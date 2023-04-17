@@ -6,7 +6,7 @@ Blaze is a finite element (FE) program developed specifically for structures in 
 
 ## Requirements
 ### Must have
-- A geometrically nonlinear shell element
+- A geometrically nonlinear shell element - preferrably triangular (3 nodes) for modelling flexibility
 - A nonlinear 2-dimensional metallic material model with temperature dependency
 - Efficient I/O performance using MPI-IO, HDF5, or NetCDF
 - At least one static solver
