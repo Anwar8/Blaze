@@ -1,13 +1,15 @@
-# Blaze: Requirements
-Requirements for the Blaze project
+# XBlaze: Requirements
+Requirements for the XBlaze project
 
 ## Summary
-Blaze is a finite element (FE) program developed specifically for structures in fire. It is explicitly designed from the ground up for scalability on high performance computing (HPC) facilities. The codebase is written in C++ and provides an interface for user customisation.
+XBlaze is an extended finite element (XFE) program developed specifically for structures in fire. It is explicitly designed from the ground up for scalability on high performance computing (HPC) facilities. The codebase is written in C++ and provides an interface for user customisation.
 
 ## Requirements
 ### Must have
 - A geometrically nonlinear shell element - preferrably triangular (3 nodes) for flexibility in modelling
+- A geometrically nonlinear beam-column element
 - A nonlinear 2-dimensional metallic material model with temperature dependency
+- A nonlinear 1-dimensional metallic material model with temperature dependency
 - Efficient I/O performance using MPI-IO, HDF5, or NetCDF
 - At least one static solver
 - Reliance only on very common numerical libraries such as BLAS, LAPACK, and ScaLAPACK
@@ -17,7 +19,7 @@ Blaze is a finite element (FE) program developed specifically for structures in 
 - Detailed error messages that specify exactly the reason for any divergence or crash
 - Wiki page from the start that documents the architecture, reasoning, and theory implemented
 - Detailed Read The Docs page for API and function documentation
-- Containerisation support so `Blaze` can run on any machine or cloud service
+- Containerisation support so `XBlaze` can run on any machine or cloud service
 - A way to enforce boundary conditions  
 ### Should have
 - At least one dynamic solver
@@ -30,6 +32,7 @@ Blaze is a finite element (FE) program developed specifically for structures in 
 - Full support for consideration of pre-stress
 - Traceability of matrix errors such as pointing out which elements and/or materials are introducing zeros into the diagonal
 ### Could have
+- Support for element deletion
 - Breadcrumbs: the ability to restart a simulation from a specific milestone
 - Support for the new Eurocode EN 1993-1-14 terminology (LA, LBA, MNA, GNA, GMNA, and GMNIA)
 - Implicit-explicit automatically jumping solver
@@ -37,7 +40,7 @@ Blaze is a finite element (FE) program developed specifically for structures in 
 - Intricate customisable conditonal-solver-conditioner switcher that would change the solver and conditioner based on state of the matrix
 ## Ideas and thoughts
 - I can use Eigen3 as my BLAS and LAPACK library. It is covered in the EPCC [Modern C++ for Computational Scientists](https://youtube.com/playlist?list=PLB4tvLCynFjShf7VLy-1gL1g9RKDhAYfY) online course. It also appears to be quite performant as shown in their [benchmark page](http://eigen.tuxfamily.org/index.php?title=Benchmark). Please note that the benchmarks appear to be quite out of date (from 2011)!
-- It may be a good idea to create specialised `Blaze` types for integers and floating point numbers. For example, `Blazefloat` would be either a single, double, or quad precision floating point number. Likewise, there must be a `Blazeresidue` which is a floating point number that is of twice the precision as the typical `Blazefloat` and is used for calculating residues and errors.
+- It may be a good idea to create specialised `XBlaze` types for integers and floating point numbers. For example, `Blazefloat` would be either a single, double, or quad precision floating point number. Likewise, there must be a `Blazeresidue` which is a floating point number that is of twice the precision as the typical `Blazefloat` and is used for calculating residues and errors.
 - Division between the geometric and material stiffenesses. If an element has geometric nonlinearity turned on, then the geometric stiffness matrix is calculated, perhaps **inplace** for the stiffness matrix. However, it may be necessary to separate the geometric and material stiffnesses in order to perform LBA analyses. 
 - Does preconditioning with part of the geometric or material stiffness matrix help in convergence? What about preconditiong with the buckling Eigen Vector matrix? Does that help?
 - It is perhaps sensible that the first thing the program does is establish the global **distributed** matrices it needs to represent and solve the system. It can do that by checking the size of the local matrix contributed by the elements and also by checking the boundary conditions and how they change the number of rows and columns. 
