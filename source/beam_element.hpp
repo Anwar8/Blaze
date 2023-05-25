@@ -3,6 +3,7 @@
 
 #include <string>
 #include <array>
+#include "maths_defaults.hpp"
 #include "node.hpp"
 
 class beam_element {
@@ -13,7 +14,7 @@ class beam_element {
         int const nnodes = 2;
         std::array<node, 2> nodes;
 
-        double length = 0.0;
+        real length = 0.0;
     public:
         beam_element();
         beam_element(std::array<node, 2> input_nodes);

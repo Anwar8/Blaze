@@ -1,8 +1,8 @@
 CXX = g++
-CXXFLAGS = -std=c++2a
+CXXFLAGS = -std=c++2a -I/usr/include/eigen3
 SRCS = main.cpp beam_element.cpp node.cpp
 OBJS = $(SRCS:.cpp=.o)
-TARGET = program
+TARGET = main
 
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
