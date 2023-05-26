@@ -1,5 +1,11 @@
+ifeq ($(shell hostname), Mhds-Air)
+CXX = g++-12
+CXXFLAGS = -std=c++2a -I/opt/homebrew/Cellar/eigen/3.4.0_1/include/eigen3
+else
 CXX = g++
 CXXFLAGS = -std=c++2a -I/usr/include/eigen3
+endif
+
 SRCS = main.cpp beam_element.cpp node.cpp
 OBJS = $(SRCS:.cpp=.o)
 TARGET = main
