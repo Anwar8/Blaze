@@ -6,7 +6,7 @@ CXX = g++
 CXXFLAGS = -std=c++2a -I/usr/include/eigen3
 endif
 
-SRCS = main.cpp beam_element.cpp node.cpp
+SRCS = main.cpp maths_defaults.cpp beam_element.cpp node.cpp
 OBJS = $(SRCS:.cpp=.o)
 TARGET = main
 

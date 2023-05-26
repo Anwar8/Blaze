@@ -15,5 +15,7 @@ using vec = Eigen::VectorXd;
 using mat = Eigen::MatrixXd;
 #endif
 
+vec make_xd_vec(int rows);
+mat make_xd_mat(int rows, int columns);
 
 #endif
