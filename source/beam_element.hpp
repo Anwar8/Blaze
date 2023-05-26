@@ -19,5 +19,6 @@ class beam_element {
         beam_element();
         beam_element(std::array<node, 2> input_nodes);
         void print_info();
+        void calc_length();
 };
 #endif
