@@ -13,14 +13,12 @@ test : $(TEST_TARGET)
 $(TARGET) : $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
 
-$(TEST_TARGET) : $(TEST_OBJS) $(TARGET)
-	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_OBJS)
+$(TEST_TARGET) : $(TEST_SRCS) $(SRCS)
+	$(TEST_CXX) $(CXXFLAGS) $(TEST_INCLUDE_FLAGS) -o $(TEST_TARGET) $(TEST_SRCS) $(filter-out main.cpp, $(SRCS)) $(TEST_LDLIBS)
 
 %.o: %.cpp %.hpp	
-	$(CXX) $(CXXFLAGS) $(LDLIBS) $(INCLUDE_FLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) -c -o $@ $< $(LDLIBS)
 
-$(TEST_DIR)/%.o: $(TEST_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(TEST_LDLIBS) $(TEST_INCLUDE_FLAGS) -c -o $@ $<
 
 ## clean       : removes all object files and executables for both TARGET and TEST_TARGET.
 .PHONY : clean
