@@ -1,26 +1,43 @@
-ifeq ($(shell hostname), Mhds-Air)
-CXX = g++-12
-CXXFLAGS = -std=c++2a -I/opt/homebrew/Cellar/eigen/3.4.0_1/include/eigen3
-else
-CXX = g++
-CXXFLAGS = -std=c++2a -I/usr/include/eigen3
-endif
+include config.mk
+OBJS=$(SRCS:.cpp=.o)
+TEST_OBJS=$(TEST_SRCS:.cpp=.o)
 
-SRCS = main.cpp maths_defaults.cpp beam_element.cpp node.cpp
-OBJS = $(SRCS:.cpp=.o)
-TARGET = main
+## all         : makes the TARGET.
+.PHONY : all
+all : $(TARGET) $(TEST_TARGET)
 
-$(TARGET): $(OBJS)
+## test        : makes the TEST_TARGET in the current directory.
+.PHONY : test
+test : $(TEST_TARGET)
+
+$(TARGET) : $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
 
-main.o: main.cpp beam_element.hpp node.hpp
-	$(CXX) $(CXXFLAGS) -c main.cpp
+$(TEST_TARGET) : $(TEST_OBJS) $(TARGET)
+	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_OBJS)
 
-beam_element.o: beam_element.cpp beam_element.hpp node.hpp
-	$(CXX) $(CXXFLAGS) -c beam_element.cpp
+%.o: %.cpp %.hpp	
+	$(CXX) $(CXXFLAGS) $(LDLIBS) $(INCLUDE_FLAGS) -c -o $@ $<
 
-node.o: node.cpp node.hpp
-	$(CXX) $(CXXFLAGS) -c node.cpp
+$(TEST_DIR)/%.o: $(TEST_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) $(TEST_LDLIBS) $(TEST_INCLUDE_FLAGS) -c -o $@ $<
 
-clean:
-	rm -f $(OBJS) $(TARGET)
+## clean       : removes all object files and executables for both TARGET and TEST_TARGET.
+.PHONY : clean
+clean :
+	rm -f *.o $(TEST_DIR)/*.o $(TARGET) $(TEST_TARGET)
+
+## clean-test  : removes all object files and executables for TEST_TARGET.
+.PHONY : clean-test
+clean-test :
+	rm -f $(TEST_DIR)/*.o $(TEST_TARGET)
+
+## clean-target: removes all object files and executables for TARGET.
+.PHONY : clean-target
+clean-target :
+	rm -f *.o $(TARGET)
+
+## help        : prints all in-line documentation about current make file.
+.PHONY : help
+help : Makefile
+	@sed -n 's/^##//p' $<

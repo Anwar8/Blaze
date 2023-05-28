@@ -1,2 +1,4 @@
 ../.vscode/
 *.o
+xblaze
+xblaze_tests
