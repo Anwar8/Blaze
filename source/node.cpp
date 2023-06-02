@@ -6,6 +6,6 @@
  void node::print_info() {
     std::cout << "xyz = (" << coordinates[0] << ", " << coordinates[1] << ", " << coordinates[2] <<  "), and mass = " << mass << std::endl;
  }
- coords const node::get_coords() {
+ coords const node::get_coords() const {
    return coordinates;
  }

@@ -41,6 +41,41 @@ void shape_function::calc_B(real x, real L) {
     B(1,5) = -2/L + 6 * x* std::pow(1/L,2);
 }
 
+void shape_function::calc_K(real L, beam_section& sec) {
+    real A = sec.get_A();
+    real E = sec.get_E();
+    real I = sec.get_I();
+    // Row 1
+    K(0,0) = E*A/L;
+    K(0,3) = -E*A/L;
+    // Row 2
+    K(1,1) = 12*E*I/std::pow(L,3);
+    K(1,2) = 6*E*I/std::pow(L,2);
+    K(1,4) = -12*E*I/std::pow(L,3);
+    K(1,5) = 6*E*I/std::pow(L,2);
+    // Row 3
+    K(2,1) = 6*E*I/std::pow(L,2);
+    K(2,2) = 4*E*I/L;
+    K(2,4) = -6*E*I/std::pow(L,2);
+    K(2,5) = 2*E*I/L;
+    // Row 4
+    K(3,0) = -E*A/L;
+    K(3,3) = E*A/L;
+    // Row 5
+    K(4,1) = -12*E*I/std::pow(L,3);
+    K(4,2) = -6*E*I/std::pow(L,2);
+    K(4,4) = 12*E*I/std::pow(L,3);
+    K(4,5) = -6*E*I/std::pow(L,2);
+    // Row 6
+    K(5,1) = 6*E*I/std::pow(L,2);
+    K(5,2) = 2*E*I/L;
+    K(5,4) = -6*E*I/std::pow(L,2);
+    K(5,5) = 4*E*I/L;
+}
+
+void beam_element::calc_T(coords origin_x) {
+    orient.evaluate(nodes, origin_x);
+}
 void beam_element::calc_N(real x)
 {
     shape_func.calc_N(x, length);
@@ -49,6 +84,11 @@ void beam_element::calc_N(real x)
 void beam_element::calc_B(real x)
 {
     shape_func.calc_B(x, length);
+}
+
+void beam_element::calc_K()
+{
+    shape_func.calc_K(length, section);
 }
 
 void beam_element::calc_eps() {

@@ -11,13 +11,11 @@ class beam_section {
     private:
         real E = 2.06e11; // Pa
         real A = 0.0125; // m^2
-        real I1 = 0.0004570000; // m^4
-        real I2 = 0.0000235000; // m^4 
+        real I = 0.0004570000; // m^4
     public:
         real get_E() {return E;}
         real get_A() {return A;}
-        real get_I1() {return I1;}
-        real get_I2() {return I2;}
+        real get_I() {return I;}
 };
 
 class shape_function {
@@ -26,11 +24,49 @@ class shape_function {
         mat N = make_xd_mat(2,6);
         mat B = make_xd_mat(2,6);
     public:
-        mat get_K() {return K;}
-        mat get_N() {return N;}
-        mat get_B() {return B;}
+        mat const get_K() const {return K;}
+        mat const get_N() const {return N;}
+        mat const get_B() const {return B;}
         void calc_N(real x, real L);
         void calc_B(real x, real L);
+        void calc_K(real L, beam_section& sec);
+};
+
+class orientation {
+    private:
+        coords local_x;
+        real length;
+        mat T = make_xd_mat(6,6);
+        real alpha = 0.0;
+    public:
+        void evaluate(std::array<node, 2> const & nodes, coords const & origin_x)
+        {
+            calc_length_local_x(nodes);
+            calc_alpha(origin_x, nodes[0].get_coords());
+            calc_T();
+        }
+        void calc_length_local_x(std::array<node, 2> const &  nodes) {
+            local_x = (nodes[1].get_coords() - nodes[0].get_coords());
+            length = local_x.norm();
+            local_x /= length;
+        }
+        void calc_alpha(coords const& origin_x, coords const node_i_coords) {
+            // calcualte the angle between the local and global x axes
+           alpha = std::acos(origin_x.dot(local_x));
+        }
+        void calc_T() {
+            T(0,0) = std::cos(alpha);
+            T(1,0) = -std::sin(alpha);
+            T(0,1) = std::sin(alpha);
+            T(1,1) = std::cos(alpha);
+            T(2,2) = 1;
+            T(3,3) = std::cos(alpha);
+            T(4,3) = -std::sin(alpha);
+            T(3,4) = std::sin(alpha);
+            T(4,4) = std::cos(alpha);
+            T(5,5) = 1;
+        }
+        mat get_T() {return T;}
 };
 
 class beam_element {
@@ -43,6 +79,7 @@ class beam_element {
         
         beam_section section;
         shape_function shape_func;
+        orientation orient;
         real length = 0.0;
         vec local_d = make_xd_vec(6);
         vec local_f = make_xd_vec(6);
@@ -55,9 +92,13 @@ class beam_element {
         void calc_length();
         void calc_N(real x);
         void calc_B(real x);
+        void calc_K();
+        void calc_T(coords origin_x);
         void calc_eps();
         mat get_N() {return shape_func.get_N();}
         mat get_B() {return shape_func.get_B();}
+        mat get_K() {return shape_func.get_K();}
+        mat get_T() {return orient.get_T();}
         vec get_eps() {return local_eps;}
         vec get_d() {return local_d;}
 
