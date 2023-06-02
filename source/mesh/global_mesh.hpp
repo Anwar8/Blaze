@@ -20,8 +20,9 @@ class global_mesh {
         gmsh_node_map read_nodes();
         void make_nodes (gmsh_node_map node_map);
         void close_mesh_file();
-
         void setup_mesh(std::string const mesh_file);
+        
+        void print_info();
 
 
 };

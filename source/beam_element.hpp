@@ -75,6 +75,8 @@ class beam_element {
         std::string const elem_type = "beam-column";
         int const dofs = 3;
         int const nnodes = 2;
+        // TODO: std::array<Node, 2> nodes; should be shared pointers to nodes
+        // not arrays of nodes. 
         std::array<Node, 2> nodes;
         
         beam_section section;

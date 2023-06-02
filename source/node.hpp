@@ -12,6 +12,7 @@ class Node {
         Node(int i, coords xyz);
         void print_info();
         coords const get_coords() const;
+        unsigned const get_id() const {return id;}
 };
 
 class global_coords {

@@ -1,3 +1,4 @@
+#include <iostream>
 #include "global_mesh.hpp"
 
 void global_mesh::open_mesh_file(std::string const mesh_file) {
@@ -17,6 +18,7 @@ gmsh_node_map global_mesh::read_nodes() {
     for (auto tag : nodeTags)
     {
         node_map.push_back(std::make_pair(tag, coords(*itr, *(itr+1), *(itr+2))));
+        itr += 3;
     }
     return node_map;
 }
@@ -41,4 +43,13 @@ void global_mesh::setup_mesh(std::string const mesh_file)
     node_vector.clear();
     make_nodes(node_map);
     close_mesh_file();
+}
+
+void global_mesh::print_info()
+{
+    for (auto node: node_vector)
+    {
+        std::cout << "node " << node.get_id() << ": " << std::endl;
+        node.print_info();
+    }
 }

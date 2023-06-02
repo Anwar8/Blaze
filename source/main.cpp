@@ -2,9 +2,16 @@
 #include <iostream>
 #include "node.hpp"
 #include "beam_element.hpp"
+#include "mesh/global_mesh.hpp"
 
 int main () {
     global_coords global_sys;
+
+    global_mesh glob_mesh; 
+    glob_mesh.setup_mesh("mesh/test.msh");
+    glob_mesh.print_info();
+
+
     std::array<Node, 2> in_nodes;
     in_nodes[0] = Node(0.0, 0.0, 0.0);
     in_nodes[1] = Node(3.0, 0.0, 1.0);

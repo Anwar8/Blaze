@@ -17,7 +17,7 @@ $(TEST_TARGET) : $(TEST_SRCS) $(filter-out main.cpp, $(SRCS))
 	$(TEST_CXX) $(CXXFLAGS) $(TEST_INCLUDE_FLAGS) -o $(TEST_TARGET) $(TEST_SRCS) $(filter-out main.cpp, $(SRCS)) $(TEST_LDLIBS)
 
 %.o: %.cpp %.hpp	
-	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) -c -o $@ $< $(LDLIBS)
+	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) $(MESH_FLAGS) -c -o $@ $< $(LDLIBS)
 
 global_mesh.o: mesh/global_mesh.cpp mesh/global_mesh.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) $(MESH_FLAGS) -c -o $@ $< 
