@@ -1,17 +1,19 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 #include "maths_defaults.hpp"
-class node {
+class Node {
     private:
         unsigned id = 0;
         coords coordinates;
         real mass;
     public:
-        node();
-        node(real x_pos, real y_pos, real z_pos);
+        Node();
+        Node(real x_pos, real y_pos, real z_pos);
+        Node(int i, coords xyz);
         void print_info();
         coords const get_coords() const;
 };
+
 class global_coords {
     private:
         coords centroid = {0.0, 0.0 , 0.0};

@@ -14,7 +14,7 @@ real get_l1_force(beam_element& my_beam, vec& d)
 class RigidBodyMotionTest : public ::testing::Test {
     // Declare variables to be used in the fixture
 public:
-    std::array<node, 2> in_nodes = {node(0.0, 0.0, 0.0), node(3.0, 0.0, 0.0)};
+    std::array<Node, 2> in_nodes = {Node(0.0, 0.0, 0.0), Node(3.0, 0.0, 0.0)};
     beam_element my_beam;
     vec d;
     void SetUp() override {

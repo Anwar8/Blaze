@@ -39,13 +39,13 @@ class orientation {
         mat T = make_xd_mat(6,6);
         real alpha = 0.0;
     public:
-        void evaluate(std::array<node, 2> const & nodes, coords const & origin_x)
+        void evaluate(std::array<Node, 2> const & nodes, coords const & origin_x)
         {
             calc_length_local_x(nodes);
             calc_alpha(origin_x, nodes[0].get_coords());
             calc_T();
         }
-        void calc_length_local_x(std::array<node, 2> const &  nodes) {
+        void calc_length_local_x(std::array<Node, 2> const &  nodes) {
             local_x = (nodes[1].get_coords() - nodes[0].get_coords());
             length = local_x.norm();
             local_x /= length;
@@ -75,7 +75,7 @@ class beam_element {
         std::string const elem_type = "beam-column";
         int const dofs = 3;
         int const nnodes = 2;
-        std::array<node, 2> nodes;
+        std::array<Node, 2> nodes;
         
         beam_section section;
         shape_function shape_func;
@@ -87,7 +87,7 @@ class beam_element {
 
     public:
         beam_element();
-        beam_element(std::array<node, 2> input_nodes);
+        beam_element(std::array<Node, 2> input_nodes);
         void print_info();
         void calc_length();
         void calc_N(real x);

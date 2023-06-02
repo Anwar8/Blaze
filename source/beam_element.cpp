@@ -5,7 +5,7 @@
 beam_element::beam_element() {
 }
 
-beam_element::beam_element(std::array<node, 2> input_nodes) {
+beam_element::beam_element(std::array<Node, 2> input_nodes) {
     nodes[0] = input_nodes[0];
     nodes[1] = input_nodes[1];
     calc_length();
@@ -13,7 +13,7 @@ beam_element::beam_element(std::array<node, 2> input_nodes) {
 
 void beam_element::print_info() {
     std::cout << elem_type << " with " << dofs << " dofs, and " << nnodes << " nodes." << std::endl;
-    for (node node_i: nodes) {
+    for (Node node_i: nodes) {
         node_i.print_info();
     }
     std::cout << "it is also of length " << length << std::endl;
@@ -76,6 +76,7 @@ void shape_function::calc_K(real L, beam_section& sec) {
 void beam_element::calc_T(coords origin_x) {
     orient.evaluate(nodes, origin_x);
 }
+
 void beam_element::calc_N(real x)
 {
     shape_func.calc_N(x, length);
