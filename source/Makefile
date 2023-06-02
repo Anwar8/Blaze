@@ -13,7 +13,7 @@ test : $(TEST_TARGET)
 $(TARGET) : $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
 
-$(TEST_TARGET) : $(TEST_SRCS) $(SRCS)
+$(TEST_TARGET) : $(TEST_SRCS) $(filter-out main.cpp, $(SRCS))
 	$(TEST_CXX) $(CXXFLAGS) $(TEST_INCLUDE_FLAGS) -o $(TEST_TARGET) $(TEST_SRCS) $(filter-out main.cpp, $(SRCS)) $(TEST_LDLIBS)
 
 %.o: %.cpp %.hpp	
