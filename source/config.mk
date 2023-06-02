@@ -16,7 +16,7 @@ ifeq ($(shell hostname), Mhds-Air)
 EIGEN_PATH= /opt/homebrew/Cellar/eigen/3.4.0_1/include/eigen3
 GTEST_DIR = /opt/homebrew/Cellar/googletest/1.13.0
 # compiler and settings
-CXX= g++-12
+CXX= g++-13
 TEST_CXX= g++
 CXXFLAGS= -std=c++20
 else
