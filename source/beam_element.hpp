@@ -6,7 +6,7 @@
 #include "maths_defaults.hpp"
 #include "node.hpp"
 
-class beam_section {
+class BasicSection {
     // 457 x 191 x 98
     private:
         real E = 2.06e11; // Pa
@@ -18,7 +18,7 @@ class beam_section {
         real get_I() {return I;}
 };
 
-class shape_function {
+class BasicShapeFunction {
     private:
         mat K = make_xd_mat(6,6);
         mat N = make_xd_mat(2,6);
@@ -29,10 +29,10 @@ class shape_function {
         mat const get_B() const {return B;}
         void calc_N(real x, real L);
         void calc_B(real x, real L);
-        void calc_K(real L, beam_section& sec);
+        void calc_K(real L, BasicSection& sec);
 };
 
-class orientation {
+class BasicOrientation {
     private:
         coords local_x;
         real length;
@@ -69,7 +69,7 @@ class orientation {
         mat get_T() {return T;}
 };
 
-class beam_element {
+class Basic2DBeamElement {
     private:
         unsigned id = 0;
         std::string const elem_type = "beam-column";
@@ -79,17 +79,17 @@ class beam_element {
         // not arrays of nodes. 
         std::array<Node, 2> nodes;
         
-        beam_section section;
-        shape_function shape_func;
-        orientation orient;
+        BasicSection section;
+        BasicShapeFunction shape_func;
+        BasicOrientation orient;
         real length = 0.0;
         vec local_d = make_xd_vec(6);
         vec local_f = make_xd_vec(6);
         vec local_eps = make_xd_vec(2);
 
     public:
-        beam_element();
-        beam_element(std::array<Node, 2> input_nodes);
+        Basic2DBeamElement();
+        Basic2DBeamElement(std::array<Node, 2> input_nodes);
         void print_info();
         void calc_length();
         void calc_N(real x);
@@ -106,7 +106,7 @@ class beam_element {
 
         void set_d(vec new_disp) {local_d = new_disp;}
 
-    beam_element(const beam_element& other) {
+    Basic2DBeamElement(const Basic2DBeamElement& other) {
         id = other.id;
         nodes = other.nodes;
         section = other.section;
@@ -117,9 +117,9 @@ class beam_element {
         local_eps = other.local_eps;
     }
     // Copy assignment - i need to learn a bit more...
-    beam_element& operator=(const beam_element& other) {
+    Basic2DBeamElement& operator=(const Basic2DBeamElement& other) {
         if (this != &other) {
-            beam_element temp(other); // use copy constructor to create temporary object
+            Basic2DBeamElement temp(other); // use copy constructor to create temporary object
 
             std::swap(id, temp.id);
             std::swap(nodes, temp.nodes);

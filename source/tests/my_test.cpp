@@ -6,7 +6,7 @@
 
 #define TOLERANCE 1e-6
 
-real get_l1_force(beam_element& my_beam, vec& d)
+real get_l1_force(Basic2DBeamElement& my_beam, vec& d)
 {
    return  (my_beam.get_K() * d).lpNorm<1>();
 }
@@ -15,11 +15,11 @@ class RigidBodyMotionTest : public ::testing::Test {
     // Declare variables to be used in the fixture
 public:
     std::array<Node, 2> in_nodes = {Node(0.0, 0.0, 0.0), Node(3.0, 0.0, 0.0)};
-    beam_element my_beam;
+    Basic2DBeamElement my_beam;
     vec d;
     void SetUp() override {
         // Create the nodes
-        my_beam = beam_element(in_nodes);
+        my_beam = Basic2DBeamElement(in_nodes);
         my_beam.calc_N(1.5);
         my_beam.calc_B(1.5);
         my_beam.calc_K();

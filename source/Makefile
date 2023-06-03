@@ -10,17 +10,23 @@ all : $(TARGET) $(TEST_TARGET)
 .PHONY : test
 test : $(TEST_TARGET)
 
-$(TARGET) : $(OBJS) global_mesh.o 
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS) global_mesh.o $(MESH_LDLIBS) 
+$(TARGET) : $(OBJS) global_mesh.o
+	@echo "$'\nMaking $(TARGET):"
+	@echo ---------------------------------------------
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS) global_mesh.o $(MESH_LDLIBS)
+	@echo ---------------------------------------------
 
 $(TEST_TARGET) : $(TEST_SRCS) $(filter-out main.cpp, $(SRCS))
+	@echo "$'\nMaking $(TEST_TARGET):"
+	@echo ---------------------------------------------
 	$(TEST_CXX) $(CXXFLAGS) $(TEST_INCLUDE_FLAGS) -o $(TEST_TARGET) $(TEST_SRCS) $(filter-out main.cpp, $(SRCS)) $(TEST_LDLIBS)
+	@echo ---------------------------------------------
 
 %.o: %.cpp %.hpp	
 	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) $(MESH_FLAGS) -c -o $@ $< $(LDLIBS)
 
 global_mesh.o: mesh/global_mesh.cpp mesh/global_mesh.hpp
-	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) $(MESH_FLAGS) -c -o $@ $< 
+	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) $(MESH_FLAGS) -c -o $@ $<
 
 ## clean       : removes all object files and executables for both TARGET and TEST_TARGET.
 .PHONY : clean

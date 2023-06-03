@@ -5,7 +5,7 @@
 #include "mesh/global_mesh.hpp"
 
 int main () {
-    global_coords global_sys;
+    GlobalCoords global_sys;
 
     global_mesh glob_mesh; 
     glob_mesh.setup_mesh("mesh/test.msh");
@@ -17,7 +17,7 @@ int main () {
     in_nodes[1] = Node(3.0, 0.0, 1.0);
 
 
-    beam_element my_beam(in_nodes);
+    Basic2DBeamElement my_beam(in_nodes);
     my_beam.print_info();
 
     my_beam.calc_K();

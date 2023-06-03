@@ -15,7 +15,7 @@ class Node {
         unsigned const get_id() const {return id;}
 };
 
-class global_coords {
+class GlobalCoords {
     private:
         coords centroid = {0.0, 0.0 , 0.0};
         coords unit_x = {1.0, 0.0, 0.0};

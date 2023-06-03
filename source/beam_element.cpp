@@ -2,16 +2,16 @@
 #include <string>
 #include "beam_element.hpp"
 
-beam_element::beam_element() {
+Basic2DBeamElement::Basic2DBeamElement() {
 }
 
-beam_element::beam_element(std::array<Node, 2> input_nodes) {
+Basic2DBeamElement::Basic2DBeamElement(std::array<Node, 2> input_nodes) {
     nodes[0] = input_nodes[0];
     nodes[1] = input_nodes[1];
     calc_length();
 }
 
-void beam_element::print_info() {
+void Basic2DBeamElement::print_info() {
     std::cout << elem_type << " with " << dofs << " dofs, and " << nnodes << " nodes." << std::endl;
     for (Node node_i: nodes) {
         node_i.print_info();
@@ -19,11 +19,11 @@ void beam_element::print_info() {
     std::cout << "it is also of length " << length << std::endl;
 }
 
-void beam_element::calc_length() {
+void Basic2DBeamElement::calc_length() {
     length = (nodes[0].get_coords() - nodes[1].get_coords()).norm();
 }
 
-void shape_function::calc_N(real x, real L) {
+void BasicShapeFunction::calc_N(real x, real L) {
     N(0,0) = 1 - (x/L);
     N(0,3) = x / L;
     N(1,1) = 1 - 3*std::pow(x/L,2) + 2*std::pow(x/L,3);
@@ -32,7 +32,7 @@ void shape_function::calc_N(real x, real L) {
     N(1,5) = -x*(x/L) + x * std::pow(x/L,2);
 }
 
-void shape_function::calc_B(real x, real L) {
+void BasicShapeFunction::calc_B(real x, real L) {
     B(0,0) = -1/L;
     B(0,3) = 1/L;
     B(1,1) = -6*std::pow(1/L,2) + 12*x*std::pow(1/L,3);
@@ -41,7 +41,7 @@ void shape_function::calc_B(real x, real L) {
     B(1,5) = -2/L + 6 * x* std::pow(1/L,2);
 }
 
-void shape_function::calc_K(real L, beam_section& sec) {
+void BasicShapeFunction::calc_K(real L, BasicSection& sec) {
     real A = sec.get_A();
     real E = sec.get_E();
     real I = sec.get_I();
@@ -73,25 +73,25 @@ void shape_function::calc_K(real L, beam_section& sec) {
     K(5,5) = 4*E*I/L;
 }
 
-void beam_element::calc_T(coords origin_x) {
+void Basic2DBeamElement::calc_T(coords origin_x) {
     orient.evaluate(nodes, origin_x);
 }
 
-void beam_element::calc_N(real x)
+void Basic2DBeamElement::calc_N(real x)
 {
     shape_func.calc_N(x, length);
 }
 
-void beam_element::calc_B(real x)
+void Basic2DBeamElement::calc_B(real x)
 {
     shape_func.calc_B(x, length);
 }
 
-void beam_element::calc_K()
+void Basic2DBeamElement::calc_K()
 {
     shape_func.calc_K(length, section);
 }
 
-void beam_element::calc_eps() {
+void Basic2DBeamElement::calc_eps() {
     local_eps = shape_func.get_B() * local_d;
 }
