@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "global_mesh.hpp"
 
 void global_mesh::open_mesh_file(std::string const mesh_file) {
@@ -14,6 +15,8 @@ gmsh_node_map global_mesh::read_nodes() {
     gmsh::model::mesh::getNodes(nodeTags, coord_vec, parametricCoords);
     
     gmsh_node_map node_map;
+    node_map.reserve(nodeTags.size());
+
     auto itr = coord_vec.begin();
     for (auto tag : nodeTags)
     {
@@ -21,6 +24,51 @@ gmsh_node_map global_mesh::read_nodes() {
         itr += 3;
     }
     return node_map;
+}
+
+gmsh_elem_map global_mesh::read_elements()
+{
+    gmsh_elem_map elem_map;
+
+    std::vector<int> element_types;
+    gmsh::model::mesh::getElementTypes(element_types);
+    for (auto elem_type: element_types)
+    {
+        std::string type_name;
+        int num_nodes_per_elem;
+        // throw-away variables
+        int dim, order, num_primary_nodes;
+        std::vector<double> local_nodal_coords;
+        // get the information about the element type. in particular:
+        // (1) number of nodes, and  (2) type name
+        gmsh::model::mesh::getElementProperties(elem_type, type_name, dim, 
+                                                order, num_nodes_per_elem, local_nodal_coords, 
+                                                num_primary_nodes);
+        
+        // getting the elements and nodes for each element type
+        // this is because each type has the same number of nodes
+        std::cout << "Mapping element type: " << type_name << std::endl;
+        std::vector<std::size_t> elem_tags, node_tags;
+        gmsh::model::mesh::getElementsByType(elem_type, elem_tags, node_tags);
+
+        std::vector<std::size_t> element_nodes;
+        element_nodes.reserve(num_nodes_per_elem);
+        auto node_itr = node_tags.begin() ;
+        for (auto elem_tag: elem_tags)
+        {
+            element_nodes.clear();
+            for (int i = 0; i < num_nodes_per_elem; ++i)
+            {
+                element_nodes.push_back(*(node_itr + i));
+                node_itr += i;
+            }
+            ++node_itr;
+            elem_map.push_back(std::make_pair(elem_tag, element_nodes));
+            std::cout << "added element: " << elem_tag << " with nodes: ";
+            print_vector(element_nodes);
+        }
+    }
+    return elem_map;
 }
 
 void global_mesh::make_nodes (gmsh_node_map node_map) {
@@ -39,17 +87,71 @@ void global_mesh::setup_mesh(std::string const mesh_file)
 {
     open_mesh_file(mesh_file);
     gmsh_node_map node_map = read_nodes();
+    gmsh_elem_map elem_map = read_elements();
     nnodes = node_map.size();
+    nelems = elem_map.size();
     node_vector.clear();
+    node_vector.reserve(nnodes);
+    elem_vector.clear();
+    elem_vector.reserve(nelems);
     make_nodes(node_map);
     close_mesh_file();
 }
 
 void global_mesh::print_info()
 {
+    std::cout << "Mesh contains " << nelems << " elements and " << nnodes << " nodes." << std::endl;
     for (auto node: node_vector)
     {
-        std::cout << "node " << node.get_id() << ": " << std::endl;
+        std::cout << "node " << node.get_id() << ": ";
         node.print_info();
     }
+}
+
+template <typename Iterator, typename Container>
+Iterator get_id_iterator(int id, Container& a_vec)
+{
+    auto itr = std::begin(a_vec) + (id - 1);
+    int check_id = (itr->get_id());
+    // this "search" is inefficient compared to other search
+    // algorithms such as std::find_if or std::lower_bound
+    // for the general case, but is more efficient considering
+    // the average case we actually care about: a sorted
+    // vector of nodes that is almost always continguous
+    if (check_id > id)
+    {
+        while (check_id != id && (itr > std::begin(a_vec)))
+        {
+            --itr;
+            check_id = (itr -> get_id());
+        }
+    } else if (check_id < id) {
+        while (check_id != id && (itr < std::end(a_vec)))
+        {
+            ++itr;
+            check_id = (itr -> get_id());
+        }
+    }
+    if (check_id == id)
+    {
+        return itr;
+    } else 
+    {
+        std::cout << "could not find item with id " << id << " in vector."
+        std::exit(1);
+    }
+    
+}
+void print_vector(std::vector<size_t> V) 
+{
+    for (auto it = V.begin(); it != V.end(); ++it) {
+        std::cout << *it;
+        if (it != V.end() - 1)
+        {
+            std::cout << ", ";
+        } else {
+            std::cout << std::endl;
+        }
+    }
+    
 }
