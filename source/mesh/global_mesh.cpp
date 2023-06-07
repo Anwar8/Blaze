@@ -70,11 +70,26 @@ gmsh_elem_map global_mesh::read_elements()
     }
     return elem_map;
 }
-
+void global_mesh::make_elements (gmsh_elem_map elem_map) {
+    std::vector<std::shared_ptr<Node>> elem_nodes;
+    elem_nodes.reserve(2);
+    for (auto element_data : elem_map)
+    {
+        elem_nodes.clear();
+        for (auto node_id: element_data.second)
+        {
+            auto node = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(node_id, node_vector);
+            elem_nodes.push_back(*node);
+        }
+        // Basic2DBeamElement my_beam(element_data.first, elem_nodes);
+        // my_beam.print_info();
+        elem_vector.push_back(std::make_shared<Basic2DBeamElement>(element_data.first, elem_nodes));
+    }   
+}
 void global_mesh::make_nodes (gmsh_node_map node_map) {
     for (auto node_data : node_map)
     {
-        node_vector.push_back(Node(node_data.first, node_data.second));
+        node_vector.push_back(std::make_shared<Node>(node_data.first, node_data.second));
     }
 }
 
@@ -95,6 +110,7 @@ void global_mesh::setup_mesh(std::string const mesh_file)
     elem_vector.clear();
     elem_vector.reserve(nelems);
     make_nodes(node_map);
+    make_elements(elem_map);
     close_mesh_file();
 }
 
@@ -103,8 +119,11 @@ void global_mesh::print_info()
     std::cout << "Mesh contains " << nelems << " elements and " << nnodes << " nodes." << std::endl;
     for (auto node: node_vector)
     {
-        std::cout << "node " << node.get_id() << ": ";
-        node.print_info();
+        node->print_info();
+    }
+    for (auto elem: elem_vector)
+    {
+        elem->print_info();
     }
 }
 
@@ -112,7 +131,7 @@ template <typename Iterator, typename Container>
 Iterator get_id_iterator(int id, Container& a_vec)
 {
     auto itr = std::begin(a_vec) + (id - 1);
-    int check_id = (itr->get_id());
+    int check_id = ((*itr)->get_id());
     // this "search" is inefficient compared to other search
     // algorithms such as std::find_if or std::lower_bound
     // for the general case, but is more efficient considering
@@ -123,13 +142,13 @@ Iterator get_id_iterator(int id, Container& a_vec)
         while (check_id != id && (itr > std::begin(a_vec)))
         {
             --itr;
-            check_id = (itr -> get_id());
+            check_id = ((*itr) -> get_id());
         }
     } else if (check_id < id) {
         while (check_id != id && (itr < std::end(a_vec)))
         {
             ++itr;
-            check_id = (itr -> get_id());
+            check_id = ((*itr) -> get_id());
         }
     }
     if (check_id == id)
@@ -137,7 +156,7 @@ Iterator get_id_iterator(int id, Container& a_vec)
         return itr;
     } else 
     {
-        std::cout << "could not find item with id " << id << " in vector."
+        std::cout << "could not find item with id " << id << " in vector." << std::endl;
         std::exit(1);
     }
     

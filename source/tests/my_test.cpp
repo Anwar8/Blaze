@@ -14,12 +14,14 @@ real get_l1_force(Basic2DBeamElement& my_beam, vec& d)
 class RigidBodyMotionTest : public ::testing::Test {
     // Declare variables to be used in the fixture
 public:
-    std::array<Node, 2> in_nodes = {Node(0.0, 0.0, 0.0), Node(3.0, 0.0, 0.0)};
+    
+    std::shared_ptr<Node> in_nodes_1 = std::make_shared<Node>(0.0, 0.0, 0.0);
+    std::shared_ptr<Node> in_nodes_2 = std::make_shared<Node>(3.0, 0.0, 0.0);
     Basic2DBeamElement my_beam;
     vec d;
     void SetUp() override {
         // Create the nodes
-        my_beam = Basic2DBeamElement(in_nodes);
+        my_beam = Basic2DBeamElement(in_nodes_1, in_nodes_2);
         my_beam.calc_N(1.5);
         my_beam.calc_B(1.5);
         my_beam.calc_K();

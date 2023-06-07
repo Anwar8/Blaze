@@ -3,6 +3,7 @@
 
 #include <string>
 #include <array>
+#include <memory>
 #include "maths_defaults.hpp"
 #include "node.hpp"
 
@@ -23,6 +24,7 @@ class BasicShapeFunction {
         mat K = make_xd_mat(6,6);
         mat N = make_xd_mat(2,6);
         mat B = make_xd_mat(2,6);
+        std::array<int, 6> elem_dofs = {1, 0, 1, 0, 0, 1};
     public:
         mat const get_K() const {return K;}
         mat const get_N() const {return N;}
@@ -39,18 +41,18 @@ class BasicOrientation {
         mat T = make_xd_mat(6,6);
         real alpha = 0.0;
     public:
-        void evaluate(std::array<Node, 2> const & nodes, coords const & origin_x)
+        void evaluate(std::array<std::shared_ptr<Node>, 2> const & nodes, coords const & origin_x)
         {
             calc_length_local_x(nodes);
-            calc_alpha(origin_x, nodes[0].get_coords());
+            calc_alpha(origin_x);
             calc_T();
         }
-        void calc_length_local_x(std::array<Node, 2> const &  nodes) {
-            local_x = (nodes[1].get_coords() - nodes[0].get_coords());
+        void calc_length_local_x(std::array<std::shared_ptr<Node>, 2> const &  nodes) {
+            local_x = (nodes[1]->get_coords() - nodes[0]->get_coords());
             length = local_x.norm();
             local_x /= length;
         }
-        void calc_alpha(coords const& origin_x, coords const node_i_coords) {
+        void calc_alpha(coords const& origin_x) {
             // calcualte the angle between the local and global x axes
            alpha = std::acos(origin_x.dot(local_x));
         }
@@ -73,11 +75,11 @@ class Basic2DBeamElement {
     private:
         unsigned id = 0;
         std::string const elem_type = "beam-column";
-        int const dofs = 3;
+        int const ndofs = 3;
         int const nnodes = 2;
         // TODO: std::array<Node, 2> nodes; should be shared pointers to nodes
         // not arrays of nodes. 
-        std::array<Node, 2> nodes;
+        std::array<std::shared_ptr<Node>, 2> nodes;
         
         BasicSection section;
         BasicShapeFunction shape_func;
@@ -89,7 +91,11 @@ class Basic2DBeamElement {
 
     public:
         Basic2DBeamElement();
-        Basic2DBeamElement(std::array<Node, 2> input_nodes);
+        Basic2DBeamElement(std::shared_ptr<Node>& node_1, std::shared_ptr<Node>& node_2);
+        Basic2DBeamElement(int id, std::shared_ptr<Node>& node_1, std::shared_ptr<Node>& node_2);
+        // template<typename Container>
+        // Basic2DBeamElement(int given_id, Container& nodes);
+        Basic2DBeamElement(int given_id, std::vector<std::shared_ptr<Node>>& in_nodes);
         void print_info();
         void calc_length();
         void calc_N(real x);
@@ -97,13 +103,19 @@ class Basic2DBeamElement {
         void calc_K();
         void calc_T(coords origin_x);
         void calc_eps();
+        int get_ndofs() {return ndofs;}
         mat get_N() {return shape_func.get_N();}
         mat get_B() {return shape_func.get_B();}
         mat get_K() {return shape_func.get_K();}
         mat get_T() {return orient.get_T();}
         vec get_eps() {return local_eps;}
         vec get_d() {return local_d;}
-
+        
+        void move_nodes_up(real up) {
+            for (auto node: nodes) {
+                node->set_z(up);
+            }
+        }
         void set_d(vec new_disp) {local_d = new_disp;}
 
     Basic2DBeamElement(const Basic2DBeamElement& other) {

@@ -1,18 +1,26 @@
 #ifndef NODE_HPP
 #define NODE_HPP
+#include <set>
 #include "maths_defaults.hpp"
+
 class Node {
     private:
         unsigned id = 0;
         coords coordinates;
         real mass;
+        int ndof = 6;
+        std::set<int> connected_elements;
     public:
         Node();
         Node(real x_pos, real y_pos, real z_pos);
         Node(int i, coords xyz);
+        void set_ndof(int dofs);
         void print_info();
         coords const get_coords() const;
+        void add_connected_element(int element_id) {connected_elements.insert(element_id);}
         unsigned const get_id() const {return id;}
+        
+        void  set_z(real z) { coordinates[2] = z;}
 };
 
 class GlobalCoords {

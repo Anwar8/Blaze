@@ -1,26 +1,74 @@
 #include <iostream>
 #include <string>
 #include "beam_element.hpp"
+#include "node.hpp"
 
 Basic2DBeamElement::Basic2DBeamElement() {
 }
 
-Basic2DBeamElement::Basic2DBeamElement(std::array<Node, 2> input_nodes) {
-    nodes[0] = input_nodes[0];
-    nodes[1] = input_nodes[1];
+
+Basic2DBeamElement::Basic2DBeamElement(std::shared_ptr<Node>& node_1, std::shared_ptr<Node>& node_2) {
+    nodes[0] = node_1;
+    nodes[1] = node_2;
+    for (auto node : nodes) {
+        node->add_connected_element(id);
+    }
+    calc_length();
+}
+Basic2DBeamElement::Basic2DBeamElement(int given_id, std::shared_ptr<Node>& node_1, std::shared_ptr<Node>& node_2) {
+    id = given_id;
+    nodes[0] = node_1;
+    nodes[1] = node_2;
+    for (auto node : nodes) {
+        node->add_connected_element(id);
+    }
     calc_length();
 }
 
+// template<typename Container>
+// Basic2DBeamElement::Basic2DBeamElement(int given_id, Container& in_nodes) {
+//     if (std::size(in_nodes) != 2)
+//     {
+//         std::cout << "Incorrect number of element passed to create element " << id << std::endl;
+//         std::cout << "Received " << std::size(in_nodes) << " but expected " << 2 << std::endl; 
+//         std::exit(1);
+//     }
+//     id = given_id;
+//     nodes[0] = in_nodes[0];
+//     nodes[1] = in_nodes[1];
+//     for (auto node : in_nodes) {
+        
+//         node->add_connected_element(id);
+//     }
+//     calc_length();
+// }
+
+Basic2DBeamElement::Basic2DBeamElement(int given_id, std::vector<std::shared_ptr<Node>>& in_nodes) {
+    if (std::size(in_nodes) != 2)
+    {
+        std::cout << "Incorrect number of element passed to create element " << id << std::endl;
+        std::cout << "Received " << std::size(in_nodes) << " but expected " << 2 << std::endl; 
+        std::exit(1);
+    }
+    id = given_id;
+    nodes[0] = in_nodes[0];
+    nodes[1] = in_nodes[1];
+    for (auto node : in_nodes) {
+        
+        node->add_connected_element(id);
+    }
+    calc_length();
+}
 void Basic2DBeamElement::print_info() {
-    std::cout << elem_type << " with " << dofs << " dofs, and " << nnodes << " nodes." << std::endl;
-    for (Node node_i: nodes) {
-        node_i.print_info();
+    std::cout << "elem " << id << " of type " <<elem_type << " with " << ndofs << " dofs, and " << nnodes << " nodes:" << std::endl;
+    for (auto node_i: nodes) {
+        node_i->print_info();
     }
     std::cout << "it is also of length " << length << std::endl;
 }
 
 void Basic2DBeamElement::calc_length() {
-    length = (nodes[0].get_coords() - nodes[1].get_coords()).norm();
+    length = (nodes[0]->get_coords() - nodes[1]->get_coords()).norm();
 }
 
 void BasicShapeFunction::calc_N(real x, real L) {

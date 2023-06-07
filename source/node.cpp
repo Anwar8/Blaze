@@ -6,8 +6,12 @@
  
  Node::Node(int i, coords xyz) : id(i), coordinates(xyz), mass(0.0) {}
  
+ void Node::set_ndof(int dofs) {
+  ndof = std::max(dofs, ndof);
+ }
+
  void Node::print_info() {
-    std::cout << "xyz = (" << coordinates[0] << ", " << coordinates[1] << ", " << coordinates[2] <<  "), and mass = " << mass << std::endl;
+    std::cout << "Node " << id << ": xyz = (" << coordinates[0] << ", " << coordinates[1] << ", " << coordinates[2] <<  "), and mass = " << mass << std::endl;
  }
  coords const Node::get_coords() const {
    return coordinates;

@@ -2,3 +2,5 @@
 *.o
 xblaze
 test_xblaze
+mesh/mesh
+mesh/mesh_analysis
