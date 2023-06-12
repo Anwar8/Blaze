@@ -93,9 +93,24 @@ class Basic2DBeamElement {
         Basic2DBeamElement();
         Basic2DBeamElement(std::shared_ptr<Node>& node_1, std::shared_ptr<Node>& node_2);
         Basic2DBeamElement(int id, std::shared_ptr<Node>& node_1, std::shared_ptr<Node>& node_2);
-        // template<typename Container>
-        // Basic2DBeamElement(int given_id, Container& nodes);
         Basic2DBeamElement(int given_id, std::vector<std::shared_ptr<Node>>& in_nodes);
+        template<typename Container>
+        Basic2DBeamElement(int given_id, Container& in_nodes) {
+            if (std::size(in_nodes) != 2)
+            {
+                std::cout << "Incorrect number of element passed to create element " << id << std::endl;
+                std::cout << "Received " << std::size(in_nodes) << " but expected " << 2 << std::endl; 
+                std::exit(1);
+            }
+            id = given_id;
+            nodes[0] = in_nodes[0];
+            nodes[1] = in_nodes[1];
+            for (auto node : in_nodes) {
+                
+                node->add_connected_element(id);
+            }
+            calc_length();
+        }
         void print_info();
         void calc_length();
         void calc_N(real x);
@@ -146,6 +161,4 @@ class Basic2DBeamElement {
     }
 
 };
-
-
 #endif

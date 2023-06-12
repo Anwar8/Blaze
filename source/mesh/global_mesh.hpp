@@ -14,12 +14,7 @@ class global_mesh {
     private: 
         int nnodes = 0;
         int nelems = 0;
-        int ndofs = 0;
-        // std::map<size_t, std::vector<size_t>> elem_map;
-        std::vector<std::shared_ptr<Node>> node_vector; // WARNING: does NOT work
-        // std::vector<Node> node_vector; // WARNING: does NOT work
-        // if the vector is resized for any reason as all iterators
-        // will be invalidated!!
+        std::vector<std::shared_ptr<Node>> node_vector;
         std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector; 
 
     public:
@@ -37,4 +32,3 @@ class global_mesh {
 template <typename Iterator, typename Container>
 Iterator get_id_iterator(int id, Container& a_vec);
 
-void print_vector(std::vector<size_t> V);

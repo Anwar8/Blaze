@@ -35,4 +35,5 @@ class GlobalCoords {
         coords get_unit_y() {return unit_y;}
         coords get_unit_z() {return unit_z;}
 };
+
 #endif

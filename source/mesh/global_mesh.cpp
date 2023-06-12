@@ -65,7 +65,7 @@ gmsh_elem_map global_mesh::read_elements()
             ++node_itr;
             elem_map.push_back(std::make_pair(elem_tag, element_nodes));
             std::cout << "added element: " << elem_tag << " with nodes: ";
-            print_vector(element_nodes);
+            print_container<std::vector<std::size_t>>(element_nodes);
         }
     }
     return elem_map;
@@ -161,16 +161,4 @@ Iterator get_id_iterator(int id, Container& a_vec)
     }
     
 }
-void print_vector(std::vector<size_t> V) 
-{
-    for (auto it = V.begin(); it != V.end(); ++it) {
-        std::cout << *it;
-        if (it != V.end() - 1)
-        {
-            std::cout << ", ";
-        } else {
-            std::cout << std::endl;
-        }
-    }
-    
-}
+

@@ -7,4 +7,6 @@ vec make_xd_vec(int rows) {
 mat make_xd_mat(int rows, int columns) {
     return mat::Zero(rows, columns);
 }
+
+
 #endif
