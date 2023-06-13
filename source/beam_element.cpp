@@ -125,3 +125,13 @@ void Basic2DBeamElement::calc_K()
 void Basic2DBeamElement::calc_eps() {
     local_eps = shape_func.get_B() * local_d;
 }
+
+int const Basic2DBeamElement::get_nth_node_id(int n) const {
+    if (n > nnodes - 1 || n < 0)
+    {
+        std::cout << "Error: Requested invalid node " << n << " from element " << id << std::endl;
+        std::cout << "Element has " << nnodes << " nodes." << std::endl;
+        std::exit(1);
+    }
+    return nodes[n]->get_id();
+}

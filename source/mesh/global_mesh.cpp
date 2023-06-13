@@ -127,38 +127,5 @@ void global_mesh::print_info()
     }
 }
 
-template <typename Iterator, typename Container>
-Iterator get_id_iterator(int id, Container& a_vec)
-{
-    auto itr = std::begin(a_vec) + (id - 1);
-    int check_id = ((*itr)->get_id());
-    // this "search" is inefficient compared to other search
-    // algorithms such as std::find_if or std::lower_bound
-    // for the general case, but is more efficient considering
-    // the average case we actually care about: a sorted
-    // vector of nodes that is almost always continguous
-    if (check_id > id)
-    {
-        while (check_id != id && (itr > std::begin(a_vec)))
-        {
-            --itr;
-            check_id = ((*itr) -> get_id());
-        }
-    } else if (check_id < id) {
-        while (check_id != id && (itr < std::end(a_vec)))
-        {
-            ++itr;
-            check_id = ((*itr) -> get_id());
-        }
-    }
-    if (check_id == id)
-    {
-        return itr;
-    } else 
-    {
-        std::cout << "could not find item with id " << id << " in vector." << std::endl;
-        std::exit(1);
-    }
-    
-}
+
 

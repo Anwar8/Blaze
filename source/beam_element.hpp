@@ -96,10 +96,10 @@ class Basic2DBeamElement {
         Basic2DBeamElement(int given_id, std::vector<std::shared_ptr<Node>>& in_nodes);
         template<typename Container>
         Basic2DBeamElement(int given_id, Container& in_nodes) {
-            if (std::size(in_nodes) != 2)
+            if (std::size(in_nodes) != nnodes)
             {
-                std::cout << "Incorrect number of element passed to create element " << id << std::endl;
-                std::cout << "Received " << std::size(in_nodes) << " but expected " << 2 << std::endl; 
+                std::cout << "Incorrect number of nodes passed to create element " << id << std::endl;
+                std::cout << "Received " << std::size(in_nodes) << " but expected " << nnodes << std::endl; 
                 std::exit(1);
             }
             id = given_id;
@@ -125,6 +125,8 @@ class Basic2DBeamElement {
         mat get_T() {return orient.get_T();}
         vec get_eps() {return local_eps;}
         vec get_d() {return local_d;}
+
+        int const get_nth_node_id(int n) const;
         
         void move_nodes_up(real up) {
             for (auto node: nodes) {
