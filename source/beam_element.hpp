@@ -24,7 +24,7 @@ class BasicShapeFunction {
         mat K = make_xd_mat(6,6);
         mat N = make_xd_mat(2,6);
         mat B = make_xd_mat(2,6);
-        std::array<int, 6> elem_dofs = {1, 0, 1, 0, 0, 1};
+        std::array<int, 6> dof_map = {0, 2, 5};
     public:
         mat const get_K() const {return K;}
         mat const get_N() const {return N;}
@@ -77,8 +77,6 @@ class Basic2DBeamElement {
         std::string const elem_type = "beam-column";
         int const ndofs = 3;
         int const nnodes = 2;
-        // TODO: std::array<Node, 2> nodes; should be shared pointers to nodes
-        // not arrays of nodes. 
         std::array<std::shared_ptr<Node>, 2> nodes;
         
         BasicSection section;
