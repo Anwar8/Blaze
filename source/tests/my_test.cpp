@@ -8,7 +8,7 @@
 
 real get_l1_force(Basic2DBeamElement& my_beam, vec& d)
 {
-   return  (my_beam.get_K() * d).lpNorm<1>();
+   return  (my_beam.get_k() * d).lpNorm<1>();
 }
 
 class RigidBodyMotionTest : public ::testing::Test {
@@ -24,7 +24,7 @@ public:
         my_beam = Basic2DBeamElement(in_nodes_1, in_nodes_2);
         my_beam.calc_N(1.5);
         my_beam.calc_B(1.5);
-        my_beam.calc_K();
+        my_beam.calc_k();
 
         // Create the d vector
         d = make_xd_vec(6);

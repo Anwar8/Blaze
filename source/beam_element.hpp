@@ -21,17 +21,18 @@ class BasicSection {
 
 class BasicShapeFunction {
     private:
-        mat K = make_xd_mat(6,6);
+        mat k = make_xd_mat(6,6);
         mat N = make_xd_mat(2,6);
         mat B = make_xd_mat(2,6);
-        std::array<int, 6> dof_map = {0, 2, 5};
+        std::vector<int> dof_map = {0, 2, 5};
     public:
-        mat const get_K() const {return K;}
+        mat const get_k() const {return k;}
         mat const get_N() const {return N;}
         mat const get_B() const {return B;}
+        std::vector<int> const get_dof_map() const {return dof_map;}
         void calc_N(real x, real L);
         void calc_B(real x, real L);
-        void calc_K(real L, BasicSection& sec);
+        void calc_k(real L, BasicSection& sec);
 };
 
 class BasicOrientation {
@@ -83,9 +84,12 @@ class Basic2DBeamElement {
         BasicShapeFunction shape_func;
         BasicOrientation orient;
         real length = 0.0;
+
         vec local_d = make_xd_vec(6);
         vec local_f = make_xd_vec(6);
         vec local_eps = make_xd_vec(2);
+
+        std::vector<spnz> K_global;
 
     public:
         Basic2DBeamElement();
@@ -113,13 +117,15 @@ class Basic2DBeamElement {
         void calc_length();
         void calc_N(real x);
         void calc_B(real x);
-        void calc_K();
-        void calc_T(coords origin_x);
+        void calc_k();
+        void calc_T(coords origin_x = {1.0, 0.0, 0.0});
         void calc_eps();
+        void calc_K_global();
+
         int get_ndofs() {return ndofs;}
         mat get_N() {return shape_func.get_N();}
         mat get_B() {return shape_func.get_B();}
-        mat get_K() {return shape_func.get_K();}
+        mat get_k() {return shape_func.get_k();}
         mat get_T() {return orient.get_T();}
         vec get_eps() {return local_eps;}
         vec get_d() {return local_d;}

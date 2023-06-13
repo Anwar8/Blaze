@@ -20,6 +20,8 @@ void Node::fix_dof(int dof) {
   if (valid_dof(dof))
   {
     inactive_dofs.insert(dof);
+    active_dofs.erase(dof);
+    calc_ndof();
   } else {
     std::cout << "ERROR: Cannot fix DoF " << dof << ". Only DoFs 0 through 5 allowed." << std::endl;
     std::exit(1);
@@ -30,8 +32,27 @@ void Node::free_dof(int dof) {
   if (valid_dof(dof))
   {
     inactive_dofs.erase(dof);
+    active_dofs.insert(dof);
+    calc_ndof();
   } else {
     std::cout << "ERROR: Cannot free DoF " << dof << ". Only DoFs 0 through 5 allowed." << std::endl;
     std::exit(1);
   }
+}
+
+void Node::fix_all_dofs() {
+  inactive_dofs.insert({0, 1, 2, 3, 4, 5});
+  active_dofs.clear();
+  calc_ndof();
+}
+void Node::free_all_dofs()
+{
+  inactive_dofs.clear();
+  active_dofs.insert({0, 1, 2, 3, 4, 5});
+  calc_ndof();
+}
+
+void Node::print_inactive_dofs() {
+    std::cout << "Node " << id << " has " << std::size(inactive_dofs) << " inactive DoFs: ";
+    print_container(inactive_dofs);
 }

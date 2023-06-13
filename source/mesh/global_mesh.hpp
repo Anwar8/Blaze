@@ -13,9 +13,14 @@ using gmsh_elem_map = std::vector<std::pair<size_t, std::vector<size_t>>>;
 class global_mesh {
     private: 
         int nnodes = 0;
+        int ndofs = 0;
         int nelems = 0;
         std::vector<std::shared_ptr<Node>> node_vector;
-        std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector; 
+        std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector;
+
+        spmat K;
+        spvec P;
+        vec U; 
 
     public:
         void open_mesh_file(std::string const mesh_file);
@@ -25,8 +30,15 @@ class global_mesh {
         void make_elements (gmsh_elem_map elem_map);
         void close_mesh_file();
         void setup_mesh(std::string const mesh_file);
-        
+        void count_dofs();
         void print_info();
+        void fix_node(int id, int dof);
+        void calc_global_contributions() {
+            for (auto elem: elem_vector) 
+            {
+                elem->calc_K_global();
+            }
+        }
 };
 
 template <typename Iterator, typename Container>

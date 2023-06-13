@@ -129,3 +129,27 @@ void global_mesh::print_info()
 
 
 
+void global_mesh::count_dofs() 
+{
+    ndofs = 0;
+    std::cout << "WARNING: count_dofs assumes nodes are ordered by id" << std::endl;
+    for (auto node: node_vector)
+    {
+        node->set_nz_i(ndofs);
+        std::cout << "Node " << node->get_id() << " has nz_i = " << ndofs << std::endl;
+        ndofs += node->get_ndof();
+    }
+    std::cout << "There are " << ndofs << " active DoFs in the mesh." << std::endl;
+}
+
+void global_mesh::fix_node(int id, int dof) {
+    auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
+    if (dof < 0)
+    {
+        std::cout << "Fixing all DoFs of node " << id << std::endl;
+        (*node_it)->fix_all_dofs();
+        (*node_it)->print_inactive_dofs();
+    } else {
+        (*node_it)->fix_dof(dof);
+    }
+}

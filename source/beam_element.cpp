@@ -71,36 +71,36 @@ void BasicShapeFunction::calc_B(real x, real L) {
     B(1,5) = -2/L + 6 * x* std::pow(1/L,2);
 }
 
-void BasicShapeFunction::calc_K(real L, BasicSection& sec) {
+void BasicShapeFunction::calc_k(real L, BasicSection& sec) {
     real A = sec.get_A();
     real E = sec.get_E();
     real I = sec.get_I();
     // Row 1
-    K(0,0) = E*A/L;
-    K(0,3) = -E*A/L;
+    k(0,0) = E*A/L;
+    k(0,3) = -E*A/L;
     // Row 2
-    K(1,1) = 12*E*I/std::pow(L,3);
-    K(1,2) = 6*E*I/std::pow(L,2);
-    K(1,4) = -12*E*I/std::pow(L,3);
-    K(1,5) = 6*E*I/std::pow(L,2);
+    k(1,1) = 12*E*I/std::pow(L,3);
+    k(1,2) = 6*E*I/std::pow(L,2);
+    k(1,4) = -12*E*I/std::pow(L,3);
+    k(1,5) = 6*E*I/std::pow(L,2);
     // Row 3
-    K(2,1) = 6*E*I/std::pow(L,2);
-    K(2,2) = 4*E*I/L;
-    K(2,4) = -6*E*I/std::pow(L,2);
-    K(2,5) = 2*E*I/L;
+    k(2,1) = 6*E*I/std::pow(L,2);
+    k(2,2) = 4*E*I/L;
+    k(2,4) = -6*E*I/std::pow(L,2);
+    k(2,5) = 2*E*I/L;
     // Row 4
-    K(3,0) = -E*A/L;
-    K(3,3) = E*A/L;
+    k(3,0) = -E*A/L;
+    k(3,3) = E*A/L;
     // Row 5
-    K(4,1) = -12*E*I/std::pow(L,3);
-    K(4,2) = -6*E*I/std::pow(L,2);
-    K(4,4) = 12*E*I/std::pow(L,3);
-    K(4,5) = -6*E*I/std::pow(L,2);
+    k(4,1) = -12*E*I/std::pow(L,3);
+    k(4,2) = -6*E*I/std::pow(L,2);
+    k(4,4) = 12*E*I/std::pow(L,3);
+    k(4,5) = -6*E*I/std::pow(L,2);
     // Row 6
-    K(5,1) = 6*E*I/std::pow(L,2);
-    K(5,2) = 2*E*I/L;
-    K(5,4) = -6*E*I/std::pow(L,2);
-    K(5,5) = 4*E*I/L;
+    k(5,1) = 6*E*I/std::pow(L,2);
+    k(5,2) = 2*E*I/L;
+    k(5,4) = -6*E*I/std::pow(L,2);
+    k(5,5) = 4*E*I/L;
 }
 
 void Basic2DBeamElement::calc_T(coords origin_x) {
@@ -117,9 +117,9 @@ void Basic2DBeamElement::calc_B(real x)
     shape_func.calc_B(x, length);
 }
 
-void Basic2DBeamElement::calc_K()
+void Basic2DBeamElement::calc_k()
 {
-    shape_func.calc_K(length, section);
+    shape_func.calc_k(length, section);
 }
 
 void Basic2DBeamElement::calc_eps() {
@@ -134,4 +134,119 @@ int const Basic2DBeamElement::get_nth_node_id(int n) const {
         std::exit(1);
     }
     return nodes[n]->get_id();
+}
+
+// void Basic2DBeamElement::calc_K_global() 
+// {
+//     calc_T();
+//     calc_k();
+//     mat k = orient.get_T().transpose() * shape_func.get_k() * orient.get_T();
+//     K_global.clear();
+//     // we have the same number of contribution as stiffness components 
+//     // assuming all are non-zero!
+//     K_global.reserve(k.rows() * k.cols());
+//     std::vector<int> dof_map = shape_func.get_dof_map();
+//     // we will first get the contribution of each node
+//     int node_i = 0;
+//     for (auto node: nodes)
+//     {
+//         std::set<int> inactive_dofs = node->get_inactive_dofs();
+//         // std::set<int> active_dofs = node->get_active_dofs();
+//         int node_ndof = node->get_ndof();
+//         for (auto dof: active_dofs)
+//         {
+//             dof += node_ndof*node_i;
+//         }
+//         int node_id = node->get_id();
+//         std::cout << "Element " << id << ", node " << node_id << std::endl;
+
+//         for (auto node_dof: active_dofs)
+//         {
+//         // iterate over each element DoF
+//         int elem_dof_i = 0;
+//             //
+//         //          MUST CHECK dof_map against inactive dofs from the node!!
+//             //
+            
+//             for (auto elem_dof: dof_map)
+//             {
+//                 // check if the dof is inactive. if it is, then do nothing, else
+//                 // the contributions of its element
+//                 if (inactive_dofs.count(elem_dof) == 0)
+//                 {
+//                 // access the values by rows associated with each node
+//                 // real val = k(node_i, elem_dof_i);
+//                 int global_row = (node_id - 1) + node_dof;
+//                 int global_column = (node_id - 1) + node_dof;
+//                 ++elem_dof_i;
+//                 // if this DoF is not inactive
+                
+//                 std::cout << "Added k(" << node_i << ", " << elem_dof_i << ")";
+//                 std::cout << " to (" << global_row << ", " << global_column << ")" << std::endl;
+//                 // K_global.push_back(spnz(val, global_row, global_column));
+
+//                 }
+//             }
+//         }
+//         // contruct the spnz from: value, row, column
+//         ++node_i;
+//     }
+
+// }
+void Basic2DBeamElement::calc_K_global() 
+{
+    calc_T();
+    calc_k();
+    mat k = orient.get_T().transpose() * shape_func.get_k() * orient.get_T();
+    K_global.clear();
+    // we have the same number of contribution as stiffness components 
+    // assuming all are non-zero!
+    K_global.reserve(k.rows() * k.cols());
+    std::vector<int> dof_map = shape_func.get_dof_map();
+    dof_map.insert(dof_map.end(), dof_map.begin(), dof_map.end());
+    // we will first get the contribution of each node
+    std::vector<int> force_in_i = dof_map;
+    std::vector<int> disp_in_j = dof_map;
+    int count = 1;
+    int node_i_index = 0;
+
+    for (auto node_i: nodes) {
+        std::set<int> node_i_active_dofs = node_i->get_active_dofs();
+        int node_i_id = node_i->get_id();
+        int node_i_nz_i = node_i -> get_nz_i();
+        
+        int node_j_index = 0;
+        for (auto node_j: nodes) {
+            std::set<int> node_j_active_dofs = node_j->get_active_dofs();
+            int node_j_id = node_j->get_id();
+            int node_j_nz_i = node_j -> get_nz_i();
+            std::cout << "Element " << id << ", nodes " << node_i_id << ", " << node_j_id << std::endl;
+            for (int i = node_i_index*ndofs; i < (node_i_index + 1)*ndofs; ++i)
+            {
+                for (int j = node_j_index*ndofs; j < (node_j_index + 1)*ndofs; ++j)
+                {
+                    std::cout << "i, j = " << i << ", " << j << std::endl;
+                    std::cout << "node " << node_i_id << " active dofs = ";
+                    print_container(node_i_active_dofs);
+                    std::cout << "node " << node_j_id << " active dofs = ";
+                    print_container(node_j_active_dofs);
+                    if (node_i_active_dofs.count(force_in_i[i]) != 0 && 
+                        node_j_active_dofs.count(disp_in_j[j]) != 0)
+                        {
+                    auto val = k(i,j);
+                    int global_row = force_in_i[i] + node_i_nz_i;
+                    int global_col = disp_in_j[j] + node_j_nz_i;
+                    std::cout << count << ". ";
+                    std::cout << "Added k(" << i << ", " << j << ")";
+                    std::cout << " to (" << global_row << ", " << global_col << ")" << std::endl;
+                        }
+                    ++count;
+                        
+                }
+            }
+        ++node_j_index;
+        }
+        ++node_i_index;
+    }
+    std::cout << std::endl << std::endl;
 }

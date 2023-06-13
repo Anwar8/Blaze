@@ -9,7 +9,9 @@ class Node {
         coords coordinates;
         real mass;
         int ndof = 6;
+        int nz_i = 0;
         std::set<int> connected_elements;
+        std::set<int> active_dofs = {0, 1, 2, 3, 4, 5};
         std::set<int> inactive_dofs;
     public:
         Node();
@@ -17,14 +19,19 @@ class Node {
         Node(int i, coords xyz);
         void print_info();
         coords const get_coords() const;
+        int const get_ndof()  {return ndof;}
         void add_connected_element(int element_id) {connected_elements.insert(element_id);}
         unsigned const get_id() const {return id;}
         
         // functions to work on DoFs vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-        void calc_ndof() {ndof = 6 - std::size(inactive_dofs);};
+        std::set<int> const get_inactive_dofs() const {return inactive_dofs;}
+        std::set<int> const get_active_dofs() const {return active_dofs;}
+        void calc_ndof() {ndof = std::size(active_dofs);};
         bool valid_dof(int dof) {return (dof >= 0 && dof < 6);}
         void fix_dof(int dof);
         void free_dof(int dof);
+        void set_nz_i(int i) {nz_i = i;}
+        int get_nz_i() {return nz_i;}
         
 
         template <typename STLContainer>
@@ -40,8 +47,10 @@ class Node {
             }
         }
         
-        void fix_all_dofs() {inactive_dofs.insert({0, 1, 2, 3, 4, 5});}
-        void free_all_dofs() {inactive_dofs.clear();}
+        void fix_all_dofs();
+
+        void free_all_dofs();
+        void print_inactive_dofs();
         // functions to work on DoFs ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
         void  set_z(real z) { coordinates[2] = z;}
