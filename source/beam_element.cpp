@@ -202,8 +202,12 @@ void Basic2DBeamElement::calc_K_global()
     // we have the same number of contribution as stiffness components 
     // assuming all are non-zero!
     K_global.reserve(k.rows() * k.cols());
-    std::vector<int> dof_map = shape_func.get_dof_map();
-    dof_map.insert(dof_map.end(), dof_map.begin(), dof_map.end());
+    std::cout << "going into creating the dof map..." << std::endl;
+    create_dof_map();
+    
+    // std::vector<int> dof_map = shape_func.get_dof_map();
+    std::vector<int> dof_map = global_dof_map;
+    // dof_map.insert(dof_map.end(), dof_map.begin(), dof_map.end());
     // we will first get the contribution of each node
     std::vector<int> force_in_i = dof_map;
     std::vector<int> disp_in_j = dof_map;
@@ -225,11 +229,14 @@ void Basic2DBeamElement::calc_K_global()
             {
                 for (int j = node_j_index*ndofs; j < (node_j_index + 1)*ndofs; ++j)
                 {
-                    std::cout << "i, j = " << i << ", " << j << std::endl;
-                    std::cout << "node " << node_i_id << " active dofs = ";
-                    print_container(node_i_active_dofs);
-                    std::cout << "node " << node_j_id << " active dofs = ";
-                    print_container(node_j_active_dofs);
+                    // -------------------------------------------------------
+                    // remove this after making sure assembly is correct
+                    // std::cout << "i, j = " << i << ", " << j << std::endl;
+                    // std::cout << "node " << node_i_id << " active dofs = ";
+                    // print_container(node_i_active_dofs);
+                    // std::cout << "node " << node_j_id << " active dofs = ";
+                    // print_container(node_j_active_dofs);
+                    // -------------------------------------------------------
                     if (node_i_active_dofs.count(force_in_i[i]) != 0 && 
                         node_j_active_dofs.count(disp_in_j[j]) != 0)
                         {
@@ -239,14 +246,44 @@ void Basic2DBeamElement::calc_K_global()
                     std::cout << count << ". ";
                     std::cout << "Added k(" << i << ", " << j << ")";
                     std::cout << " to (" << global_row << ", " << global_col << ")" << std::endl;
-                        }
-                    ++count;
-                        
+                    K_global.push_back(spnz(global_row, global_col, val));
+                    }
+                    ++count;   
                 }
             }
         ++node_j_index;
         }
-        ++node_i_index;
+    ++node_i_index;
     }
     std::cout << std::endl << std::endl;
+}
+
+void Basic2DBeamElement::create_dof_map()
+{
+    std::cout << "creating dof map for element " << id << std::endl;
+    global_dof_map.clear();
+    global_dof_map.reserve(6);
+    for (auto node: nodes)
+    {
+        std::set<int> active_dofs = node->get_active_dofs();
+        std::vector<int> mapped_dofs = map_dofs(shape_func.get_dof_map(), active_dofs);
+        global_dof_map.insert(global_dof_map.end(), mapped_dofs.begin(), mapped_dofs.end());
+    }
+}
+
+std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs)
+{
+    std::vector<int> mapped_dofs;
+    mapped_dofs.reserve(std::size(elem_dofs));
+    for (auto dof: elem_dofs)
+    {
+        auto dof_itr = std::find(active_dofs.begin(), active_dofs.end(), dof);
+        if (dof_itr == active_dofs.end())
+        {
+            mapped_dofs.push_back(-1);
+        } else {
+            mapped_dofs.push_back(std::distance(active_dofs.begin(), dof_itr));
+        }
+    }
+    return mapped_dofs;
 }

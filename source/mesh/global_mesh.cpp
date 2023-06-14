@@ -153,3 +153,62 @@ void global_mesh::fix_node(int id, int dof) {
         (*node_it)->fix_dof(dof);
     }
 }
+
+void global_mesh::assemble_global_contributions() 
+{
+    std::vector<spnz> K_global;
+    std::vector<spnz> K_global_elem;
+    // this reservation is not accurate nor good...
+    K_global.reserve(nelems*ndofs);
+    for (auto elem: elem_vector)
+    {   
+        K_global_elem = elem->get_K_global();
+        K_global.insert(K_global.end(), K_global_elem.begin(), K_global_elem.end());
+    }
+    K = make_spd_mat(ndofs, ndofs);
+    P = make_spd_vec(ndofs);
+    U = make_xd_vec(ndofs);
+    K.setFromTriplets(K_global.begin(), K_global.end());
+    K.makeCompressed();
+    std::cout << "Setting a force of -1e4 N on node in y direction." << std::endl;
+    P.insert(2) = -1e4;
+}
+void global_mesh::solve_for_U() {
+    Eigen::SparseLU<spmat> solver;
+    // Compute the ordering permutation vector from the structural pattern of A
+    solver.analyzePattern(K); 
+    // Compute the numerical factorization 
+    solver.factorize(K); 
+    //Use the factors to solve the linear system 
+    
+    if (solver.info() == Eigen::Success)
+    {
+        std::cout << "Factorisation successfull." << std::endl;
+    } else {
+        std::cout << "ERROR: Factorisation unsuccessfull! Matrix is:" << std::endl;
+        // convert to dense matrix to print correctly
+        std::cout << Eigen::MatrixXd(K) << std::endl;
+
+        
+        std::exit(1);
+    }
+    U = solver.solve(P); 
+    std::cout << "The solution is:" << std::endl << U << std::endl;
+}
+
+// BROKEN!!!
+bool has_zero_row(spmat A) {
+    int n = A.outerSize();
+    // int* nnz = A.innerNonZeroPtr();
+    // for(int i = 0; i < n; ++i)
+    // {
+    //     if(nnz[i] == 0)
+    //     std::cout << "Row " << i << " is zero\n";
+    //     return true;
+    // }
+    return false;
+}
+
+bool check_matrix(spmat A) {
+    return has_zero_row(A);
+}
