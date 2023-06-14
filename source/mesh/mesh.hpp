@@ -1,2 +1,2 @@
-#define LENGTH 5.0
-#define MESH_SIZE 2.5
+#define LENGTH 3.0
+#define MESH_SIZE 1.0

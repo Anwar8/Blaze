@@ -202,7 +202,8 @@ void Basic2DBeamElement::calc_K_global()
     // we have the same number of contribution as stiffness components 
     // assuming all are non-zero!
     K_global.reserve(k.rows() * k.cols());
-    std::cout << "going into creating the dof map..." << std::endl;
+    std::cout << "Element " << id << " has stiffness matrix:" << std::endl;
+    std::cout << shape_func.get_k() << std::endl;
     create_dof_map();
     
     // std::vector<int> dof_map = shape_func.get_dof_map();
@@ -237,14 +238,13 @@ void Basic2DBeamElement::calc_K_global()
                     // std::cout << "node " << node_j_id << " active dofs = ";
                     // print_container(node_j_active_dofs);
                     // -------------------------------------------------------
-                    if (node_i_active_dofs.count(force_in_i[i]) != 0 && 
-                        node_j_active_dofs.count(disp_in_j[j]) != 0)
-                        {
+                    if (force_in_i[i] >= 0 && disp_in_j[j] >= 0)
+                    {
                     auto val = k(i,j);
                     int global_row = force_in_i[i] + node_i_nz_i;
                     int global_col = disp_in_j[j] + node_j_nz_i;
                     std::cout << count << ". ";
-                    std::cout << "Added k(" << i << ", " << j << ")";
+                    std::cout << "Added k(" << i << ", " << j << ") = " << val;
                     std::cout << " to (" << global_row << ", " << global_col << ")" << std::endl;
                     K_global.push_back(spnz(global_row, global_col, val));
                     }

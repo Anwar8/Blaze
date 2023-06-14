@@ -43,6 +43,7 @@ class global_mesh {
         }
         void assemble_global_contributions();
         void solve_for_U();
+        int const get_num_elems() const {return nelems;}
 };
 
 template <typename Iterator, typename Container>
