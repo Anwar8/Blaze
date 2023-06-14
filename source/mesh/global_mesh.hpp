@@ -2,6 +2,8 @@
 #include <vector>
 #include <tuple>
 #include <string>
+#include<Eigen/SparseLU>
+#include<Eigen/SparseCholesky>
 #include "gmsh.h"
 #include "../maths_defaults.hpp"
 #include "../node.hpp"
@@ -39,6 +41,8 @@ class global_mesh {
                 elem->calc_K_global();
             }
         }
+        void assemble_global_contributions();
+        void solve_for_U();
 };
 
 template <typename Iterator, typename Container>

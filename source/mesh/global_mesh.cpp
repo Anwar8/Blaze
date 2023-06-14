@@ -153,3 +153,42 @@ void global_mesh::fix_node(int id, int dof) {
         (*node_it)->fix_dof(dof);
     }
 }
+
+void global_mesh::assemble_global_contributions() 
+{
+    std::vector<spnz> K_global;
+    std::vector<spnz> K_global_elem;
+    // this reservation is not accurate nor good...
+    K_global.reserve(nelems*ndofs);
+    for (auto elem: elem_vector)
+    {   
+        K_global_elem = elem->get_K_global();
+        K_global.insert(K_global.end(), K_global_elem.begin(), K_global_elem.end());
+    }
+    K = make_spd_mat(ndofs, ndofs);
+    P = make_spd_vec(ndofs);
+    U = make_xd_vec(ndofs);
+    K.setFromTriplets(K_global.begin(), K_global.end());
+    K.makeCompressed();
+    std::cout << "Setting a force of -1e4 N on node in y direction." << std::endl;
+    P.insert(2) = -1e4;
+}
+void global_mesh::solve_for_U() {
+    Eigen::SparseLU<spmat> solver;
+    // Compute the ordering permutation vector from the structural pattern of A
+    solver.analyzePattern(K); 
+    // Compute the numerical factorization 
+    solver.factorize(K); 
+    //Use the factors to solve the linear system 
+    if (solver.info() == Eigen::Success)
+    {
+        std::cout << "Factorisation successfull." << std::endl;
+    } else {
+        std::cout << "ERROR: Factorisation unsuccessfull!" << std::endl;
+        std::cout << "det(K) = " << std::endl;
+        std::cout << solver.determinant();
+        std::exit(1);
+    }
+    U = solver.solve(P); 
+    std::cout << "The solution is:" << std::endl << U << std::endl;
+}

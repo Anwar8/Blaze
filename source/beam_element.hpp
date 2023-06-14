@@ -80,6 +80,8 @@ class Basic2DBeamElement {
         int const nnodes = 2;
         std::array<std::shared_ptr<Node>, 2> nodes;
         
+        std::vector<int> global_dof_map;
+
         BasicSection section;
         BasicShapeFunction shape_func;
         BasicOrientation orient;
@@ -121,7 +123,8 @@ class Basic2DBeamElement {
         void calc_T(coords origin_x = {1.0, 0.0, 0.0});
         void calc_eps();
         void calc_K_global();
-
+        
+        void create_dof_map();
         int get_ndofs() {return ndofs;}
         mat get_N() {return shape_func.get_N();}
         mat get_B() {return shape_func.get_B();}
@@ -129,6 +132,8 @@ class Basic2DBeamElement {
         mat get_T() {return orient.get_T();}
         vec get_eps() {return local_eps;}
         vec get_d() {return local_d;}
+        std::vector<int> get_global_dof_map() {return global_dof_map;}
+        std::vector<spnz> get_K_global() {return K_global;}
 
         int const get_nth_node_id(int n) const;
         
@@ -167,4 +172,6 @@ class Basic2DBeamElement {
     }
 
 };
+
+std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs);
 #endif
