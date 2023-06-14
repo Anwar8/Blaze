@@ -79,3 +79,6 @@ Iterator get_id_iterator(int id, Container& a_vec)
     }
     
 }
+bool check_matrix(spmat A);
+bool has_zero_row(spmat A);
+

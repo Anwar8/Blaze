@@ -170,7 +170,6 @@ class Basic2DBeamElement {
         }
         return *this;
     }
-
 };
 
 std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs);

@@ -180,15 +180,35 @@ void global_mesh::solve_for_U() {
     // Compute the numerical factorization 
     solver.factorize(K); 
     //Use the factors to solve the linear system 
+    
     if (solver.info() == Eigen::Success)
     {
         std::cout << "Factorisation successfull." << std::endl;
     } else {
-        std::cout << "ERROR: Factorisation unsuccessfull!" << std::endl;
-        std::cout << "det(K) = " << std::endl;
-        std::cout << solver.determinant();
+        std::cout << "ERROR: Factorisation unsuccessfull! Matrix is:" << std::endl;
+        // convert to dense matrix to print correctly
+        std::cout << Eigen::MatrixXd(K) << std::endl;
+
+        
         std::exit(1);
     }
     U = solver.solve(P); 
     std::cout << "The solution is:" << std::endl << U << std::endl;
+}
+
+// BROKEN!!!
+bool has_zero_row(spmat A) {
+    int n = A.outerSize();
+    // int* nnz = A.innerNonZeroPtr();
+    // for(int i = 0; i < n; ++i)
+    // {
+    //     if(nnz[i] == 0)
+    //     std::cout << "Row " << i << " is zero\n";
+    //     return true;
+    // }
+    return false;
+}
+
+bool check_matrix(spmat A) {
+    return has_zero_row(A);
 }

@@ -72,7 +72,6 @@ void BasicShapeFunction::calc_B(real x, real L) {
 }
 
 void BasicShapeFunction::calc_k(real L, BasicSection& sec) {
-    std::cout << "calculating k" << std::endl;
     real A = sec.get_A();
     real E = sec.get_E();
     real I = sec.get_I();
@@ -105,7 +104,6 @@ void BasicShapeFunction::calc_k(real L, BasicSection& sec) {
 }
 
 void Basic2DBeamElement::calc_T(coords origin_x) {
-    std::cout << "calculating T" << std::endl;
     orient.evaluate(nodes, origin_x);
 }
 
@@ -197,16 +195,12 @@ int const Basic2DBeamElement::get_nth_node_id(int n) const {
 // }
 void Basic2DBeamElement::calc_K_global() 
 {
-    std::cout << "Element " << id << " calculating its global contributions." << std::endl;
     calc_T();
     calc_k();
-    std::cout << "calculating transformed k" << std::endl;
     mat k = orient.get_T().transpose() * shape_func.get_k() * orient.get_T();
-    std::cout << "clearing K_global" << std::endl;
     K_global.clear();
     // we have the same number of contribution as stiffness components 
     // assuming all are non-zero!
-    std::cout << "reserving space for K_global" << std::endl;
     K_global.reserve(k.rows() * k.cols());
     std::cout << "going into creating the dof map..." << std::endl;
     create_dof_map();
@@ -237,11 +231,11 @@ void Basic2DBeamElement::calc_K_global()
                 {
                     // -------------------------------------------------------
                     // remove this after making sure assembly is correct
-                    std::cout << "i, j = " << i << ", " << j << std::endl;
-                    std::cout << "node " << node_i_id << " active dofs = ";
-                    print_container(node_i_active_dofs);
-                    std::cout << "node " << node_j_id << " active dofs = ";
-                    print_container(node_j_active_dofs);
+                    // std::cout << "i, j = " << i << ", " << j << std::endl;
+                    // std::cout << "node " << node_i_id << " active dofs = ";
+                    // print_container(node_i_active_dofs);
+                    // std::cout << "node " << node_j_id << " active dofs = ";
+                    // print_container(node_j_active_dofs);
                     // -------------------------------------------------------
                     if (node_i_active_dofs.count(force_in_i[i]) != 0 && 
                         node_j_active_dofs.count(disp_in_j[j]) != 0)
