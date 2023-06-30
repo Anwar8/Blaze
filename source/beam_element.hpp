@@ -39,7 +39,7 @@ class BasicOrientation {
     private:
         coords local_x;
         real length;
-        mat T = make_xd_mat(6,6);
+        mat T = make_xd_mat(6,12);
         real alpha = 0.0;
     public:
         void evaluate(std::array<std::shared_ptr<Node>, 2> const & nodes, coords const & origin_x)
@@ -58,16 +58,18 @@ class BasicOrientation {
            alpha = std::acos(origin_x.dot(local_x));
         }
         void calc_T() {
-            T(0,0) = std::cos(alpha);
-            T(1,0) = -std::sin(alpha);
-            T(0,1) = std::sin(alpha);
-            T(1,1) = std::cos(alpha);
-            T(2,2) = 1;
-            T(3,3) = std::cos(alpha);
-            T(4,3) = -std::sin(alpha);
-            T(3,4) = std::sin(alpha);
-            T(4,4) = std::cos(alpha);
-            T(5,5) = 1;
+            real c = std::cos(alpha);
+            real s = std::sin(alpha);
+            T(0,0) = c;
+            T(0,2) = s;
+            T(1,0) = -s;
+            T(1,2) = c;
+            T(2,5) = 1;
+            T(3,6) = c;
+            T(3,8) = s;
+            T(4,6) = -s;
+            T(4,8) = c;
+            T(5,11) = 1;
         }
         mat get_T() {return T;}
 };

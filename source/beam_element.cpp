@@ -136,63 +136,6 @@ int const Basic2DBeamElement::get_nth_node_id(int n) const {
     return nodes[n]->get_id();
 }
 
-// void Basic2DBeamElement::calc_K_global() 
-// {
-//     calc_T();
-//     calc_k();
-//     mat k = orient.get_T().transpose() * shape_func.get_k() * orient.get_T();
-//     K_global.clear();
-//     // we have the same number of contribution as stiffness components 
-//     // assuming all are non-zero!
-//     K_global.reserve(k.rows() * k.cols());
-//     std::vector<int> dof_map = shape_func.get_dof_map();
-//     // we will first get the contribution of each node
-//     int node_i = 0;
-//     for (auto node: nodes)
-//     {
-//         std::set<int> inactive_dofs = node->get_inactive_dofs();
-//         // std::set<int> active_dofs = node->get_active_dofs();
-//         int node_ndof = node->get_ndof();
-//         for (auto dof: active_dofs)
-//         {
-//             dof += node_ndof*node_i;
-//         }
-//         int node_id = node->get_id();
-//         std::cout << "Element " << id << ", node " << node_id << std::endl;
-
-//         for (auto node_dof: active_dofs)
-//         {
-//         // iterate over each element DoF
-//         int elem_dof_i = 0;
-//             //
-//         //          MUST CHECK dof_map against inactive dofs from the node!!
-//             //
-            
-//             for (auto elem_dof: dof_map)
-//             {
-//                 // check if the dof is inactive. if it is, then do nothing, else
-//                 // the contributions of its element
-//                 if (inactive_dofs.count(elem_dof) == 0)
-//                 {
-//                 // access the values by rows associated with each node
-//                 // real val = k(node_i, elem_dof_i);
-//                 int global_row = (node_id - 1) + node_dof;
-//                 int global_column = (node_id - 1) + node_dof;
-//                 ++elem_dof_i;
-//                 // if this DoF is not inactive
-                
-//                 std::cout << "Added k(" << node_i << ", " << elem_dof_i << ")";
-//                 std::cout << " to (" << global_row << ", " << global_column << ")" << std::endl;
-//                 // K_global.push_back(spnz(val, global_row, global_column));
-
-//                 }
-//             }
-//         }
-//         // contruct the spnz from: value, row, column
-//         ++node_i;
-//     }
-
-// }
 void Basic2DBeamElement::calc_K_global() 
 {
     calc_T();
