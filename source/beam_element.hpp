@@ -41,9 +41,11 @@ class BasicOrientation {
         real length;
         mat T = make_xd_mat(6,12);
         real alpha = 0.0;
+        real offset = 0.0;
     public:
-        void evaluate(std::array<std::shared_ptr<Node>, 2> const & nodes, coords const & origin_x)
+        void evaluate(std::array<std::shared_ptr<Node>, 2> const & nodes, real sec_offset, coords const & origin_x)
         {
+            offset = sec_offset;
             calc_length_local_x(nodes);
             calc_alpha(origin_x);
             calc_T();
@@ -62,13 +64,17 @@ class BasicOrientation {
             real s = std::sin(alpha);
             T(0,0) = c;
             T(0,2) = s;
+            T(0,5) = c*offset;
             T(1,0) = -s;
             T(1,2) = c;
+            T(1,5) = -s*offset;
             T(2,5) = 1;
             T(3,6) = c;
             T(3,8) = s;
+            T(3,11) = c*offset;
             T(4,6) = -s;
             T(4,8) = c;
+            T(4,11) = -s*offset;
             T(5,11) = 1;
         }
         mat get_T() {return T;}
@@ -122,7 +128,7 @@ class Basic2DBeamElement {
         void calc_N(real x);
         void calc_B(real x);
         void calc_k();
-        void calc_T(coords origin_x = {1.0, 0.0, 0.0});
+        void calc_T(real sec_offset = 0.0, coords origin_x = {1.0, 0.0, 0.0});
         void calc_eps();
         void calc_K_global();
         

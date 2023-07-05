@@ -103,8 +103,8 @@ void BasicShapeFunction::calc_k(real L, BasicSection& sec) {
     k(5,5) = 4*E*I/L;
 }
 
-void Basic2DBeamElement::calc_T(coords origin_x) {
-    orient.evaluate(nodes, origin_x);
+void Basic2DBeamElement::calc_T(real sec_offset, coords origin_x) {
+    orient.evaluate(nodes, sec_offset, origin_x);
 }
 
 void Basic2DBeamElement::calc_N(real x)
