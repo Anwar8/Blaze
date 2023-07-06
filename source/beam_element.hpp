@@ -87,6 +87,7 @@ class Basic2DBeamElement {
         std::array<std::shared_ptr<Node>, 2> nodes;
         
         std::vector<int> global_dof_map;
+        std::vector<std::array<int,4>> stiffness_map;
 
         BasicSection section;
         BasicShapeFunction shape_func;
@@ -129,6 +130,8 @@ class Basic2DBeamElement {
         void calc_T(real sec_offset = 0.0, coords origin_x = {1.0, 0.0, 0.0});
         void calc_eps();
         void calc_K_global();
+
+        void map_stiffness();
         
         void create_dof_map();
         int get_ndofs() {return ndofs;}

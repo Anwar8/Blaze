@@ -168,10 +168,12 @@ void global_mesh::assemble_global_contributions()
     K = make_spd_mat(ndofs, ndofs);
     P = make_spd_vec(ndofs);
     U = make_xd_vec(ndofs);
+    std::cout << "There are " << std::size(K_global) << " contributions to add up." << std::endl;
+    std::cout << "The K_global is of size " << ndofs << "x" << ndofs << std::endl;
     K.setFromTriplets(K_global.begin(), K_global.end());
     K.makeCompressed();
     std::cout << "Setting a force of -1e4 N on node in y direction." << std::endl;
-    P.insert(2) = -1e4;
+    P.insert(1) = -1e4;
 }
 void global_mesh::solve_for_U() {
     Eigen::SparseLU<spmat> solver;

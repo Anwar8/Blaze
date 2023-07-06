@@ -39,12 +39,14 @@ class Node {
             for (auto dof: dofs) {
                 fix_dof(dof);
             }
+            calc_ndof();
         }
         template <typename STLContainer>
         void free_dofs(STLContainer dofs) {
             for (auto dof: dofs) {
                 free_dof(dof);
             }
+            calc_ndof();
         }
         
         void fix_all_dofs();

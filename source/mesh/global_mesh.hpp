@@ -36,8 +36,10 @@ class global_mesh {
         void print_info();
         void fix_node(int id, int dof);
         void calc_global_contributions() {
+            std::cout << "Calc_global_contirbutions: There are " << ndofs << " active DoFs in the mesh." << std::endl;
             for (auto elem: elem_vector) 
-            {
+            {   
+                elem->map_stiffness();
                 elem->calc_K_global();
             }
         }

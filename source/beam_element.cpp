@@ -136,69 +136,67 @@ int const Basic2DBeamElement::get_nth_node_id(int n) const {
     return nodes[n]->get_id();
 }
 
+void Basic2DBeamElement::map_stiffness()
+{
+    // local to global stiffness map: <<local_row, local_col, global_row, global_col>, ...>
+    stiffness_map.clear();
+    int stiffness_size = 0;
+    for (auto node: nodes) 
+    {
+        stiffness_size += std::size(node->get_active_dofs());
+    }
+    stiffness_size *= stiffness_size;
+    std::cout << "Reserved " << stiffness_size << " spaces for the stiffness_map" << std::endl;
+    stiffness_map.reserve(stiffness_size);
+    int i = 0;
+    for (auto node_i: nodes)
+    {
+        int j = 0;
+        std::set<int> active_dofs_i = node_i->get_active_dofs();
+        int nz_i_i = node_i->get_nz_i();
+        for (auto node_j: nodes)
+        {
+            
+            std::set<int> active_dofs_j = node_j->get_active_dofs();
+            
+            int nz_i_j = node_j->get_nz_i();
+            int dof_i_index = 0;
+            for (auto dof_i: active_dofs_i)
+            {
+                int dof_j_index = 0;
+                for (auto dof_j: active_dofs_j)
+                {
+                    // std::cout << "i, j = " << i << ", " << j << " and their dofs are " << dof_i << ", " << dof_j << std::endl;
+                    stiffness_map.push_back({6*i+dof_i, 6*j+dof_j, nz_i_i + dof_i_index, nz_i_j+dof_j_index});
+                    ++dof_j_index;
+                }
+                ++dof_i_index;
+            }
+        ++j;
+        }
+    ++i;
+    }
+    std::cout << "Element " << id << " has " << std::size(stiffness_map) << " contributions, the stiffness map is:" << std::endl;
+    for (auto submap: stiffness_map)
+    {
+        print_container(submap);
+    }
+
+}
 void Basic2DBeamElement::calc_K_global() 
 {
     calc_T();
     calc_k();
-    mat k = orient.get_T().transpose() * shape_func.get_k() * orient.get_T();
+    mat k_glob = orient.get_T().transpose() * shape_func.get_k() * orient.get_T();
     K_global.clear();
     // we have the same number of contribution as stiffness components 
     // assuming all are non-zero!
-    K_global.reserve(k.rows() * k.cols());
-    std::cout << "Element " << id << " has stiffness matrix:" << std::endl;
-    std::cout << shape_func.get_k() << std::endl;
-    create_dof_map();
-    
-    // std::vector<int> dof_map = shape_func.get_dof_map();
-    std::vector<int> dof_map = global_dof_map;
-    // dof_map.insert(dof_map.end(), dof_map.begin(), dof_map.end());
-    // we will first get the contribution of each node
-    std::vector<int> force_in_i = dof_map;
-    std::vector<int> disp_in_j = dof_map;
-    int count = 1;
-    int node_i_index = 0;
-
-    for (auto node_i: nodes) {
-        std::set<int> node_i_active_dofs = node_i->get_active_dofs();
-        int node_i_id = node_i->get_id();
-        int node_i_nz_i = node_i -> get_nz_i();
-        
-        int node_j_index = 0;
-        for (auto node_j: nodes) {
-            std::set<int> node_j_active_dofs = node_j->get_active_dofs();
-            int node_j_id = node_j->get_id();
-            int node_j_nz_i = node_j -> get_nz_i();
-            std::cout << "Element " << id << ", nodes " << node_i_id << ", " << node_j_id << std::endl;
-            for (int i = node_i_index*ndofs; i < (node_i_index + 1)*ndofs; ++i)
-            {
-                for (int j = node_j_index*ndofs; j < (node_j_index + 1)*ndofs; ++j)
-                {
-                    // -------------------------------------------------------
-                    // remove this after making sure assembly is correct
-                    // std::cout << "i, j = " << i << ", " << j << std::endl;
-                    // std::cout << "node " << node_i_id << " active dofs = ";
-                    // print_container(node_i_active_dofs);
-                    // std::cout << "node " << node_j_id << " active dofs = ";
-                    // print_container(node_j_active_dofs);
-                    // -------------------------------------------------------
-                    if (force_in_i[i] >= 0 && disp_in_j[j] >= 0)
-                    {
-                    auto val = k(i,j);
-                    int global_row = force_in_i[i] + node_i_nz_i;
-                    int global_col = disp_in_j[j] + node_j_nz_i;
-                    std::cout << count << ". ";
-                    std::cout << "Added k(" << i << ", " << j << ") = " << val;
-                    std::cout << " to (" << global_row << ", " << global_col << ")" << std::endl;
-                    K_global.push_back(spnz(global_row, global_col, val));
-                    }
-                    ++count;   
-                }
-            }
-        ++node_j_index;
-        }
-    ++node_i_index;
+    K_global.reserve(k_glob.rows() * k_glob.cols());
+    for (auto kmap: stiffness_map)
+    {
+        real val = k_glob(kmap[0], kmap[1]);
+        K_global.push_back(spnz(kmap[2], kmap[3], val));
     }
-    std::cout << std::endl << std::endl;
 }
 
 void Basic2DBeamElement::create_dof_map()

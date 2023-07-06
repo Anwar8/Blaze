@@ -12,8 +12,9 @@ int main () {
     glob_mesh.setup_mesh("mesh/test.msh");
     glob_mesh.count_dofs();
     int nelems = glob_mesh.get_num_elems();
+    int nnodes = nelems + 1;
     glob_mesh.fix_node(1, -1);
-    for (int i = 2; i <= nelems; ++i)
+    for (int i = 2; i <= nnodes; ++i)
     {
         glob_mesh.fix_node(i, 1);
         glob_mesh.fix_node(i, 3);
