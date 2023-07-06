@@ -11,9 +11,9 @@ using realx2 = long double;
 #ifdef EIGEN
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-using coords = Eigen::Vector3d;
-using vec = Eigen::VectorXd;
-using mat = Eigen::MatrixXd;
+using coords = Eigen::Matrix<real, 3, 1>;
+using vec = Eigen::Matrix<real, Eigen::Dynamic, 1>;
+using mat = Eigen::Matrix<real, Eigen::Dynamic, Eigen::Dynamic>;
 
 // sparse non-zero element: val, row, col
 using spnz = Eigen::Triplet<real>;
