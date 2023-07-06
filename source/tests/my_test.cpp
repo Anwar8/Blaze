@@ -83,9 +83,7 @@ TEST_F(BasicTransformationTest, CheckOffsetUp) {
 
   mat T = my_beam.get_T();
   EXPECT_NEAR(T(0,5), 0.5, TOLERANCE);
-  EXPECT_NEAR(T(1,5), 0.0, TOLERANCE);
   EXPECT_NEAR(T(3,11), 0.5, TOLERANCE);
-  EXPECT_NEAR(T(4,11), 0.0, TOLERANCE);
 }
 
 TEST_F(BasicTransformationTest, CheckOffsetDown) {
@@ -93,9 +91,8 @@ TEST_F(BasicTransformationTest, CheckOffsetDown) {
 
   mat T = my_beam.get_T();
   EXPECT_NEAR(T(0,5), -0.5, TOLERANCE);
-  EXPECT_NEAR(T(1,5), 0.0, TOLERANCE);
   EXPECT_NEAR(T(3,11), -0.5, TOLERANCE);
-  EXPECT_NEAR(T(4,11), 0.0, TOLERANCE);
+  
 }
 
 TEST_F(BasicTransformationTest, CheckTransformedStiffnessSize) {

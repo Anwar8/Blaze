@@ -64,17 +64,15 @@ class BasicOrientation {
             real s = std::sin(alpha);
             T(0,0) = c;
             T(0,2) = s;
-            T(0,5) = c*offset;
+            T(0,5) = offset;
             T(1,0) = -s;
             T(1,2) = c;
-            T(1,5) = -s*offset;
             T(2,5) = 1;
             T(3,6) = c;
             T(3,8) = s;
-            T(3,11) = c*offset;
+            T(3,11) = offset;
             T(4,6) = -s;
             T(4,8) = c;
-            T(4,11) = -s*offset;
             T(5,11) = 1;
         }
         mat get_T() {return T;}

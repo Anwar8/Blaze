@@ -3,4 +3,5 @@
 xblaze
 test_xblaze
 mesh/mesh
+mesh/test.msh
 mesh/mesh_analysis
