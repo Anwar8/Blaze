@@ -2,7 +2,7 @@
 Requirements for the XBlaze project
 
 ## Summary
-XBlaze is an extended finite element (XFE) program developed specifically for structures in fire. It is explicitly designed from the ground up for scalability on high performance computing (HPC) facilities. The codebase is written in C++ and provides an interface for user customisation.
+XBlaze is a finite element method (FEM) program developed specifically for structures in fire. It is explicitly designed from the ground up for scalability on high performance computing (HPC) facilities. The codebase is written in C++ and provides an interface for user customisation.
 
 ## Requirements
 ### Must have
@@ -59,10 +59,18 @@ XBlaze is an extended finite element (XFE) program developed specifically for st
 - [Calculix](http://www.dhondt.de/) uses [PreProMax](https://prepomax.fs.um.si/), which is an open source pre and post processor. From looking around the internet it may be that this program was not really made for HPC.
 
 ## TO DO
-- [x] Create a subtype (possibly templated) inheriting from `std::vector`. This subtype is for storing nodes and elements. It combines the abilities of a vector and a sorted map. The sorted map functionality is pretty bare only concerned with finding a node or an element with a specific id. It does this by simply sorting the vector by the ids and then using the index. before returning the member, it checks that the id indeed matches. If the id is higher or lower, it uses the difference to find it. if it's not found it raises an error. 
+- [x] ~~Create a subtype (possibly templated) inheriting from `std::vector`. This subtype is for storing nodes and elements. It combines the abilities of a vector and a sorted map. The sorted map functionality is pretty bare only concerned with finding a node or an element with a specific id. It does this by simply sorting the vector by the ids and then using the index. before returning the member, it checks that the id indeed matches. If the id is higher or lower, it uses the difference to find it. if it's not found it raises an error.~~ 
     - Apprently, inheriting from `std::vector` is a (bad idea)[https://stackoverflow.com/questions/16812606/adding-custom-methods-to-stdvector-or-typdef]. In stead, it is best to simply write a function to perform the functionality that I need. This may make it easier to write a function that works for both vectors of elements or vectors of nodes.
 - [x] Each node keeps a set of unique element IDs of those elements to which it belongs. Each node also has 6 DoFs **by the definition: everything is 3D, and DoFs have a strict ordering**. Each element keeps a vector or an array containing numbers that map its stiffness matrix to these DoFs. For example, the `Basic2DBeam` would have a DoF array of `{0, 2, 5}` which corresponds to its freedoms of $U_x$, $U_y$, and $\theta_z$. This DoF array helps in assembling the global stiffness matrix. ~~For assembly, we loop over all the nodes, and for each node we retrieve the stiffness components for the elements connected to them, and place them in the right place in the global stiffness matrix. This allows us to more efficiently fill up the global stiffness matrix as we are filling the global matrix progressively. This is different from if we were assembling the matrix by looping over the elements. In that case, we would be filling bits and pieces of the global matrix everywhere.~~
-- [ ] Use test-lead development to build and correct the assembler.
+- [x] ~~Use test-lead development to~~ build and correct the assembler.
 - [x] Update the Transformation matrix to account for DoFs that are required at the node but not included in the element stiffness.
-- [ ] Update transformation matrix to consider offset by utilising translation matrix multiplied with the rotation matrix to correspond to offset.
-- [ ] Consider the following: add a list of the indices for where the DoFs of each element goes. That is, each element is given a map for where its local stiffnesses need to go in the begining of the analysis. If, for example, we have a constraint that forces the DoFs of a node to be reflected in the DoFs of a nother node, then this is reflected in this original map that is not needed to be updated too often or at all. This would allow us to tell where each local stiffness goes in the global matrix in a much simpler way.
+- [x] Update transformation matrix to consider offset by utilising translation matrix multiplied with the rotation matrix to correspond to offset.
+- [x] Consider the following: add a list of the indices for where the DoFs of each element goes. That is, each element is given a map for where its local stiffnesses need to go in the begining of the analysis. If, for example, we have a constraint that forces the DoFs of a node to be reflected in the DoFs of a nother node, then this is reflected in this original map that is not needed to be updated too often or at all. This would allow us to tell where each local stiffness goes in the global matrix in a much simpler way.
+- [ ] The assembler should be separated from the `GlobalMesh` object.
+- [ ] The assembler should have a way to map nodes to the load and displacement vectors.
+- [ ] The assembler should fill the load vector based on nodal loads.
+- [ ] Nodes should have a container for reaction forces and for nodal dispalcements. After each successful analysis step, nodal displacements are updated by the assembler which maps the nodal displacement vector back to the nodes.
+- [ ] The solution procedure should include calculating the element internal forces and strains, and each element should have these saved.
+- [ ] Add functionality to add nodal load.
+- [ ] Fixing a node adds it to a `std::vector` that corresponds to fixed nodes. After each successful analysis step, these nodes calculate their reaction forces. All nodes that do not have a constraint just have reaction forces of zero.
+- [ ] Add loggers to retrieve and log certain displacements or reaction forces from the nodes, and internal forces/stresses/strains of elements.
