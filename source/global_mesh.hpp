@@ -5,9 +5,9 @@
 #include<Eigen/SparseLU>
 #include<Eigen/SparseCholesky>
 #include "gmsh.h"
-#include "../maths_defaults.hpp"
-#include "../node.hpp"
-#include "../beam_element.hpp"
+#include "maths_defaults.hpp"
+#include "node.hpp"
+#include "beam_element.hpp"
 
 using gmsh_node_map = std::vector<std::pair<size_t, coords>>;
 using gmsh_elem_map = std::vector<std::pair<size_t, std::vector<size_t>>>;

@@ -3,7 +3,7 @@
 #include <memory>
 #include "node.hpp"
 #include "beam_element.hpp"
-#include "mesh/global_mesh.hpp"
+#include "global_mesh.hpp"
 
 int main () {
     GlobalCoords global_sys;

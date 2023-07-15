@@ -25,7 +25,7 @@ $(TEST_TARGET) : $(TEST_SRCS) $(filter-out main.cpp, $(SRCS))
 %.o: %.cpp %.hpp	
 	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) $(MESH_FLAGS) -c -o $@ $< $(LDLIBS)
 
-global_mesh.o: mesh/global_mesh.cpp mesh/global_mesh.hpp
+global_mesh.o: global_mesh.cpp global_mesh.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) $(MESH_FLAGS) -c -o $@ $<
 
 ## clean       : removes all object files and executables for both TARGET and TEST_TARGET.
