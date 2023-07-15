@@ -2,12 +2,12 @@
 #include <string>
 #include "global_mesh.hpp"
 
-void global_mesh::open_mesh_file(std::string const mesh_file) {
+void GlobalMesh::open_mesh_file(std::string const mesh_file) {
     gmsh::initialize();
     gmsh::open(mesh_file);
 }
 
-gmsh_node_map global_mesh::read_nodes() {
+gmsh_node_map GlobalMesh::read_nodes() {
     std::vector<double> coord_vec;
     std::vector<double> parametricCoords;
     std::vector<std::size_t> nodeTags;
@@ -26,7 +26,7 @@ gmsh_node_map global_mesh::read_nodes() {
     return node_map;
 }
 
-gmsh_elem_map global_mesh::read_elements()
+gmsh_elem_map GlobalMesh::read_elements()
 {
     gmsh_elem_map elem_map;
 
@@ -70,7 +70,7 @@ gmsh_elem_map global_mesh::read_elements()
     }
     return elem_map;
 }
-void global_mesh::make_elements (gmsh_elem_map elem_map) {
+void GlobalMesh::make_elements (gmsh_elem_map elem_map) {
     std::vector<std::shared_ptr<Node>> elem_nodes;
     elem_nodes.reserve(2);
     for (auto element_data : elem_map)
@@ -86,19 +86,19 @@ void global_mesh::make_elements (gmsh_elem_map elem_map) {
         elem_vector.push_back(std::make_shared<Basic2DBeamElement>(element_data.first, elem_nodes));
     }   
 }
-void global_mesh::make_nodes (gmsh_node_map node_map) {
+void GlobalMesh::make_nodes (gmsh_node_map node_map) {
     for (auto node_data : node_map)
     {
         node_vector.push_back(std::make_shared<Node>(node_data.first, node_data.second));
     }
 }
 
-void global_mesh::close_mesh_file()
+void GlobalMesh::close_mesh_file()
 {
     gmsh::finalize();
 }
 
-void global_mesh::setup_mesh(std::string const mesh_file) 
+void GlobalMesh::setup_mesh(std::string const mesh_file) 
 {
     open_mesh_file(mesh_file);
     gmsh_node_map node_map = read_nodes();
@@ -114,7 +114,7 @@ void global_mesh::setup_mesh(std::string const mesh_file)
     close_mesh_file();
 }
 
-void global_mesh::print_info()
+void GlobalMesh::print_info()
 {
     std::cout << "Mesh contains " << nelems << " elements and " << nnodes << " nodes." << std::endl;
     for (auto node: node_vector)
@@ -129,7 +129,7 @@ void global_mesh::print_info()
 
 
 
-void global_mesh::count_dofs() 
+void GlobalMesh::count_dofs() 
 {
     ndofs = 0;
     std::cout << "WARNING: count_dofs assumes nodes are ordered by id" << std::endl;
@@ -142,7 +142,7 @@ void global_mesh::count_dofs()
     std::cout << "There are " << ndofs << " active DoFs in the mesh." << std::endl;
 }
 
-void global_mesh::fix_node(int id, int dof) {
+void GlobalMesh::fix_node(int id, int dof) {
     auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
     if (dof < 0)
     {
@@ -154,28 +154,29 @@ void global_mesh::fix_node(int id, int dof) {
     }
 }
 
-void global_mesh::assemble_global_contributions() 
-{
-    std::vector<spnz> K_global;
-    std::vector<spnz> K_global_elem;
-    // this reservation is not accurate nor good...
-    K_global.reserve(nelems*ndofs);
-    for (auto elem: elem_vector)
-    {   
-        K_global_elem = elem->get_K_global();
-        K_global.insert(K_global.end(), K_global_elem.begin(), K_global_elem.end());
-    }
-    K = make_spd_mat(ndofs, ndofs);
-    P = make_spd_vec(ndofs);
-    U = make_xd_vec(ndofs);
-    std::cout << "There are " << std::size(K_global) << " contributions to add up." << std::endl;
-    std::cout << "The K_global is of size " << ndofs << "x" << ndofs << std::endl;
-    K.setFromTriplets(K_global.begin(), K_global.end());
-    K.makeCompressed();
-    std::cout << "Setting a force of -1e4 N on node in y direction." << std::endl;
-    P.insert(1) = -1e4;
-}
-void global_mesh::solve_for_U() {
+// void GlobalMesh::assemble_global_contributions() 
+// {
+//     std::vector<spnz> K_global;
+//     std::vector<spnz> K_global_elem;
+//     // TODO: this reservation is not accurate...fix it so it more closely
+//     // matches the number of contributions that are expected
+//     K_global.reserve(nelems*ndofs);
+//     for (auto elem: elem_vector)
+//     {   
+//         K_global_elem = elem->get_K_global();
+//         K_global.insert(K_global.end(), K_global_elem.begin(), K_global_elem.end());
+//     }
+//     K = make_spd_mat(ndofs, ndofs);
+//     P = make_spd_vec(ndofs);
+//     U = make_xd_vec(ndofs);
+//     std::cout << "There are " << std::size(K_global) << " contributions to add up." << std::endl;
+//     std::cout << "The K_global is of size " << ndofs << "x" << ndofs << std::endl;
+//     K.setFromTriplets(K_global.begin(), K_global.end());
+//     K.makeCompressed();
+//     std::cout << "Setting a force of -1e4 N on node in y direction." << std::endl;
+//     P.insert(1) = -1e4;
+// }
+void GlobalMesh::solve_for_U() {
     Eigen::SparseLU<spmat> solver;
     // Compute the ordering permutation vector from the structural pattern of A
     solver.analyzePattern(K); 
@@ -198,7 +199,7 @@ void global_mesh::solve_for_U() {
     std::cout << "The solution is:" << std::endl << U << std::endl;
 }
 
-// BROKEN!!!
+// TODO: Fix BROKEN analyser
 bool has_zero_row(spmat A) {
     int n = A.outerSize();
     // int* nnz = A.innerNonZeroPtr();
@@ -213,4 +214,52 @@ bool has_zero_row(spmat A) {
 
 bool check_matrix(spmat A) {
     return has_zero_row(A);
+}
+
+void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh) 
+{
+    std::vector<spnz> K_global;
+    std::vector<spnz> K_global_elem;
+    // TODO: this reservation is not accurate...fix it so it more closely
+    // matches the number of contributions that are expected
+    K_global.reserve(glob_mesh.nelems*glob_mesh.ndofs);
+    for (auto elem: glob_mesh.elem_vector)
+    {   
+        K_global_elem = elem->get_K_global();
+        K_global.insert(K_global.end(), K_global_elem.begin(), K_global_elem.end());
+    }
+    K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
+    P = make_spd_vec(glob_mesh.ndofs);
+    // TODO: Decide whether U is sparse or dense
+    // U = make_xd_vec(glob_mesh.ndofs);
+    U = make_spd_vec(glob_mesh.ndofs);
+    std::cout << "There are " << std::size(K_global) << " contributions to add up." << std::endl;
+    std::cout << "The K_global is of size " << glob_mesh.ndofs << "x" << glob_mesh.ndofs << std::endl;
+    K.setFromTriplets(K_global.begin(), K_global.end());
+    K.makeCompressed();
+    std::cout << "Setting a force of -1e4 N on node in y direction." << std::endl;
+    P.insert(1) = -1e4;
+}
+
+void BasicSolver::solve_for_U(Assembler& assembler) {
+    Eigen::SparseLU<spmat> solver;
+    // Compute the ordering permutation vector from the structural pattern of A
+    solver.analyzePattern(assembler.K); 
+    // Compute the numerical factorization 
+    solver.factorize(assembler.K); 
+    //Use the factors to solve the linear system 
+    
+    if (solver.info() == Eigen::Success)
+    {
+        std::cout << "Factorisation successfull." << std::endl;
+    } else {
+        std::cout << "ERROR: Factorisation unsuccessfull! Matrix is:" << std::endl;
+        // convert to dense matrix to print correctly
+        std::cout << Eigen::MatrixXd(assembler.K) << std::endl;
+
+        
+        std::exit(1);
+    }
+    assembler.U = solver.solve(assembler.P); 
+    std::cout << "The solution is:" << std::endl << assembler.U << std::endl;
 }

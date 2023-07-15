@@ -2,6 +2,6 @@
 *.o
 xblaze
 test_xblaze
-mesh/mesh
-mesh/test.msh
-mesh/mesh_analysis
+source/mesh/mesh
+source/mesh/test.msh
+source/mesh/mesh_analysis

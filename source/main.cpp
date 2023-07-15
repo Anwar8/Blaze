@@ -6,9 +6,10 @@
 #include "global_mesh.hpp"
 
 int main () {
-    GlobalCoords global_sys;
+    GlobalMesh glob_mesh; 
+    Assembler assembler;
+    BasicSolver solver;
 
-    global_mesh glob_mesh; 
     glob_mesh.setup_mesh("mesh/test.msh");
     glob_mesh.count_dofs();
     int nelems = glob_mesh.get_num_elems();
@@ -22,6 +23,6 @@ int main () {
     }
     glob_mesh.count_dofs();
     glob_mesh.calc_global_contributions();
-    glob_mesh.assemble_global_contributions();
-    glob_mesh.solve_for_U();
+    assembler.assemble_global_contributions(glob_mesh);
+    solver.solve_for_U(assembler);
 }

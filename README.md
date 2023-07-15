@@ -57,7 +57,8 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 - FEniCS has an entire [book](https://launchpadlibrarian.net/83776282/fenics-book-2011-10-27-final.pdf). This book also includes information about what algorithms are used, and how they implemented in parallel.
 - Code Aster appears to be less well developed and maintained than the other two, but has been [used for structures in fire](https://www.code-aster.de/project-cases/project-cases-detail/analysis-of-steel-reinforced-concrete-exposed-to-fire-mfpa-leipzig-gmbh-copy.html). The website has much more of a commercial bend to it with the product being seminars and tutorials.
 - [Calculix](http://www.dhondt.de/) uses [PreProMax](https://prepomax.fs.um.si/), which is an open source pre and post processor. From looking around the internet it may be that this program was not really made for HPC.
-
+## Some tips
+- You need to specify the friends of class A in class A, so that the friend class can access class A members. "John is my friend and what's mine is his" vs. ~~"I am friends with Alex so I will access his stuff!"~~
 ## TO DO
 - [x] ~~Create a subtype (possibly templated) inheriting from `std::vector`. This subtype is for storing nodes and elements. It combines the abilities of a vector and a sorted map. The sorted map functionality is pretty bare only concerned with finding a node or an element with a specific id. It does this by simply sorting the vector by the ids and then using the index. before returning the member, it checks that the id indeed matches. If the id is higher or lower, it uses the difference to find it. if it's not found it raises an error.~~ 
     - Apprently, inheriting from `std::vector` is a (bad idea)[https://stackoverflow.com/questions/16812606/adding-custom-methods-to-stdvector-or-typdef]. In stead, it is best to simply write a function to perform the functionality that I need. This may make it easier to write a function that works for both vectors of elements or vectors of nodes.
@@ -66,11 +67,14 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 - [x] Update the Transformation matrix to account for DoFs that are required at the node but not included in the element stiffness.
 - [x] Update transformation matrix to consider offset by utilising translation matrix multiplied with the rotation matrix to correspond to offset.
 - [x] Consider the following: add a list of the indices for where the DoFs of each element goes. That is, each element is given a map for where its local stiffnesses need to go in the begining of the analysis. If, for example, we have a constraint that forces the DoFs of a node to be reflected in the DoFs of a nother node, then this is reflected in this original map that is not needed to be updated too often or at all. This would allow us to tell where each local stiffness goes in the global matrix in a much simpler way.
-- [ ] The assembler should be separated from the `GlobalMesh` object.
-- [ ] The assembler should have a way to map nodes to the load and displacement vectors.
-- [ ] The assembler should fill the load vector based on nodal loads.
-- [ ] Nodes should have a container for reaction forces and for nodal dispalcements. After each successful analysis step, nodal displacements are updated by the assembler which maps the nodal displacement vector back to the nodes.
-- [ ] The solution procedure should include calculating the element internal forces and strains, and each element should have these saved.
+- [x] The `Assembler` should be separated from the `GlobalMesh`.
+- [x] The `BasicSolver` should be separated from the `GlobalMesh`.
+- [ ] The assembler should have a way to map nodes to the load and displacement vectors. Perhaps using `std::map`?
+- [ ] Nodes should have a container for loads, reaction forces, and for nodal dispalcements. 
 - [ ] Add functionality to add nodal load.
-- [ ] Fixing a node adds it to a `std::vector` that corresponds to fixed nodes. After each successful analysis step, these nodes calculate their reaction forces. All nodes that do not have a constraint just have reaction forces of zero.
+- [ ] The command to load a node adds the loaded node to a `std::set` of loaded nodes so each time we want to map the loaded nodes, we only need to loop over the loaded nodes.
+- [ ] The assembler should fill the load vector based on nodal loads.
+- [ ] After each successful analysis step, nodal displacements are updated by the assembler which maps the nodal displacement vector back to the nodes.
+- [ ] The solution procedure should include calculating the element internal forces and strains, and each element should have these saved.
+- [ ] Fixing a node adds it to a `std::set` that corresponds to fixed nodes. After each successful analysis step, these nodes calculate their reaction forces. All nodes that do not have a constraint just have reaction forces of zero.
 - [ ] Add loggers to retrieve and log certain displacements or reaction forces from the nodes, and internal forces/stresses/strains of elements.

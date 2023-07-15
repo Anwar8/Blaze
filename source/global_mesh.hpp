@@ -12,7 +12,9 @@
 using gmsh_node_map = std::vector<std::pair<size_t, coords>>;
 using gmsh_elem_map = std::vector<std::pair<size_t, std::vector<size_t>>>;
 
-class global_mesh {
+
+
+class GlobalMesh {
     private: 
         int nnodes = 0;
         int ndofs = 0;
@@ -25,6 +27,7 @@ class global_mesh {
         vec U; 
 
     public:
+        friend class Assembler;
         void open_mesh_file(std::string const mesh_file);
         gmsh_node_map read_nodes();
         gmsh_elem_map read_elements();
@@ -43,7 +46,6 @@ class global_mesh {
                 elem->calc_K_global();
             }
         }
-        void assemble_global_contributions();
         void solve_for_U();
         int const get_num_elems() const {return nelems;}
 };
@@ -82,6 +84,23 @@ Iterator get_id_iterator(int id, Container& a_vec)
     }
     
 }
+
+class Assembler {
+    private:
+        spmat K;
+        spvec P;
+        // TODO: Figure out if U should be sparse or dense!
+        // vec U;
+        spvec U;
+    public:
+        friend class BasicSolver;
+        void assemble_global_contributions(GlobalMesh& glob_mesh);
+
+
+};
+class BasicSolver {
+    public:
+        void solve_for_U(Assembler& assembler);
+};
 bool check_matrix(spmat A);
 bool has_zero_row(spmat A);
-
