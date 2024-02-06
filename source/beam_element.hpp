@@ -7,8 +7,15 @@
 #include "maths_defaults.hpp"
 #include "node.hpp"
 
+/**
+ * @brief basic cross-section containing geometry and material information and functions to get E, A, and I
+ * 
+ * @details This class currently only creates an elastic section with the equivalent properties of a 457 x 191 x 98
+ * I-section made from steel. 
+ */
+
+// 457 x 191 x 98
 class BasicSection {
-    // 457 x 191 x 98
     private:
         real E = 2.06e11; // Pa
         real A = 0.0125; // m^2
@@ -19,6 +26,15 @@ class BasicSection {
         real get_I() {return I;}
 };
 
+/**
+ * @brief shape function class that contains the local stiffness, freedoms, derivative, and order of DoFs
+ * 
+ * @details the shape function class is used to calculate the values of the shape function related matrices
+ * for each row columns of the N and B. This requires knowing where along the element these values will be
+ * calculated and how long the element is. Given section properties, this class will also calculate local
+ * stiffness. Currently, this is done assuming an elastic non-changing local stiffness matrix.
+ * 
+ */
 class BasicShapeFunction {
     private:
         mat k = make_xd_mat(6,6);
@@ -30,6 +46,7 @@ class BasicShapeFunction {
         mat const get_N() const {return N;}
         mat const get_B() const {return B;}
         std::vector<int> const get_dof_map() const {return dof_map;}
+        /
         void calc_N(real x, real L);
         void calc_B(real x, real L);
         void calc_k(real L, BasicSection& sec);
