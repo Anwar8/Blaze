@@ -52,14 +52,33 @@ class BasicShapeFunction {
         void calc_k(real L, BasicSection& sec);
 };
 
+/**
+ * @brief 
+ * 
+ * creates transform matrices to shift and rotate elements
+ * 
+ * @details
+ * 
+ * calculates the local axis of a beam-column element, and then creates a transform
+ * matrix T that will be used to transform the stiffness matrix.
+ * 
+ */
+
 class BasicOrientation {
     private:
-        coords local_x;
-        real length;
-        mat T = make_xd_mat(6,12);
-        real alpha = 0.0;
-        real offset = 0.0;
+        coords local_x; /**< the x, y, z unit vectors for the beam element local x axis. */
+        real length; /**< length of the beam-column element. */
+        mat T = make_xd_mat(6,12); /**< The 6x12 T transformation matrix. */
+        real alpha = 0.0; /**< angle between local and global coordinate systems. */
+        real offset = 0.0; /**< offset of centroid along y axis. */
     public:
+        /**
+         * @brief sets offset and calculates length, local_x axis, alpha, and T matrix
+         * 
+         * @param nodes a size 2 array of shared ptr to the element nodes
+         * @param sec_offset the offset value for the section
+         * @param origin_x the global coord system x-axis unit vector
+         */
         void evaluate(std::array<std::shared_ptr<Node>, 2> const & nodes, real sec_offset, coords const & origin_x)
         {
             offset = sec_offset;
@@ -67,15 +86,38 @@ class BasicOrientation {
             calc_alpha(origin_x);
             calc_T();
         }
+        /**
+         * @brief calculates beam length and local_x components
+         * 
+         * @param nodes a size 2 array of shared ptr to the element nodes
+         */
         void calc_length_local_x(std::array<std::shared_ptr<Node>, 2> const &  nodes) {
             local_x = (nodes[1]->get_coords() - nodes[0]->get_coords());
             length = local_x.norm();
             local_x /= length;
         }
+        /**
+         * @brief calcualte the angle between the local and global x axes
+         * 
+         * @details
+         * The calculation is based on:
+         * \f$ A\dot B = \abs{A}\abs{B}\cos{\theta}\f$
+         * and then:
+         * \f$ \theta = \arccos{\frac{A\dot B}{\abs{A}\abs{B}}} \f$
+         * 
+         * @param origin_x the global coord system x-axis unit vector
+         */
         void calc_alpha(coords const& origin_x) {
-            // calcualte the angle between the local and global x axes
            alpha = std::acos(origin_x.dot(local_x));
         }
+        /**
+         * @brief 
+         * creates the T matrix
+         * 
+         * @details
+         * the T matrix created is a 6x12 matrix with members only in the first
+         * 6 rows. No idea why this matrix is not square.
+         */
         void calc_T() {
             real c = std::cos(alpha);
             real s = std::sin(alpha);
@@ -95,33 +137,106 @@ class BasicOrientation {
         mat get_T() {return T;}
 };
 
+/**
+ * @brief a 2D beam element with 6 total freedoms: 1 rotation and two displacements
+ * 
+ * @details
+ * This beam-column element has fewer freedoms than required in a 3D domain, and so the
+ * transformation matrix T must map the element from 6 freedoms to the required 12 in 3D
+ * domains.
+ * 
+ */
 class Basic2DBeamElement {
     private:
-        unsigned id = 0;
-        std::string const elem_type = "beam-column";
-        int const ndofs = 3;
-        int const nnodes = 2;
-        std::array<std::shared_ptr<Node>, 2> nodes;
+        unsigned id = 0; /**< unique identifier for the element.*/
+        std::string const elem_type = "beam-column"; /**< string that represents the type of the element.*/
+        int const ndofs = 3; /**< number of freedoms at each node.*/
+        int const nnodes = 2; /**< number of nodes.*/
+        std::array<std::shared_ptr<Node>, 2> nodes; /**< an array of size 2 that holds the shared ptrs to the nodes.*/
         
-        std::vector<int> global_dof_map;
-        std::vector<std::array<int,4>> stiffness_map;
+        std::vector<int> global_dof_map; /**< FORGOT - appears to have been deprecated.*/
 
-        BasicSection section;
-        BasicShapeFunction shape_func;
-        BasicOrientation orient;
-        real length = 0.0;
 
-        vec local_d = make_xd_vec(6);
-        vec local_f = make_xd_vec(6);
-        vec local_eps = make_xd_vec(2);
+        /**
+         * @brief maps local stiffness contributions to their global positions in the stiffness matrix
+         * 
+         * @details a vector of std array of size 4. the first two indices of the array refer to the
+         * transformed local stiffness matrix indices, and the last two refer to the indices where that
+         * local stiffness would go in the global stiffness matrix. The size of the std vector is dependent on the
+         * number of nodes and which DOFs are active/not fixed. See \ref map_stiffness for details.
+         */
+        std::vector<std::array<int,4>> stiffness_map; 
 
-        std::vector<spnz> K_global;
+        BasicSection section; /**< the section for the beam-column element.*/
+        BasicShapeFunction shape_func; /**< the shape function for the beam-column element.*/
+        BasicOrientation orient; /**< the orientation object for the beam-column element.*/
+        real length = 0.0; /**< the length for the beam-column element - to be calculated by the orientation object.*/
+
+        vec local_d = make_xd_vec(6); /**< local displacements for all freedoms.*/
+        vec local_f = make_xd_vec(6); /**< local forces corresponding to all freedoms.*/
+        vec local_eps = make_xd_vec(2); /**< local strains corresponding to all freedoms.*/
+
+        std::vector<spnz> K_global; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
 
     public:
+        /**
+         * @brief Construct a new Basic 2D Beam Element object (Default)
+         * 
+         * @details Kept, most likely, for copying...otherwise, I don't see how this is
+         * going to work. Probably need to create a copy constructor as there are some
+         * fishy pointer stuff going on
+         * 
+         * @todo deprecate this constructor
+         */
         Basic2DBeamElement();
+
+        /**
+         * @brief Construct a new Basic 2D Beam Element object when given two nodes, and calculate its length
+         * 
+         * @details
+         * Definitely needs to be deprecated as it simply passes the default element id
+         * which is 0 (or unintialized) to the nodes
+         * 
+         * @todo deprecate this constructor
+         * 
+         * @param node_1 a shared ptr referencing the first node
+         * @param node_2 a shared ptr referencing the second node
+         */
         Basic2DBeamElement(std::shared_ptr<Node>& node_1, std::shared_ptr<Node>& node_2);
+
+        /**
+         * @brief Construct a new Basic 2D Beam Element object when given two nodes and an id, and calculate its length
+         * 
+         * @details 
+         * Nodes are given the ids of the elements connected to them to facilitate node deletion
+         * in future. Right now, this is just creating extra mess.
+         * 
+         * @param id unique identifier for the element; will be passed to the nodes
+         * @param node_1 a shared ptr referencing the first node
+         * @param node_2 a shared ptr referencing the second node
+         */
         Basic2DBeamElement(int id, std::shared_ptr<Node>& node_1, std::shared_ptr<Node>& node_2);
+        /**
+         * @brief Construct a new Basic 2D Beam Element object from a vector of nodes and an id, and calculate its length
+         * 
+         * @details 
+         * Actually easier to use as we don't have to give it two nodes and instead can easily give
+         * a container of nodes. Will check number of nodes is \ref nnodes to match the element requirements.
+         * 
+         * @todo    deprecate in favour of template that accepts any container type
+         * 
+         * @param given_id unique identifier for the element; will be passed to the nodes
+         * @param in_nodes a std vector of shared pointers to node objects
+         */
         Basic2DBeamElement(int given_id, std::vector<std::shared_ptr<Node>>& in_nodes);
+        
+        /**
+         * @brief Construct a new Basic 2D Beam Element object and calculate its length
+         * 
+         * @tparam Container any type of std container that has a std::size and built-in iterators
+         * @param given_id unique identifier for the element; will be passed to the nodes
+         * @param in_nodes a container of shared pointers to node objects
+         */
         template<typename Container>
         Basic2DBeamElement(int given_id, Container& in_nodes) {
             if (std::size(in_nodes) != nnodes)
@@ -146,11 +261,46 @@ class Basic2DBeamElement {
         void calc_k();
         void calc_T(real sec_offset = 0.0, coords origin_x = {1.0, 0.0, 0.0});
         void calc_eps();
+
+        /**
+         * @brief calculates the global stiffness contribution of the local element and populates K_global
+         * 
+         * @details first, the freedoms are mapped to the right size by pre- and post-multiplying by the T matrix
+         * After that, \ref stiffness_map is used to map where these contributions would go in the global stiffness
+         * matrix. So, this function will populate \ref K_global with sparse matrix notation
+         * 
+         */
         void calc_K_global();
 
+        /**
+         * @brief populates \ref stiffness_map considering active and inactive DOFs for each node of the element
+         * 
+         * @details see function \ref calc_K_global, and variables \ref stiffness_map, and \ref K_global. 
+         * 
+         * @todo REALLY needs to be revisited. attempt to rewrite this function so it does the following:
+         *  1. gets all the contribution without worrying about active or not
+         *  2. if a contribution is inactive then that contribution is zeroed AND
+         *  3. zeroed contributions are not added to \ref K_global
+         * 
+         */
         void map_stiffness();
         
+        /**
+         * @brief populate \ref global_dof_map; appears deprecated.
+         * 
+         */
         void create_dof_map();
+
+        /**
+         * @brief a function to take care of correctly mapping only active DOFs; appears to have been deprecated.
+         * 
+         * @param elem_dofs 
+         * @param active_dofs 
+         * @return std::vector<int> 
+         */
+        std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs);
+        
+
         int get_ndofs() {return ndofs;}
         mat get_N() {return shape_func.get_N();}
         mat get_B() {return shape_func.get_B();}
@@ -198,5 +348,5 @@ class Basic2DBeamElement {
     }
 };
 
-std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs);
+
 #endif
