@@ -12,6 +12,7 @@
  * 
  * @details This class currently only creates an elastic section with the equivalent properties of a 457 x 191 x 98
  * I-section made from steel. 
+ * 
  */
 
 // 457 x 191 x 98
@@ -144,6 +145,10 @@ class BasicOrientation {
  * This beam-column element has fewer freedoms than required in a 3D domain, and so the
  * transformation matrix T must map the element from 6 freedoms to the required 12 in 3D
  * domains.
+ * 
+ * @todo 1. add functionality to apply distributed mechanical loading
+ *       2. add functionality to apply thermal gradient and uniform temperature
+ *       3. add functionality to apply non-uniform thermal loading interpolation (LOW PRIORITY)
  * 
  */
 class Basic2DBeamElement {
@@ -312,14 +317,25 @@ class Basic2DBeamElement {
         std::vector<spnz> get_K_global() {return K_global;}
 
         int const get_nth_node_id(int n) const;
-        
+        /**
+         * @brief moves the location of the nodes up, does NOT cause a transformation. 
+         * 
+         * @attention This is a setter function, nothing more!
+         * 
+         * @param up distance to move nodes by, which is done along the y-axis.
+         */
         void move_nodes_up(real up) {
             for (auto node: nodes) {
                 node->set_z(up);
             }
         }
         void set_d(vec new_disp) {local_d = new_disp;}
-
+    /**
+     * @brief Copy assignment - i need to learn a bit more to make sure this actually works.
+     * 
+     * @param other 
+     * @return Basic2DBeamElement& 
+     */
     Basic2DBeamElement(const Basic2DBeamElement& other) {
         id = other.id;
         nodes = other.nodes;
@@ -330,7 +346,12 @@ class Basic2DBeamElement {
         local_f = other.local_f;
         local_eps = other.local_eps;
     }
-    // Copy assignment - i need to learn a bit more...
+    /**
+     * @brief Copy assignment - i need to learn a bit more...
+     * 
+     * @param other 
+     * @return Basic2DBeamElement& 
+     */
     Basic2DBeamElement& operator=(const Basic2DBeamElement& other) {
         if (this != &other) {
             Basic2DBeamElement temp(other); // use copy constructor to create temporary object

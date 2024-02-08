@@ -5,7 +5,9 @@
 
 
 /**
- * @brief node data and functions including functionality to activate and deactivate DOFs.
+ * @brief node data and functions including functionality to activate and deactivate DoFs.
+ * 
+ * @todo Add functionality and interface to apply mechanical loading on nodes.
  * 
  */
 class Node {
@@ -19,20 +21,20 @@ class Node {
          * @todo should the nodal mass have x, y, and z components?
          */
         real mass;
-        int ndof = 6; /**< the number of DOFs - should be 6 unless some are deactivated.*/
+        int ndof = 6; /**< the number of DoFs - should be 6 unless some are deactivated.*/
         int nz_i = 0; /**< FORGOT - used in assembly.*/
         std::set<int> connected_elements; /**< of element ids that are connected to this node; expected to be useful for element and node deletion.*/
         std::set<int> active_dofs = {0, 1, 2, 3, 4, 5}; /**< set of active DOFs; all of them at first, then if deactivated moved to inactive_dofs.*/
-        std::set<int> inactive_dofs; /**< a std set of active DOFs; none at first, then if any are deactivated then they are moved from active_dofs*/
+        std::set<int> inactive_dofs; /**< a std set of active DoFs; none at first, then if any are deactivated then they are moved from active_dofs.*/
     public:
         /**
-         * @brief Construct a new Node object with 0 mass and 0 across coordinates
+         * @brief Construct a new Node object with 0 mass and 0 across coordinates.
          * 
          */
         Node();
 
         /**
-         * @brief Construct a new Node object with 0 mass and specified x, y, and z coordinates
+         * @brief Construct a new Node object with 0 mass and specified x, y, and z coordinates.
          * 
          * @attention uses the default id of 0; pretty pointless but useful during development and testing.
          * 
@@ -53,7 +55,7 @@ class Node {
         void print_info();
 
         /**
-         * @name setters_getters
+         * @name SettersGetters
          * @brief functions to set and get private class members.
          */
         //@{
@@ -94,11 +96,11 @@ class Node {
         void calc_ndof() {ndof = std::size(active_dofs);};
 
         /**
-         * @brief checks if a given DOF is valid within the problem domain which has 6 DOFs by default.
+         * @brief checks if a given DoF is valid within the problem domain which has 6 DoFs by default.
          * 
-         * @param dof  DOF to check.
-         * @return true if DOF is valid and is between 0 and 5.
-         * @return false if DOF is not a valid DOF (not between 0 and 5).
+         * @param dof  DoF to check.
+         * @return true if DoF is valid and is between 0 and 5.
+         * @return false if DoF is not a valid DoF (not between 0 and 5).
          */
         bool valid_dof(int dof) {return (dof >= 0 && dof < 6);}
         /**
@@ -121,7 +123,7 @@ class Node {
          * of std set would take care of not having repeats in \ref inactive_dofs 
          * and \ref active_dofs.
          * 
-         * @param dof degree of freedom to activate (free).
+         * @param dof degree of freedom to activate (to free).
          */
         void free_dof(int dof);
 
