@@ -4,6 +4,10 @@ Requirements for the XBlaze project
 ## Summary
 XBlaze is a finite element method (FEM) program developed specifically for structures in fire. It is explicitly designed from the ground up for scalability on high performance computing (HPC) facilities. The codebase is written in C++ and provides an interface for user customisation.
 
+## Journal
+#### 19 Feb 24
+ Need to figure out how to use Kokkos, and make sure that graders of project prep are able to see that I am doing that. Copied the Kokkos tutorials to the repo and tried to build the solution for exercise 01 but failed. Tutorials were prepared for a preconfigured system which I have to do for my own system. Building Kokkos with Spack, finding its directory with `spack find --paths`, and putting this directory as the Kokkos directory did not succeed as the `Makefile` for the exercises did not find `Makefile.kokkos`. Downloading Kokkos source and placing it in the directory indicated in the tutorial makefile did not succceed as running `make` for the tutorial results in the error message `g++-13: error: unrecognized command-line option '-mrtm'`. Maybe `gcc@13.2` has an issue with building Kokkos on my Mac? Trying to install `gcc@12.2` using Spack now, maybe that helps. Although I will always be working on my Mac to write code, perhaps I should be connecting to Cirrus and doing all my build work there rather than locally. Even if things work on my Mac, it does not mean it will work on Cirrus or Archer2 which are my target devices. Better email JP and get some advice. Perhaps working on Cirrus directly with remote connection from VSCode could be a good option.
+
 ## Requirements
 ### Must have
 - A geometrically nonlinear shell element - preferrably triangular (3 nodes) for flexibility in modelling

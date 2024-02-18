@@ -11,7 +11,7 @@ TEST_SRCS= my_test.cpp
 TEST_SRCS := $(addprefix $(TEST_DIR)/,$(TEST_SRCS))
 
 # Choose paths for libraries and frameworks based on where the code is being compiled
-ifeq ($(shell hostname), Mhds-Air)
+ifeq ($(shell hostname), Mhds-MacBook-Air.local)
 # include paths
 EIGEN_PATH= /opt/homebrew/Cellar/eigen/3.4.0_1/include/eigen3
 GMSH_PATH=/opt/homebrew/Cellar/gmsh/4.11.1_1
