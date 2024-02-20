@@ -4,7 +4,41 @@ Requirements for the XBlaze project
 ## Summary
 XBlaze is a finite element method (FEM) program developed specifically for structures in fire. It is explicitly designed from the ground up for scalability on high performance computing (HPC) facilities. The codebase is written in C++ and provides an interface for user customisation.
 
+## Project Schedule
+#### Week of 19 Feb
+- [x] Build Kokkos and Kokkos Exercises
+- [x] Request new Cirrus and Archer2 accounts
+- [x] Clone Blaze into Project Prep. Repo
+- [ ] Kokkos first exercise
+- [ ] Separate Blaze into more files
+- [ ] Blaze build with `CMake`
+#### Week of 26 Feb
+- [ ] Add geometric nonlinearity to Blaze (1/3)
+- [ ] Kokkos Lectures Module 2: Views and Spaces
+#### Week of 04 Mar
+- [ ] Add geometric nonlinearity to Blaze (2/3)
+- [ ] Kokkos Lectures Module 3: Data Structures + MultiDimensional Loops
+#### Week of 11 Mar
+- [ ] Add geometric nonlinearity to Blaze (3/3)
+- [ ] Kokkos Lectures Module 8: Kernels: Sparse and Dense Linear Algebra
+#### Week of 25 Mar
+- [ ] Add dynamic explicit solver to Blaze (1/2)
+#### Week of 01 Apr
+- [ ] Add dynamic explicit solver to Blaze (2/2)
+#### Week of 15 Apr
+- [ ] Report writing (1/2)
+#### Week of 22 Apr
+- [ ] Report writing (1/2)
+#### Report Deadline: Monday 29 Apr
+
+
 ## Journal
+#### 21 Feb 24
+Did the housekeeping tasks from yesterday:   
+  1) Request a new Cirrus **and Archer2** account**s** for PP and dissertation
+  2) Prepare a timeline for the work with the report hand-in date in mind.
+  3) Move everything to the repo made the Project Prep team
+   
 #### 20 Feb 24
 - Built Kokkos from scratch with cmake. Must make sure to use the `-S`, `-B`, and `-DCMAKE_INSTALL_PREFIX=` flags to get it to work properly. I can now confidently build Kokkos with the `CMake` file they provide with the repository.
 - For the exercises, you should download the entire tutorial repo, although as was discovered the `BuildScripts` don't work rendering the need to download everything moot. You will build all of Kokkos for each exercise. You will need to have Kokkos in `~/Kokkos/kokkos`, and you must modify the `Makefile` in the exercise `Solution` or `Begin` directories to mention your architecture (ARM vs BDW). The Makefile will import another much larger `Makefile.kokkos` from the Kokkos directory, and you need to modify some variables there too such as architecture (arm). I had to delete some lines that were causing an issue with my Mac M1 processor. If statements should have taken care of the problem lines but they did not. I set the architecture to `arm-v80` altough the Mac M1 is actually 8.5.
@@ -23,6 +57,11 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 
 #### 19 Feb 24
  Need to figure out how to use Kokkos, and make sure that graders of project prep are able to see that I am doing that. Copied the Kokkos tutorials to the repo and tried to build the solution for exercise 01 but failed. Tutorials were prepared for a preconfigured system which I have to do for my own system. Building Kokkos with Spack, finding its directory with `spack find --paths`, and putting this directory as the Kokkos directory did not succeed as the `Makefile` for the exercises did not find `Makefile.kokkos`. Downloading Kokkos source and placing it in the directory indicated in the tutorial makefile did not succceed as running `make` for the tutorial results in the error message `g++-13: error: unrecognized command-line option '-mrtm'`. Maybe `gcc@13.2` has an issue with building Kokkos on my Mac? Trying to install `gcc@12.2` using Spack now, maybe that helps. Although I will always be working on my Mac to write code, perhaps I should be connecting to Cirrus and doing all my build work there rather than locally. Even if things work on my Mac, it does not mean it will work on Cirrus or Archer2 which are my target devices. Better email JP and get some advice. Perhaps working on Cirrus directly with remote connection from VSCode could be a good option.
+
+
+
+
+
 
 ## Requirements
 ### Must have
