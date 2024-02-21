@@ -10,7 +10,7 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 - [x] Request new Cirrus and Archer2 accounts
 - [x] Clone Blaze into Project Prep. Repo
 - [ ] Kokkos first exercise
-- [ ] Separate Blaze into more files
+- [x] Separate Blaze into more files
 - [ ] Blaze build with `CMake`
 #### Week of 26 Feb
 - [ ] Add geometric nonlinearity to Blaze (1/3)
@@ -38,7 +38,18 @@ Did the housekeeping tasks from yesterday:
   1) Request a new Cirrus **and Archer2** account**s** for PP and dissertation
   2) Prepare a timeline for the work with the report hand-in date in mind.
   3) Move everything to the repo made the Project Prep team
-   
+  4) Separate Blaze into a sensible file structure, and updated `config.mk` and `Makefile` albit incorrectly as Blaze fails to compile during the linking stage:
+```
+Making xblaze:
+---------------------------------------------
+g++ -std=c++20  -o xblaze basic_utilities.o maths_defaults.o global_coords.o node.o basic_section.o basic_orientation.o basic_shape_function.o beam_element.o assembler.o basic_solver.o main.o  global_mesh.o -L/opt/homebrew/Cellar/gmsh/4.11.1_1/lib -lgmsh 
+ld: Undefined symbols:
+  Basic2DBeamElement::map_dofs(std::__1::vector<int, std::__1::allocator<int>>, std::__1::set<int, std::__1::less<int>, std::__1::allocator<int>>), referenced from:
+      Basic2DBeamElement::create_dof_map() in beam_element.o
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+I will deal with this when I configure the project to build with CMake.
+
 #### 20 Feb 24
 - Built Kokkos from scratch with cmake. Must make sure to use the `-S`, `-B`, and `-DCMAKE_INSTALL_PREFIX=` flags to get it to work properly. I can now confidently build Kokkos with the `CMake` file they provide with the repository.
 - For the exercises, you should download the entire tutorial repo, although as was discovered the `BuildScripts` don't work rendering the need to download everything moot. You will build all of Kokkos for each exercise. You will need to have Kokkos in `~/Kokkos/kokkos`, and you must modify the `Makefile` in the exercise `Solution` or `Begin` directories to mention your architecture (ARM vs BDW). The Makefile will import another much larger `Makefile.kokkos` from the Kokkos directory, and you need to modify some variables there too such as architecture (arm). I had to delete some lines that were causing an issue with my Mac M1 processor. If statements should have taken care of the problem lines but they did not. I set the architecture to `arm-v80` altough the Mac M1 is actually 8.5.

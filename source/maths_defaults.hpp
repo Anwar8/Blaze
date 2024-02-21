@@ -1,7 +1,6 @@
 /**
  * @file maths_defaults.hpp
  * @brief Contains wrappers for numerical types, containers, and operations. 
- * @version 0.1
  * 
  */
 #ifndef MATHS_DEFAULTS_HPP
@@ -21,7 +20,7 @@ using realx2 = long double; /**< Numerical data type to represent quadruple prec
  * @details Allowed options are: EIGEN.
  * 
  */
-#define EIGEN; /**< Numerical engine being used.*/
+#define EIGEN /**< Numerical engine being used.*/
 
 #ifdef EIGEN
 #include <Eigen/Dense>

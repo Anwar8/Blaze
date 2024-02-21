@@ -4,6 +4,8 @@
 #include "node.hpp"
 #include "beam_element.hpp"
 #include "global_mesh.hpp"
+#include "assembler.hpp"
+#include "basic_solver.hpp"
 
 int main () {
     GlobalMesh glob_mesh; 

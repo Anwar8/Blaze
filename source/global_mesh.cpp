@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "global_mesh.hpp"
+#include "basic_utilities.hpp"
 
 void GlobalMesh::open_mesh_file(std::string const mesh_file) {
     gmsh::initialize();
@@ -127,8 +128,6 @@ void GlobalMesh::print_info()
     }
 }
 
-
-
 void GlobalMesh::count_dofs() 
 {
     ndofs = 0;
@@ -154,28 +153,6 @@ void GlobalMesh::fix_node(int id, int dof) {
     }
 }
 
-// void GlobalMesh::assemble_global_contributions() 
-// {
-//     std::vector<spnz> K_global;
-//     std::vector<spnz> K_global_elem;
-//     // TODO: this reservation is not accurate...fix it so it more closely
-//     // matches the number of contributions that are expected
-//     K_global.reserve(nelems*ndofs);
-//     for (auto elem: elem_vector)
-//     {   
-//         K_global_elem = elem->get_K_global();
-//         K_global.insert(K_global.end(), K_global_elem.begin(), K_global_elem.end());
-//     }
-//     K = make_spd_mat(ndofs, ndofs);
-//     P = make_spd_vec(ndofs);
-//     U = make_xd_vec(ndofs);
-//     std::cout << "There are " << std::size(K_global) << " contributions to add up." << std::endl;
-//     std::cout << "The K_global is of size " << ndofs << "x" << ndofs << std::endl;
-//     K.setFromTriplets(K_global.begin(), K_global.end());
-//     K.makeCompressed();
-//     std::cout << "Setting a force of -1e4 N on node in y direction." << std::endl;
-//     P.insert(1) = -1e4;
-// }
 void GlobalMesh::solve_for_U() {
     Eigen::SparseLU<spmat> solver;
     // Compute the ordering permutation vector from the structural pattern of A
@@ -190,76 +167,9 @@ void GlobalMesh::solve_for_U() {
     } else {
         std::cout << "ERROR: Factorisation unsuccessfull! Matrix is:" << std::endl;
         // convert to dense matrix to print correctly
-        std::cout << Eigen::MatrixXd(K) << std::endl;
-
-        
+        std::cout << Eigen::MatrixXd(K) << std::endl;       
         std::exit(1);
     }
     U = solver.solve(P); 
     std::cout << "The solution is:" << std::endl << U << std::endl;
-}
-
-// TODO: Fix BROKEN analyser
-bool has_zero_row(spmat A) {
-    int n = A.outerSize();
-    // int* nnz = A.innerNonZeroPtr();
-    // for(int i = 0; i < n; ++i)
-    // {
-    //     if(nnz[i] == 0)
-    //     std::cout << "Row " << i << " is zero\n";
-    //     return true;
-    // }
-    return false;
-}
-
-bool check_matrix(spmat A) {
-    return has_zero_row(A);
-}
-
-void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh) 
-{
-    std::vector<spnz> K_global;
-    std::vector<spnz> K_global_elem;
-    // TODO: this reservation is not accurate...fix it so it more closely
-    // matches the number of contributions that are expected
-    K_global.reserve(glob_mesh.nelems*glob_mesh.ndofs);
-    for (auto elem: glob_mesh.elem_vector)
-    {   
-        K_global_elem = elem->get_K_global();
-        K_global.insert(K_global.end(), K_global_elem.begin(), K_global_elem.end());
-    }
-    K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
-    P = make_spd_vec(glob_mesh.ndofs);
-    // TODO: Decide whether U is sparse or dense
-    // U = make_xd_vec(glob_mesh.ndofs);
-    U = make_spd_vec(glob_mesh.ndofs);
-    std::cout << "There are " << std::size(K_global) << " contributions to add up." << std::endl;
-    std::cout << "The K_global is of size " << glob_mesh.ndofs << "x" << glob_mesh.ndofs << std::endl;
-    K.setFromTriplets(K_global.begin(), K_global.end());
-    K.makeCompressed();
-    std::cout << "Setting a force of -1e4 N on node in y direction." << std::endl;
-    P.insert(1) = -1e4;
-}
-
-void BasicSolver::solve_for_U(Assembler& assembler) {
-    Eigen::SparseLU<spmat> solver;
-    // Compute the ordering permutation vector from the structural pattern of A
-    solver.analyzePattern(assembler.K); 
-    // Compute the numerical factorization 
-    solver.factorize(assembler.K); 
-    //Use the factors to solve the linear system 
-    
-    if (solver.info() == Eigen::Success)
-    {
-        std::cout << "Factorisation successfull." << std::endl;
-    } else {
-        std::cout << "ERROR: Factorisation unsuccessfull! Matrix is:" << std::endl;
-        // convert to dense matrix to print correctly
-        std::cout << Eigen::MatrixXd(assembler.K) << std::endl;
-
-        
-        std::exit(1);
-    }
-    assembler.U = solver.solve(assembler.P); 
-    std::cout << "The solution is:" << std::endl << assembler.U << std::endl;
 }

@@ -1,3 +1,12 @@
+/**
+ * @file global_mesh.hpp
+ * @brief global mesh object, and functions related to creating model and operating on it
+ * 
+ */
+
+#ifndef GLOBAL_MESH
+#define GLOBAL_MESH
+
 #include <memory>
 #include <vector>
 #include <tuple>
@@ -96,163 +105,13 @@ class GlobalMesh {
                 elem->calc_K_global();
             }
         }
+        /**
+         * @brief No idea why we have a template to solve for U here. 
+         * @todo reconcile this function with the \ref BasicSolver object
+         * 
+         */
         void solve_for_U();
         int const get_num_elems() const {return nelems;}
 };
 
-
-/**
- * @brief helps assemble the global matrices.
- * 
- * @details supposed to help with organising the code by separating 
- * assembly; right now it is not helpful and only contains one big
- * function and redundunt member variables that appeared in \ref GlobalMesh.
- * 
- */
-class Assembler {
-    private:
-        spmat K;
-        spvec P;
-        // TODO: Figure out if U should be sparse or dense!
-        // vec U;
-        spvec U;
-    public:
-        friend class BasicSolver;
-        /**
-         * @brief retrives global contributions from all elements.
-         * 
-         * @details creates triplets by retrieving all global contributions from
-         * the elements and then uses the triplets to creat the global sparse stiffness
-         * matrix. Also allocates the force and displacement vectors.
-         * 
-         * @attention sets a force of -1e4 in one of the locations.
-         * 
-         * @todo add a function to read and apply forces to nodes.
-         * 
-         * @param glob_mesh takes the global_mesh object as input to get the counters and containers for nodes and elements.
-         */
-        void assemble_global_contributions(GlobalMesh& glob_mesh);
-
-
-};
-
-/**
- * @brief place-holder class for solvers.
- * 
- */
-class BasicSolver {
-    public:
-        /**
-         * @brief solves for U using the global matrices contained in \ref Assembler; uses Eigen's SparseLU solver.
-         * 
-         * @param assembler 
-         */
-        void solve_for_U(Assembler& assembler);
-};
-
-
-/**
- * @defgroup Utility 
- * 
- * @brief utility functions used by other classes and do not generally fit elsewhere.
- * @{
- */
-
-/**
- * @brief Get iterator for a node or element by searching for their id.
- * 
- * @details searches by checking if the id of the element corrsponds closely to its location
- * in the vector. if not, it goes either up or down to keep checking.
- * this "search" is inefficient compared to other search algorithms such as std::find_if
- * or std::lower_bound for the general case, but is more efficient considering the average case we 
- * actually care about: a sorted vector of nodes/elems that is almost always continguous.
- * 
- * @attention there might be a potential infinite loop in this search.
- * 
- * @todo create test cases that searches when there is no node or element with the given id
- * in the searched container.
- * 
- * @tparam Iterator stl-compatible iterator corresponding to the stl compatible container.
- * @tparam Container any container with stl compatible interface.
- * @param id unique id of node or vector to search.
- * @param a_vec the container containing the nodes or the elements.
- * @return Iterator 
- */
-template <typename Iterator, typename Container>
-Iterator get_id_iterator(int id, Container& a_vec)
-{
-    auto itr = std::begin(a_vec) + (id - 1);
-    int check_id = ((*itr)->get_id());
-    if (check_id > id)
-    {
-        while (check_id != id && (itr > std::begin(a_vec)))
-        {
-            --itr;
-            check_id = ((*itr) -> get_id());
-        }
-    } else if (check_id < id) {
-        while (check_id != id && (itr < std::end(a_vec)))
-        {
-            ++itr;
-            check_id = ((*itr) -> get_id());
-        }
-    }
-    if (check_id == id)
-    {
-        return itr;
-    } else 
-    {
-        std::cout << "could not find item with id " << id << " in vector." << std::endl;
-        std::exit(1);
-    }
-}
-/**
- * @brief Prints the contents of a container one by one.
- * 
- * @tparam T Type of data in container.
- * @param V STL-compatible container.
- */
-template <typename T>
-void print_container(T V)
-{
-  for (auto v: V)
-  {
-    std::cout << v << " ";
-  }
-  std::cout << std::endl;
-}
-
-/** @} */ // end of Utility group
-
-/**
- * @defgroup NumericalDebuggers
- * @brief checks if matrices are ill-conditioned or have other issues that prevent convergence.
- * @{
- */
-
-/**
- * @brief Supposed to check if a matrix has numerical issues such as a zero row or a zero diagonal.
- * 
- * @warning does NOT work.
- * 
- * @todo Fix.
- * 
- * @param A sparse matrix to check.
- * @return true if matrix has a numerical error.
- * @return false if matrix does not have a numerical error.
- */
-bool check_matrix(spmat A);
-
-/**
- * @brief check if a sparse matrix has a zero row.
- * 
- * @warning does NOT work.
- * 
- * @todo Fix.
- * 
- * @param A sparse matrix to check.
- * @return true matrix has zero row.
- * @return false matrix does not have a zero row.
- */
-bool has_zero_row(spmat A);
-/** @} */ // end of NumericalDebuggers group
+#endif

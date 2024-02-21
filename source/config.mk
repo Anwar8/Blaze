@@ -1,5 +1,5 @@
 TARGET= xblaze
-SRCS= maths_defaults.cpp node.cpp beam_element.cpp main.cpp 
+SRCS= basic_utilities.cpp maths_defaults.cpp global_coords.cpp node.cpp basic_section.cpp basic_orientation.cpp basic_shape_function.cpp beam_element.cpp assembler.cpp basic_solver.cpp main.cpp 
 
 TEST_TARGET=test_xblaze
 TEST_DIR=tests

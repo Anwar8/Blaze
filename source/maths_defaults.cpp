@@ -14,6 +14,4 @@ spvec make_spd_vec(int rows) {
 spmat make_spd_mat(int rows, int columns) {
     return spmat(rows, columns);
 }
-
-
 #endif

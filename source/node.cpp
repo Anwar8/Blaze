@@ -1,6 +1,6 @@
  #include <iostream>
  #include "node.hpp"
- 
+ #include "basic_utilities.hpp"
  
  Node::Node() : coordinates(0.0 , 0.0, 0.0), mass(0.0) {}
  Node::Node(real x_pos, real y_pos, real z_pos) : coordinates(x_pos, y_pos, z_pos), mass(0.0) {}
