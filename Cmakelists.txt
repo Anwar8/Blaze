@@ -1,0 +1,9 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(Blaze)
+set(CMAKE_OBJCXX_STANDARD 20)
+add_executable(Blaze "source/main.cpp")
+target_include_directories(Blaze PUBLIC "source")
+find_package(Eigen3 REQUIRED NO_MODULE)
+find_package(Gmsh REQUIRED)
+
