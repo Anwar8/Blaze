@@ -35,6 +35,7 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 ## Journal
 #### 22 Feb 24
 Tried to configure Blaze to build with `CMake`. Started `Cmakelists.txt`, but currently facing problems in linking to `gmsh`. I think I correctly linked to `Eigen3` by using the command `find_package(Eigen3 REQUIRED NO_MODULE)`. I don't know why I needed the `NO_MODULE`, but that's what is provided on the `Eigen` documentation. There is no such information for `gmsh`. All I found was a message board from 12 years ago where someone suggested to add `gmsh` as a subproject in `CMake`. They referenced a depracated directory in the `gmsh` source code.
+
 #### 21 Feb 24
 Did the housekeeping tasks from yesterday:   
   1) Request a new Cirrus **and Archer2** account**s** for PP and dissertation

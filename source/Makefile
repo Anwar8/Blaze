@@ -2,7 +2,7 @@ include config.mk
 OBJS=$(SRCS:.cpp=.o) 
 TEST_OBJS=$(TEST_SRCS:.cpp=.o)
 
-## all         : makes the TARGET.
+## all         : makes the TARGET and TEST_TARGET.
 .PHONY : all
 all : $(TARGET) $(TEST_TARGET)
 
@@ -10,10 +10,10 @@ all : $(TARGET) $(TEST_TARGET)
 .PHONY : test
 test : $(TEST_TARGET)
 
-$(TARGET) : $(OBJS) global_mesh.o
+$(TARGET) : maths_defaults.o $(OBJS) global_mesh.o assembler.o basic_solver.o main.o
 	@echo "$'\nMaking $(TARGET):"
 	@echo ---------------------------------------------
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS) global_mesh.o $(MESH_LDLIBS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) maths_defaults.o $(OBJS) global_mesh.o assembler.o basic_solver.o $(MESH_LDLIBS)
 	@echo ---------------------------------------------
 
 $(TEST_TARGET) : $(TEST_SRCS) $(filter-out main.cpp, $(SRCS))
@@ -23,10 +23,23 @@ $(TEST_TARGET) : $(TEST_SRCS) $(filter-out main.cpp, $(SRCS))
 	@echo ---------------------------------------------
 
 %.o: %.cpp %.hpp	
-	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) $(MESH_FLAGS) -c -o $@ $< $(LDLIBS)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+# $(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) $(MESH_FLAGS) -c -o $@ $< $(LDLIBS)
+
+main.o: main.cpp main.hpp
+	$(CXX) $(CXXFLAGS) $(MESH_FLAGS) -c -o $@ $< $(LDLIBS)
+
+maths_defaults.o: maths_defaults.cpp maths_defaults.hpp
+	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) -c -o $@ $< 
 
 global_mesh.o: global_mesh.cpp global_mesh.hpp
-	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) $(MESH_FLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(MESH_FLAGS) -c -o $@ $< $(LDLIBS)
+
+assembler.o: assembler.cpp assembler.hpp
+	$(CXX) $(CXXFLAGS) $(MESH_FLAGS) -c -o $@ $<
+
+basic_solver.o: basic_solver.cpp basic_solver.hpp
+	$(CXX) $(CXXFLAGS) $(MESH_FLAGS) -c -o $@ $<
 
 ## clean       : removes all object files and executables for both TARGET and TEST_TARGET.
 .PHONY : clean
