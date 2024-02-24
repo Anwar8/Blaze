@@ -1,18 +1,19 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Blaze)
+project(Blaze LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 
-
 find_package(Eigen3 REQUIRED NO_MODULE)
-
+# gmsh
 find_library(GMSH_LIB Gmsh PATH_SUFFIXES lib)
 find_path(GMSH_INC "Gmsh.h" PATH_SUFFIXES include */include gmsh include/gmsh)
-if(GMSH_LIB AND GMSH_INC)
-  # use ${GMSH_LIB} and ${GMSH_INC}
-endif(GMSH_LIB AND GMSH_INC)
 
 
-add_executable(Blaze "source/main.cpp")
+# Assuming all your source files are in the "source" directory
+file(GLOB SOURCES "source/*.cpp")
+
+add_executable(Blaze ${SOURCES})
 target_include_directories(Blaze PUBLIC "source" ${GMSH_INC})
-target_link_libraries(Blaze Eigen3::Eigen)
+target_link_libraries(Blaze Eigen3::Eigen ${GMSH_LIB})
+
+install(TARGETS Blaze RUNTIME DESTINATION bin)
