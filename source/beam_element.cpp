@@ -166,7 +166,7 @@ void Basic2DBeamElement::create_dof_map()
     }
 }
 
-std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs)
+std::vector<int> Basic2DBeamElement::map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs)
 {
     std::vector<int> mapped_dofs;
     mapped_dofs.reserve(std::size(elem_dofs));
