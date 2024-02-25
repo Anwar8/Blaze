@@ -1,40 +1,41 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Project and language definitions
 project(Blaze LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Eigen header files
+# Getting external packages
+## Eigen for numerical methods
 find_package(Eigen3 REQUIRED NO_MODULE)
-# gmsh library and header files
+## gmsh library and header files
 find_library(GMSH_LIB Gmsh PATH_SUFFIXES lib)
 find_path(GMSH_INC "Gmsh.h" PATH_SUFFIXES include */include gmsh include/gmsh)
-# find the source files
+
+
+# Getting internal packages and source files
+## collecting all source files into SOURCES
 file(GLOB SOURCES "source/*.cpp")
 list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/source/main.cpp)
-# list(REMOVE_ITEM SOURCES "source/main.cpp")
+## defining the internal library BLAZE_LIB which contains the object files for all source files
+add_library(BLAZE_LIB STATIC ${SOURCES})
+target_include_directories(BLAZE_LIB PUBLIC "source" ${GMSH_INC})
+target_link_libraries(BLAZE_LIB Eigen3::Eigen ${GMSH_LIB})
 
-
+# Defining the project executables 
+## main exercutable
 add_executable( Blaze )
-target_sources( Blaze PUBLIC ${SOURCES})
 target_sources( Blaze PRIVATE "source/main.cpp")
-
-# should be including header files here
 target_include_directories(Blaze PUBLIC "source" ${GMSH_INC})
-# but then linking to the libraries
-target_link_libraries(Blaze Eigen3::Eigen ${GMSH_LIB})
-
+target_link_libraries(Blaze BLAZE_LIB Eigen3::Eigen ${GMSH_LIB})
+## testing exectuable
 enable_testing()
 find_package(GTest REQUIRED)
-
 add_executable(TestBlaze)
-target_sources( TestBlaze PUBLIC ${SOURCES})
 target_sources( TestBlaze PRIVATE "source/tests/my_test.cpp")
-# Specify that TestBlaze depends on Blaze
-add_dependencies(TestBlaze Blaze)
 target_include_directories(TestBlaze PUBLIC "source" ${GMSH_INC})
-target_link_libraries(TestBlaze GTest::gtest GTest::gtest_main Eigen3::Eigen ${GMSH_LIB})
+target_link_libraries(TestBlaze BLAZE_LIB GTest::gtest GTest::gtest_main Eigen3::Eigen ${GMSH_LIB})
 add_test(AllTests TestBlaze)
 
-
+# Install directives - what to install?
 install(TARGETS Blaze TestBlaze)
