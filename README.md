@@ -6,22 +6,22 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 
 ## Project Schedule
 #### Week of 19 Feb (10)
-- [x] Build Kokkos and Kokkos Exercises
+- [x] Build `Kokkos` and `Kokkos` Exercises
 - [x] Request new Cirrus and Archer2 accounts
 - [x] Clone Blaze into Project Prep. Repo
-- [ ] Kokkos first exercise
+- [x] `Kokkos` first exercise
 - [x] Separate Blaze into more files
 - [x] Blaze build with `CMake`
 - [x] Blaze build tests with `CMake` and `gtest`
 #### Week of 26 Feb (09)
 - [ ] Add geometric nonlinearity to Blaze (1/4)
-- [ ] Kokkos Lectures Module 2: Views and Spaces
+- [ ] `Kokkos` Lectures Module 2: Views and Spaces
 #### Week of 04 Mar (08)
 - [ ] Add geometric nonlinearity to Blaze (2/4)
-- [ ] Kokkos Lectures Module 3: Data Structures + MultiDimensional Loops
+- [ ] `Kokkos` Lectures Module 3: Data Structures + MultiDimensional Loops
 #### Week of 11 Mar (07)
 - [ ] Add geometric nonlinearity to Blaze (3/4)
-- [ ] Kokkos Lectures Module 8: Kernels: Sparse and Dense Linear Algebra
+- [ ] `Kokkos` Lectures Module 8: Kernels: Sparse and Dense Linear Algebra
 #### Week of 18 Mar (06)
 - [ ] Add geometric nonlinearity to Blaze (4/4)
 #### Week of 25 Mar (05)
@@ -40,6 +40,7 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 ## Journal
 #### 25 Feb 24
 Did some additional modifications to the `Cmakelists.txt` to better present what `CMake` is doing and make it easier to update it in future. Currently working to build the tests using `CMake` and gtest as well. The issue with the basic build method with `CMake` is that it requires rebuilding the source files for `Blaze` and `BlazeTest`. To overcome this, used the `add_library` command to build a common `BLAZE_LIB` library of sources, and then built `Blaze` and `BlazeTest` by linking to this library. This is the correct way to do this.
+Also, completed the first exercise from `Kokkos` and copied the completed solution into the repo. It is worth mentioning that in `Kokkos` reductions, we have to explicitly define a variable which is used by each "thread" to store the partial reduction. While under the hood this is exactly what `OpenMP` does, the implementation is unlike in `OpenMP`. In `Kokkos`, we must explicitly define the intermediate reduction variable that is used by each thread.
 
 #### 24 Feb 24
 Successfully built Blaze and its tests using a modified `Makefile` and `config.mk`. The reason I went back to the `Makefile` is because `CMake` was throwing the same error as `make`, so I needed to figure out the issue at the original `Makefile` level first as it is easier and more transparent. I had to separate the `GlobalMesh`, `Assembler`, `BasicSolver`, and `main` from the rest of the build targets and make sure to build all of them with access to `gmsh` header files! Likewise, anything dependent on `maths_defaults.hpp` needed to include the header files from `Eigen3`. Finally, while separating the project objects into files that correspond to only that object, I had missed that the definition of `map_dofs` in `beam_element.hpp` did not match the implementation in `beam_element.cpp`. It was simply an issue of whether or not `map_dofs` belonged to the object `Basic2DBeamElement` or not (it did, but forgot to add `Basic2DBeamElement::` prefix in the `.cpp` file). With this, I figured out how to modify the `Cmakelists.txt` to correctly build and install Blaze! Added the `build.sh` and aliased `bash ./bash.sh` to the word build to make it easier to rebuild and install things from scratch.
@@ -68,23 +69,23 @@ clang: error: linker command failed with exit code 1 (use -v to see invocation)
 I will deal with this when I configure the project to build with CMake.
 
 #### 20 Feb 24
-- Built Kokkos from scratch with cmake. Must make sure to use the `-S`, `-B`, and `-DCMAKE_INSTALL_PREFIX=` flags to get it to work properly. I can now confidently build Kokkos with the `CMake` file they provide with the repository.
-- For the exercises, you should download the entire tutorial repo, although as was discovered the `BuildScripts` don't work rendering the need to download everything moot. You will build all of Kokkos for each exercise. You will need to have Kokkos in `~/Kokkos/kokkos`, and you must modify the `Makefile` in the exercise `Solution` or `Begin` directories to mention your architecture (ARM vs BDW). The Makefile will import another much larger `Makefile.kokkos` from the Kokkos directory, and you need to modify some variables there too such as architecture (arm). I had to delete some lines that were causing an issue with my Mac M1 processor. If statements should have taken care of the problem lines but they did not. I set the architecture to `arm-v80` altough the Mac M1 is actually 8.5.
-- The `Spack` shell script for the Kokkos tutorials simply does not work. It uses the diy command which `Spack` does not recognize.
+- Built `Kokkos` from scratch with cmake. Must make sure to use the `-S`, `-B`, and `-DCMAKE_INSTALL_PREFIX=` flags to get it to work properly. I can now confidently build `Kokkos` with the `CMake` file they provide with the repository.
+- For the exercises, you should download the entire tutorial repo, although as was discovered the `BuildScripts` don't work rendering the need to download everything moot. You will build all of `Kokkos` for each exercise. You will need to have `Kokkos` in `~/Kokkos/kokkos`, and you must modify the `Makefile` in the exercise `Solution` or `Begin` directories to mention your architecture (ARM vs BDW). The Makefile will import another much larger `Makefile.kokkos` from the `Kokkos` directory, and you need to modify some variables there too such as architecture (arm). I had to delete some lines that were causing an issue with my Mac M1 processor. If statements should have taken care of the problem lines but they did not. I set the architecture to `arm-v80` altough the Mac M1 is actually 8.5.
+- The `Spack` shell script for the `Kokkos` tutorials simply does not work. It uses the diy command which `Spack` does not recognize.
 - When the exercise builds successfully, it will have a `.host` extension which is by design. I don't know why that choice was made. It confused me and made question whether  I built successfully. The final line after a successful build is confusingly "Start Build"
-- ⁠To `make` the exercise, use the command `Make -j 24`. I am not sure if the flag is needed, I just realised now that the **second** Kokkos lecture shows how to do the exercise including building it with the `Makefile`. Be careful, however, as the `Makefile` was built by design for the architecture they are using for the exercises and so it is an easier process for them.
+- ⁠To `make` the exercise, use the command `Make -j 24`. I am not sure if the flag is needed, I just realised now that the **second** `Kokkos` lecture shows how to do the exercise including building it with the `Makefile`. Be careful, however, as the `Makefile` was built by design for the architecture they are using for the exercises and so it is an easier process for them.
 - TODO: 
   1) Request a new Cirrus account for the PP and dissertation
   2) Prepare a timeline for the work with the report hand-in date in mind.
   3) Move everything to the repo made the Project Prep team
-  4) Do the first Kokkos exercise
+  4) Do the first `Kokkos` exercise
   5) Separate Blaze into more logical files with proper file documentation
   6) Create a `CMakeLists.txt` for Blaze
   7) Include geometric nonlinearity in Blaze
   8) Include dynamic solvers in Blaze
 
 #### 19 Feb 24
- Need to figure out how to use Kokkos, and make sure that graders of project prep are able to see that I am doing that. Copied the Kokkos tutorials to the repo and tried to build the solution for exercise 01 but failed. Tutorials were prepared for a preconfigured system which I have to do for my own system. Building Kokkos with Spack, finding its directory with `spack find --paths`, and putting this directory as the Kokkos directory did not succeed as the `Makefile` for the exercises did not find `Makefile.kokkos`. Downloading Kokkos source and placing it in the directory indicated in the tutorial makefile did not succceed as running `make` for the tutorial results in the error message `g++-13: error: unrecognized command-line option '-mrtm'`. Maybe `gcc@13.2` has an issue with building Kokkos on my Mac? Trying to install `gcc@12.2` using Spack now, maybe that helps. Although I will always be working on my Mac to write code, perhaps I should be connecting to Cirrus and doing all my build work there rather than locally. Even if things work on my Mac, it does not mean it will work on Cirrus or Archer2 which are my target devices. Better email JP and get some advice. Perhaps working on Cirrus directly with remote connection from VSCode could be a good option.
+ Need to figure out how to use `Kokkos`, and make sure that graders of project prep are able to see that I am doing that. Copied the `Kokkos` tutorials to the repo and tried to build the solution for exercise 01 but failed. Tutorials were prepared for a preconfigured system which I have to do for my own system. Building `Kokkos` with Spack, finding its directory with `spack find --paths`, and putting this directory as the `Kokkos` directory did not succeed as the `Makefile` for the exercises did not find `Makefile.kokkos`. Downloading `Kokkos` source and placing it in the directory indicated in the tutorial makefile did not succceed as running `make` for the tutorial results in the error message `g++-13: error: unrecognized command-line option '-mrtm'`. Maybe `gcc@13.2` has an issue with building `Kokkos` on my Mac? Trying to install `gcc@12.2` using Spack now, maybe that helps. Although I will always be working on my Mac to write code, perhaps I should be connecting to Cirrus and doing all my build work there rather than locally. Even if things work on my Mac, it does not mean it will work on Cirrus or Archer2 which are my target devices. Better email JP and get some advice. Perhaps working on Cirrus directly with remote connection from VSCode could be a good option.
 
 
 
