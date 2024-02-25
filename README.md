@@ -5,34 +5,48 @@ Requirements for the XBlaze project
 XBlaze is a finite element method (FEM) program developed specifically for structures in fire. It is explicitly designed from the ground up for scalability on high performance computing (HPC) facilities. The codebase is written in C++ and provides an interface for user customisation.
 
 ## Project Schedule
-#### Week of 19 Feb
+#### Week of 19 Feb (10)
 - [x] Build Kokkos and Kokkos Exercises
 - [x] Request new Cirrus and Archer2 accounts
 - [x] Clone Blaze into Project Prep. Repo
 - [ ] Kokkos first exercise
 - [x] Separate Blaze into more files
 - [ ] Blaze build with `CMake`
-#### Week of 26 Feb
-- [ ] Add geometric nonlinearity to Blaze (1/3)
+- [ ] Blaze build tests with `CMake` and `gtest`
+#### Week of 26 Feb (09)
+- [ ] Add geometric nonlinearity to Blaze (1/4)
 - [ ] Kokkos Lectures Module 2: Views and Spaces
-#### Week of 04 Mar
-- [ ] Add geometric nonlinearity to Blaze (2/3)
+#### Week of 04 Mar (08)
+- [ ] Add geometric nonlinearity to Blaze (2/4)
 - [ ] Kokkos Lectures Module 3: Data Structures + MultiDimensional Loops
-#### Week of 11 Mar
-- [ ] Add geometric nonlinearity to Blaze (3/3)
+#### Week of 11 Mar (07)
+- [ ] Add geometric nonlinearity to Blaze (3/4)
 - [ ] Kokkos Lectures Module 8: Kernels: Sparse and Dense Linear Algebra
-#### Week of 25 Mar
-- [ ] Add dynamic explicit solver to Blaze (1/2)
-#### Week of 01 Apr
-- [ ] Add dynamic explicit solver to Blaze (2/2)
-#### Week of 15 Apr
+#### Week of 18 Mar (06)
+- [ ] Add geometric nonlinearity to Blaze (4/4)
+#### Week of 25 Mar (05)
+- [ ] Add dynamic explicit solver to Blaze (1/3)
+#### Week of 01 Apr (04)
+- [ ] Add dynamic explicit solver to Blaze (2/3)
+#### Week of 08 Apr (03)
+- [ ] Add dynamic explicit solver to Blaze (3/3)
+#### Week of 15 Apr (02)
 - [ ] Report writing (1/2)
-#### Week of 22 Apr
-- [ ] Report writing (1/2)
+#### Week of 22 Apr (01)
+- [ ] Report writing (2/2)
 #### Report Deadline: Monday 29 Apr
 
 
 ## Journal
+#### 25 Feb 24
+Did some additional modifications to the `Cmakelists.txt` to better present what `CMake` is doing and make it easier to update it in future. Currently working to build the tests using `CMake` and gtest as well.
+
+#### 24 Feb 24
+Successfully built Blaze and its tests using a modified `Makefile` and `config.mk`. The reason I went back to the `Makefile` is because `CMake` was throwing the same error as `make`, so I needed to figure out the issue at the original `Makefile` level first as it is easier and more transparent. I had to separate the `GlobalMesh`, `Assembler`, `BasicSolver`, and `main` from the rest of the build targets and make sure to build all of them with access to `gmsh` header files! Likewise, anything dependent on `maths_defaults.hpp` needed to include the header files from `Eigen3`. Finally, while separating the project objects into files that correspond to only that object, I had missed that the definition of `map_dofs` in `beam_element.hpp` did not match the implementation in `beam_element.cpp`. It was simply an issue of whether or not `map_dofs` belonged to the object `Basic2DBeamElement` or not (it did, but forgot to add `Basic2DBeamElement::` prefix in the `.cpp` file). With this, I figured out how to modify the `Cmakelists.txt` to correctly build and install Blaze! Added the `build.sh` and aliased `bash ./bash.sh` to the word build to make it easier to rebuild and install things from scratch.
+
+#### 23 Feb 24
+Friday. Too tired.
+
 #### 22 Feb 24
 Tried to configure Blaze to build with `CMake`. Started `Cmakelists.txt`, but currently facing problems in linking to `gmsh`. I think I correctly linked to `Eigen3` by using the command `find_package(Eigen3 REQUIRED NO_MODULE)`. I don't know why I needed the `NO_MODULE`, but that's what is provided on the `Eigen` documentation. There is no such information for `gmsh`. All I found was a message board from 12 years ago where someone suggested to add `gmsh` as a subproject in `CMake`. They referenced a depracated directory in the `gmsh` source code.
 
