@@ -14,30 +14,38 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 - [x] Blaze build with `CMake`
 - [x] Blaze build tests with `CMake` and `gtest`
 #### Week of 26 Feb (09)
-- [ ] Add geometric nonlinearity to Blaze (1/4)
+- [ ] Add geometric nonlinearity to Blaze (1/6)
 - [ ] `Kokkos` Lectures Module 2: Views and Spaces
 #### Week of 04 Mar (08)
-- [ ] Add geometric nonlinearity to Blaze (2/4)
+- [ ] Add geometric nonlinearity to Blaze (2/6)
 - [ ] `Kokkos` Lectures Module 3: Data Structures + MultiDimensional Loops
 #### Week of 11 Mar (07)
-- [ ] Add geometric nonlinearity to Blaze (3/4)
+- [ ] Add geometric nonlinearity to Blaze (3/6)
 - [ ] `Kokkos` Lectures Module 8: Kernels: Sparse and Dense Linear Algebra
 #### Week of 18 Mar (06)
-- [ ] Add geometric nonlinearity to Blaze (4/4)
+- [ ] Add geometric nonlinearity to Blaze (4/6)
 #### Week of 25 Mar (05)
-- [ ] Add dynamic explicit solver to Blaze (1/3)
+- [ ] Add geometric nonlinearity to Blaze (5/6)
 #### Week of 01 Apr (04)
-- [ ] Add dynamic explicit solver to Blaze (2/3)
+- [ ] Add geometric nonlinearity to Blaze (6/6)
 #### Week of 08 Apr (03)
-- [ ] Add dynamic explicit solver to Blaze (3/3)
+- [ ] Report writing (1/3)
 #### Week of 15 Apr (02)
-- [ ] Report writing (1/2)
+- [ ] Report writing (2/3)
 #### Week of 22 Apr (01)
-- [ ] Report writing (2/2)
+- [ ] Report writing (3/3)
 #### Report Deadline: Monday 29 Apr
 
 
 ## Journal
+#### 29 Feb 24
+Today I read a part of Chapter 13: Corotational formulation overview 1. This chapter has made it clear that the main objective of the corotational formulation is to isolate the rigid body motions from the element deformations. What makes it most useful has been introduced in page 13-8: "...adding and removing rigidy body motions can be visualised as a *front end filter* that lies between the assembler/solver and the element library". That is, the corotational formulation can be decoupled form elements and then be used with the library of linear elements to allow them to become geometrically linear. This is likely how `OpenSees` separates the "Transformation" object (including the *corotational* transformation object) from the rest of element implementation. However, looking at the next chapter, I am afraid things will get much more complicated. It might be wise to skip for a while and move to chapters 16, and 20 through 24.
+
+Other than the reading, I note that I should probably include details on how to build `Blaze` in this `README.md`.
+**29 Feb Meeting Notes**
+- Agree to narrow down scope of project prep to only cover geometric nonlinearity.
+- It is acceptable if I do not achieve the objectives of this project prep after trying. This can be justified in the report if an approporiate reason is given, as well as a plan for the future of `Blaze`.
+
 #### 28 Feb 24
 From Felippa's book today I read: 
 - Chapter 3 "Residual Force Equations" - the chapter introduces the control variable $\boldsymbol{\kappa}$, state variable $\boldsymbol{u}$, and residual vector $\boldsymbol{r}$. It also, most importantly, establishes the tangent stiffness matrix $\boldsymbol{K}=\frac{\partial \boldsymbol{r}}{\partial \boldsymbol{u}}$. Did not need to go beyond section 3.4.
