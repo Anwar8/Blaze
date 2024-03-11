@@ -22,7 +22,7 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 - [x] `Kokkos` Lectures Module 3: Data Structures + MultiDimensional Loops
 #### Week of 11 Mar (07)
 - [ ] Add geometric nonlinearity to Blaze (3/6)
-  - [ ] Load application and restraint for nodes.
+  - [x] Load application and restraint for nodes.
   - [ ] Additional reading particularly on implementation of $\boldsymbol{T}$ and $\boldsymbol{K}_G$
 - [ ] `Kokkos` Lectures Module 6: Internode: MPI and PGAS (approximately 40 minutes out of the total is about MPI)
 #### Week of 18 Mar (06)
@@ -44,6 +44,12 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 
 
 ## Journal
+#### 12 Mar 24
+Corrected the bugs and added functionality to assembler and global mesh to apply load and properly create the P vector. Seems to work correctly, but should really consider creating some tests, and should also create an ideal model that would allow to verify the solver results (which is more about the stiffness assembly, really...). 
+
+#### 11 Mar 24
+Began adding commands to load nodes. Currently extremely tired so code is buggy and I am unable to debug it properly.
+
 #### 6 to 10 Mar 24
 This week has been quite tough for me at work. I have been reading the chapters from Felippa's Nonlinear Finite Element Analysis (NLFEA)book at a rate of about an hour/day or a bit more. However, I am finding the implementation of geometrically nonlinear analysis to be a little bit difficult. I have also gone through Bassam Izzuddin's Nonlinear Structural Analysis (NLSA), and found them to be a bit easier to follow but leave out a lot for interpretation. Going through the past exams, I have tried solving some of the problems by hand which I found to be very helpful.
 
