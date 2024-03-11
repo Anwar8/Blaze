@@ -21,5 +21,6 @@ void BasicSolver::solve_for_U(Assembler& assembler) {
         std::exit(1);
     }
     assembler.U = solver.solve(assembler.P); 
+    
     std::cout << "The solution is:" << std::endl << assembler.U << std::endl;
 }

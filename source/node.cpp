@@ -63,6 +63,10 @@ void Node::add_nodal_load(real nodal_load, int dof) {
   {
     nodal_loads[dof] = nodal_load;
     loaded_dofs.insert(dof);
+    std::cout << "node " << id << " loaded dofs are:" << std::endl;
+    print_container(loaded_dofs);
+    std::cout << "node " << id << " loads are:" << std::endl;
+    print_container(nodal_loads);
   } else {
     std::cout << "ERROR: Cannot add load to DoF " << dof << ". Only DoFs 0 through 5 can be loaded." << std::endl;
     std::exit(1);
@@ -70,15 +74,15 @@ void Node::add_nodal_load(real nodal_load, int dof) {
 }
 
 
-void Node::compute_load_triplets() {
-    global_nodal_loads.clear();
-    for (auto dof: loaded_dofs) {
-      if (active_dofs.contains(dof)) {
-        need to be careful about order of this loop. May need to loop over the active dofs first. 
-        we have to carefully see which index we are using where! nz_i + dof may not work if some 
-        dofs are deactivated. what if, for example, all dofs are restrained except 5 which is also loaded?
-        in that case, nz_i + dof will add 5!!! 
-        global_nodal_loads.push_back(spnz(nz_i + dof, 1, nodal_loads[dof]));
+void Node::compute_global_load_triplets() {
+    global_nodal_loads_triplets.clear();
+    int dof_index = 0;
+    for (auto active_dof: active_dofs) {
+      std::cout << "node " << id << " checking active dof: " << active_dof << " with index " << dof_index << std::endl;
+      if (loaded_dofs.contains(active_dof)) {
+        std::cout << "pushing triplet val " << nodal_loads[active_dof] << " to P vector index " << nz_i + dof_index << std::endl;
+        global_nodal_loads_triplets.push_back(spnz(nz_i + dof_index, 0, nodal_loads[active_dof]));
       }
+      dof_index++;
     }
 }

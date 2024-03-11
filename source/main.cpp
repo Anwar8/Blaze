@@ -19,6 +19,7 @@ int main () {
     glob_mesh.fix_node(1, -1);
     for (int i = 2; i <= nnodes; ++i)
     {
+        glob_mesh.load_node(i, 2, -5000.); // load the y translation with a load for all none-support nodes.
         glob_mesh.fix_node(i, 1);
         glob_mesh.fix_node(i, 3);
         glob_mesh.fix_node(i, 4);

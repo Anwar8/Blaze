@@ -152,6 +152,10 @@ void GlobalMesh::fix_node(int id, int dof) {
         (*node_it)->fix_dof(dof);
     }
 }
+void GlobalMesh::load_node(int id, int dof, real load) {
+auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
+    (*node_it)->add_nodal_load(load, dof);
+}
 
 void GlobalMesh::solve_for_U() {
     Eigen::SparseLU<spmat> solver;

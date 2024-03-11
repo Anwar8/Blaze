@@ -95,14 +95,33 @@ class GlobalMesh {
          */
         void count_dofs();
         void print_info();
-
+        /**
+         * @brief calls a node's \ref Node::fix_dof function.
+         * 
+         * @param id id of the node to which to apply the boundary condition.
+         * @param dof DoF to apply the constraint.
+         */
         void fix_node(int id, int dof);
+        /**
+         * @brief calls a node's \ref Node::add_nodal_load command and loads it.
+         * 
+         */
+        void load_node(int id, int dof, real load);
+
+        /**
+         * @brief loop over elements and call each of their \ref map_stiffness and \ref calc_K_global functions.
+         * 
+         */
         void calc_global_contributions() {
             std::cout << "Calc_global_contirbutions: There are " << ndofs << " active DoFs in the mesh." << std::endl;
             for (auto elem: elem_vector) 
             {   
                 elem->map_stiffness();
                 elem->calc_K_global();
+            }
+            for (auto node: node_vector)
+            {
+                node->compute_global_load_triplets();
             }
         }
         /**

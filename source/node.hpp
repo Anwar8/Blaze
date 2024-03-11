@@ -35,7 +35,7 @@ class Node {
         
         std::set<int> loaded_dofs; /**< a std set of loaded DoFs; none at first, then those loaded are added.*/
         std::array<real, 6> nodal_loads = {0., 0., 0., 0., 0., 0.}; /**< a std array containing 6 slots to be filled with nodal loads corresponding to dofs; initialised to zero.*/
-        std::vector<spnz> global_nodal_loads; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
+        std::vector<spnz> global_nodal_loads_triplets; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
         
     public:
         /**
@@ -187,8 +187,12 @@ class Node {
          * 
          * @warning requires C++20 or won't compile due to the use of the container.contains function introduced in the C++20 standard.
          */
-        void compute_load_triplets();
-
+        void compute_global_load_triplets();
+        /**
+         * @brief returns the \ref global_nodal_loads_triplets vector.
+         * 
+         */
+        std::vector<spnz> get_load_triplets() {return global_nodal_loads_triplets;}
 };
 
 #endif

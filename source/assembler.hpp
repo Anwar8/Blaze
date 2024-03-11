@@ -14,11 +14,17 @@
  * assembly; right now it is not helpful and only contains one big
  * function and redundunt member variables that appeared in \ref GlobalMesh.
  * 
+ * @todo improve teh naming scheme of the variables. Right now they are either very
+ * vague such as "K_glob" (now became K_glob_triplets) when it is actually referring to triplet vector, or way too
+ * long such as "K_global_elem_triplet_contribution"
+ * 
+ * @todo break down the assembler into load and stiffness assembly steps in stead of combined together in a big mess.
+ * 
  */
 class Assembler {
     private:
         spmat K;
-        spvec P;
+        spmat P;
         // TODO: Figure out if U should be sparse or dense!
         // vec U;
         spvec U;
