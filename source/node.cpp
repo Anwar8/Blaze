@@ -56,3 +56,29 @@ void Node::print_inactive_dofs() {
     std::cout << "Node " << id << " has " << std::size(inactive_dofs) << " inactive DoFs: ";
     print_container(inactive_dofs);
 }
+
+
+void Node::add_nodal_load(real nodal_load, int dof) {
+  if (valid_dof(dof))
+  {
+    nodal_loads[dof] = nodal_load;
+    loaded_dofs.insert(dof);
+  } else {
+    std::cout << "ERROR: Cannot add load to DoF " << dof << ". Only DoFs 0 through 5 can be loaded." << std::endl;
+    std::exit(1);
+  }
+}
+
+
+void Node::compute_load_triplets() {
+    global_nodal_loads.clear();
+    for (auto dof: loaded_dofs) {
+      if (active_dofs.contains(dof)) {
+        need to be careful about order of this loop. May need to loop over the active dofs first. 
+        we have to carefully see which index we are using where! nz_i + dof may not work if some 
+        dofs are deactivated. what if, for example, all dofs are restrained except 5 which is also loaded?
+        in that case, nz_i + dof will add 5!!! 
+        global_nodal_loads.push_back(spnz(nz_i + dof, 1, nodal_loads[dof]));
+      }
+    }
+}

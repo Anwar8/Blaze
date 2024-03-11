@@ -28,10 +28,15 @@ class Node {
          */
         real mass;
         int ndof = 6; /**< the number of DoFs - should be 6 unless some are deactivated.*/
-        int nz_i = 0; /**< FORGOT - used in assembly.*/
+        int nz_i = 0; /**< Corresponds to global location of node and its DoFs and load, considering deactivated DoFs.*/
         std::set<int> connected_elements; /**< of element ids that are connected to this node; expected to be useful for element and node deletion.*/
         std::set<int> active_dofs = {0, 1, 2, 3, 4, 5}; /**< set of active DOFs; all of them at first, then if deactivated moved to inactive_dofs.*/
         std::set<int> inactive_dofs; /**< a std set of active DoFs; none at first, then if any are deactivated then they are moved from active_dofs.*/
+        
+        std::set<int> loaded_dofs; /**< a std set of loaded DoFs; none at first, then those loaded are added.*/
+        std::array<real, 6> nodal_loads = {0., 0., 0., 0., 0., 0.}; /**< a std array containing 6 slots to be filled with nodal loads corresponding to dofs; initialised to zero.*/
+        std::vector<spnz> global_nodal_loads; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
+        
     public:
         /**
          * @brief Construct a new Node object with 0 mass and 0 across coordinates.
@@ -79,7 +84,7 @@ class Node {
         /**
          * @brief Set the nz_i to a value.
          * 
-         * @attention \ref nz_i is still a mystery. 
+         * @attention \ref nz_i global index of node considering activated and deactivated DoFs.
          * 
          * @param i the value to set nz_i to; can be any integer.
          */
@@ -162,7 +167,28 @@ class Node {
         void fix_all_dofs();
         void free_all_dofs();
         void print_inactive_dofs();
-        //@}      
+
+        //@}
+        /**
+         * @name nodal_load_functions
+         * @brief functions that operate on nodal DoF loads.
+         */
+        //@{      
+        
+        /**
+         * @brief adds nodal load to \ref nodal_loads.
+         * 
+         * @param nodal_load nodal load to be added.
+         * @param dof the dof to which the nodal load will be added.
+         */
+        void add_nodal_load(real nodal_load, int dof);
+        /**
+         * @brief converts the \ref nodal_loads array into a std vector of triplets to be collected by the assembler.
+         * 
+         * @warning requires C++20 or won't compile due to the use of the container.contains function introduced in the C++20 standard.
+         */
+        void compute_load_triplets();
+
 };
 
 #endif
