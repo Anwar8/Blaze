@@ -21,7 +21,7 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
     for (auto node: glob_mesh.node_vector)
     {
         P_global_node_triplet_contribution = node->get_load_triplets();
-        std::cout << "Assembler: Node " << node->get_id() << " triplets are: " << std::endl;
+        std::cout << "Assembler: Node " << node->get_id() << " with coords: "  << node->get_coords()[0] << "," << node->get_coords()[1] << "," << node->get_coords()[2] << ". its triplets are: " << std::endl;
         for (auto triplet: P_global_node_triplet_contribution)
         {
             std::cout << "row, col, val: " << triplet.row() << "," << triplet.col() << "," << triplet.value() << std::endl;
@@ -44,8 +44,6 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
     std::cout << "The K_global_triplets is of size " << glob_mesh.ndofs << "x" << glob_mesh.ndofs << std::endl;
     K.setFromTriplets(K_global_triplets.begin(), K_global_triplets.end());
     K.makeCompressed();
-
-
     
     P.setFromTriplets(P_global_triplets.begin(), P_global_triplets.end());
     P.makeCompressed();

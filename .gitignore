@@ -5,3 +5,6 @@ test_xblaze
 source/mesh/mesh
 source/mesh/test.msh
 source/mesh/mesh_analysis
+/build
+/doc
+/bin

@@ -44,6 +44,12 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 
 
 ## Journal
+#### 13 Mar 24
+Tested a 3 m cantilever beam with E = 206 GPa, I = 0.000457 $m^4$, and 100 kN tip point load. The actual end displacement for this problem is -0.00956003 m. The results from `Blaze` with 10 elements and 11 nodes is exactly -0.00956003 m. Few things to note: 
+1. I don't currently have a way to output results other than printing to output stream
+2. There is no mapping between state vector (displacements) and nodes; have to map it manually in my head
+3. There is no calculation of stresses and internal resistances based on displacements. This step is missing.
+
 #### 12 Mar 24
 Corrected the bugs and added functionality to assembler and global mesh to apply load and properly create the P vector. Seems to work correctly, but should really consider creating some tests, and should also create an ideal model that would allow to verify the solver results (which is more about the stiffness assembly, really...). 
 
