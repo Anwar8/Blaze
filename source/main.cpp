@@ -30,4 +30,7 @@ int main () {
     glob_mesh.calc_global_contributions();
     assembler.assemble_global_contributions(glob_mesh);
     solver.solve_for_U(assembler);
+    assembler.map_U_to_nodes(glob_mesh);
+    glob_mesh.print_info();
+
 }

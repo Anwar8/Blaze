@@ -31,7 +31,7 @@ class Assembler {
     public:
         friend class BasicSolver;
         /**
-         * @brief retrives global contributions from all elements.
+         * @brief retrieves global contributions from all elements.
          * 
          * @details creates triplets by retrieving all global contributions from
          * the elements and then uses the triplets to creat the global sparse stiffness
@@ -44,5 +44,12 @@ class Assembler {
          * @param glob_mesh takes the global_mesh object as input to get the counters and containers for nodes and elements.
          */
         void assemble_global_contributions(GlobalMesh& glob_mesh);
+
+        /**
+         * @brief maps state vector U back to nodes.
+         * 
+         * @param glob_mesh takes the global_mesh object as input to get the counters and containers for nodes and elements.
+         */
+        void map_U_to_nodes(GlobalMesh& glob_mesh);
 };
 #endif

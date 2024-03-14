@@ -27,13 +27,16 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 - [ ] `Kokkos` Lectures Module 6: Internode: MPI and PGAS (approximately 40 minutes out of the total is about MPI)
 #### Week of 18 Mar (06)
 - [ ] Add geometric nonlinearity to Blaze (4/6)
+  - [ ] Stress and element resistance forces
   - [ ] Geometric and tangent stiffness?
   - [ ] Nonlinear corotational transformation?
 - [ ] `Kokkos` Lectures Module 8: Kernels: Sparse and Dense Linear Algebra
 #### Week of 25 Mar (05)
 - [ ] Add geometric nonlinearity to Blaze (5/6)
+  - [ ] Implement the geometric stiffness for the beam-column lecture
 #### Week of 01 Apr (04)
 - [ ] Add geometric nonlinearity to Blaze (6/6)
+  - [ ] Final assembly and load-incrementation
 #### Week of 08 Apr (03)
 - [ ] Report writing (1/3)
 #### Week of 15 Apr (02)
@@ -44,6 +47,11 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 
 
 ## Journal
+#### 14 Mar 24
+Added the functionality to map global nodal displacements back from the state vector $\boldsymbol{U}$ to the nodes. Modifications made to `Assembler` and `Node` to make it happen. Functionality appears to work correctly, although the `print_info` function from the `GlobalMesh` is a bit...much (prints too much stuff). 
+
+TODO: Improve logging/`print_info` functions.
+
 #### 13 Mar 24
 Tested a 3 m cantilever beam with E = 206 GPa, I = 0.000457 $m^4$, and 100 kN tip point load. The actual end displacement for this problem is -0.00956003 m. The results from `Blaze` with 10 elements and 11 nodes is exactly -0.00956003 m. Few things to note: 
 1. I don't currently have a way to output results other than printing to output stream

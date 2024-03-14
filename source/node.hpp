@@ -37,6 +37,7 @@ class Node {
         std::array<real, 6> nodal_loads = {0., 0., 0., 0., 0., 0.}; /**< a std array containing 6 slots to be filled with nodal loads corresponding to dofs; initialised to zero.*/
         std::vector<spnz> global_nodal_loads_triplets; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
         
+        std::array<real, 6> nodal_displacements = {0., 0., 0., 0., 0., 0.}; /**< a std array containing 6 slots to be filled with nodal displacements corresponding to dofs; initialised to zero.*/
     public:
         /**
          * @brief Construct a new Node object with 0 mass and 0 across coordinates.
@@ -174,7 +175,6 @@ class Node {
          * @brief functions that operate on nodal DoF loads.
          */
         //@{      
-        
         /**
          * @brief adds nodal load to \ref nodal_loads.
          * 
@@ -193,6 +193,28 @@ class Node {
          * 
          */
         std::vector<spnz> get_load_triplets() {return global_nodal_loads_triplets;}
+        //@}
+        
+        /**
+         * @name nodal_displacement_functions
+         * @brief functions that operate on nodal DoF displacements.
+         */
+        //@{      
+        /**
+         * @brief sets the value of the nodal displacements.
+         * 
+         * @details sets a given DoF to a particular displacement value in the container \ref nodal_displacements.
+         * 
+         * @param dof degree of freedom to set the displacement value to.
+         * @param disp the displacement value to which to set the DoF to.
+         */
+        void set_nodal_displacement(int dof, real disp)
+        {
+            if (valid_dof(dof)) {
+                nodal_displacements[dof] = disp;
+            }
+        }
+        //@}
 };
 
 #endif

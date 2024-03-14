@@ -94,6 +94,10 @@ class GlobalMesh {
          * 
          */
         void count_dofs();
+        /**
+         * @brief calls the \ref Node::print_info function of all nodes and \ref Basic2DBeamElement::print_info of all elements.
+         * 
+         */
         void print_info();
         /**
          * @brief calls a node's \ref Node::fix_dof function.

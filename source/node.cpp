@@ -11,6 +11,10 @@
     std::cout << "Node " << id << ": xyz = (" << coordinates[0] << ", " << coordinates[1] << ", " << coordinates[2] <<  "), and mass = " << mass << std::endl;
     std::cout << "There are " << std::size(connected_elements) << " connected elements. They are: ";
     print_container<std::set<int>>(connected_elements);
+    std::cout << "Node has following loads:" << std::endl;
+    print_container(nodal_loads);
+    std::cout << "Node has following displacement:" << std::endl;
+    print_container(nodal_displacements);
  }
  coords const Node::get_coords() const {
    return coordinates;
