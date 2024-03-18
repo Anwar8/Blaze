@@ -21,15 +21,16 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 - [x] Add geometric nonlinearity to Blaze (2/6)
 - [x] `Kokkos` Lectures Module 3: Data Structures + MultiDimensional Loops
 #### Week of 11 Mar (07)
-- [ ] Add geometric nonlinearity to Blaze (3/6)
+- [x] Add geometric nonlinearity to Blaze (3/6)
   - [x] Load application and restraint for nodes.
-  - [ ] Additional reading particularly on implementation of $\boldsymbol{T}$ and $\boldsymbol{K}_G$
-- [ ] `Kokkos` Lectures Module 6: Internode: MPI and PGAS (approximately 40 minutes out of the total is about MPI)
+  - [x] Additional reading particularly on implementation of $\boldsymbol{T}$ and $\boldsymbol{K}_G$
+- [ ] ~~`Kokkos` Lectures Module 6: Internode: MPI and PGAS (approximately 40 minutes out of the total is about MPI)~~
 #### Week of 18 Mar (06)
 - [ ] Add geometric nonlinearity to Blaze (4/6)
   - [ ] Stress and element resistance forces
   - [ ] Geometric and tangent stiffness?
   - [ ] Nonlinear corotational transformation?
+- [x] `Kokkos` Lectures Module 6: Internode: MPI and PGAS (approximately 40 minutes out of the total is about MPI)
 - [ ] `Kokkos` Lectures Module 8: Kernels: Sparse and Dense Linear Algebra
 #### Week of 25 Mar (05)
 - [ ] Add geometric nonlinearity to Blaze (5/6)
@@ -47,6 +48,20 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 
 
 ## Journal
+#### 19 Mar 24
+Here are my notes on `Kokkos` lecture 6. The idea behind mixing `MPI` with `Kokkos` is rather simple: send and receive views as normal, and be very certain to overlap communication and computation. `MPI` can be made aware of GPUs, and can communicate with them. Therefore, it is possible to exchange GPU data directly with `MPI`, but need to be careful about how that is done. Doing this across different nodes with the `UVMSpace` will destroy performance. The exchange of data via `MPI` can be done via subviews or views if you are sending the entire data, but one must be careful that only contiguous layouts could be sent so do not send `LayoutStride` data without first creating an appropriate `MPI` datatype.  When overlapping communication and computation, be sure that the compute kernel does not touch the data of the communication kernel. They have an exercise for "packing and unpacking" which is a concept, to be honest, that I did not understand. There is also an exercise about overlapping computation and communication where a 3D heat conduction problem is solved. It involves some information about exchanging boundaries and I believe it is going to be quite a useful exercise for me. A final very important consideration is resource affinity when using `Kokkos`+`MPI`. They recommend not over-subscribing the CPU cores by requesting more than physically available knowing that when mixing with `MPI`, each `MPI` rank will have some `OpenMP` or `Devices` associated with it using the bind command. There are ways to set these numbers but were not updated in the slides uploaded. There is also a way for telling `Kokkos` how many devices there are by using a flag or a system variable. 
+
+#### 18 Mar 24
+Reading Rankin (1986) paper. The paper starts off rather clear, but then the notation quickly becomes cumbersome. It is important to also note some limitations: this paper only covers rotations not deflections, and the focus is primarily on shell elements. I still need to continue with this paper, but it is not looking good for me. Right now, I have reached the implementation part of the paper and I am hoping this will be easier to go through.
+
+I have also started going through `Kokkos` lecture 6 about MPI, but will need to continue that tomorrow.
+
+
+Rankin, C. C., & Brogan, F. A. (1986). An element independent corotational procedure for the treatment of large rotations
+
+#### 17 Mar 24
+I chose to take a break today. My efficiency has not been amazing, and I needed some rest.
+
 #### 16 Mar 24 
 The transformation matrix, with offset $b$, is currently: 
 $$\boldsymbol{T} \boldsymbol{U} = \boldsymbol{d}$$
