@@ -72,7 +72,7 @@ class BasicOrientation {
          * 
          * @details
          * the T matrix created is a 6x12 matrix with members only in the first
-         * 6 rows. No idea why this matrix is not square.
+         * 6 rows.
          */
         void calc_T() {
             real c = std::cos(alpha);

@@ -214,6 +214,12 @@ class Node {
                 nodal_displacements[dof] = disp;
             }
         }
+        /**
+         * @brief Get the nodal displacements array.
+         * 
+         * @return std::array<real,6>  nodal_displacements array.
+         */
+        std::array<real,6> get_nodal_displacements() {return nodal_displacements;}
         //@}
 };
 

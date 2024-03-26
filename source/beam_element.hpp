@@ -31,12 +31,53 @@
  */
 class Basic2DBeamElement {
     private:
+        /**
+         * @name beam_basic_information
+         * @brief the basic data about the beam element
+         */
+        //@{      
         unsigned id = 0; /**< unique identifier for the element.*/
         std::string const elem_type = "beam-column"; /**< string that represents the type of the element.*/
         int const ndofs = 3; /**< number of freedoms at each node.*/
         int const nnodes = 2; /**< number of nodes.*/
+        const std::array<real, 2> gauss_pts = {-0.57735, 0.57735}; /**< length-wise coordinates of the Gauss Points*/
+        real length = 0.0; /**< the length for the beam-column element - to be calculated by the orientation object.*/
+        //@}
+
+        /**
+         * @name beam_basic_objects
+         * @brief basic objects needed by the beam-column elements. Section, shape function, transformation, etc.
+         */
+        //@{
         std::array<std::shared_ptr<Node>, 2> nodes; /**< an array of size 2 that holds the shared ptrs to the nodes.*/
+        BasicSection section; /**< the section for the beam-column element.*/
+        BasicShapeFunction shape_func; /**< the shape function for the beam-column element.*/
+        BasicOrientation orient; /**< the orientation object for the beam-column element.*/
+        //@}
+
+        /**
+         * @name beam_state_containers
+         * @brief the containers for the beam state such as displacement, strain, force, etc.
+         */
+        //@{
+        vec global_ele_U = make_xd_vec(12); /**< global nodal displacements for all freedoms of the nodes corresponding to the element.*/
+        vec local_d = make_xd_vec(6); /**< local nodal-displacements for all freedoms.*/
+        vec local_f = make_xd_vec(6); /**< local nodal-forces corresponding to all freedoms.*/
+        vec local_eps = make_xd_vec(2); /**< local strains. Here they are axial strain and curvature.*/
+        vec local_stresses = make_xd_vec(2); /**< local stresses. Here they are axial force and moment.*/
+        mat local_const_mat = make_xd_mat(2,2); /**< local constitutive matrix $\boldsymbol{D}$*/
+        mat local_mat_stiffness = make_xd_mat(6,6); /**< local element stiffness matrix*/
+        std::vector<spnz> K_global; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
+        //@}
         
+        
+
+
+        /**
+         * @name beam_mappers
+         * @brief objects needed for mapping from local to global coordinates except for transformation or orientation objects.
+         */
+        //@{
         std::vector<int> global_dof_map; /**< FORGOT - appears to have been deprecated.*/
 
 
@@ -49,17 +90,9 @@ class Basic2DBeamElement {
          * number of nodes and which DOFs are active/not fixed. See \ref map_stiffness for details.
          */
         std::vector<std::array<int,4>> stiffness_map; 
+        //@}
 
-        BasicSection section; /**< the section for the beam-column element.*/
-        BasicShapeFunction shape_func; /**< the shape function for the beam-column element.*/
-        BasicOrientation orient; /**< the orientation object for the beam-column element.*/
-        real length = 0.0; /**< the length for the beam-column element - to be calculated by the orientation object.*/
-
-        vec local_d = make_xd_vec(6); /**< local displacements for all freedoms.*/
-        vec local_f = make_xd_vec(6); /**< local forces corresponding to all freedoms.*/
-        vec local_eps = make_xd_vec(2); /**< local strains corresponding to all freedoms.*/
-
-        std::vector<spnz> K_global; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
+        
 
     public:
         /**
@@ -140,11 +173,48 @@ class Basic2DBeamElement {
         void print_info();
         void calc_length();
         void calc_N(real x);
+        /**
+         * @brief call the shape function's derivative of the shape function operation to calculate at a specific point.
+         * 
+         * @param x 
+         */
         void calc_B(real x);
         void calc_k();
+        void calc_mat_stiffness() {shape_func.calc_elem_mat_stiffness(length, section, local_mat_stiffness);}
         void calc_T(real sec_offset = 0.0, coords origin_x = {1.0, 0.0, 0.0});
-        void calc_eps();
+        /**
+         * @brief calculates local constitutive matrix from section information.
+         * 
+         */
+        void calc_local_const_mat();
+        void calc_eps(){local_eps = shape_func.get_B() * local_d;}
+        /**
+         * @brief calculates the local stresses from $\boldsymbol{\sigma}=\boldsymbol{D}{\boldsymbol{\varepsilon}}$
+         * @warning depends on `Eigen3` overlay for the \* operation for matrix objects. 
+         */
+        void calc_stresses() {local_stresses = local_const_mat*local_eps;}
+        
+        /**
+         * @brief calculates element nodal forces based on nodal displacements and element stiffness.
+         * @details calculates the nodal forces from the relationship $\boldsymbol{f} = \boldsymbol{k}\boldsymbol{d}$
+         * @todo convert from using material stiffness to using tangent stiffness.
+         * @warning uses only material stiffness for force calculation - linear only.
+         */
+        void calc_nodal_forces() {local_f = local_mat_stiffness*local_d;}
 
+        /**
+         * @brief maps global freedoms to element local freedoms using the transformation matrix.
+         * @details uses the relationship $\boldsymbol{d} = \boldsymbol{T}\boldsymbol{U}$. U comes from nodal displacements.
+         * 
+         */
+        void calc_d_from_U();
+
+        /**
+         * @brief Get the \ref global_ele_U from each node object connected to the element.
+         * 
+         */
+        void get_U_from_nodes();
+        
         /**
          * @brief calculates the global stiffness contribution of the local element and populates K_global
          * 

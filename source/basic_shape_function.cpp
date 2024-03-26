@@ -49,3 +49,37 @@ void BasicShapeFunction::calc_k(real L, BasicSection& sec) {
     k(5,4) = -6*E*I/std::pow(L,2);
     k(5,5) = 4*E*I/L;
 }
+void BasicShapeFunction::calc_elem_mat_stiffness(real& L, BasicSection& sec, mat& k_mat)
+{
+    real A = sec.get_A();
+    real E = sec.get_E();
+    real I = sec.get_I();
+    real EA = E*A;
+    real EI = E*I;
+    // Row 1
+    k_mat(0,0) = EA/L;
+    k_mat(0,3) = -EA/L;
+    // Row 2
+    k_mat(1,1) = 12*EI/std::pow(L,3);
+    k_mat(1,2) = 6*EI/std::pow(L,2);
+    k_mat(1,4) = -12*EI/std::pow(L,3);
+    k_mat(1,5) = 6*EI/std::pow(L,2);
+    // Row 3
+    k_mat(2,1) = 6*EI/std::pow(L,2);
+    k_mat(2,2) = 4*EI/L;
+    k_mat(2,4) = -6*EI/std::pow(L,2);
+    k_mat(2,5) = 2*EI/L;
+    // Row 4
+    k_mat(3,0) = -EA/L;
+    k_mat(3,3) = EA/L;
+    // Row 5
+    k_mat(4,1) = -12*EI/std::pow(L,3);
+    k_mat(4,2) = -6*EI/std::pow(L,2);
+    k_mat(4,4) = 12*EI/std::pow(L,3);
+    k_mat(4,5) = -6*EI/std::pow(L,2);
+    // Row 6
+    k_mat(5,1) = 6*EI/std::pow(L,2);
+    k_mat(5,2) = 2*EI/L;
+    k_mat(5,4) = -6*EI/std::pow(L,2);
+    k_mat(5,5) = 4*EI/L;
+}
