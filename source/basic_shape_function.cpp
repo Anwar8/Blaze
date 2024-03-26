@@ -83,3 +83,26 @@ void BasicShapeFunction::calc_elem_mat_stiffness(real& L, BasicSection& sec, mat
     k_mat(5,4) = -6*EI/std::pow(L,2);
     k_mat(5,5) = 4*EI/L;
 }
+void BasicShapeFunction::calc_elem_geom_stiffness(real& L, real& P, mat& k_g)
+{
+    real N = P/(30*L); /**< common factor of the geometric stiffness.*/
+    k_g(1,1) = N*36;
+    k_g(1,2) = N*3*L;
+    k_g(1,4) = N*-36;
+    k_g(1,5) = N*3*L;
+    
+    k_g(2,1) = N*3*L;
+    k_g(2,2) = N*4*L*L;
+    k_g(2,4) = N*-3*L;
+    k_g(2,5) = N*-L*L;
+
+    k_g(4,1) = N*-36;
+    k_g(4,2) = N*-3*L;
+    k_g(4,4) = N*36;
+    k_g(4,5) = N*-3*L;
+
+    k_g(5,1) = N*3*L;
+    k_g(5,2) = N*-L*L;
+    k_g(5,4) = N*-3*L;
+    k_g(5,5) = N*L*L;
+}

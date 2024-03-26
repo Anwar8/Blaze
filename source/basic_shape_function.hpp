@@ -33,15 +33,27 @@ class BasicShapeFunction {
         void calc_B(real x, real L);
         void calc_k(real L, BasicSection& sec);
         /**
-         * @brief calculates the element stiffness in-place for the element.
+         * @brief calculates the element material stiffness in-place for the element.
          * @details for basic beam-column element, the material stiffness is a simple predefine matrix that uses length, EA, and EI.
-         * This function takes the element stiffness by reference and places the relevant components there.
+         * This function takes the element material stiffness by reference and places the relevant components there.
          * 
-         * @param L beam length
-         * @param sec section object containing methods to retrieve axial and bending rigidities EA and EI
-         * @param k local element material stiffness matrix
+         * @param L beam length.
+         * @param sec section object containing methods to retrieve axial and bending rigidities EA and EI.
+         * @param k local element material stiffness matrix.
          */
         void calc_elem_mat_stiffness(real& L, BasicSection& sec, mat& k);
+        
+        /**
+         * @brief calculates the element geometric stiffness in-place for the element.
+         * @details for basic beam-column element, the geometric stiffness used here is that related to the
+         * axial force of the Hermitian beam-column element. Referenced from Chapter 16 of Felippa's Nonlinear FEA notes.
+         * Equation 16.26.
+         * 
+         * @param L beam length
+         * @param P axial force in the beam-column.
+         * @param k_g local element geometric stiffness matrix.
+         */
+        void calc_elem_geom_stiffness(real& L, real& P, mat& k_g);
 };
 
 #endif

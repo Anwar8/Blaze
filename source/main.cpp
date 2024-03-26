@@ -25,6 +25,7 @@ int main () {
     }
 
     glob_mesh.load_node(2, 2, -100000.); // load the y translation with a load for the last node (which happens to have id = 2).
+    glob_mesh.load_node(2, 0, 1000.); // load the x translation with a load for the last node (which happens to have id = 2).
 
     glob_mesh.count_dofs();
     glob_mesh.calc_global_contributions();

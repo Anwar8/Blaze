@@ -66,7 +66,9 @@ class Basic2DBeamElement {
         vec local_eps = make_xd_vec(2); /**< local strains. Here they are axial strain and curvature.*/
         vec local_stresses = make_xd_vec(2); /**< local stresses. Here they are axial force and moment.*/
         mat local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix \f$\boldsymbol{D}\f$*/
-        mat local_mat_stiffness = make_xd_mat(6,6); /**< local element stiffness matrix*/
+        mat local_mat_stiffness = make_xd_mat(6,6); /**< local element material stiffness matrix*/
+        mat local_geom_stiffness = make_xd_mat(6,6); /**< local element geometric stiffness matrix*/
+        mat local_tangent_stiffness = make_xd_mat(6,6); /**< local element tangent stiffness matrix*/
         std::vector<spnz> K_global; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
         //@}
         
@@ -180,7 +182,22 @@ class Basic2DBeamElement {
          */
         void calc_B(real x);
         void calc_k();
+        /**
+         * @brief calculates the material stiffness matrix using the shape-function function \ref ShapeFunction::calc_elem_mat_stiffness.
+         * 
+         */
         void calc_mat_stiffness() {shape_func.calc_elem_mat_stiffness(length, section, local_mat_stiffness);}
+        /**
+         * @brief calculates the geometric stiffness matrix using the shape-function function \ref ShapeFunction::calc_elem_geom_stiffness.
+         * 
+         */
+        void calc_geom_stiffness() {shape_func.calc_elem_geom_stiffness(length, local_stresses(0), local_geom_stiffness);}
+        /**
+         * @brief sums the \ref local_mat_stiffness and \ref local_geom_stiffness to create the tangent stiffness.
+         * 
+         */
+        void calc_tangent_stiffness() {local_tangent_stiffness = local_mat_stiffness + local_geom_stiffness;}
+
         void calc_T(real sec_offset = 0.0, coords origin_x = {1.0, 0.0, 0.0});
         /**
          * @brief calculates local constitutive matrix from section information.
@@ -200,7 +217,7 @@ class Basic2DBeamElement {
          * @todo convert from using material stiffness to using tangent stiffness.
          * @warning uses only material stiffness for force calculation - linear only.
          */
-        void calc_nodal_forces() {local_f = local_mat_stiffness*local_d;}
+        void calc_nodal_forces() {local_f = local_tangent_stiffness*local_d;}
 
         /**
          * @brief maps global freedoms to element local freedoms using the transformation matrix.
@@ -236,6 +253,8 @@ class Basic2DBeamElement {
          calc_stresses();
          // calc_geometric_stiffness, calc_tangent_stiffness
          calc_mat_stiffness();
+         calc_geom_stiffness();
+         calc_tangent_stiffness();
          calc_nodal_forces();
         }
 
