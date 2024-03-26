@@ -57,9 +57,9 @@ class BasicOrientation {
          * 
          * @details
          * The calculation is based on:
-         * \f$ A\dot B = \abs{A}\abs{B}\cos{\theta}\f$
+         * \f$A\dot B = \abs{A}\abs{B}\cos{\theta}\f$
          * and then:
-         * \f$ \theta = \arccos{\frac{A\dot B}{\abs{A}\abs{B}}} \f$
+         * \f$\theta = \arccos{\frac{A\dot B}{\abs{A}\abs{B}}}\f$
          * 
          * @param origin_x the global coord system x-axis unit vector
          */

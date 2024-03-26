@@ -65,7 +65,7 @@ class Basic2DBeamElement {
         vec local_f = make_xd_vec(6); /**< local nodal-forces corresponding to all freedoms.*/
         vec local_eps = make_xd_vec(2); /**< local strains. Here they are axial strain and curvature.*/
         vec local_stresses = make_xd_vec(2); /**< local stresses. Here they are axial force and moment.*/
-        mat local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix $\boldsymbol{D}$*/
+        mat local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix \f$\boldsymbol{D}\f$*/
         mat local_mat_stiffness = make_xd_mat(6,6); /**< local element stiffness matrix*/
         std::vector<spnz> K_global; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
         //@}
@@ -189,14 +189,14 @@ class Basic2DBeamElement {
         void calc_local_constitutive_mat();
         void calc_eps(){local_eps = shape_func.get_B() * local_d;}
         /**
-         * @brief calculates the local stresses from $\boldsymbol{\sigma}=\boldsymbol{D}{\boldsymbol{\varepsilon}}$
+         * @brief calculates the local stresses from \f$\boldsymbol{\sigma}=\boldsymbol{D}{\boldsymbol{\varepsilon}}\f$
          * @warning depends on `Eigen3` overlay for the \* operation for matrix objects. 
          */
         void calc_stresses() {local_stresses = local_constitutive_mat*local_eps;}
         
         /**
          * @brief calculates element nodal forces based on nodal displacements and element stiffness.
-         * @details calculates the nodal forces from the relationship $\boldsymbol{f} = \boldsymbol{k}\boldsymbol{d}$
+         * @details calculates the nodal forces from the relationship \f$\boldsymbol{f} = \boldsymbol{k}\boldsymbol{d}\f$
          * @todo convert from using material stiffness to using tangent stiffness.
          * @warning uses only material stiffness for force calculation - linear only.
          */
@@ -204,7 +204,7 @@ class Basic2DBeamElement {
 
         /**
          * @brief maps global freedoms to element local freedoms using the transformation matrix.
-         * @details uses the relationship $\boldsymbol{d} = \boldsymbol{T}\boldsymbol{U}$. U comes from nodal displacements.
+         * @details uses the relationship \f$\boldsymbol{d} = \boldsymbol{T}\boldsymbol{U}\f$. U comes from nodal displacements.
          * 
          */
         void calc_d_from_U() {local_d = orient.get_T()*global_ele_U;}
@@ -221,7 +221,7 @@ class Basic2DBeamElement {
          * @todo Change the way B matrix is calculated so it is not done for midpoint of beam.
          * @todo add calculation of geometric and tangent stiffnesses.
          * @todo remove redundant calculation of material stiffness unless it needs to be recalculated again. Remember, it was calculated before finding global U to begin with.
-         * @warning calculates $\boldsymbol{B}$ based on mid-length of the beam not Gauss points.
+         * @warning calculates \f$\boldsymbol{B}\f$ based on mid-length of the beam not Gauss points.
          */
         void update_state()
         {
