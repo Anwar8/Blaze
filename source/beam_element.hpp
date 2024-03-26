@@ -65,7 +65,7 @@ class Basic2DBeamElement {
         vec local_f = make_xd_vec(6); /**< local nodal-forces corresponding to all freedoms.*/
         vec local_eps = make_xd_vec(2); /**< local strains. Here they are axial strain and curvature.*/
         vec local_stresses = make_xd_vec(2); /**< local stresses. Here they are axial force and moment.*/
-        mat local_const_mat = make_xd_mat(2,2); /**< local constitutive matrix $\boldsymbol{D}$*/
+        mat local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix $\boldsymbol{D}$*/
         mat local_mat_stiffness = make_xd_mat(6,6); /**< local element stiffness matrix*/
         std::vector<spnz> K_global; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
         //@}
@@ -186,13 +186,13 @@ class Basic2DBeamElement {
          * @brief calculates local constitutive matrix from section information.
          * 
          */
-        void calc_local_const_mat();
+        void calc_local_constitutive_mat();
         void calc_eps(){local_eps = shape_func.get_B() * local_d;}
         /**
          * @brief calculates the local stresses from $\boldsymbol{\sigma}=\boldsymbol{D}{\boldsymbol{\varepsilon}}$
          * @warning depends on `Eigen3` overlay for the \* operation for matrix objects. 
          */
-        void calc_stresses() {local_stresses = local_const_mat*local_eps;}
+        void calc_stresses() {local_stresses = local_constitutive_mat*local_eps;}
         
         /**
          * @brief calculates element nodal forces based on nodal displacements and element stiffness.
@@ -207,7 +207,7 @@ class Basic2DBeamElement {
          * @details uses the relationship $\boldsymbol{d} = \boldsymbol{T}\boldsymbol{U}$. U comes from nodal displacements.
          * 
          */
-        void calc_d_from_U();
+        void calc_d_from_U() {local_d = orient.get_T()*global_ele_U;}
 
         /**
          * @brief Get the \ref global_ele_U from each node object connected to the element.
@@ -215,6 +215,54 @@ class Basic2DBeamElement {
          */
         void get_U_from_nodes();
         
+        /**
+         * @brief updates element nodal displacements, strains, stresses, element resistance forces.
+         * @todo no need to evaluate EA and EI every state update - move to initialisation stage.
+         * @todo Change the way B matrix is calculated so it is not done for midpoint of beam.
+         * @todo add calculation of geometric and tangent stiffnesses.
+         * @todo remove redundant calculation of material stiffness unless it needs to be recalculated again. Remember, it was calculated before finding global U to begin with.
+         * @warning calculates $\boldsymbol{B}$ based on mid-length of the beam not Gauss points.
+         */
+        void update_state()
+        {
+         // Move to initialisation of element
+         calc_local_constitutive_mat();
+         // really should not be doing this for midpoint location.
+         calc_B(length*0.5);
+
+         get_U_from_nodes();
+         calc_d_from_U();
+         calc_eps();
+         calc_stresses();
+         // calc_geometric_stiffness, calc_tangent_stiffness
+         calc_mat_stiffness();
+         calc_nodal_forces();
+        }
+
+        /**
+         * @brief prints the internal state of the element.
+         * 
+         */
+        void print_element_state(bool print_stresses = true, bool print_strains = false,
+                                 bool print_nodal_disp = false, bool print_nodal_forces = false) 
+        {
+            if (print_stresses) 
+            {
+                std::cout << "element " << id << " stresses are:"  << std::endl << local_stresses << std::endl;
+            }
+            if (print_strains) 
+            {
+                std::cout << "element " << id << " strains are:"  << std::endl << local_eps << std::endl;
+            }
+            if (print_nodal_forces) 
+            {
+                std::cout << "element " << id << " nodal forces are:"  << std::endl << local_f << std::endl;
+            }
+            if (print_nodal_disp) 
+            {
+                std::cout << "element " << id << " nodal displacements are:" << std::endl << local_d << std::endl;
+            }
+        }
         /**
          * @brief calculates the global stiffness contribution of the local element and populates K_global
          * 

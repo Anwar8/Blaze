@@ -75,15 +75,15 @@ void Basic2DBeamElement::calc_k()
 {
     shape_func.calc_k(length, section);
 }
-void Basic2DBeamElement::calc_local_const_mat()
+void Basic2DBeamElement::calc_local_constitutive_mat()
 {
     real EA = section.get_E()*section.get_A();
     real EI = section.get_E()*section.get_I();
     
-    local_const_mat(0,0) = EA;
-    local_const_mat(1,0) = 0;
-    local_const_mat(0,1) = 0;
-    local_const_mat(1,1) = EI;
+    local_constitutive_mat(0,0) = EA;
+    local_constitutive_mat(1,0) = 0;
+    local_constitutive_mat(0,1) = 0;
+    local_constitutive_mat(1,1) = EI;
 }
 void Basic2DBeamElement::get_U_from_nodes() 
 {
@@ -95,7 +95,7 @@ void Basic2DBeamElement::get_U_from_nodes()
         nodal_disp = node->get_nodal_displacements();
         for (auto dof: nodal_disp)
         {
-            global_ele_U[i] = dof;
+            global_ele_U(i) = dof;
             ++i;
         }
     }

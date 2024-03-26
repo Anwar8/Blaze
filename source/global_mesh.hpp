@@ -128,6 +128,31 @@ class GlobalMesh {
                 node->compute_global_load_triplets();
             }
         }
+
+        /**
+         * @brief updates the state of each element after calculating global displacements.
+         * 
+         */
+        void update_elements_states()
+        {
+            for (auto elem: elem_vector)
+            {
+                elem->update_state();
+            }
+        }
+        /**
+         * @brief prints the selected state of each element.
+         * 
+         */
+        void print_elements_states(bool print_stresses = true, bool print_strains = false,
+                                 bool print_nodal_disp = false, bool print_nodal_forces = false)
+        {
+            for (auto elem: elem_vector)
+            {
+                elem->print_element_state(print_stresses, print_strains, print_nodal_disp, print_nodal_forces);
+            }
+        }
+
         /**
          * @brief No idea why we have a template to solve for U here. 
          * @todo reconcile this function with the \ref BasicSolver object

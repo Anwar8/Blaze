@@ -40,6 +40,7 @@ class Assembler {
          * @attention sets a force of -1e4 in one of the locations.
          * 
          * @todo add a function to read and apply forces to nodes.
+         * @todo add a function to calculate constrained nodes reactions.
          * 
          * @param glob_mesh takes the global_mesh object as input to get the counters and containers for nodes and elements.
          */

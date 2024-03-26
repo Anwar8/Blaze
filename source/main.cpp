@@ -32,5 +32,7 @@ int main () {
     solver.solve_for_U(assembler);
     assembler.map_U_to_nodes(glob_mesh);
     glob_mesh.print_info();
+    glob_mesh.update_elements_states();
+    glob_mesh.print_elements_states(true, true, true, true);
 
 }
