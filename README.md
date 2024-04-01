@@ -33,10 +33,10 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 - [x] `Kokkos` Lectures Module 6: Internode: MPI and PGAS (approximately 40 minutes out of the total is about MPI)
 - [x] `Kokkos` Lectures Module 8: Kernels: Sparse and Dense Linear Algebra
 #### Week of 25 Mar (05)
-- [ ] Add geometric nonlinearity to Blaze (5/6)
+- [x] Add geometric nonlinearity to Blaze (5/6)
   - [x] Implement the calculation of element strains, stresses and nodal forces
-  - [ ] Implement the geometric stiffness for the beam element
-  - [ ] Map-out the geometrically nonlinear transformation object
+  - [x] Implement the geometric stiffness for the beam element
+  - [x] Map-out the geometrically nonlinear transformation object
 #### Week of 01 Apr (04)
 - [ ] Add geometric nonlinearity to Blaze (6/6)
   - [ ] Final assembly and load-incrementation
@@ -50,6 +50,29 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 
 
 ## Journal
+#### 31 Mar and 1 April 24
+I spent a long time attempting to map out and build the new nonlinear transformation object under `NonlinearTransform`. This object will have a rather complex interaction with the `BasicOrientation` object, which may become obselete. In fact, upon attempting to build the nonlinear solver I am finding that my implementation of the geometric stiffness is very lacking. The element-level contributions to the geometric stiffness can actually be ignored, and it is the part that I have been ignoring - what is called "external geometric stiffness" in Du and Hajjar (2020), "principal contribution" in Izzuddin's NLSA notes, and "varying moments through the transverse shear force in $\mathcal{C}$" (16.27) in Felippa's notes is what actually matters. Looking at Izzuddin's in-class notes, he makes that clear as well. I have made extensive hand-written notes on the implementation yesterday in OneNote and I think I am almost ready to implement geometric nonlinearity, although I remain rather confused about how I should structure my program classes. I have decided, for now, to implement Izzuddin's nonlinear element under its own nonlinear class rather than implement everything within the `Basic2DBeamElement` class. Thus, I have introduced `Izzuddin2DNonlinearBeam`, which inherits from `Basic2DBeamElement` but seeks to re-implement the way state is assessed using the nonlinear equations in Izzuddin's notes. I am also likely to implement Felippa's or Izzuddin's corotational transform in `NonlinearTransform` to isolate the deformation-inducing displacements from the rigid body motions. Felippa's implementation is a little more clear because of the better figures, and because I spent a rather long time on 31 March taking hand-written notes on it and drawing it for myself. I need to do this, even though I had decided not to implement corotational transformation at first, because I need the trigonometric relationships from the transformation to calculate the element response such as the principal contribution to global geometric stiffness. I have taken some note on both Izzuddin and Felippa's implementation below:
+
+*Why am I unhappy with Felippa’s element?*
+1. Linear generalised stresses where axial force does not play a role in the moments.
+2. Because it uses a linear interpolation for the nodal forces and for the stiffness matrix.
+3. ⁠it seems to have me do some extra work where phi is simply a function of the original base configuration and current configuration that I can solve for easily already.
+
+*Why am I happy with Felippa's element?*
+1. The interpolation separates the rigid body modes and I can probably use this approach where I separate the transform from the element state calculation as all element freedoms are not related to the rigid body modes.
+
+*What do I not like about Izzuddin's element?*
+1. Appears to be no shear but actually I can use Felippa’s expression for shear to get the generalised shear from the moments.
+2. ⁠No evaluation for the tangent stiffness matrix so I have to multiply it myself.
+  
+*What do I like about Izzuddin's element?*
+1. The transformation matrix appears to be quite easy to interpolate actually.
+2. And the element includes nonlinearity at every stage including axial force term in the moment calculation.
+   
+Finally, I have prepared a draft interface for performing the iterative procedure to calcualte the nonlinear response. I have placed this in `main.cpp` as commented-out code which is meant to guide my future implementation.
+**References**
+Du and Hajjar (2020) Three-dimensional nonlinear displacement-based beam element for members with angle and tee sections. Engineering Structures.
+
 #### 27 Mar 24
 It might be that I am not yet done with the reading. I have found the book by Belytschko to include many sections that I must read, particularly on transformations! This book also covers some meshless methods which I will need to revisit. I added geometric stiffness and tangent stiffness calculations. Note that the geometric stiffness is incomplete as it only contains contributions of the axial load.
 
@@ -370,12 +393,12 @@ I will deal with this when I configure the project to build with CMake.
 - [x] Consider the following: add a list of the indices for where the DoFs of each element goes. That is, each element is given a map for where its local stiffnesses need to go in the begining of the analysis. If, for example, we have a constraint that forces the DoFs of a node to be reflected in the DoFs of a nother node, then this is reflected in this original map that is not needed to be updated too often or at all. This would allow us to tell where each local stiffness goes in the global matrix in a much simpler way.
 - [x] The `Assembler` should be separated from the `GlobalMesh`.
 - [x] The `BasicSolver` should be separated from the `GlobalMesh`.
-- [ ] The assembler should have a way to map nodes to the load and displacement vectors. Perhaps using `std::map`?
-- [ ] Nodes should have a container for loads, reaction forces, and for nodal dispalcements. 
-- [ ] Add functionality to add nodal load.
+- [x] The assembler should have a way to map nodes to the load and displacement vectors. Perhaps using `std::map`?
+- [x] Nodes should have a container for loads, reaction forces, and for nodal dispalcements. 
+- [x] Add functionality to add nodal load.
 - [ ] The command to load a node adds the loaded node to a `std::set` of loaded nodes so each time we want to map the loaded nodes, we only need to loop over the loaded nodes.
-- [ ] The assembler should fill the load vector based on nodal loads.
-- [ ] After each successful analysis step, nodal displacements are updated by the assembler which maps the nodal displacement vector back to the nodes.
-- [ ] The solution procedure should include calculating the element internal forces and strains, and each element should have these saved.
+- [x] The assembler should fill the load vector based on nodal loads.
+- [x] After each successful analysis step, nodal displacements are updated by the assembler which maps the nodal displacement vector back to the nodes.
+- [x] The solution procedure should include calculating the element internal forces and strains, and each element should have these saved.
 - [ ] Fixing a node adds it to a `std::set` that corresponds to fixed nodes. After each successful analysis step, these nodes calculate their reaction forces. All nodes that do not have a constraint just have reaction forces of zero.
 - [ ] Add loggers to retrieve and log certain displacements or reaction forces from the nodes, and internal forces/stresses/strains of elements.

@@ -28,12 +28,26 @@ int main () {
     glob_mesh.load_node(2, 0, 1000.); // load the x translation with a load for the last node (which happens to have id = 2).
 
     glob_mesh.count_dofs();
-    glob_mesh.calc_global_contributions();
-    assembler.assemble_global_contributions(glob_mesh);
-    solver.solve_for_U(assembler);
-    assembler.map_U_to_nodes(glob_mesh);
-    glob_mesh.print_info();
-    glob_mesh.update_elements_states();
+    // bool converged;
+    // real tolerance;
+    // const std::string convergence_criterion = "norm"; // or "max" - of out of balance.
+    // int max_iter = 100;
+    // int iter = 1;
+    // begin nonlinear iterations:
+    // while ((iter < max_iter) && !(converged))
+    // {
+        glob_mesh.calc_global_contributions();
+        assembler.assemble_global_contributions(glob_mesh);
+        solver.solve_for_U(assembler);
+        assembler.map_U_to_nodes(glob_mesh);
+        glob_mesh.print_info();
+        glob_mesh.update_elements_states(); // calculates internal state of strain, stress, and nodal responses
+        // assembler.collect_element_R(glob_mesh);
+        // solver.calculate_out_of_balance(assembler);
+        // converged = solver.check_convergence(assembler, convergence_criterion, tolerance);
+        // iter++;
+    //}
+
     glob_mesh.print_elements_states(true, true, true, true);
 
 }

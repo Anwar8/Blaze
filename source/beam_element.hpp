@@ -31,6 +31,7 @@
  */
 class Basic2DBeamElement {
     private:
+    protected:
         /**
          * @name beam_basic_information
          * @brief the basic data about the beam element
