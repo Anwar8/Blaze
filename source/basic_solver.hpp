@@ -24,6 +24,12 @@ class BasicSolver {
          * @param assembler 
          */
         void solve_for_U(Assembler& assembler);
+        /**
+         * @brief solves for \f$\Delta \boldsymbol{U}\f$ from \f$\Delta \boldsymbol{U} = -\boldsymbol{K}^{-1} \boldsymbol{G}\f$.
+         * 
+         * @param assembler 
+         */
+        void solve_for_deltaU(Assembler& assembler);
 };
 
 #endif

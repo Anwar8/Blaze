@@ -39,6 +39,7 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
     // TODO: Decide whether U is sparse or dense
     // U = make_xd_vec(glob_mesh.ndofs);
     U = make_spd_vec(glob_mesh.ndofs);
+    dU = make_spd_vec(glob_mesh.ndofs);
 
     std::cout << "There are " << std::size(P_global_triplets) << " P_global contributions to add up." << std::endl;
     std::cout << "There are " << std::size(K_global_triplets) << " K_global contributions to add up." << std::endl;

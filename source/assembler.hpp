@@ -23,11 +23,12 @@
  */
 class Assembler {
     private:
-        spmat K; /**< Global stiffness matrix \f$\boldsymbol{K}\f$*/
-        spmat P; /**< Nodal force vector \f$\boldsymbol{P}\f$*/
-        spmat R; /**< Resistance force vector \f$\boldsymbol{R}\f$*/
-        spmat G; /**< Out of balance force vector  \f$\boldsymbol{G}\f$*/
-        spvec U; /**< Global Nodal displacement vector \f$\boldsymbol{U}\f$ - also known as system state vector*/
+        spmat K; /**< Global stiffness matrix \f$\boldsymbol{K}\f$.*/
+        spmat P; /**< Nodal force vector \f$\boldsymbol{P}\f$.*/
+        spmat R; /**< Resistance force vector \f$\boldsymbol{R}\f$.*/
+        spmat G; /**< Out of balance force vector  \f$\boldsymbol{G}\f$.*/
+        spvec U; /**< Global Nodal displacement vector \f$\boldsymbol{U}\f$ - also known as system state vector.*/
+        spvec dU; /**< Change in global Nodal displacement vector \f$\Delta\boldsymbol{U}\f$ - also known as system state vector increment.*/
     public:
         friend class BasicSolver;
         /**
@@ -59,10 +60,18 @@ class Assembler {
          * @param glob_mesh takes the global_mesh object as input to get the counters and containers for nodes and elements.
          */
         void map_elements_f_to_R(GlobalMesh& glob_mes);
-
+        /**
+         * @brief calculates out of balance forces from \f$\boldsymbol{G} = \boldsymbol{K}\boldsymbol{U} - \boldsymbol{R}\f$.
+         * 
+         */
         void calculate_out_of_balance() {
             G = K*U - R;
             std::cout << "The G (out of balance) vector is:" << std::endl << Eigen::MatrixXd(G) << std::endl;
         }
+        /**
+         * @brief updates \f$\boldsymbol{U}\f$ by incrementing with \f$ \Delta \boldsymbol{U}\f$.
+         * 
+         */
+        void increment_U() {U += dU;}
 };
 #endif

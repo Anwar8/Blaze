@@ -206,7 +206,15 @@ class Basic2DBeamElement {
          * 
          */
         void calc_local_constitutive_mat();
-        void calc_eps(){local_eps = shape_func.get_B() * local_d;}
+        /**
+         * @brief calcualtes the local strains from the relationship \f$\boldsymbol{\sigma} = \boldsymbol{B}\boldsymbol{d}\f$.
+         * 
+         */
+        void calc_eps(){
+            local_eps = shape_func.get_B() * local_d;
+            std::cout << "Element " << id << " B is " << std::endl << shape_func.get_B() << std::endl;
+            std::cout << "Element " << id << " d is " << std::endl << local_d << std::endl;
+            }
         /**
          * @brief calculates the local stresses from \f$\boldsymbol{\sigma}=\boldsymbol{D}{\boldsymbol{\varepsilon}}\f$
          * @warning depends on `Eigen3` overlay for the \* operation for matrix objects. 
@@ -338,15 +346,18 @@ class Basic2DBeamElement {
         void calculate_global_resistance_forces() {
             global_R_triplets.clear();
             // the 12x1 full resistance vector from local nodal forces vector f
+            std::cout << "element " << id << " has untransformed local_f " <<std::endl << local_f << std::endl;
             vec full_local_R = orient.get_T().transpose()*local_f;
-
+            std::cout << "element " << id << " has full_local_R " <<std::endl << full_local_R << std::endl;
             std::set<int> node_active_dofs;
             int nz_i = 0;
             real force_value;
             int total_nodal_ndofs_completed = 0; // each node we finish with, we add 6 to this. 
             // This means we have to move to the next set of values corresponding to the next 
             // node in the full resistance vector.
-
+            
+            
+            
             for (auto node: nodes)
             {
                 int nodal_dof_index = 0;
@@ -354,15 +365,18 @@ class Basic2DBeamElement {
                 nz_i = node->get_nz_i();
                 for (auto active_dof: node_active_dofs)
                 {
-
+                    
                     force_value = full_local_R(active_dof + total_nodal_ndofs_completed);
                     // since inactive nodes do not appear in R, we have to make sure to be careful about where we add our nodal forces.
                     // here, nz_i + nodal_dof_index simply starts at where the node freedoms start in the global index, and then
                     // iterates one by one. See how we ++ nodal_dof_index for each freedom we add, and how we restrat from zero when
                     // we start work with the next node?
                     global_R_triplets.push_back(spnz(nz_i + nodal_dof_index, 0, force_value));
+                    std::cout << "element " << id << " node " << node->get_id() << " pushed force_value " << force_value << " to " << nz_i + nodal_dof_index <<  std::endl; 
                     nodal_dof_index++;
                 }
+                
+
                 //**< has to be 6 because each node has 6 dofs and our \ref full_local_R also has 6 rows for each node!*
                 total_nodal_ndofs_completed += 6;
             }
