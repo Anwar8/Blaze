@@ -11,7 +11,8 @@ int main () {
     GlobalMesh glob_mesh; 
     Assembler assembler;
     BasicSolver solver;
-
+    real x_load = -1e7;
+    real y_load = -1e5;
     glob_mesh.setup_mesh("mesh/test.msh");
     glob_mesh.count_dofs();
     int nelems = glob_mesh.get_num_elems();
@@ -24,14 +25,14 @@ int main () {
         glob_mesh.fix_node(i, 4);
     }
 
-    glob_mesh.load_node(2, 2, -100000.); // load the y translation with a load for the last node (which happens to have id = 2).
-    glob_mesh.load_node(2, 0, -1e7); // load the x translation with a load for the last node (which happens to have id = 2).
+    glob_mesh.load_node(2, 2, y_load); // load the y translation with a load for the last node (which happens to have id = 2).
+    glob_mesh.load_node(2, 0, x_load); // load the x translation with a load for the last node (which happens to have id = 2).
 
     glob_mesh.count_dofs();
     bool converged = false;
-    // real tolerance;
+    real tolerance = 0.002*std::max(std::abs(x_load), std::abs(y_load));
     // const std::string convergence_criterion = "norm"; // or "max" - of out of balance.
-    int max_iter = 3;
+    int max_iter = 200;
     int iter = 1;
 
         glob_mesh.calc_global_contributions();
@@ -46,12 +47,12 @@ int main () {
         glob_mesh.update_elements_states(); // calculates internal state of strain, stress, and nodal responses
         assembler.map_elements_f_to_R(glob_mesh);
         assembler.calculate_out_of_balance();
-        // converged = solver.check_convergence(assembler, convergence_criterion, tolerance);
+        converged = assembler.check_convergence(tolerance);
         solver.solve_for_deltaU(assembler);
         assembler.increment_U();
         iter++;
     }
 
     glob_mesh.print_elements_states(true, true, true, true);
-
+    std::cout << std::endl << "---<Analysis complete. Final iteration = " << iter << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
 }

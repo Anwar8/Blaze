@@ -85,6 +85,20 @@ spvec make_spd_vec(int rows);
  * @return spmat Sparse matrix allocated.
  */
 spmat make_spd_mat(int rows, int columns);
+
+/**
+ * @brief return the l2 norm of a vector.
+ * 
+ * @tparam eigen_container any container form Eigen compatible with `squaredNorm()`.
+ * @param V the vector/container to be normalised.
+ * @return realx2 l2_norm twice the normal precision norm value.
+ */
+template <typename eigen_container>
+realx2 calc_l2_norm(eigen_container& V)
+{
+    realx2 l2_norm = V.squaredNorm();
+    return l2_norm;
+}
 /** @} */
 
 #endif

@@ -82,3 +82,10 @@ void Assembler::map_elements_f_to_R(GlobalMesh& glob_mesh)
     R.makeCompressed();
     std::cout << "The R vector is:" << std::endl << Eigen::MatrixXd(R) << std::endl;
 }
+
+bool Assembler::check_convergence(real tolerance)
+{
+    G_max = std::sqrt(calc_l2_norm(G));
+    std::cout << "G_max = " << G_max << " while tolerance " << tolerance << std::endl;
+    return G_max < tolerance;
+}

@@ -27,6 +27,7 @@ class Assembler {
         spmat P; /**< Nodal force vector \f$\boldsymbol{P}\f$.*/
         spmat R; /**< Resistance force vector \f$\boldsymbol{R}\f$.*/
         spmat G; /**< Out of balance force vector  \f$\boldsymbol{G}\f$.*/
+        realx2 G_max; /**< Max out-of-balance force retrieved by taking the square-root of the l2 norm of \f$ \sqrt{\norm{\boldsymbol{G}}}\f$.*/
         spvec U; /**< Global Nodal displacement vector \f$\boldsymbol{U}\f$ - also known as system state vector.*/
         spvec dU; /**< Change in global Nodal displacement vector \f$\Delta\boldsymbol{U}\f$ - also known as system state vector increment.*/
     public:
@@ -73,5 +74,16 @@ class Assembler {
          * 
          */
         void increment_U() {U += dU;}
+
+        /**
+         * @brief checks if the maximum square-root of the norm of out-of-balance is smaller than a tolerance.
+         * 
+         * @param tolerance maximum allowed out of balance force.
+         * @return true if converged (i.e. tolerance more than max out-of-balance)
+         * @return false if not converged (i.e. tolerance more than out-of-balance)
+         */
+        bool check_convergence(real tolerance);
+
+        realx2 get_G_max() {return G_max;}
 };
 #endif
