@@ -66,3 +66,18 @@ void Assembler::map_U_to_nodes(GlobalMesh& glob_mesh)
         }
     }
 }
+
+void Assembler::map_elements_f_to_R(GlobalMesh& glob_mesh) 
+{
+    std::vector<spnz> R_global_triplets;
+    std::vector<spnz> R_global_triplets_elem_contributions;
+    for (auto elem: glob_mesh.elem_vector)
+    {
+        R_global_triplets_elem_contributions = elem->get_global_resistance_force_triplets();
+        R_global_triplets.insert(R_global_triplets.end(), R_global_triplets_elem_contributions.begin(), R_global_triplets_elem_contributions.end());
+    }
+    R = make_spd_mat(glob_mesh.ndofs, 1);
+    R.setFromTriplets(R_global_triplets.begin(), R_global_triplets.end());
+    R.makeCompressed();
+    std::cout << "The R vector is:" << std::endl << Eigen::MatrixXd(R) << std::endl;
+}

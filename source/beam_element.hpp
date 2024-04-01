@@ -64,13 +64,14 @@ class Basic2DBeamElement {
         vec global_ele_U = make_xd_vec(12); /**< global nodal displacements for all freedoms of the nodes corresponding to the element.*/
         vec local_d = make_xd_vec(6); /**< local nodal-displacements for all freedoms.*/
         vec local_f = make_xd_vec(6); /**< local nodal-forces corresponding to all freedoms.*/
+        std::vector<spnz> global_R_triplets; /**< triplet vector for global resistance forces \f$\boldsymbol{R}\f$.*/
         vec local_eps = make_xd_vec(2); /**< local strains. Here they are axial strain and curvature.*/
         vec local_stresses = make_xd_vec(2); /**< local stresses. Here they are axial force and moment.*/
-        mat local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix \f$\boldsymbol{D}\f$*/
-        mat local_mat_stiffness = make_xd_mat(6,6); /**< local element material stiffness matrix*/
-        mat local_geom_stiffness = make_xd_mat(6,6); /**< local element geometric stiffness matrix*/
-        mat local_tangent_stiffness = make_xd_mat(6,6); /**< local element tangent stiffness matrix*/
-        std::vector<spnz> K_global; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
+        mat local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix \f$\boldsymbol{D}\f$.*/
+        mat local_mat_stiffness = make_xd_mat(6,6); /**< local element material stiffness matrix.*/
+        mat local_geom_stiffness = make_xd_mat(6,6); /**< local element geometric stiffness matrix.*/
+        mat local_tangent_stiffness = make_xd_mat(6,6); /**< local element tangent stiffness matrix.*/
+        std::vector<spnz> K_global; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix.*/
         //@}
         
         
@@ -257,6 +258,7 @@ class Basic2DBeamElement {
          calc_geom_stiffness();
          calc_tangent_stiffness();
          calc_nodal_forces();
+         calculate_global_resistance_forces();
         }
 
         /**
@@ -329,6 +331,44 @@ class Basic2DBeamElement {
         mat get_T() {return orient.get_T();}
         vec get_eps() {return local_eps;}
         vec get_d() {return local_d;}
+        /**
+         * @brief Calculates the resistance forces from the relationship \f$ \boldsymbol{R} = \boldsymbol{T}^T\boldsymbol{f}\f$ removing any inactive freedoms.
+         * @todo I seem to be doing the active_dofs thing too often. The element should also have a set that contains its active dofs!
+         */
+        void calculate_global_resistance_forces() {
+            global_R_triplets.clear();
+            // the 12x1 full resistance vector from local nodal forces vector f
+            vec full_local_R = orient.get_T().transpose()*local_f;
+
+            std::set<int> node_active_dofs;
+            int nz_i = 0;
+            real force_value;
+            int total_nodal_ndofs_completed = 0; // each node we finish with, we add 6 to this. 
+            // This means we have to move to the next set of values corresponding to the next 
+            // node in the full resistance vector.
+
+            for (auto node: nodes)
+            {
+                int nodal_dof_index = 0;
+                node_active_dofs = node->get_active_dofs();
+                nz_i = node->get_nz_i();
+                for (auto active_dof: node_active_dofs)
+                {
+
+                    force_value = full_local_R(active_dof + total_nodal_ndofs_completed);
+                    // since inactive nodes do not appear in R, we have to make sure to be careful about where we add our nodal forces.
+                    // here, nz_i + nodal_dof_index simply starts at where the node freedoms start in the global index, and then
+                    // iterates one by one. See how we ++ nodal_dof_index for each freedom we add, and how we restrat from zero when
+                    // we start work with the next node?
+                    global_R_triplets.push_back(spnz(nz_i + nodal_dof_index, 0, force_value));
+                    nodal_dof_index++;
+                }
+                //**< has to be 6 because each node has 6 dofs and our \ref full_local_R also has 6 rows for each node!*
+                total_nodal_ndofs_completed += 6;
+            }
+        }
+        std::vector<spnz> get_global_resistance_force_triplets() {return global_R_triplets;}
+
         std::vector<int> get_global_dof_map() {return global_dof_map;}
         std::vector<spnz> get_K_global() {return K_global;}
 

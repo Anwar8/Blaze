@@ -25,7 +25,7 @@ int main () {
     }
 
     glob_mesh.load_node(2, 2, -100000.); // load the y translation with a load for the last node (which happens to have id = 2).
-    glob_mesh.load_node(2, 0, 1000.); // load the x translation with a load for the last node (which happens to have id = 2).
+    glob_mesh.load_node(2, 0, 1e7); // load the x translation with a load for the last node (which happens to have id = 2).
 
     glob_mesh.count_dofs();
     // bool converged;
@@ -42,8 +42,8 @@ int main () {
         assembler.map_U_to_nodes(glob_mesh);
         glob_mesh.print_info();
         glob_mesh.update_elements_states(); // calculates internal state of strain, stress, and nodal responses
-        // assembler.collect_element_R(glob_mesh);
-        // solver.calculate_out_of_balance(assembler);
+        assembler.map_elements_f_to_R(glob_mesh);
+        assembler.calculate_out_of_balance();
         // converged = solver.check_convergence(assembler, convergence_criterion, tolerance);
         // iter++;
     //}
