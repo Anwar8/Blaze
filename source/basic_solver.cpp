@@ -11,7 +11,7 @@ void BasicSolver::solve_for_U(Assembler& assembler) {
     
     if (solver.info() == Eigen::Success)
     {
-        std::cout << "Factorisation successfull." << std::endl;
+        std::cout << "Factorisation successful." << std::endl;
     } else {
         std::cout << "ERROR: Factorisation unsuccessfull! Matrix is:" << std::endl;
         // convert to dense matrix to print correctly
@@ -21,8 +21,10 @@ void BasicSolver::solve_for_U(Assembler& assembler) {
         std::exit(1);
     }
     assembler.U = solver.solve(assembler.P); 
-    
-    std::cout << "The solution is:" << std::endl << assembler.U << std::endl;
+    if (VERBOSE)
+    {
+        std::cout << "The solution is:" << std::endl << assembler.U << std::endl;
+    }
 }
 void BasicSolver::solve_for_deltaU(Assembler& assembler) {
 
@@ -35,9 +37,9 @@ void BasicSolver::solve_for_deltaU(Assembler& assembler) {
     
     if (solver.info() == Eigen::Success)
     {
-        std::cout << "Factorisation successfull." << std::endl;
+        std::cout << "Factorisation successful." << std::endl;
     } else {
-        std::cout << "ERROR: Factorisation unsuccessfull! Matrix is:" << std::endl;
+        std::cout << "ERROR: Factorisation unsuccessful! Matrix is:" << std::endl;
         // convert to dense matrix to print correctly
         std::cout << Eigen::MatrixXd(assembler.K) << std::endl;
 
@@ -46,5 +48,8 @@ void BasicSolver::solve_for_deltaU(Assembler& assembler) {
     }
     assembler.dU = solver.solve(assembler.G);
     assembler.dU = -assembler.dU; 
-    std::cout << "dU is:" << std::endl << assembler.dU << std::endl;
+    if (VERBOSE)
+    {    
+        std::cout << "dU is:" << std::endl << assembler.dU << std::endl;
+    }
 }

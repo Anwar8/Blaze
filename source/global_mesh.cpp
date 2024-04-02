@@ -157,6 +157,18 @@ auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std
     (*node_it)->add_nodal_load(load, dof);
 }
 
+void GlobalMesh::increment_node_load(int id, int dof, real dP) {
+auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
+    (*node_it)->increment_nodal_load(dP, dof);
+}
+
+void GlobalMesh::track_nodal_dof(int id, int dof, std::vector<real>& history)
+{
+    auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
+    std::array<real, 6> nodal_displacements = (*node_it)->get_nodal_displacements();
+    history.push_back(nodal_displacements[dof]);
+}
+
 void GlobalMesh::solve_for_U() {
     Eigen::SparseLU<spmat> solver;
     // Compute the ordering permutation vector from the structural pattern of A

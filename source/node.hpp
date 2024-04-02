@@ -179,9 +179,17 @@ class Node {
          * @brief adds nodal load to \ref nodal_loads.
          * 
          * @param nodal_load nodal load to be added.
-         * @param dof the dof to which the nodal load will be added.
+         * @param dof the DoF to which the nodal load will be added.
          */
         void add_nodal_load(real nodal_load, int dof);
+
+        /**
+         * @brief increments the nodal at DoF dof by dP.
+         * 
+         * @param nodal_load nodal load increment to be added to node loads.
+         * @param dof the DoF to which the nodal load will be added.
+         */
+        void increment_nodal_load(real dP, int dof);
         /**
          * @brief converts the \ref nodal_loads array into a std vector of triplets to be collected by the assembler.
          * 

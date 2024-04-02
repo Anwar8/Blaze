@@ -67,7 +67,10 @@ class Assembler {
          */
         void calculate_out_of_balance() {
             G = K*U - R;
-            std::cout << "The G (out of balance) vector is:" << std::endl << Eigen::MatrixXd(G) << std::endl;
+            if (VERBOSE)
+            {
+                std::cout << "The G (out of balance) vector is:" << std::endl << Eigen::MatrixXd(G) << std::endl;
+            }
         }
         /**
          * @brief updates \f$\boldsymbol{U}\f$ by incrementing with \f$ \Delta \boldsymbol{U}\f$.

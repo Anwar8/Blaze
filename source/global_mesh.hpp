@@ -111,6 +111,23 @@ class GlobalMesh {
          * 
          */
         void load_node(int id, int dof, real load);
+        /**
+         * @brief increments the nodal load of DoF dof of node id by load increment dP. Uses \ref Node::increment_nodal_load.
+         * 
+         * @param id 
+         * @param dof 
+         * @param dP
+         */
+        void increment_node_load(int id, int dof, real dP);
+
+        /**
+         * @brief keeps track of the history of a nodal DoF.
+         * 
+         * @param id 
+         * @param dof 
+         * @param history vector where nodal DoF history is tracked.
+         */
+        void track_nodal_dof(int id, int dof, std::vector<real>& history);
 
         /**
          * @brief loop over elements and call each of their \ref map_stiffness and \ref calc_K_global functions.

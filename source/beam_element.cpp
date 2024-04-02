@@ -121,7 +121,10 @@ void Basic2DBeamElement::map_stiffness()
         stiffness_size += std::size(node->get_active_dofs());
     }
     stiffness_size *= stiffness_size;
-    std::cout << "Reserved " << stiffness_size << " spaces for the stiffness_map" << std::endl;
+    if (VERBOSE)
+    {
+        std::cout << "Reserved " << stiffness_size << " spaces for the stiffness_map" << std::endl;
+    }
     stiffness_map.reserve(stiffness_size);
     int i = 0;
     for (auto node_i: nodes)
@@ -151,12 +154,15 @@ void Basic2DBeamElement::map_stiffness()
         }
     ++i;
     }
-    std::cout << "Element " << id << " has " << std::size(stiffness_map) << " contributions, the stiffness map is:" << std::endl;
+    if (VERBOSE)
+    {
+        std::cout << "Element " << id << " has " << std::size(stiffness_map) << " contributions, the stiffness map is:" << std::endl;
+    
     for (auto submap: stiffness_map)
     {
         print_container(submap);
     }
-
+    }
 }
 void Basic2DBeamElement::calc_K_global() 
 {

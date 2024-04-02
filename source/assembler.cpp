@@ -21,18 +21,23 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
     for (auto node: glob_mesh.node_vector)
     {
         P_global_node_triplet_contribution = node->get_load_triplets();
+        if (VERBOSE)
+        {
         std::cout << "Assembler: Node " << node->get_id() << " with coords: "  << node->get_coords()[0] << "," << node->get_coords()[1] << "," << node->get_coords()[2] << ". its triplets are: " << std::endl;
         for (auto triplet: P_global_node_triplet_contribution)
         {
             std::cout << "row, col, val: " << triplet.row() << "," << triplet.col() << "," << triplet.value() << std::endl;
         }
-        
+        }
         P_global_triplets.insert(P_global_triplets.end(), P_global_node_triplet_contribution.begin(), P_global_node_triplet_contribution.end());
     }
+    if (VERBOSE)
+    {
     std::cout << "Assembler: all triplets are: " << std::endl;
     for (auto triplet: P_global_triplets)
     {
         std::cout << "row, col, val: " << triplet.row() << "," << triplet.col() << "," << triplet.value() << std::endl;
+    }
     }
     K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
     P = make_spd_mat(glob_mesh.ndofs, 1);
@@ -40,10 +45,12 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
     // U = make_xd_vec(glob_mesh.ndofs);
     U = make_spd_vec(glob_mesh.ndofs);
     dU = make_spd_vec(glob_mesh.ndofs);
-
-    std::cout << "There are " << std::size(P_global_triplets) << " P_global contributions to add up." << std::endl;
-    std::cout << "There are " << std::size(K_global_triplets) << " K_global contributions to add up." << std::endl;
-    std::cout << "The K_global_triplets is of size " << glob_mesh.ndofs << "x" << glob_mesh.ndofs << std::endl;
+    if (VERBOSE)
+    {
+        std::cout << "There are " << std::size(P_global_triplets) << " P_global contributions to add up." << std::endl;
+        std::cout << "There are " << std::size(K_global_triplets) << " K_global contributions to add up." << std::endl;
+        std::cout << "The K_global_triplets is of size " << glob_mesh.ndofs << "x" << glob_mesh.ndofs << std::endl;
+    }
     K.setFromTriplets(K_global_triplets.begin(), K_global_triplets.end());
     K.makeCompressed();
     
@@ -80,7 +87,10 @@ void Assembler::map_elements_f_to_R(GlobalMesh& glob_mesh)
     R = make_spd_mat(glob_mesh.ndofs, 1);
     R.setFromTriplets(R_global_triplets.begin(), R_global_triplets.end());
     R.makeCompressed();
-    std::cout << "The R vector is:" << std::endl << Eigen::MatrixXd(R) << std::endl;
+    if (VERBOSE)
+    {
+        std::cout << "The R vector is:" << std::endl << Eigen::MatrixXd(R) << std::endl;
+    }
 }
 
 bool Assembler::check_convergence(real tolerance)

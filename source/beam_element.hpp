@@ -10,6 +10,7 @@
 #include <string>
 #include <array>
 #include <memory>
+#include "main.hpp"
 #include "maths_defaults.hpp"
 #include "basic_section.hpp"
 #include "basic_shape_function.hpp"
@@ -212,8 +213,11 @@ class Basic2DBeamElement {
          */
         void calc_eps(){
             local_eps = shape_func.get_B() * local_d;
-            std::cout << "Element " << id << " B is " << std::endl << shape_func.get_B() << std::endl;
-            std::cout << "Element " << id << " d is " << std::endl << local_d << std::endl;
+            if (VERBOSE)
+            {
+                std::cout << "Element " << id << " B is " << std::endl << shape_func.get_B() << std::endl;
+                std::cout << "Element " << id << " d is " << std::endl << local_d << std::endl;
+            }
             }
         /**
          * @brief calculates the local stresses from \f$\boldsymbol{\sigma}=\boldsymbol{D}{\boldsymbol{\varepsilon}}\f$
@@ -346,9 +350,15 @@ class Basic2DBeamElement {
         void calculate_global_resistance_forces() {
             global_R_triplets.clear();
             // the 12x1 full resistance vector from local nodal forces vector f
+            if (VERBOSE)
+            {
             std::cout << "element " << id << " has untransformed local_f " <<std::endl << local_f << std::endl;
+            }
             vec full_local_R = orient.get_T().transpose()*local_f;
+            if (VERBOSE)
+            {
             std::cout << "element " << id << " has full_local_R " <<std::endl << full_local_R << std::endl;
+            }
             std::set<int> node_active_dofs;
             int nz_i = 0;
             real force_value;
@@ -372,7 +382,10 @@ class Basic2DBeamElement {
                     // iterates one by one. See how we ++ nodal_dof_index for each freedom we add, and how we restrat from zero when
                     // we start work with the next node?
                     global_R_triplets.push_back(spnz(nz_i + nodal_dof_index, 0, force_value));
+                    if (VERBOSE)
+                    {
                     std::cout << "element " << id << " node " << node->get_id() << " pushed force_value " << force_value << " to " << nz_i + nodal_dof_index <<  std::endl; 
+                    }
                     nodal_dof_index++;
                 }
                 
