@@ -21,7 +21,7 @@
  */
 
 class BasicOrientation {
-    private:
+    protected:
         coords local_x; /**< the x, y, z unit vectors for the beam element local x axis. */
         real length; /**< length of the beam-column element. */
         mat T = make_xd_mat(6,12); /**< The 6x12 T transformation matrix. */
@@ -55,11 +55,10 @@ class BasicOrientation {
         /**
          * @brief calcualte the angle between the local and global x axes
          * 
-         * @details
-         * The calculation is based on:
-         * \f$A\dot B = \abs{A}\abs{B}\cos{\theta}\f$
+         * @details 
+         * The calculation is based on: \f$ A \cdot B = |A||B|\cos{\theta} \f$
          * and then:
-         * \f$\theta = \arccos{\frac{A\dot B}{\abs{A}\abs{B}}}\f$
+         * \f$\theta = \arccos{\frac{A\cdot B}{|A||B|}}\f$
          * 
          * @param origin_x the global coord system x-axis unit vector
          */

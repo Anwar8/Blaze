@@ -15,7 +15,7 @@
  * 
  */
 class GlobalCoords {
-    private:
+    protected:
         coords centroid = {0.0, 0.0 , 0.0};
         coords unit_x = {1.0, 0.0, 0.0};
         coords unit_y = {0.0, 1.0, 0.0};
