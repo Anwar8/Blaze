@@ -59,11 +59,12 @@ class BasicOrientation {
          * The calculation is based on: \f$ A \cdot B = |A||B|\cos{\theta} \f$
          * and then:
          * \f$\theta = \arccos{\frac{A\cdot B}{|A||B|}}\f$
+         * Knowing that A and B are both unit vectors the multiple of their absolute value is just 1.
          * 
          * @param origin_x the global coord system x-axis unit vector
          */
         void calc_alpha(coords const& origin_x) {
-           alpha = std::acos(origin_x.dot(local_x));
+           alpha = std::acos(origin_x.dot(local_x)); 
         }
         /**
          * @brief 

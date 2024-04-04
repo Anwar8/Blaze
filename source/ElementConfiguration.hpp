@@ -7,6 +7,7 @@
 #ifndef ELEMENT_CONFIGURATION_HPP
 #define ELEMENT_CONFIGURATION_HPP
 #include "maths_defaults.hpp"
+#include "NonlinearTransform.hpp"
 /**
  * @brief defines element configuration in terms of end-node coordinates, local axis orientation, and angles with global axis.
  * 
@@ -24,12 +25,28 @@ class ElementConfiguration
     real alpha; /**< Angle between the element configuration and the global configuration.*/
     
     public:
+    friend class NonlinearTransform;
     ElementConfiguration(coords node1, coords node2) 
     {
         pt1 = node1;
         pt2 = node2;
         calc_distances();
         calc_axes();
+    }
+    /**
+     * @brief Just like the constructor, except it is called on an already established object. 
+     * 
+     * @todo consider whether I should just use the constructor again.
+     * 
+     * @param node1 
+     * @param node2 
+     */
+    void update_pts(coords node1, coords node2)
+    {
+        pt1 = node1;
+        pt2 = node2;
+        calc_distances();
+        calc_axes(); 
     }
     /**
      * @brief calculates \ref X21, \ref Y21, \ref Z21, and \ref L from embedded end-point coordinates \ref pt1 and \ref pt2.
@@ -41,6 +58,9 @@ class ElementConfiguration
         X21 = pt21(0);
         Y21 = pt21(1);
         Z21 = pt21(2);
+
+        centroid = pt1 + 0.5*pt21;
+
         // Uses Eigen3 norm function to retrieve length.
         L = pt21.norm();
         
@@ -70,13 +90,8 @@ class ElementConfiguration
         z_axis(1) = x_axis(1);
         z_axis(2) = -x_axis(0);
     }
-    /**
-     * @brief calculates the angles (xx, yy, zz) with another element configuration.
-     * 
-     * @param config configuration with which to calculate the angle.
-     * @param ref_config the reference configuration with which axes to align the angles.
-     * @param along_axis the global axis along which we want to calculate the angles.
-     */
-    void calc_angle_w_configuration(ElementConfiguration& config, ElementConfiguration& ref_config, int along_axis);
+
+
+    
 };
 #endif
