@@ -18,6 +18,8 @@ Basic2DBeamElement::Basic2DBeamElement(std::shared_ptr<Node>& node_1, std::share
         node->add_connected_element(id);
     }
     calc_length();
+    calc_T();
+    calc_stiffnesses();
 }
 Basic2DBeamElement::Basic2DBeamElement(int given_id, std::shared_ptr<Node>& node_1, std::shared_ptr<Node>& node_2) {
     id = given_id;
@@ -27,6 +29,8 @@ Basic2DBeamElement::Basic2DBeamElement(int given_id, std::shared_ptr<Node>& node
         node->add_connected_element(id);
     }
     calc_length();
+    calc_T();
+    calc_stiffnesses();
 }
 
 Basic2DBeamElement::Basic2DBeamElement(int given_id, std::vector<std::shared_ptr<Node>>& in_nodes) {
@@ -44,6 +48,8 @@ Basic2DBeamElement::Basic2DBeamElement(int given_id, std::vector<std::shared_ptr
         node->add_connected_element(id);
     }
     calc_length();
+    calc_T();
+    calc_stiffnesses();
 }
 void Basic2DBeamElement::print_info() {
     std::cout << "elem " << id << " of type " <<elem_type << " with " << ndofs << " dofs, and " << nnodes << " nodes:" << std::endl;
@@ -71,10 +77,6 @@ void Basic2DBeamElement::calc_B(real x)
     shape_func.calc_B(x, length);
 }
 
-void Basic2DBeamElement::calc_k()
-{
-    shape_func.calc_k(length, section);
-}
 void Basic2DBeamElement::calc_local_constitutive_mat()
 {
     real EA = section.get_E()*section.get_A();
@@ -166,16 +168,16 @@ void Basic2DBeamElement::map_stiffness()
 }
 void Basic2DBeamElement::calc_K_global() 
 {
-    calc_T();
-    calc_k();
-    mat k_glob = orient.get_T().transpose() * shape_func.get_k() * orient.get_T();
+    // calc_T();
+    // calc_k();
+    // mat k_glob = orient.get_T().transpose() * shape_func.get_k() * orient.get_T();
     K_global.clear();
     // we have the same number of contribution as stiffness components 
     // assuming all are non-zero!
-    K_global.reserve(k_glob.rows() * k_glob.cols());
+    K_global.reserve(elem_global_stiffness.rows() * elem_global_stiffness.cols());
     for (auto kmap: stiffness_map)
     {
-        real val = k_glob(kmap[0], kmap[1]);
+        real val = elem_global_stiffness(kmap[0], kmap[1]);
         K_global.push_back(spnz(kmap[2], kmap[3], val));
     }
 }

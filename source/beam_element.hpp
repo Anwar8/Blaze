@@ -1,7 +1,7 @@
 /**
  * @file beam_element.hpp
  * @brief definitions for basic beam-column elements.
- * 
+ * @todo get rid of the shape function object, or modify it so that it is more powerful.
  */
 
 #ifndef BEAM_ELEMENT_HPP
@@ -72,6 +72,7 @@ class Basic2DBeamElement {
         mat local_mat_stiffness = make_xd_mat(6,6); /**< local element material stiffness matrix.*/
         mat local_geom_stiffness = make_xd_mat(6,6); /**< local element geometric stiffness matrix.*/
         mat local_tangent_stiffness = make_xd_mat(6,6); /**< local element tangent stiffness matrix.*/
+        mat elem_global_stiffness = make_xd_mat(6,6); /**< the global contribution of the element - as in, tangent stiffness after transform via \f$ \boldsymbol{K}_t^e = \boldsymbol{T}^T \boldysymbol{k}_t \boldsymbol{T}\f$*/
         std::vector<spnz> K_global; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix.*/
         //@}
         
@@ -174,6 +175,8 @@ class Basic2DBeamElement {
                 node->add_connected_element(id);
             }
             calc_length();
+            calc_T();
+            calc_stiffnesses();
         }
         void print_info();
         void calc_length();
@@ -184,7 +187,6 @@ class Basic2DBeamElement {
          * @param x 
          */
         void calc_B(real x);
-        void calc_k();
         /**
          * @brief calculates the material stiffness matrix using the shape-function function \ref ShapeFunction::calc_elem_mat_stiffness.
          * 
@@ -200,6 +202,14 @@ class Basic2DBeamElement {
          * 
          */
         void calc_tangent_stiffness() {local_tangent_stiffness = local_mat_stiffness + local_geom_stiffness;}
+
+        /**
+         * @brief calculates the global contributions of the tangent stiffness to the global stiffness matrix as a 6x6 matrix.
+         * 
+         */
+        void calc_elem_global_stiffness() {
+            elem_global_stiffness = orient.get_T().transpose() * local_tangent_stiffness * orient.get_T();
+        }
 
         void calc_T(real sec_offset = 0.0, coords origin_x = {1.0, 0.0, 0.0});
         /**
@@ -228,8 +238,6 @@ class Basic2DBeamElement {
         /**
          * @brief calculates element nodal forces based on nodal displacements and element stiffness.
          * @details calculates the nodal forces from the relationship \f$\boldsymbol{f} = \boldsymbol{k}\boldsymbol{d}\f$
-         * @todo convert from using material stiffness to using tangent stiffness.
-         * @warning uses only material stiffness for force calculation - linear only.
          */
         void calc_nodal_forces() {local_f = local_tangent_stiffness*local_d;}
 
@@ -265,12 +273,20 @@ class Basic2DBeamElement {
          calc_d_from_U();
          calc_eps();
          calc_stresses();
-         // calc_geometric_stiffness, calc_tangent_stiffness
          calc_mat_stiffness();
          calc_geom_stiffness();
          calc_tangent_stiffness();
+         calc_elem_global_stiffness();
          calc_nodal_forces();
-         calculate_global_resistance_forces();
+         calc_global_resistance_forces();
+        }
+
+        void calc_stiffnesses()
+        {
+            calc_mat_stiffness();
+            calc_geom_stiffness();
+            calc_tangent_stiffness();
+            calc_elem_global_stiffness();
         }
 
         /**
@@ -347,7 +363,7 @@ class Basic2DBeamElement {
          * @brief Calculates the resistance forces from the relationship \f$ \boldsymbol{R} = \boldsymbol{T}^T\boldsymbol{f}\f$ removing any inactive freedoms.
          * @todo I seem to be doing the active_dofs thing too often. The element should also have a set that contains its active dofs!
          */
-        void calculate_global_resistance_forces() {
+        void calc_global_resistance_forces() {
             global_R_triplets.clear();
             // the 12x1 full resistance vector from local nodal forces vector f
             if (VERBOSE)

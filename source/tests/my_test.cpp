@@ -24,7 +24,6 @@ public:
         my_beam = Basic2DBeamElement(in_nodes_1, in_nodes_2);
         my_beam.calc_N(1.5);
         my_beam.calc_B(1.5);
-        my_beam.calc_k();
 
         // Create the d vector
         d = make_xd_vec(6);
@@ -44,8 +43,6 @@ public:
     void SetUp() override {
         // Create the nodes
         my_beam = Basic2DBeamElement(in_nodes_1, in_nodes_2);
-        my_beam.calc_k();
-        my_beam.calc_T();
     }
     void TearDown() override {
       
