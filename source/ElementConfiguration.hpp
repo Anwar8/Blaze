@@ -7,7 +7,8 @@
 #ifndef ELEMENT_CONFIGURATION_HPP
 #define ELEMENT_CONFIGURATION_HPP
 #include "maths_defaults.hpp"
-#include "NonlinearTransform.hpp"
+
+
 /**
  * @brief defines element configuration in terms of end-node coordinates, local axis orientation, and angles with global axis.
  * 
@@ -26,13 +27,7 @@ class ElementConfiguration
     
     public:
     friend class NonlinearTransform;
-    ElementConfiguration(coords node1, coords node2) 
-    {
-        pt1 = node1;
-        pt2 = node2;
-        calc_distances();
-        calc_axes();
-    }
+
     /**
      * @brief Just like the constructor, except it is called on an already established object. 
      * 

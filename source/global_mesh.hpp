@@ -17,6 +17,7 @@
 #include "maths_defaults.hpp"
 #include "node.hpp"
 #include "beam_element.hpp"
+#include "Izzuddin2DNonlinearBeam.hpp"
 
 /**
  * @brief std vector of pairs each of which has an id and a 3-item coords vector.
@@ -42,7 +43,8 @@ class GlobalMesh {
         int ndofs = 0; /**< number of DOFs in the mesh.*/
         int nelems = 0; /**< number of elements in the mesh.*/
         std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes in the problem.*/
-        std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
+        // std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
+        std::vector<std::shared_ptr<Izzuddin2DNonlinearBeam>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
 
         spmat K;
         spvec P;

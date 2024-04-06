@@ -7,7 +7,7 @@
 #ifndef NONLINEAR_TRANSFORM_HPP
 #define NONLINEAR_TRANSFORM_HPP
 #include "ElementConfiguration.hpp"
-#include "Node.hpp"
+#include "node.hpp"
 /**
  * @brief NonlinearTransform object is responsible for creating the geometerically-nonlinear transformation matrix for beam-column analysis.
  * 
@@ -35,7 +35,7 @@ private:
     mat nl_T = make_xd_mat(3,12); /**< The 3x12 T transformation matrix \f$ \partial \boldsymbol{d}/\partial \boldsymbol{U}\f$.*/
     mat T = make_xd_mat(6,12); /**< The 6x12 T transformation matrix from (16.24).*/
 public:
-    NonlinearTransform();
+    
     /**
      * @brief initialise the nonlinear transform object with a direct reference to the nodes to extract their initial coordinates.
      * 
@@ -179,7 +179,33 @@ public:
         T(4,8) = c;
         T(5,11) = 1;
     }
+
+
+
     mat get_T() {return T;}
+    real get_L() {return L;}
+    real get_L0() {return L0;}
+
+    real get_g1()
+    {
+        return 2*cos_phi/(L*L);
+    }
+    real get_g2()
+    {
+        return (cos_phi*cos_phi - sin_phi*sin_phi)/(L*L);
+    }
+    real get_g3()
+    {
+        return (cos_phi*cos_phi)/(L*L);
+    }
+    real get_g4()
+    {
+        return (cos_phi*sin_phi)/L;
+    }
+    real get_g5()
+    {
+        return sin_phi*sin_phi/L;
+    }
 };
 
 

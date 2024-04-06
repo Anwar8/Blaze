@@ -2,7 +2,7 @@
 #include <string>
 #include "global_mesh.hpp"
 #include "basic_utilities.hpp"
-
+#include "Izzuddin2DNonlinearBeam.hpp"
 void GlobalMesh::open_mesh_file(std::string const mesh_file) {
     gmsh::initialize();
     gmsh::open(mesh_file);
@@ -84,7 +84,8 @@ void GlobalMesh::make_elements (gmsh_elem_map elem_map) {
         }
         // Basic2DBeamElement my_beam(element_data.first, elem_nodes);
         // my_beam.print_info();
-        elem_vector.push_back(std::make_shared<Basic2DBeamElement>(element_data.first, elem_nodes));
+        // elem_vector.push_back(std::make_shared<Basic2DBeamElement>(element_data.first, elem_nodes));
+        elem_vector.push_back(std::make_shared<Izzuddin2DNonlinearBeam>(element_data.first, elem_nodes));
     }   
 }
 void GlobalMesh::make_nodes (gmsh_node_map node_map) {
