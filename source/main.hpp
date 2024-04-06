@@ -1,2 +1,3 @@
-#define VERBOSE 1
+#define VERBOSE 0
 #define VERBOSE_STIFFNESSES 0
+#define VERBOSE_NLB 1

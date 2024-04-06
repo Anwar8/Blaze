@@ -21,7 +21,7 @@ void BasicSolver::solve_for_U(Assembler& assembler) {
         std::exit(1);
     }
     assembler.U = solver.solve(assembler.P); 
-    if (VERBOSE)
+    if (VERBOSE_NLB)
     {
         std::cout << "The solution is:" << std::endl << assembler.U << std::endl;
     }
@@ -48,7 +48,7 @@ void BasicSolver::solve_for_deltaU(Assembler& assembler) {
     }
     assembler.dU = solver.solve(assembler.G);
     assembler.dU = -assembler.dU; 
-    if (VERBOSE)
+    if (VERBOSE_NLB)
     {    
         std::cout << "dU is:" << std::endl << assembler.dU << std::endl;
     }

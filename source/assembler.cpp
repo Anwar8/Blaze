@@ -87,9 +87,11 @@ void Assembler::map_elements_f_to_R(GlobalMesh& glob_mesh)
     R = make_spd_mat(glob_mesh.ndofs, 1);
     R.setFromTriplets(R_global_triplets.begin(), R_global_triplets.end());
     R.makeCompressed();
-    if (VERBOSE)
+    if (VERBOSE_NLB)
     {
         std::cout << "The R vector is:" << std::endl << Eigen::MatrixXd(R) << std::endl;
+        std::cout << "KU, however, is:" << std::endl << Eigen::MatrixXd(K*U) << std::endl;
+        std::cout << "and P is:" << std::endl << Eigen::MatrixXd(P) << std::endl;
     }
 }
 

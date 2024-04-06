@@ -43,8 +43,8 @@ class GlobalMesh {
         int ndofs = 0; /**< number of DOFs in the mesh.*/
         int nelems = 0; /**< number of elements in the mesh.*/
         std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes in the problem.*/
-        // std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
-        std::vector<std::shared_ptr<Izzuddin2DNonlinearBeam>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
+        std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
+        // std::vector<std::shared_ptr<Izzuddin2DNonlinearBeam>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
 
         spmat K;
         spvec P;

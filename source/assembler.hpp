@@ -60,14 +60,14 @@ class Assembler {
          * 
          * @param glob_mesh takes the global_mesh object as input to get the counters and containers for nodes and elements.
          */
-        void map_elements_f_to_R(GlobalMesh& glob_mes);
+        void map_elements_f_to_R(GlobalMesh& glob_mesh);
         /**
-         * @brief calculates out of balance forces from \f$\boldsymbol{G} = \boldsymbol{K}\boldsymbol{U} - \boldsymbol{R}\f$.
+         * @brief calculates out of balance forces from \f$\boldsymbol{G} =  \boldsymbol{R} - \boldsymbol{P}\f$.
          * 
          */
         void calculate_out_of_balance() {
-            G = K*U - R;
-            if (VERBOSE)
+            G = R - P;
+            if (VERBOSE_NLB)
             {
                 std::cout << "The G (out of balance) vector is:" << std::endl << Eigen::MatrixXd(G) << std::endl;
             }
@@ -76,7 +76,13 @@ class Assembler {
          * @brief updates \f$\boldsymbol{U}\f$ by incrementing with \f$ \Delta \boldsymbol{U}\f$.
          * 
          */
-        void increment_U() {U += dU;}
+        void increment_U() {
+            if (VERBOSE_NLB)
+                std::cout << "U before update is " << std::endl << U << std::endl;
+            U += dU;
+            if (VERBOSE_NLB)
+                std::cout << "U after update is " << std::endl << U << std::endl;
+        }
 
         /**
          * @brief checks if the maximum square-root of the norm of out-of-balance is smaller than a tolerance.

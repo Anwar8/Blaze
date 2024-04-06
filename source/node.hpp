@@ -24,7 +24,7 @@ class Node {
         /**
          * @brief nodal mass.
          * 
-         * @todo should the nodal mass have x, y, and z components?
+         * @todo nodal displacements should be Eigen3 vector types not std array types.
          */
         real mass;
         int ndof = 6; /**< the number of DoFs - should be 6 unless some are deactivated.*/

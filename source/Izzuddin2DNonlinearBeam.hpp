@@ -226,15 +226,36 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
             std::cout << "calc_tangent_stiffness::elem " << id << " tangent_stiffness is " << std::endl << local_tangent_stiffness << std::endl;
             }
         }
+
         void update_state()
         {
-            // really should not be doing this for midpoint location.
+            if (VERBOSE_NLB)
+            {
+                std::cout << "element " << id << " global-level disp prior to get_U_from_nodes = " << std::endl << global_ele_U << std::endl;
+                corot_transform.print_state();
+            }
+            
             get_U_from_nodes();
             corot_transform.update_state(global_ele_U);
+            if (VERBOSE_NLB)
+            {
+                std::cout << "element " << id << " global-level disp after get_U_from_nodes and updating state = " << std::endl << global_ele_U << std::endl;
+                corot_transform.print_state();
+            }
             calc_d_from_U();
+            if (VERBOSE_NLB)
+            {
+                std::cout << "d = " << std::endl << local_d << std::endl;
+            }
             calc_nodal_forces();
             calc_eps();
             calc_stresses();
+            if (VERBOSE_NLB)
+            {
+                std::cout << "f = " << std::endl << local_f << std::endl;
+                std::cout << "eps = " << std::endl << local_eps << std::endl;
+                std::cout << "stresses = " << std::endl << local_stresses << std::endl;
+            }
             calc_mat_stiffness();
             if (VERBOSE_STIFFNESSES)
                 std::cout << std::endl << "--------------------------------------------------------------" << std::endl;

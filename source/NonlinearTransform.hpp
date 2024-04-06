@@ -8,6 +8,7 @@
 #define NONLINEAR_TRANSFORM_HPP
 #include "ElementConfiguration.hpp"
 #include "node.hpp"
+#include "main.hpp"
 /**
  * @brief NonlinearTransform object is responsible for creating the geometerically-nonlinear transformation matrix for beam-column analysis.
  * 
@@ -57,6 +58,12 @@ public:
         calc_trigonometric_identities();
         calc_nl_T();
         calc_T();
+
+    }
+    void print_state()
+    {
+        std::cout << "NLTransform. L0 = " << L0 << ", L = " << L << std::endl;
+        std::cout << "phi = " << phi << ", cos_phi = " << cos_phi << ", sin_phi = " << sin_phi << std::endl;
     }
     /**
      * @brief extracts global element displacements from a pointer to the global element displacement that lives in the beam element object.

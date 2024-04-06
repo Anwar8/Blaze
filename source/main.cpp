@@ -14,7 +14,7 @@ int main () {
     Assembler assembler;
     BasicSolver solver;
     
-    std::vector<real> end_disp_history;
+    std::vector<real> end_disp_history_y, end_disp_history_x;
     // Euler buckling load for this beam is 2.58096e7
     real x_load = -30.0e7;
     real y_load = -1e3;
@@ -34,9 +34,11 @@ int main () {
 
 
     real max_LF = 1;
-    int step = 1;
-    int nsteps = 2;
+    int nsteps = 100;
     real dLF = max_LF/nsteps;
+    // int recording_interval = 10;
+    
+    int step = 1;
     real LF = 0;
 
     // loop over steps
@@ -55,9 +57,9 @@ int main () {
     
     bool converged = false;
     // real tolerance = 0.00002*std::max(std::abs(x_load), std::abs(y_load));
-    real tolerance = 10000;
+    real tolerance = 1000;
     // const std::string convergence_criterion = "norm"; // or "max" - of out of balance.
-    int max_iter = 10;
+    int max_iter = 20;
     int iter = 1;
 
         glob_mesh.calc_global_contributions();
@@ -78,6 +80,7 @@ int main () {
         converged = assembler.check_convergence(tolerance);
         solver.solve_for_deltaU(assembler);
         assembler.increment_U();
+        std::cout << std::endl << "-----------------------------<Completed: Iteration " << iter << ">-----------------------------" << std::endl;
         iter++;
     }
     if (VERBOSE) 
@@ -86,8 +89,14 @@ int main () {
     }
     
     step++;
-    glob_mesh.track_nodal_dof(2, 2, end_disp_history);
-    std::cout << "LF = " << LF << " and node 2 DoF 2 = " << *(end_disp_history.end()-1) << std::endl;
+    
+    // if (!(step%recording_interval))
+    // {
+        glob_mesh.track_nodal_dof(2, 2, end_disp_history_y);
+        glob_mesh.track_nodal_dof(2, 0, end_disp_history_x);
+    // }
+    std::cout << "LF = " << LF << " and node 2 DoF 2 (U2) = " << *(end_disp_history_y.end()-1) << std::endl;
+    std::cout << "LF = " << LF << " and node 2 DoF 0 (U1) = " << *(end_disp_history_x.end()-1) << std::endl;
     if ((iter >= max_iter) && !(converged))
     {
         break;
@@ -95,5 +104,8 @@ int main () {
     }
     std::cout << std::endl << "---<Analysis complete. LF = " << LF << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
     std::cout << "nodal displacement history for DoF 2 of node 2 is: " << std::endl;
-    print_container(end_disp_history);
+    print_container(end_disp_history_y);
+    std::cout << "nodal displacement history for DoF 0 of node 2 is: " << std::endl;
+    print_container(end_disp_history_x);
+    
 }
