@@ -215,7 +215,14 @@ class Basic2DBeamElement {
          * @brief sums the \ref local_mat_stiffness and \ref local_geom_stiffness to create the tangent stiffness.
          * 
          */
-        void calc_tangent_stiffness() {local_tangent_stiffness = local_mat_stiffness + local_geom_stiffness;}
+        void calc_tangent_stiffness() {
+            std::cout << ">>>>>>>>>>>calc_tangent_stifness<<<<<<<<<<" << std::endl;
+            std::cout << "calc_tangent_stiffness::elem " << id << " mat_stiffness is " << std::endl << local_mat_stiffness << std::endl;
+            std::cout << "calc_tangent_stiffness::elem " << id << " geom_stiffness is " << std::endl << local_geom_stiffness << std::endl;
+            std::cout << "calc_tangent_stiffness::elem " << id << " mat_stiffness + geom_stiffness is " << std::endl << local_mat_stiffness + local_geom_stiffness << std::endl;
+            this->local_tangent_stiffness = this->local_mat_stiffness + this->local_geom_stiffness;
+            std::cout << "calc_tangent_stiffness::elem " << id << " tangent_stiffness is " << std::endl << local_tangent_stiffness << std::endl;
+        }
 
         /**
          * @brief calculates the global contributions of the tangent stiffness to the global stiffness matrix as a 6x6 matrix.

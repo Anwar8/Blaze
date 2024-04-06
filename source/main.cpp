@@ -35,7 +35,7 @@ int main () {
 
     real max_LF = 1;
     int step = 1;
-    int nsteps = 100;
+    int nsteps = 2;
     real dLF = max_LF/nsteps;
     real LF = 0;
 

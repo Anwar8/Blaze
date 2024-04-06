@@ -136,7 +136,10 @@ void GlobalMesh::count_dofs()
     for (auto node: node_vector)
     {
         node->set_nz_i(ndofs);
-        std::cout << "Node " << node->get_id() << " has nz_i = " << ndofs << std::endl;
+        if (VERBOSE)
+        {
+            std::cout << "Node " << node->get_id() << " has nz_i = " << ndofs << std::endl;
+        }
         ndofs += node->get_ndof();
     }
     std::cout << "There are " << ndofs << " active DoFs in the mesh." << std::endl;

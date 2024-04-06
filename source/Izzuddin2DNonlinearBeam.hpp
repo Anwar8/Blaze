@@ -8,6 +8,7 @@
 #define IZZUDDIN_2D_NONLINEAR_BEAM_HPP
 #include "beam_element.hpp"
 #include "NonlinearTransform.hpp"
+#include "main.hpp"
 
 class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
 {
@@ -71,11 +72,7 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
             V(1) = 2*theta1/15 - theta2/30;
             V(2) = -theta1/30 + 2*theta2/15;
             local_mat_stiffness.setZero();
-            // this is for geometric stiffness!!
-            // local_mat_stiffness(1,1) = 4*F*L0/30;
-            // local_mat_stiffness(2,2) = 4*F*L0/30;
-            // local_mat_stiffness(1,2) = -F*L0/30;
-            // local_mat_stiffness(2,1) = -F*L0/30;
+    
             local_mat_stiffness(1,1) = 4*EI/L0;
             local_mat_stiffness(2,2) = 4*EI/L0;
             local_mat_stiffness(1,2) = 2*EI/L0;
@@ -215,7 +212,20 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
             external_geom_stiffness = d2delta_du2*local_f(0) + d2theta_du2*local_f(1) + d2theta_du2*local_f(2);
 
         }
-        
+        void calc_tangent_stiffness() {
+            if (VERBOSE_STIFFNESSES)
+            {
+            std::cout << ">>>>>>>>>>>Izzuddin's calc_tangent_stifness<<<<<<<<<<" << std::endl;
+            std::cout << "calc_tangent_stiffness::elem " << id << " mat_stiffness is " << std::endl << local_mat_stiffness << std::endl;
+            std::cout << "calc_tangent_stiffness::elem " << id << " geom_stiffness is " << std::endl << local_geom_stiffness << std::endl;
+            std::cout << "calc_tangent_stiffness::elem " << id << " mat_stiffness + geom_stiffness is " << std::endl << local_mat_stiffness + local_geom_stiffness << std::endl;
+            }
+            this->local_tangent_stiffness = this->local_mat_stiffness + this->local_geom_stiffness;
+            if (VERBOSE_STIFFNESSES)
+            {
+            std::cout << "calc_tangent_stiffness::elem " << id << " tangent_stiffness is " << std::endl << local_tangent_stiffness << std::endl;
+            }
+        }
         void update_state()
         {
             // really should not be doing this for midpoint location.
@@ -226,12 +236,27 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
             calc_eps();
             calc_stresses();
             calc_mat_stiffness();
+            if (VERBOSE_STIFFNESSES)
+                std::cout << std::endl << "--------------------------------------------------------------" << std::endl;
+            std::cout << "elem " << id << " mat_stiffness is " << std::endl << local_mat_stiffness << std::endl;
             calc_geom_stiffness();
+            if (VERBOSE_STIFFNESSES)
+            {
+            std::cout << "elem " << id << " geom_stiffness is " << std::endl << local_geom_stiffness << std::endl;
+            std::cout << "elem " << id << " mat_stiffness + geom_stiffness is " << std::endl << local_mat_stiffness + local_geom_stiffness << std::endl;
+            }
             calc_tangent_stiffness();
+            if (VERBOSE_STIFFNESSES)
+                std::cout << "elem " << id << " tan_stiffness is " << std::endl << local_tangent_stiffness << std::endl;
             calc_external_geom_stiffness();
+            if (VERBOSE_STIFFNESSES)
+                std::cout << "elem " << id << " external_geom_stiffness is " << std::endl << external_geom_stiffness << std::endl;
             calc_elem_global_stiffness();
+            if (VERBOSE_STIFFNESSES)
+                std::cout << "elem " << id << " global_stiffness contribution is " << std::endl << elem_global_stiffness << std::endl;
             populate_resistance_force_triplets();
         }
+        
     
 };
 #endif
