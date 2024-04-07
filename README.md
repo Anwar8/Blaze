@@ -38,7 +38,7 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
   - [x] Implement the geometric stiffness for the beam element
   - [x] Map-out the geometrically nonlinear transformation object
 #### Week of 01 Apr (04)
-- [ ] Add geometric nonlinearity to Blaze (6/6)
+- [x] Add geometric nonlinearity to Blaze (6/6)
   - [x] Final assembly and load-incrementation
 #### Week of 08 Apr (03)
 - [ ] Report writing (1/3)
@@ -50,6 +50,15 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 
 
 ## Journal
+#### 7 April
+Lack of unit-testing seems to have caught up with me. I will need to do a few things to correct the geometrically nonlinear analysis. 
+1. Develop unit tests at the very least for `Basic2DBeamElement`, `Izzuddin2DNonlinearBeam`, `ElementConfiguration`, `NonlinearTransform`, and `Assembler` - particularly for collecting resistance forces from elements. A full list of necessary tests will need to be compiled first, and then implemented. That is a task for another day, and not for today!
+2. Extract the solution procedure from `main` and add command-line variables to control it. For example, 
+   1. Element choice
+   2. Maximum load factor
+   3. Number of iterations
+3. Add a new, fully-controlled way to create a mesh/problem without having to generate a `.msh` file using `Gmsh`. This allows me to control the node and element numbering, and thus improve debugging. It will also help, along with extracting the solution procedure from `main`, in debugging.
+4. Generate a basic output and integrate with `ParaView` in stead of logging to screen. Current logging to screen makes it difficult to debug and ascertain whether results are correct or not. Could also potentially write some `Python` scripts to help with debugging. It appears `Paraview` can read from many, many different fromats as shown [here](https://www.paraview.org/Wiki/ParaView/Users_Guide/List_of_readers), with a page showing some basic guidance [here](https://www.paraview.org/Wiki/ParaView/Data_formats). I will likely need to play around a bit until I find something quick and easy such a series of `csv` files wrapped inside an `hdf5` file. I can, probably, visualise that in Python first as a quick and easy simplistic post-processing for debugging, rather than get stuck messing around `Paraview`. This a full discussion to have another day.
 #### 6 April
 1. Upon entering the second iteration, the nonlinear transform appears to reset and calculate non-existing displacement as if the corotated and base configurations are identical although in the first iteration that was not the case.
 2. It turns out that this is happening because the nodal reaction forces are not being considered which is resulting in out-of-balance forces equal to the load applied. What this is doing is giving a dU equal and opposite the resolved displacement fields thus returning the structure to its base configuration.
