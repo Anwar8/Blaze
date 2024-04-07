@@ -25,8 +25,8 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
         mat local_geom_stiffness = make_xd_mat(3,3); /**< local element 3x3 geometric stiffness matrix.*/
         mat local_tangent_stiffness = make_xd_mat(3,3); /**< local element 3x3 tangent stiffness matrix.*/
         mat external_geom_stiffness = make_xd_mat(12,12); /**< Geometric stiffness matrix contribution to global geometric stiffness due to \f$ \partial ^2\boldsymbol{d} /\partial \boldsymbol{U}\f$.*/
-        vec local_d = make_xd_vec(3); /**< local deformational displacements \f$\boldsymbol{d} = [\Delta & \theta_1 & \theta_2]^T\f$.*/
-        vec local_f = make_xd_vec(3); /**< local nodal-forces corresponding to deformational displacements \f$ \boldsymbol{f} = [F M_1 M_2]^T\f$.*/
+        vec local_d = make_xd_vec(3); /**< local deformational displacements \f$\boldsymbol{d} = [\Delta,    \theta_1,   \theta_2]^T\f$.*/
+        vec local_f = make_xd_vec(3); /**< local nodal-forces corresponding to deformational displacements \f$ \boldsymbol{f} = [F, M_1, M_2]^T\f$.*/
     public:
         Izzuddin2DNonlinearBeam();
         
