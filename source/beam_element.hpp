@@ -73,7 +73,7 @@ class Basic2DBeamElement {
         mat local_mat_stiffness = make_xd_mat(6,6); /**< local element material stiffness matrix.*/
         mat local_geom_stiffness = make_xd_mat(6,6); /**< local element geometric stiffness matrix.*/
         mat local_tangent_stiffness = make_xd_mat(6,6); /**< local element tangent stiffness matrix.*/
-        mat elem_global_stiffness = make_xd_mat(12,12); /**< the global contribution of the element - as in, tangent stiffness after transform via \f$ \boldsymbol{K}_t^e = \boldsymbol{T}^T \boldysymbol{k}_t \boldsymbol{T}\f$*/
+        mat elem_global_stiffness = make_xd_mat(12,12); /**< the global contribution of the element - as in, tangent stiffness after transform via \f$ \boldsymbol{K}_t^e = \boldsymbol{T}^T \boldsymbol{k}_t \boldsymbol{T}\f$*/
         std::vector<spnz> K_global; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix.*/
         //@}
         

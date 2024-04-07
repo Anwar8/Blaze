@@ -24,7 +24,7 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
         mat local_mat_stiffness = make_xd_mat(3,3); /**< local element 3x3 material stiffness matrix.*/
         mat local_geom_stiffness = make_xd_mat(3,3); /**< local element 3x3 geometric stiffness matrix.*/
         mat local_tangent_stiffness = make_xd_mat(3,3); /**< local element 3x3 tangent stiffness matrix.*/
-        mat external_geom_stiffness = make_xd_mat(12,12); /**< Geometric stiffness matrix contribution to global geometric stiffness due to \f$ \partial ^2\boldsymbol{d} /\partial \boldsymbol{U}\f$.*/
+        mat external_geom_stiffness = make_xd_mat(12,12); /**< Geometric stiffness matrix contribution to global geometric stiffness due to \f$ \partial ^2\boldsymbol{d} /\partial \boldsymbol{U}^2\f$.*/
         vec local_d = make_xd_vec(3); /**< local deformational displacements \f$\boldsymbol{d} = [\Delta,    \theta_1,   \theta_2]^T\f$.*/
         vec local_f = make_xd_vec(3); /**< local nodal-forces corresponding to deformational displacements \f$ \boldsymbol{f} = [F, M_1, M_2]^T\f$.*/
     public:
@@ -147,7 +147,10 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
         }
         
         // void calc_stresses();<<< same as the regular linear beam. D*eps.
-
+        /**
+         * @brief calculates the global resistance forces contributions of this element from \f$\boldsymbol{R}^e = \frac{\partial \boldsymbol{d}}{\partial \boldsymbol{U}}\boldsymbol{f}\f$
+         * 
+         */
         void calc_global_resistance_forces()
         {
             element_resistance_forces = corot_transform.get_nl_T().transpose()*local_f;
@@ -155,8 +158,9 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
         /**
          * @brief calculates the direct external geometric stiffness contributions of the element.
          * @details
-         * equation (10.c) \f$ \frac{\partial ^2\theta}{\partial \boldsymbol{U}} =  * \begin{bmatrix} NA & \bf{0} & \bf{1} & \bf{2} & \bf{3} & \bf{4} & \bf{5} & \bf{6} & \bf{7} & \bf{8} & \bf{9} & \bf{10} & \bf{11} \\ \bf{0} & -g_1 & 0 & g_2 & 0 & 0 & 0 & g_1 & 0 & -g_2 & 0 & 0 & 0 \\ \bf{1} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{2} & g_2 & 0 & g_1 & 0 & 0 & 0 & -g_2 & 0 & -g_1 & 0 & 0 & 0  \\ \bf{3} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{4} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{5} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{6} & g_1 & 0 & -g_2 & 0 & 0 & 0 & -g_1 & 0 & g_2 & 0 & 0 & 0 \\ \bf{7} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{8} & -g_2 & 0 & -g_1 & 0 & 0 & 0 & g_2 & 0 & g_1 & 0 & 0 & 0  \\ \bf{9} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{10} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{11} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \end{bmatrix}\f$
-         * equation (10.d) \f$ \frac{\partial ^2\Delta}{\partial \boldsymbol{U}} =  * \begin{bmatrix} NA & \bf{0} & \bf{1} & \bf{2} & \bf{3} & \bf{4} & \bf{5} & \bf{6} & \bf{7} & \bf{8} & \bf{9} & \bf{10} & \bf{11} \\ \bf{0} & g_5 & 0 & -g_4 & 0 & 0 & 0 & -g_5 & 0 & g_4 & 0 & 0 & 0 \\ \bf{1} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{2} & -g_4 & 0 & g_3 & 0 & 0 & 0 & g_4 & 0 & -g_3 & 0 & 0 & 0  \\ \bf{3} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{4} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{5} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{6} & -g_5 & 0 & g_4 & 0 & 0 & 0 & g_5 & 0 & -g_4 & 0 & 0 & 0 \\ \bf{7} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{8} & g_4 & 0 & -g_3 & 0 & 0 & 0 & -g_4 & 0 & g_3 & 0 & 0 & 0  \\ \bf{9} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{10} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{11} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \end{bmatrix}\f$
+         * equation (10.c) \f$ \frac{\partial ^2\theta}{\partial \boldsymbol{U}^2} =  * \begin{bmatrix} NA & \bf{0} & \bf{1} & \bf{2} & \bf{3} & \bf{4} & \bf{5} & \bf{6} & \bf{7} & \bf{8} & \bf{9} & \bf{10} & \bf{11} \\ \bf{0} & -g_1 & 0 & g_2 & 0 & 0 & 0 & g_1 & 0 & -g_2 & 0 & 0 & 0 \\ \bf{1} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{2} & g_2 & 0 & g_1 & 0 & 0 & 0 & -g_2 & 0 & -g_1 & 0 & 0 & 0  \\ \bf{3} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{4} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{5} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{6} & g_1 & 0 & -g_2 & 0 & 0 & 0 & -g_1 & 0 & g_2 & 0 & 0 & 0 \\ \bf{7} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{8} & -g_2 & 0 & -g_1 & 0 & 0 & 0 & g_2 & 0 & g_1 & 0 & 0 & 0  \\ \bf{9} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{10} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{11} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \end{bmatrix}\f$
+         * 
+         * equation (10.d) \f$ \frac{\partial ^2\Delta}{\partial \boldsymbol{U}^2} =  * \begin{bmatrix} NA & \bf{0} & \bf{1} & \bf{2} & \bf{3} & \bf{4} & \bf{5} & \bf{6} & \bf{7} & \bf{8} & \bf{9} & \bf{10} & \bf{11} \\ \bf{0} & g_5 & 0 & -g_4 & 0 & 0 & 0 & -g_5 & 0 & g_4 & 0 & 0 & 0 \\ \bf{1} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{2} & -g_4 & 0 & g_3 & 0 & 0 & 0 & g_4 & 0 & -g_3 & 0 & 0 & 0  \\ \bf{3} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{4} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{5} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{6} & -g_5 & 0 & g_4 & 0 & 0 & 0 & g_5 & 0 & -g_4 & 0 & 0 & 0 \\ \bf{7} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{8} & g_4 & 0 & -g_3 & 0 & 0 & 0 & -g_4 & 0 & g_3 & 0 & 0 & 0  \\ \bf{9} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{10} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{11} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \end{bmatrix}\f$
          */
         void calc_external_geom_stiffness()
         {
