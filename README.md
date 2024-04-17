@@ -4,6 +4,37 @@ Requirements for the XBlaze project
 ## Summary
 XBlaze is a finite element method (FEM) program developed specifically for structures in fire. It is explicitly designed from the ground up for scalability on high performance computing (HPC) facilities. The codebase is written in C++ and provides an interface for user customisation.
 
+## Thesis Schedules
+#### Wed 17 April (11)
+- [x] Feasiblity Report outline
+- [x] Initial execution plan
+#### Thu 18 April (10)
+- [ ] Preliminary investigations: 3.2 Blaze: Starting Point
+- [ ] Preliminary investigations: 3.3 References and Documentation
+- [ ] Preliminary investigations: 3.4 Build Systems: Building Kokkos and Blaze
+#### Fri 19 April (09)
+- [ ] Preliminary investigations: 3.5	Geometric Nonlinearity
+- [ ] Preliminary investigations: 3.6	Tested Examples
+#### Sat 20 April (08)
+- [ ] 4	Project Proposal
+- [ ] 5	Workplan
+- [ ] 6	Resource Estimation
+- [ ] 7	Risk Analysis
+#### Sun 21 April (07)
+- [ ] 2	Background and Literature Review: 2.1	Simulation of Structures in Fire 
+- [ ] 2	Background and Literature Review: 2.2	Brief Introduction to FEM
+#### Mon 22 April (06)
+- [ ] 2 Background and Literature Review: 2.3	Parallelisation of FEM
+#### Tue 23 April (05)
+- [ ] 2 Background and Literature Review: 2.4	Brief Introduction to Kokkos
+#### Wed 24 April (04)
+- [ ] 1 Introduction
+#### Thu 25 April (03)
+- [ ] 3 Preliminary investigations: 3.1 The repository
+#### Fri 26 April (02)
+#### Sat 27 April (01)
+#### Sun 28 April (00)
+
 ## Project Schedule
 #### Week of 19 Feb (10)
 - [x] Build `Kokkos` and `Kokkos` Exercises
