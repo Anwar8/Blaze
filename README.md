@@ -9,12 +9,12 @@ XBlaze is a finite element method (FEM) program developed specifically for struc
 - [x] Feasiblity Report outline
 - [x] Initial execution plan
 #### Thu 18 April (10)
-- [ ] Preliminary investigations: 3.2 Blaze: Starting Point
-- [ ] Preliminary investigations: 3.3 References and Documentation
-- [ ] Preliminary investigations: 3.4 Build Systems: Building Kokkos and Blaze
+- [x] Preliminary investigations: 3.2 Blaze: Starting Point
+- [x] Preliminary investigations: 3.3 References and Documentation
+- [x] Preliminary investigations: 3.4 Build Systems: Building Kokkos and Blaze
 #### Fri 19 April (09)
-- [ ] Preliminary investigations: 3.5	Geometric Nonlinearity
-- [ ] Preliminary investigations: 3.6	Tested Examples
+- [x] Preliminary investigations: 3.5	Geometric Nonlinearity
+- [x] Preliminary investigations: 3.6	Tested Examples
 #### Sat 20 April (08)
 - [ ] 4	Project Proposal
 - [ ] 5	Workplan
