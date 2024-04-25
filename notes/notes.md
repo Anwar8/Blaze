@@ -1,3 +1,6 @@
+# Notes
+Contains notes and some other things I want to remind myself of and I want access to in one place.
+
 # Transformations
 ## Translations
 ### Graphical
@@ -87,3 +90,12 @@ $$
 $$
 The order is **very important** here. We have to recall that the offset is applied to the $\theta'_{z,1}$ local rotation. That means that we need to first get that rotation from the global DoFs whatever they may be. As such, we must first perform the rotational transformation followed by the translation transformation. As in, we first multiply $\{d\}$ by $[T_{\theta}]$ then by $[T_{\Delta}]$: $\{d'\} = [T_\Delta][T_\theta]\{d\}$.
 
+
+
+## Review of some other software
+- [Elmer uses Metis](https://youtu.be/84K6OxEKEjQ?t=1358) for graph partitioning to discretise the domain for the processes. Elmer is open source and its code can be found [here](https://github.com/ElmerCSC/elmerfem). 
+- FEniCS has an entire [book](https://launchpadlibrarian.net/83776282/fenics-book-2011-10-27-final.pdf). This book also includes information about what algorithms are used, and how they implemented in parallel.
+- Code Aster appears to be less well developed and maintained than the other two, but has been [used for structures in fire](https://www.code-aster.de/project-cases/project-cases-detail/analysis-of-steel-reinforced-concrete-exposed-to-fire-mfpa-leipzig-gmbh-copy.html). The website has much more of a commercial bend to it with the product being seminars and tutorials.
+- [Calculix](http://www.dhondt.de/) uses [PreProMax](https://prepomax.fs.um.si/), which is an open source pre and post processor. From looking around the internet it may be that this program was not really made for HPC.
+## Some tips
+- You need to specify the friends of class A in class A, so that the friend class can access class A members. "John is my friend and what's mine is his" vs. ~~"I am friends with Alex so I will access his stuff!"~~
