@@ -1,81 +1,14 @@
 # Journal of Work
 This journal contains the day-to-day project management and notes taken. It was also used as an indirect form of communication with the MSc supervisor so they are always up to date with my progress.
 
-## Feasibility Report Schedule
-#### Wed 17 April (11)
-- [x] Feasibility Report outline
-- [x] Initial execution plan
-#### Thu 18 April (10)
-- [x] Preliminary investigations: 3.2 Blaze: Starting Point
-- [x] Preliminary investigations: 3.3 References and Documentation
-- [x] Preliminary investigations: 3.4 Build Systems: Building Kokkos and Blaze
-#### Fri 19 April (09)
-- [x] Preliminary investigations: 3.5	Geometric Nonlinearity
-- [x] Preliminary investigations: 3.6	Tested Examples
-#### Sat 20 April (08)
-- [x] 4	Project Proposal
-- [x] 5	Workplan
-- [x] 6	Resource Estimation
-- [x] 7	Risk Analysis
-#### Sun 21 April (07)
-- [x] 2	Background and Literature Review: 2.1	Simulation of Structures in Fire 
-- [x] 2	Background and Literature Review: 2.2	Brief Introduction to FEM
-#### Mon 22 April (06)
-- [x] 2 Background and Literature Review: 2.3	Parallelisation of FEM
-#### Tue 23 April (05)
-- [x] 2 Background and Literature Review: 2.4	Brief Introduction to Kokkos
-#### Wed 24 April (04)
-- [x] 1 Introduction
-#### Thu 25 April (03)
-- [ ] 3 Preliminary investigations: 3.1 The repository
-#### Fri 26 April (02)
-#### Sat 27 April (01)
-#### Sun 28 April (00)
-
-## Project Schedule
-#### Week of 19 Feb (10)
-- [x] Build `Kokkos` and `Kokkos` Exercises
-- [x] Request new Cirrus and Archer2 accounts
-- [x] Clone Blaze into Project Prep. Repo
-- [x] `Kokkos` first exercise
-- [x] Separate Blaze into more files
-- [x] Blaze build with `CMake`
-- [x] Blaze build tests with `CMake` and `gtest`
-#### Week of 26 Feb (09)
-- [x] Add geometric nonlinearity to Blaze (1/6)
-  - Looked through different textbooks, and then found the lieterature that I want to implement based on (Felippa's NLFEA).
-- [x] `Kokkos` Lectures Module 2: Views and Spaces
-#### Week of 04 Mar (08)
-- [x] Add geometric nonlinearity to Blaze (2/6)
-- [x] `Kokkos` Lectures Module 3: Data Structures + MultiDimensional Loops
-#### Week of 11 Mar (07)
-- [x] Add geometric nonlinearity to Blaze (3/6)
-  - [x] Load application and restraint for nodes.
-  - [x] Additional reading particularly on implementation of $\boldsymbol{T}$ and $\boldsymbol{K}_G$
-- [ ] ~~`Kokkos` Lectures Module 6: Internode: MPI and PGAS (approximately 40 minutes out of the total is about MPI)~~
-#### Week of 18 Mar (06)
-- [x] Add geometric nonlinearity to Blaze (4/6)
-  - [x] Read on Stress and element resistance forces
-  - [x] Read on Geometric and tangent stiffness?
-  - [x] Read on Nonlinear corotational transformation?
-- [x] `Kokkos` Lectures Module 6: Internode: MPI and PGAS (approximately 40 minutes out of the total is about MPI)
-- [x] `Kokkos` Lectures Module 8: Kernels: Sparse and Dense Linear Algebra
-#### Week of 25 Mar (05)
-- [x] Add geometric nonlinearity to Blaze (5/6)
-  - [x] Implement the calculation of element strains, stresses and nodal forces
-  - [x] Implement the geometric stiffness for the beam element
-  - [x] Map-out the geometrically nonlinear transformation object
-#### Week of 01 Apr (04)
-- [x] Add geometric nonlinearity to Blaze (6/6)
-  - [x] Final assembly and load-incrementation
-#### Week of 08 Apr (03)
-- [ ] Report writing (1/3)
-#### Week of 15 Apr (02)
-- [ ] Report writing (2/3)
-#### Week of 22 Apr (01)
-- [ ] Report writing (3/3)
-#### Report Deadline: Monday 29 Apr
-
+## Work plan
+### WP1: Debugging of geometric nonlinearity - 2 weeks - due 15/06/2024
+### WP2: Implementation of 1D nonlinear material - 8 weeks - due 15/08/2024
+### WP3: Thermal loading interface - 4 weeks - due 15/09/2024
+### WP4: Shared-memory parallelisation on Cirrus using Kokkos - 6 weeks - due 01/11/2024
+### WP5: Internode parallelisation with MPI - 12 weeks - due 01/02/2025
+### WP6: Profiling, data collection, and analysis - 6 weeks - due 15/03/2025
+### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
 #### 7 April
@@ -396,3 +329,79 @@ I will deal with this when I configure the project to build with CMake.
 - [x] The solution procedure should include calculating the element internal forces and strains, and each element should have these saved.
 - [ ] Fixing a node adds it to a `std::set` that corresponds to fixed nodes. After each successful analysis step, these nodes calculate their reaction forces. All nodes that do not have a constraint just have reaction forces of zero.
 - [ ] Add loggers to retrieve and log certain displacements or reaction forces from the nodes, and internal forces/stresses/strains of elements.
+
+
+## Feasibility Report Schedule
+#### Wed 17 April (11)
+- [x] Feasibility Report outline
+- [x] Initial execution plan
+#### Thu 18 April (10)
+- [x] Preliminary investigations: 3.2 Blaze: Starting Point
+- [x] Preliminary investigations: 3.3 References and Documentation
+- [x] Preliminary investigations: 3.4 Build Systems: Building Kokkos and Blaze
+#### Fri 19 April (09)
+- [x] Preliminary investigations: 3.5	Geometric Nonlinearity
+- [x] Preliminary investigations: 3.6	Tested Examples
+#### Sat 20 April (08)
+- [x] 4	Project Proposal
+- [x] 5	Workplan
+- [x] 6	Resource Estimation
+- [x] 7	Risk Analysis
+#### Sun 21 April (07)
+- [x] 2	Background and Literature Review: 2.1	Simulation of Structures in Fire 
+- [x] 2	Background and Literature Review: 2.2	Brief Introduction to FEM
+#### Mon 22 April (06)
+- [x] 2 Background and Literature Review: 2.3	Parallelisation of FEM
+#### Tue 23 April (05)
+- [x] 2 Background and Literature Review: 2.4	Brief Introduction to Kokkos
+#### Wed 24 April (04)
+- [x] 1 Introduction
+#### Thu 25 April (03)
+- [x] 3 Preliminary investigations: 3.1 The repository
+#### Fri 26 April (02)
+#### Sat 27 April (01)
+#### Sun 28 April (00)
+
+## Project Preparation Schedule
+#### Week of 19 Feb (10)
+- [x] Build `Kokkos` and `Kokkos` Exercises
+- [x] Request new Cirrus and Archer2 accounts
+- [x] Clone Blaze into Project Prep. Repo
+- [x] `Kokkos` first exercise
+- [x] Separate Blaze into more files
+- [x] Blaze build with `CMake`
+- [x] Blaze build tests with `CMake` and `gtest`
+#### Week of 26 Feb (09)
+- [x] Add geometric nonlinearity to Blaze (1/6)
+  - Looked through different textbooks, and then found the lieterature that I want to implement based on (Felippa's NLFEA).
+- [x] `Kokkos` Lectures Module 2: Views and Spaces
+#### Week of 04 Mar (08)
+- [x] Add geometric nonlinearity to Blaze (2/6)
+- [x] `Kokkos` Lectures Module 3: Data Structures + MultiDimensional Loops
+#### Week of 11 Mar (07)
+- [x] Add geometric nonlinearity to Blaze (3/6)
+  - [x] Load application and restraint for nodes.
+  - [x] Additional reading particularly on implementation of $\boldsymbol{T}$ and $\boldsymbol{K}_G$
+- [ ] ~~`Kokkos` Lectures Module 6: Internode: MPI and PGAS (approximately 40 minutes out of the total is about MPI)~~
+#### Week of 18 Mar (06)
+- [x] Add geometric nonlinearity to Blaze (4/6)
+  - [x] Read on Stress and element resistance forces
+  - [x] Read on Geometric and tangent stiffness?
+  - [x] Read on Nonlinear corotational transformation?
+- [x] `Kokkos` Lectures Module 6: Internode: MPI and PGAS (approximately 40 minutes out of the total is about MPI)
+- [x] `Kokkos` Lectures Module 8: Kernels: Sparse and Dense Linear Algebra
+#### Week of 25 Mar (05)
+- [x] Add geometric nonlinearity to Blaze (5/6)
+  - [x] Implement the calculation of element strains, stresses and nodal forces
+  - [x] Implement the geometric stiffness for the beam element
+  - [x] Map-out the geometrically nonlinear transformation object
+#### Week of 01 Apr (04)
+- [x] Add geometric nonlinearity to Blaze (6/6)
+  - [x] Final assembly and load-incrementation
+#### Week of 08 Apr (03)
+- [ ] Report writing (1/3)
+#### Week of 15 Apr (02)
+- [ ] Report writing (2/3)
+#### Week of 22 Apr (01)
+- [ ] Report writing (3/3)
+#### Report Deadline: Monday 29 Apr
