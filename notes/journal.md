@@ -11,6 +11,9 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 5 June
+`HighFive` is an `HDF5` header only library. I want to use it to build an output database in `HDF5` where the output from each each element and node are stored in a tree. For example: node_1/displacements, node_1/accelerations, node_1/reaction_forces, etc. The same for elements where the forces and stresses are stored in the same manner. This data would then be read by Python to plot the results for verification and debugging. Today I installed `HighFive` using `Spack`. It took longer than I hoped because `Spack` decided not to cooperate. It now installed, but I haven't used it yet.
+
 #### 7 April
 Lack of unit-testing seems to have caught up with me. I will need to do a few things to correct the geometrically nonlinear analysis. 
 1. Develop unit tests at the very least for `Basic2DBeamElement`, `Izzuddin2DNonlinearBeam`, `ElementConfiguration`, `NonlinearTransform`, and `Assembler` - particularly for collecting resistance forces from elements. A full list of necessary tests will need to be compiled first, and then implemented. That is a task for another day, and not for today!
