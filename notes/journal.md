@@ -11,6 +11,16 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 6 June
+So today I did not do any code writing at all. However, I did some thinking, which, I suppose, is better than nothing. Two things: 
+1. Node and element history
+Nodes and elements should have a buffer for storing their history. This buffer is appended to by calling the `remember_state` function or something of a similar name. This function is called from outside the element when a history point needs to be recorded (every *n* steps or so). After a predetermined number of states has been recorded and the element/node history buffers are full, the results are flushed to disk. This needs to be done in some non-blocking manner, perhaps, or simply in parallel. For now, it doesn't matter how efficient this I/O is exactly. Right now it is just for debugging.
+2. Code architecture and hierarchy
+It is not correct that `Izzuddin2DNonlinearBeam` inherits from `Basic2DBeamElement` because this is causing many issues as the former rewrites only some of the latter's functions and what is happening is that there is confusion since not all the containers of the latter are rewritten in the former. In stead, **both should inherit from a common virtual class.** A quick-fix alternative is to copy all the code from `Basic2DBeamElement` and reimplement all that is necessary. In general, if I want to edit `Izzuddin2DNonlinearBeam` I should not have to play around with `Basic2DBeamElement` at all - each should be completely independent and must stand on its own.
+
+On a personal level, I am feeling quite anxious about starting work on this again. I am almost afraid to touch `Blaze`. This is not logical, I am just a bit tired, and I know it will take a lot of effort. At the same time, I know how important `Blaze` is to me, especially that it will presented at ICES2024.
+
+
 #### 5 June
 `HighFive` is an `HDF5` header only library. I want to use it to build an output database in `HDF5` where the output from each each element and node are stored in a tree. For example: node_1/displacements, node_1/accelerations, node_1/reaction_forces, etc. The same for elements where the forces and stresses are stored in the same manner. This data would then be read by Python to plot the results for verification and debugging. Today I installed `HighFive` using `Spack`. It took longer than I hoped because `Spack` decided not to cooperate. It now installed, but I haven't used it yet.
 
