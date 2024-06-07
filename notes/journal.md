@@ -11,6 +11,8 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 7 June
+I was working on creating the base class currently called `BeamElement2DTemplate`. This class should contain implementations for all members and functions that would be common across ALL beam-column elements. It would have virtual versions for functions that would need to be overwritten by each unique beam-column element. Remember that it is not a given that each element would have 2 nodes, and not every element would have the same initialisation procedure (linear vs nonlinear).
 #### 6 June
 So today I did not do any code writing at all. However, I did some thinking, which, I suppose, is better than nothing. Two things: 
 1. Node and element history
