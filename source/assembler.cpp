@@ -48,7 +48,7 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
     if (VERBOSE)
     {
         std::cout << "There are " << std::size(P_global_triplets) << " P_global contributions to add up." << std::endl;
-        std::cout << "There are " << std::size(K_global_triplets) << " K_global contributions to add up." << std::endl;
+        std::cout << "There are " << std::size(K_global_triplets) << " global_stiffness_triplets contributions to add up." << std::endl;
         std::cout << "The K_global_triplets is of size " << glob_mesh.ndofs << "x" << glob_mesh.ndofs << std::endl;
     }
     K.setFromTriplets(K_global_triplets.begin(), K_global_triplets.end());

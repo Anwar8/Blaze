@@ -42,7 +42,7 @@ class Basic2DBeamElement {
         std::string const elem_type = "beam-column"; /**< string that represents the type of the element.*/
         int const ndofs = 3; /**< number of freedoms at each node.*/
         int const nnodes = 2; /**< number of nodes.*/
-        const std::array<real, 2> gauss_pts = {-0.57735, 0.57735}; /**< length-wise coordinates of the Gauss Points*/
+        const std::array<real, 2> gauss_points = {-0.57735, 0.57735}; /**< length-wise coordinates of the Gauss Points*/
         real length = 0.0; /**< the length for the beam-column element - to be calculated by the orientation object.*/
         //@}
 
@@ -74,7 +74,7 @@ class Basic2DBeamElement {
         mat local_geom_stiffness = make_xd_mat(6,6); /**< local element geometric stiffness matrix.*/
         mat local_tangent_stiffness = make_xd_mat(6,6); /**< local element tangent stiffness matrix.*/
         mat elem_global_stiffness = make_xd_mat(12,12); /**< the global contribution of the element - as in, tangent stiffness after transform via \f$ \boldsymbol{K}_t^e = \boldsymbol{T}^T \boldsymbol{k}_t \boldsymbol{T}\f$*/
-        std::vector<spnz> K_global; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix.*/
+        std::vector<spnz> global_stiffness_triplets; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix.*/
         //@}
         
         
@@ -341,11 +341,11 @@ class Basic2DBeamElement {
             }
         }
         /**
-         * @brief calculates the global stiffness contribution of the local element and populates K_global
+         * @brief calculates the global stiffness contribution of the local element and populates global_stiffness_triplets
          * 
          * @details first, the freedoms are mapped to the right size by pre- and post-multiplying by the T matrix
          * After that, \ref stiffness_map is used to map where these contributions would go in the global stiffness
-         * matrix. So, this function will populate \ref K_global with sparse matrix notation
+         * matrix. So, this function will populate \ref global_stiffness_triplets with sparse matrix notation
          * 
          */
         void calc_K_global();
@@ -353,12 +353,12 @@ class Basic2DBeamElement {
         /**
          * @brief populates \ref stiffness_map considering active and inactive DOFs for each node of the element
          * 
-         * @details see function \ref calc_K_global, and variables \ref stiffness_map, and \ref K_global. 
+         * @details see function \ref calc_K_global, and variables \ref stiffness_map, and \ref global_stiffness_triplets. 
          * 
          * @todo REALLY needs to be revisited. attempt to rewrite this function so it does the following:
          *  1. gets all the contribution without worrying about active or not
          *  2. if a contribution is inactive then that contribution is zeroed AND
-         *  3. zeroed contributions are not added to \ref K_global
+         *  3. zeroed contributions are not added to \ref global_stiffness_triplets
          * 
          */
         void map_stiffness();
@@ -443,7 +443,7 @@ class Basic2DBeamElement {
         std::vector<spnz> get_global_resistance_force_triplets() {return global_R_triplets;}
 
         std::vector<int> get_global_dof_map() {return global_dof_map;}
-        std::vector<spnz> get_K_global() {return K_global;}
+        std::vector<spnz> get_K_global() {return global_stiffness_triplets;}
 
         int const get_nth_node_id(int n) const;
         /**

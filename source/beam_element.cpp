@@ -145,14 +145,14 @@ void Basic2DBeamElement::calc_K_global()
     // calc_T();
     // calc_k();
     // mat k_glob = orient.get_T().transpose() * shape_func.get_k() * orient.get_T();
-    K_global.clear();
+    global_stiffness_triplets.clear();
     // we have the same number of contribution as stiffness components 
     // assuming all are non-zero!
-    K_global.reserve(elem_global_stiffness.rows() * elem_global_stiffness.cols());
+    global_stiffness_triplets.reserve(elem_global_stiffness.rows() * elem_global_stiffness.cols());
     for (auto kmap: stiffness_map)
     {
         real val = elem_global_stiffness(kmap[0], kmap[1]);
-        K_global.push_back(spnz(kmap[2], kmap[3], val));
+        global_stiffness_triplets.push_back(spnz(kmap[2], kmap[3], val));
     }
 }
 
