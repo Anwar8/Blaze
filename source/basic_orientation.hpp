@@ -43,6 +43,36 @@ class BasicOrientation {
             calc_T();
         }
         /**
+         * @brief sets offset and calculates length, local_x axis, alpha, and T matrix. This is the templated variant of \ref evaluate that can take a node container of any type.
+         * 
+         * @tparam Container a container that is STL-compatible.
+         * @param nodes a size 2 array of shared ptr to the element nodes
+         * @param sec_offset the offset value for the section
+         * @param origin_x the global coord system x-axis unit vector
+         */
+        template<typename Container>
+        void evaluate(Container const & nodes, real sec_offset, coords const & origin_x)
+        {
+            offset = sec_offset;
+            calc_length_local_x(nodes);
+            calc_alpha(origin_x);
+            calc_T();
+        }
+
+        /**
+         * @brief Templated variant of \ref calc_length_local_x. Calculates beam length and local_x components.
+         * 
+         * @tparam Container a container that is STL-compatible.
+         * @param nodes a size 2 array of shared ptr to the element nodes
+         */
+        template<typename Container>
+        void calc_length_local_x(Container const &  nodes) {
+            local_x = (nodes[1]->get_coords() - nodes[0]->get_coords());
+            length = local_x.norm();
+            local_x /= length;
+        }
+
+        /**
          * @brief calculates beam length and local_x components
          * 
          * @param nodes a size 2 array of shared ptr to the element nodes
@@ -52,6 +82,7 @@ class BasicOrientation {
             length = local_x.norm();
             local_x /= length;
         }
+
         /**
          * @brief calcualte the angle between the local and global x axes
          * 
@@ -91,5 +122,11 @@ class BasicOrientation {
             T(5,11) = 1;
         }
         mat get_T() {return T;}
+        /**
+         * @brief Get the length of the beam-column
+         * 
+         * @return real length 
+         */
+        real get_length() {return length;}
 };
 #endif
