@@ -189,8 +189,7 @@ class Basic2DBeamElement {
             calc_length();
             calc_T();
             calc_local_constitutive_mat();
-            calc_stiffnesses();
-            
+            calc_stiffnesses();    
         }
         void print_info();
         void calc_length();
@@ -395,7 +394,7 @@ class Basic2DBeamElement {
             element_resistance_forces = orient.get_T().transpose()*local_f;
         }
         /**
-         * @brief Populates the resistance forces triplets removing any inactive freedoms.
+         * @brief 
          * @todo I seem to be doing the active_dofs thing too often. The element should also have a set that contains its active dofs!
          */
         void populate_resistance_force_triplets() {

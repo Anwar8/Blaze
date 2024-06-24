@@ -10,7 +10,7 @@
 #include <array>
 #include <memory>
 #include "main.hpp"
-#include "BeamElement2DTemplate.hpp"
+#include "BeamElementBaseClass.hpp"
 
 /**
  * @brief a 2D beam element with 6 total freedoms: 1 rotation and two displacements
@@ -22,7 +22,7 @@
  * 
  * 
  */
-class Linear2DBeamElement : public BeamElement2DTemplate {
+class Linear2DBeamElement : public BeamElementBaseClass {
     private:
     protected:
         /**
@@ -30,10 +30,10 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
          * @brief the basic data about the generic beam element
          */
         //@{      
-        unsigned id = 0; /**< unique identifier for the element.*/
-        std::string const elem_type = "2D_EulerBernouli_beam-column"; /**< string that represents the type of the element.*/
-        int ndofs = 3; /**< number of freedoms at each node.*/
-        int nnodes = 2; /**< number of nodes.*/
+        // unsigned id = 0; /**< unique identifier for the element.*/
+        // std::string const elem_type = "2D_EulerBernouli_beam-column"; /**< string that represents the type of the element.*/
+        // int ndofs = 3; /**< number of freedoms at each node.*/
+        // int nnodes = 2; /**< number of nodes.*/
         // std::vector<real> gauss_points; /**< length-wise coordinates of the Gauss Points. to be set by \ref set_gauss_points*/
         // real length = 0.0; /**< the length for the beam-column element - to be calculated by the orientation object.*/
         //@}
@@ -53,22 +53,23 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
         /**
          * @name beam_state_containers
          * @brief the containers for the beam state such as displacement, strain, force, etc.
+         * @warning remove the initialisation of the matrices from here and move it to the \ref initialise function!
          */
-        //@{
-        vec global_ele_U= make_xd_vec(12); /**< global nodal displacements for all freedoms of the nodes corresponding to the element.*/
-        vec local_d = make_xd_vec(6); /**< local nodal-displacements for all freedoms.*/
-        vec local_f = make_xd_vec(6); /**< local nodal-forces corresponding to all freedoms.*/
-        vec element_resistance_forces = make_xd_vec(12); /**< transformed resistance forces of the element from \ref local_f.*/
-        std::vector<spnz> global_R_triplets; /**< triplet vector for global resistance forces \f$\boldsymbol{R}\f$.*/
-        vec local_eps = make_xd_vec(2); /**< local strains.*/
-        vec local_stresses = make_xd_vec(2); /**< local stresses.*/
-        mat local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix \f$\boldsymbol{D}\f$.*/
-        mat local_mat_stiffness = make_xd_mat(6,6); /**< local element material stiffness matrix.*/
-        mat local_geom_stiffness = make_xd_mat(6,6); /**< local element geometric stiffness matrix.*/
-        mat local_tangent_stiffness = make_xd_mat(6,6); /**< local element tangent stiffness matrix.*/
-        mat elem_global_stiffness = make_xd_mat(12,12); /**< the global contribution of the element - as in, tangent stiffness after transform via \f$ \boldsymbol{K}_t^e = \boldsymbol{T}^T \boldsymbol{k}_t \boldsymbol{T}\f$*/
-        std::vector<spnz> global_stiffness_triplets; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix.*/
-        //@}
+        // //@{
+        // vec global_ele_U= make_xd_vec(12); /**< global nodal displacements for all freedoms of the nodes corresponding to the element.*/
+        // vec local_d = make_xd_vec(6); /**< local nodal-displacements for all freedoms.*/
+        // vec local_f = make_xd_vec(6); /**< local nodal-forces corresponding to all freedoms.*/
+        // vec element_resistance_forces = make_xd_vec(12); /**< transformed resistance forces of the element from \ref local_f.*/
+        // std::vector<spnz> global_R_triplets; /**< triplet vector for global resistance forces \f$\boldsymbol{R}\f$.*/
+        // vec local_eps = make_xd_vec(2); /**< local strains.*/
+        // vec local_stresses = make_xd_vec(2); /**< local stresses.*/
+        // mat local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix \f$\boldsymbol{D}\f$.*/
+        // mat local_mat_stiffness = make_xd_mat(6,6); /**< local element material stiffness matrix.*/
+        // mat local_geom_stiffness = make_xd_mat(6,6); /**< local element geometric stiffness matrix.*/
+        // mat local_tangent_stiffness = make_xd_mat(6,6); /**< local element tangent stiffness matrix.*/
+        // mat elem_global_stiffness = make_xd_mat(12,12); /**< the global contribution of the element - as in, tangent stiffness after transform via \f$ \boldsymbol{K}_t^e = \boldsymbol{T}^T \boldsymbol{k}_t \boldsymbol{T}\f$*/
+        // std::vector<spnz> global_stiffness_triplets; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix.*/
+        // // @}
         
 
         /**
@@ -80,7 +81,7 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
          * number of nodes and which DOFs are active/not fixed. See \ref map_stiffness for details. The size 4 does
          * not change regardless of element type and implementation.
          */
-        std::vector<std::array<int,4>> stiffness_map; 
+        // std::vector<std::array<int,4>> stiffness_map; 
         //@}
 
         
@@ -112,6 +113,11 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
          */
         template<typename Container>
         void initialise(int given_id, Container& in_nodes) {
+
+            elem_type = "2D_EulerBernouli_beam-column"; /**< string that represents the type of the element.*/
+            ndofs = 3; /**< number of freedoms at each node. 3 for this element type.*/
+            nnodes = 2; /**< number of nodes. 2 nodes for this element type.*/
+            initialise_state_containers();
             if (std::size(in_nodes) != nnodes)
             {
                 std::cout << "Incorrect number of nodes passed to create element " << id << std::endl;
@@ -129,6 +135,24 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
             calc_T();
             calc_local_constitutive_mat();
             calc_stiffnesses();
+        }
+
+        /**
+         * @brief initialises the beam state containers (matricces and vectors) to zeros of the right size for the element.
+         * 
+         */
+        void initialise_state_containers() {
+            global_ele_U = make_xd_vec(12); /**< global nodal displacements for all freedoms of the nodes corresponding to the element. 6 freedoms per node since everything is 3D, and we have two nodes for this element.*/
+            local_d = make_xd_vec(6); /**< local nodal-displacements for all freedoms. 3 DOFs per node.*/
+            local_f = make_xd_vec(6); /**< local nodal-forces corresponding to all freedoms. 3 element forces per node (Fx, Fy, and Mzz).*/
+            element_resistance_forces = make_xd_vec(12); /**< transformed resistance forces of the element from \ref local_f. 6 per node since we have 3D global nodes, and two nodes giving us 12 components.*/
+            local_eps = make_xd_vec(2); /**< local strains. \f$ \boldsymbol{\varepsilon} = \begin{bmatrix} \varepsilon_{xx} & \kappa\end{bmatrix}^T\f$*/
+            local_stresses = make_xd_vec(2); /**< local stresses.\f$ \boldsymbol{\sigma} = \begin{bmatrix} N & M \end{bmatrix}^T\f$*/
+            local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix \f$\boldsymbol{D} = \begin{bmatrix} EA & 0 \\ 0 & EI\end{bmatrix}\f$.*/
+            local_mat_stiffness = make_xd_mat(6,6); /**< local element material stiffness matrix.*/
+            local_geom_stiffness = make_xd_mat(6,6); /**< local element geometric stiffness matrix.*/
+            local_tangent_stiffness = make_xd_mat(6,6); /**< local element tangent stiffness matrix.*/
+            elem_global_stiffness = make_xd_mat(12,12); /**< the global contribution of the element - as in, tangent stiffness after transform via \f$ \boldsymbol{K}_t^e = \boldsymbol{T}^T \boldsymbol{k}_t \boldsymbol{T}\f$*/
         }
 
         /**
@@ -287,17 +311,14 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
         {
             elem_global_stiffness = orient.get_T().transpose() * local_tangent_stiffness * orient.get_T();
         }
-        // /**
-        //  * @brief runs all stiffness function calculations
-        //  * 
-        //  */
-        // void calc_stiffnesses()
-        // {
-        //     calc_mat_stiffness();
-        //     calc_geom_stiffness();
-        //     calc_tangent_stiffness();
-        //     calc_elem_global_stiffness();
-        // }
+        /**
+         * @brief runs all stiffness function calculations
+         * 
+         */
+        void calc_stiffnesses()
+        {
+            this->BeamElementBaseClass::calc_stiffnesses();
+        }
     //@}
 
     /**
@@ -358,19 +379,9 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
          * @brief Get the \ref global_ele_U from each node object connected to the element.
          * 
          */
-        void get_U_from_nodes() {
-            std::array<real, 6> nodal_disp;
-            int i = 0;
-            // global_ele_U
-            for (auto node: nodes)
-            {
-                nodal_disp = node->get_nodal_displacements();
-                for (auto dof: nodal_disp)
-                {
-                    global_ele_U(i) = dof;
-                    ++i;
-                }
-            }
+        void get_U_from_nodes() 
+        {
+            this->BeamElementBaseClass::get_U_from_nodes();
         }
 
         /**
@@ -381,10 +392,11 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
         }
 
         /**
-         * @brief Populates the resistance forces triplets removing any inactive freedoms.
-         * @todo I seem to be doing the active_dofs thing too often. The element should also have a set that contains its active dofs!
+         * @brief implemented in base class.
          */
-        virtual void populate_resistance_force_triplets() const = 0;
+        void populate_resistance_force_triplets() {
+            this->BeamElementBaseClass::populate_resistance_force_triplets();
+        }
 
         /**
          * @brief calculates the global stiffness contribution of the local element and populates global_stiffness_triplets
@@ -394,7 +406,9 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
          * matrix. So, this function will populate \ref global_stiffness_triplets with sparse matrix notation
          * 
          */
-        virtual void calc_K_global() const = 0;
+        void calc_K_global() {
+            this->BeamElementBaseClass::calc_K_global();
+        }
 
         /**
          * @brief populates \ref stiffness_map considering active and inactive DOFs for each node of the element
@@ -407,13 +421,10 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
          *  3. zeroed contributions are not added to \ref global_stiffness_triplets
          * 
          */
-        virtual void map_stiffness() const = 0;
-        
-        /**
-         * @brief populate \ref global_dof_map; appears deprecated.
-         * 
-         */
-        virtual void create_dof_map() const = 0;
+        void map_stiffness() 
+        {
+            this->BeamElementBaseClass::map_stiffness();
+        }
 
         /**
          * @brief a function to take care of correctly mapping only active DOFs; appears to have been deprecated.
@@ -422,7 +433,10 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
          * @param active_dofs 
          * @return std::vector<int> 
          */
-        virtual std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs) const = 0;
+        std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs)
+        {
+            return this->BeamElementBaseClass::map_dofs(elem_dofs, active_dofs);
+        }
     //@}
 
     /**
@@ -431,13 +445,13 @@ class Linear2DBeamElement : public BeamElement2DTemplate {
      */
     //@{
 
-        int get_ndofs() {return ndofs;}
-        mat get_N() {return shape_func.get_N();}
-        mat get_B() {return shape_func.get_B();}
-        mat get_k() {return shape_func.get_k();}
-        mat get_T() {return orient.get_T();}
-        vec get_eps() {return local_eps;}
-        vec get_d() {return local_d;}
+        int get_ndofs() {return this->BeamElementBaseClass::get_ndofs();}
+        mat get_N() {return this->BeamElementBaseClass::get_N();}
+        mat get_B() {return this->BeamElementBaseClass::get_B();}
+        mat get_k() {return this->BeamElementBaseClass::get_k();}
+        mat get_T() {return this->BeamElementBaseClass::get_T();}
+        vec get_eps() {return this->BeamElementBaseClass::get_eps();}
+        vec get_d() {return this->BeamElementBaseClass::get_d();}
 
         virtual std::vector<spnz> get_global_resistance_force_triplets() const = 0;
         virtual std::vector<spnz> get_K_global() const = 0;

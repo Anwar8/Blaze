@@ -1,5 +1,5 @@
 /**
- * @file BeamElement2DTemplate.hpp
+ * @file BeamElementBaseClass.hpp
  * @brief definitions for base class for all basic beam-column elements.
  */
 
@@ -28,7 +28,7 @@
  *       3. add functionality to apply non-uniform thermal loading interpolation (LOW PRIORITY)
  * 
  */
-class BeamElement2DTemplate {
+class BeamElementBaseClass {
     private:
     protected:
         /**
@@ -37,7 +37,7 @@ class BeamElement2DTemplate {
          */
         //@{      
         unsigned id = 0; /**< unique identifier for the element.*/
-        std::string const elem_type = "beam-column"; /**< string that represents the type of the element.*/
+        std::string elem_type = "beam-column"; /**< string that represents the type of the element.*/
         int ndofs = -1; /**< number of freedoms at each node. Unknown in this virtual class. Set to -1 to force implementation in subclass.*/
         int nnodes = -1; /**< number of nodes. Set to -1 to force implementation in subclass.*/
         std::vector<real> gauss_points; /**< length-wise coordinates of the Gauss Points. to be set by \ref set_gauss_points*/
@@ -59,6 +59,7 @@ class BeamElement2DTemplate {
         /**
          * @name beam_state_containers
          * @brief the containers for the beam state such as displacement, strain, force, etc.
+         * @todo should the shape function's \f$ \boldysymbol{N}\f$ and \f$ \boldysymbol{B}\f$ be placed here? if so, are they calculated at the Gauss points? 
          */
         //@{
         vec global_ele_U; /**< global nodal displacements for all freedoms of the nodes corresponding to the element.*/
@@ -105,7 +106,7 @@ class BeamElement2DTemplate {
          * @param in_nodes a container of shared pointers to node objects
          */
         template<typename Container>
-        BeamElement2DTemplate(int given_id, Container& in_nodes) {
+        BeamElementBaseClass(int given_id, Container& in_nodes) {
             initialise(given_id, in_nodes);
         }
 
@@ -121,6 +122,12 @@ class BeamElement2DTemplate {
             std::cout << "This is a pseudo virtual function. Must define an overriding initialiser for your class." << std::endl;
             std::exit(1);  
         }
+
+        /**
+         * @brief initialises the beam state containers (matricces and vectors) to zeros of the right size for the element.
+         * 
+         */
+        virtual void initialise_state_containers() const = 0;
 
         /**
          * @brief Set the gauss points std::vector.
@@ -292,7 +299,21 @@ class BeamElement2DTemplate {
          * @brief Get the \ref global_ele_U from each node object connected to the element.
          * 
          */
-        virtual void get_U_from_nodes() const = 0;
+        virtual void get_U_from_nodes() 
+        {
+            std::array<real, 6> nodal_disp;
+            int i = 0;
+            // global_ele_U
+            for (auto node: nodes)
+            {
+                nodal_disp = node->get_nodal_displacements();
+                for (auto dof: nodal_disp)
+                {
+                    global_ele_U(i) = dof;
+                    ++i;
+                }
+            }
+        }
 
         /**
          * @brief Calculates the resistance forces from the relationship \f$ \boldsymbol{R} = \boldsymbol{T}^T\boldsymbol{f}\f$.
@@ -303,7 +324,35 @@ class BeamElement2DTemplate {
          * @brief Populates the resistance forces triplets removing any inactive freedoms.
          * @todo I seem to be doing the active_dofs thing too often. The element should also have a set that contains its active dofs!
          */
-        virtual void populate_resistance_force_triplets() const = 0;
+        virtual void populate_resistance_force_triplets() {
+            global_R_triplets.clear();
+            // the 12x1 full resistance vector from local nodal forces vector f
+            std::set<int> node_active_dofs;
+            int nz_i = 0;
+            real force_value;
+            int total_nodal_ndofs_completed = 0; // each node we finish with, we add 6 to this. 
+            // This means we have to move to the next set of values corresponding to the next 
+            // node in the full resistance vector.         
+            for (auto node: nodes)
+            {
+                int nodal_dof_index = 0;
+                node_active_dofs = node->get_active_dofs();
+                nz_i = node->get_nz_i();
+                for (auto active_dof: node_active_dofs)
+                {
+                
+                    force_value = element_resistance_forces(active_dof + total_nodal_ndofs_completed);
+                    // since inactive nodes do not appear in R, we have to make sure to be careful about where we add our nodal forces.
+                    // here, nz_i + nodal_dof_index simply starts at where the node freedoms start in the global index, and then
+                    // iterates one by one. See how we ++ nodal_dof_index for each freedom we add, and how we restrat from zero when
+                    // we start work with the next node?
+                    global_R_triplets.push_back(spnz(nz_i + nodal_dof_index, 0, force_value));
+                    nodal_dof_index++;
+                }
+                //**< has to be 6 because each node has 6 dofs and our \ref element_resistance_forces also has 6 rows for each node!*
+                total_nodal_ndofs_completed += 6;
+            }
+        }
 
         /**
          * @brief calculates the global stiffness contribution of the local element and populates global_stiffness_triplets
@@ -313,7 +362,18 @@ class BeamElement2DTemplate {
          * matrix. So, this function will populate \ref global_stiffness_triplets with sparse matrix notation
          * 
          */
-        virtual void calc_K_global() const = 0;
+        virtual void calc_K_global() 
+        {
+            global_stiffness_triplets.clear();
+            // we have the same number of contribution as stiffness components 
+            // assuming all are non-zero!
+            global_stiffness_triplets.reserve(elem_global_stiffness.rows() * elem_global_stiffness.cols());
+            for (auto kmap: stiffness_map)
+            {
+                real val = elem_global_stiffness(kmap[0], kmap[1]);
+                global_stiffness_triplets.push_back(spnz(kmap[2], kmap[3], val));
+            }
+        }
 
         /**
          * @brief populates \ref stiffness_map considering active and inactive DOFs for each node of the element
@@ -326,14 +386,48 @@ class BeamElement2DTemplate {
          *  3. zeroed contributions are not added to \ref global_stiffness_triplets
          * 
          */
-        virtual void map_stiffness() const = 0;
+        virtual void map_stiffness() 
+        {
+             // local to global stiffness map: <<local_row, local_col, global_row, global_col>, ...>
+            stiffness_map.clear();
+            int stiffness_size = 0;
+            for (auto node: nodes) 
+            {
+                stiffness_size += std::size(node->get_active_dofs());
+            }
+            stiffness_size *= stiffness_size;
+           
+            stiffness_map.reserve(stiffness_size);
+            int i = 0;
+            for (auto node_i: nodes)
+            {
+                int j = 0;
+                std::set<int> active_dofs_i = node_i->get_active_dofs();
+                int nz_i_i = node_i->get_nz_i();
+                for (auto node_j: nodes)
+                {
+                    
+                    std::set<int> active_dofs_j = node_j->get_active_dofs();
+                    
+                    int nz_i_j = node_j->get_nz_i();
+                    int dof_i_index = 0;
+                    for (auto dof_i: active_dofs_i)
+                    {
+                        int dof_j_index = 0;
+                        for (auto dof_j: active_dofs_j)
+                        {
+                            // std::cout << "i, j = " << i << ", " << j << " and their dofs are " << dof_i << ", " << dof_j << std::endl;
+                            stiffness_map.push_back({6*i+dof_i, 6*j+dof_j, nz_i_i + dof_i_index, nz_i_j+dof_j_index});
+                            ++dof_j_index;
+                        }
+                        ++dof_i_index;
+                    }
+                ++j;
+                }
+            ++i;
+            }
+        }
         
-        /**
-         * @brief populate \ref global_dof_map; appears deprecated.
-         * 
-         */
-        virtual void create_dof_map() const = 0;
-
         /**
          * @brief a function to take care of correctly mapping only active DOFs; appears to have been deprecated.
          * 
@@ -341,7 +435,22 @@ class BeamElement2DTemplate {
          * @param active_dofs 
          * @return std::vector<int> 
          */
-        virtual std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs) const = 0;
+        virtual std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs)
+        {
+            std::vector<int> mapped_dofs;
+            mapped_dofs.reserve(std::size(elem_dofs));
+            for (auto dof: elem_dofs)
+            {
+                auto dof_itr = std::find(active_dofs.begin(), active_dofs.end(), dof);
+                if (dof_itr == active_dofs.end())
+                {
+                    mapped_dofs.push_back(-1);
+                } else {
+                    mapped_dofs.push_back(std::distance(active_dofs.begin(), dof_itr));
+                }
+            }
+            return mapped_dofs;
+        }
     //@}
 
     /**
@@ -350,13 +459,13 @@ class BeamElement2DTemplate {
      */
     //@{
 
-        int get_ndofs() {return ndofs;}
-        mat get_N() {return shape_func.get_N();}
-        mat get_B() {return shape_func.get_B();}
-        mat get_k() {return shape_func.get_k();}
-        mat get_T() {return orient.get_T();}
-        vec get_eps() {return local_eps;}
-        vec get_d() {return local_d;}
+        virtual int get_ndofs() const {return ndofs;}
+        virtual mat get_N() const {return shape_func.get_N();}
+        virtual mat get_B() const {return shape_func.get_B();}
+        virtual mat get_k() const {return shape_func.get_k();}
+        virtual mat get_T() {return orient.get_T();}
+        virtual vec get_eps() const {return local_eps;}
+        virtual vec get_d() const {return local_d;}
 
         virtual std::vector<spnz> get_global_resistance_force_triplets() const = 0;
         virtual std::vector<spnz> get_K_global() const = 0;
