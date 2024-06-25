@@ -113,11 +113,14 @@ class Linear2DBeamElement : public BeamElementBaseClass {
          */
         template<typename Container>
         void initialise(int given_id, Container& in_nodes) {
-
+            // initialise the fundamental aspects of the element
+            // -----------------------------------------------------
             elem_type = "2D_EulerBernouli_beam-column"; /**< string that represents the type of the element.*/
             ndofs = 3; /**< number of freedoms at each node. 3 for this element type.*/
             nnodes = 2; /**< number of nodes. 2 nodes for this element type.*/
             initialise_state_containers();
+            // -----------------------------------------------------
+
             if (std::size(in_nodes) != nnodes)
             {
                 std::cout << "Incorrect number of nodes passed to create element " << id << std::endl;
@@ -178,14 +181,22 @@ class Linear2DBeamElement : public BeamElementBaseClass {
         void calc_length() {
             length = orient.get_length();
         }
-        
-        // virtual void calc_N(real x) const = 0;
+        /**
+         * @brief calculates the shape function of the beam-column element for location x.
+         * 
+         * @param x location at which shape function is evaluated.
+         */
+        virtual void calc_N(real x)
+        {
+            shape_func.calc_N(x, length);
+        }
         /**
          * @brief call the shape function's derivative of the shape function operation to calculate at a specific point.
          * 
          * @param x location along beam-column element at which to calculate the derivative of the shape function.
          */
-        void calc_B(real x) {
+        void calc_B(real x) 
+        {
             shape_func.calc_B(x, length);
         }
 
@@ -231,13 +242,24 @@ class Linear2DBeamElement : public BeamElementBaseClass {
                 
         /**
          * @brief updates element nodal displacements, strains, stresses, element resistance forces.
-         * @todo no need to evaluate EA and EI every state update - move to initialisation stage.
-         * @todo Change the way B matrix is calculated so it is not done for midpoint of beam.
-         * @todo add calculation of geometric and tangent stiffnesses.
-         * @todo remove redundant calculation of material stiffness unless it needs to be recalculated again. Remember, it was calculated before finding global U to begin with.
-         * @warning calculates \f$\boldsymbol{B}\f$ based on mid-length of the beam not Gauss points.
+         * @warning this is a purely linear element so no re-evaluation of material strength or constitutive matrix.
+         * @warning This calculation is NOT done for Gauss points, but only for midpoint of element (which is preferred for output postprocessing).
          */
-        virtual void update_state() const = 0;
+        void update_state() 
+        {
+            // need to retrieve local displacement from the global displacement first of all.
+            calc_d_from_U();
+            // calculating element strain and stress states depends on local displacement d, even though B calculation currently does not.
+            calc_B(length*0.5);
+            calc_eps();
+            calc_stresses();
+            // stiffness calculation must come AFTER stress calculation as stiffness may depend on stress.
+            calc_stiffnesses();
+            // nodal forces depend on stiffness, so must come after stiffness calculations.
+            calc_nodal_forces();
+            // finally, we map back the nodal forces to the force triplets that will be used to populate the global force/resistance vector.
+            populate_resistance_force_triplets();
+        }
 
         
     //@}
@@ -337,30 +359,15 @@ class Linear2DBeamElement : public BeamElementBaseClass {
             std::cout << "it is also of length " << length << std::endl;
         }
  
-        // /**
-        //  * @brief prints the internal state of the element.
-        //  * 
-        //  */
-        // void print_element_state(bool print_stresses = true, bool print_strains = false,
-        //                          bool print_nodal_disp = false, bool print_nodal_forces = false) 
-        // {
-        //     if (print_stresses) 
-        //     {
-        //         std::cout << "element " << id << " stresses are:"  << std::endl << local_stresses << std::endl;
-        //     }
-        //     if (print_strains) 
-        //     {
-        //         std::cout << "element " << id << " strains are:"  << std::endl << local_eps << std::endl;
-        //     }
-        //     if (print_nodal_forces) 
-        //     {
-        //         std::cout << "element " << id << " nodal forces are:"  << std::endl << local_f << std::endl;
-        //     }
-        //     if (print_nodal_disp) 
-        //     {
-        //         std::cout << "element " << id << " nodal displacements are:" << std::endl << local_d << std::endl;
-        //     }
-        // }
+        /**
+         * @brief prints the internal state of the element.
+         * 
+         */
+        void print_element_state(bool print_stresses = true, bool print_strains = false,
+                                 bool print_nodal_disp = false, bool print_nodal_forces = false) 
+        {
+          this->BeamElementBaseClass::print_element_state(print_stresses, print_strains, print_nodal_disp, print_nodal_forces);
+        }
     //@}
 
     /**
@@ -453,12 +460,12 @@ class Linear2DBeamElement : public BeamElementBaseClass {
         vec get_eps() {return this->BeamElementBaseClass::get_eps();}
         vec get_d() {return this->BeamElementBaseClass::get_d();}
 
-        virtual std::vector<spnz> get_global_resistance_force_triplets() const = 0;
-        virtual std::vector<spnz> get_K_global() const = 0;
-        virtual int const get_nth_node_id(int n) const = 0;
+        std::vector<spnz> get_global_resistance_force_triplets() {this->BeamElementBaseClass::get_global_resistance_force_triplets();}
+        virtual std::vector<spnz> get_K_global() {this->BeamElementBaseClass::get_K_global();}
+        int const get_nth_node_id(int n) {this->BeamElementBaseClass::get_nth_node_id(n);}
     //@}
 
-        virtual void set_d(vec new_disp) const = 0;
+        void set_d(vec new_disp) {this->BeamElementBaseClass::set_d(new_disp);}
 };
 
 

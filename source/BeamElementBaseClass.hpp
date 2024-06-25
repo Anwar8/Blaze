@@ -148,8 +148,12 @@ class BeamElementBaseClass {
          * 
          */
         virtual void calc_length() const = 0;
-        
-        // virtual void calc_N(real x) const = 0;
+        /**
+         * @brief calculates the shape function of the beam-column element for location x.
+         * 
+         * @param x location at which shape function is evaluated.
+         */
+        virtual void calc_N(real x) const = 0;
         /**
          * @brief call the shape function's derivative of the shape function operation to calculate at a specific point.
          * 
@@ -238,7 +242,7 @@ class BeamElementBaseClass {
          * @brief runs all stiffness function calculations
          * 
          */
-        void calc_stiffnesses()
+        virtual void calc_stiffnesses()
         {
             calc_mat_stiffness();
             calc_geom_stiffness();
@@ -261,7 +265,7 @@ class BeamElementBaseClass {
          * @brief prints the internal state of the element.
          * 
          */
-        void print_element_state(bool print_stresses = true, bool print_strains = false,
+        virtual void print_element_state(bool print_stresses = true, bool print_strains = false,
                                  bool print_nodal_disp = false, bool print_nodal_forces = false) 
         {
             if (print_stresses) 
