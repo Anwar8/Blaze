@@ -37,7 +37,7 @@ class BeamElementBaseClass {
          */
         //@{      
         unsigned id = 0; /**< unique identifier for the element.*/
-        std::string elem_type = "beam-column"; /**< string that represents the type of the element.*/
+        std::string elem_type = "pure-virtual-beam-column"; /**< string that represents the type of the element.*/
         int ndofs = -1; /**< number of freedoms at each node. Unknown in this virtual class. Set to -1 to force implementation in subclass.*/
         int nnodes = -1; /**< number of nodes. Set to -1 to force implementation in subclass.*/
         std::vector<real> gauss_points; /**< length-wise coordinates of the Gauss Points. to be set by \ref set_gauss_points*/

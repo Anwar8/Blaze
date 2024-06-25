@@ -1,29 +1,34 @@
 #include <iostream>
+#include <vector>
 #include "gtest/gtest.h"
 #include "../beam_element.hpp"
+#include "../BeamElementBaseClass.hpp"
+#include "../BeamElementCommonInterface.hpp"
+#include "../Linear2DBeamElement.hpp"
 #include "../maths_defaults.hpp"
 #include "../node.hpp"
 
 #define TOLERANCE 1e-6
 
-real get_l1_force(Basic2DBeamElement& my_beam, vec& d)
+real get_l1_force(std::shared_ptr<BeamElementBaseClass> my_beam, vec& d)
 {
-   return  (my_beam.get_k() * d).lpNorm<1>();
+   return  (my_beam->get_k() * d).lpNorm<1>();
 }
 
 class RigidBodyMotionTest : public ::testing::Test {
     // Declare variables to be used in the fixture
 public:
-    
-    std::shared_ptr<Node> in_nodes_1 = std::make_shared<Node>(0.0, 0.0, 0.0);
-    std::shared_ptr<Node> in_nodes_2 = std::make_shared<Node>(3.0, 0.0, 0.0);
-    Basic2DBeamElement my_beam;
+    std::vector<std::shared_ptr<Node>> in_nodes;
+    std::shared_ptr<BeamElementBaseClass> my_beam;
     vec d;
     void SetUp() override {
         // Create the nodes
-        my_beam = Basic2DBeamElement(in_nodes_1, in_nodes_2);
-        my_beam.calc_N(1.5);
-        my_beam.calc_B(1.5);
+        in_nodes.push_back(std::make_shared<Node>(0.0, 0.0, 0.0));
+        in_nodes.push_back(std::make_shared<Node>(3.0, 0.0, 0.0));
+        
+        my_beam = std::make_shared<Linear2DBeamElement>(0, in_nodes);
+        my_beam->calc_N(1.5);
+        my_beam->calc_B(1.5);
 
         // Create the d vector
         d = make_xd_vec(6);
@@ -36,13 +41,16 @@ public:
 class BasicTransformationTest : public ::testing::Test {
     // Declare variables to be used in the fixture
 public:
+    std::vector<std::shared_ptr<Node>> in_nodes;
+    std::shared_ptr<BeamElementBaseClass> my_beam;
     
-    std::shared_ptr<Node> in_nodes_1 = std::make_shared<Node>(0.0, 0.0, 0.0);
-    std::shared_ptr<Node> in_nodes_2 = std::make_shared<Node>(3.0, 0.0, 0.0);
-    Basic2DBeamElement my_beam;
+  
     void SetUp() override {
         // Create the nodes
-        my_beam = Basic2DBeamElement(in_nodes_1, in_nodes_2);
+        in_nodes.push_back(std::make_shared<Node>(0.0, 0.0, 0.0));
+        in_nodes.push_back(std::make_shared<Node>(3.0, 0.0, 0.0));
+        my_beam = std::make_shared<Linear2DBeamElement>(0, in_nodes);
+        
     }
     void TearDown() override {
       
@@ -51,7 +59,7 @@ public:
 
 TEST_F(BasicTransformationTest, CheckUnitTransformValues) {
 
-  mat T = my_beam.get_T();
+  mat T = my_beam->get_T();
   EXPECT_NEAR(T(0,0), 1.0, TOLERANCE);
   T(0,0) = 0;
   EXPECT_NEAR(T(1,2), 1.0, TOLERANCE);
@@ -76,17 +84,17 @@ TEST_F(BasicTransformationTest, CheckUnitTransformValues) {
 
 
 TEST_F(BasicTransformationTest, CheckOffsetUp) {
-  my_beam.calc_T(0.5);
+  my_beam->calc_T(0.5);
 
-  mat T = my_beam.get_T();
+  mat T = my_beam->get_T();
   EXPECT_NEAR(T(0,5), 0.5, TOLERANCE);
   EXPECT_NEAR(T(3,11), 0.5, TOLERANCE);
 }
 
 TEST_F(BasicTransformationTest, CheckOffsetDown) {
-  my_beam.calc_T(-0.5);
+  my_beam->calc_T(-0.5);
 
-  mat T = my_beam.get_T();
+  mat T = my_beam->get_T();
   EXPECT_NEAR(T(0,5), -0.5, TOLERANCE);
   EXPECT_NEAR(T(3,11), -0.5, TOLERANCE);
   
@@ -94,8 +102,8 @@ TEST_F(BasicTransformationTest, CheckOffsetDown) {
 
 TEST_F(BasicTransformationTest, CheckTransformedStiffnessSize) {
 
-  mat T = my_beam.get_T();
-  mat k = my_beam.get_k();
+  mat T = my_beam->get_T();
+  mat k = my_beam->get_k();
   mat k_g = T.transpose()*k*T;
   int n_cols = k_g.cols();
   int n_rows = k_g.rows();
@@ -107,7 +115,7 @@ TEST_F(RigidBodyMotionTest, MoveRightCheckStiffness) {
   // Modify the d vector for this test case
   d(0) = 1;
   d(3) = 1;
-  my_beam.set_d(d);
+  my_beam->set_d(d);
 
   // Calculate eps and perform assertions
   
@@ -120,7 +128,7 @@ TEST_F(RigidBodyMotionTest, MoveUpCheckStiffness) {
   // Modify the d vector for this test case
   d(1) = 1;
   d(4) = 1;
-  my_beam.set_d(d);
+  my_beam->set_d(d);
 
   // Calculate eps and perform assertions
   
@@ -135,7 +143,7 @@ TEST_F(RigidBodyMotionTest, RotateCCWCheckStiffness) {
   d(2) = 2.0/3;
   d(4) = 1;
   d(5) = 2.0/3;
-  my_beam.set_d(d);
+  my_beam->set_d(d);
 
   // Calculate eps and perform assertions
   
@@ -148,11 +156,11 @@ TEST_F(RigidBodyMotionTest, MoveRight) {
   // Modify the d vector for this test case
   d(0) = 1;
   d(3) = 1;
-  my_beam.set_d(d);
+  my_beam->set_d(d);
 
   // Calculate eps and perform assertions
-  my_beam.calc_eps();
-  vec eps = my_beam.get_eps();
+  my_beam->calc_eps();
+  vec eps = my_beam->get_eps();
   EXPECT_NEAR(eps(0), 0.0, TOLERANCE);
   EXPECT_NEAR(eps(1), 0.0, TOLERANCE);
 }
@@ -161,11 +169,11 @@ TEST_F(RigidBodyMotionTest, MoveUp) {
   // Modify the d vector for this test case
   d(1) = 1;
   d(4) = 1;
-  my_beam.set_d(d);
+  my_beam->set_d(d);
 
   // Calculate eps and perform assertions
-  my_beam.calc_eps();
-  vec eps = my_beam.get_eps();
+  my_beam->calc_eps();
+  vec eps = my_beam->get_eps();
   EXPECT_NEAR(eps(0), 0.0, TOLERANCE);
   EXPECT_NEAR(eps(1), 0.0, TOLERANCE);
 }
@@ -176,11 +184,11 @@ TEST_F(RigidBodyMotionTest, RotateCCW) {
   d(2) = 2.0/3;
   d(4) = 1;
   d(5) = 2.0/3;
-  my_beam.set_d(d);
+  my_beam->set_d(d);
 
   // Calculate eps and perform assertions
-  my_beam.calc_eps();
-  vec eps = my_beam.get_eps();
+  my_beam->calc_eps();
+  vec eps = my_beam->get_eps();
   EXPECT_NEAR(eps(0), 0.0, TOLERANCE);
   EXPECT_NEAR(eps(1), 0.0, TOLERANCE);
   

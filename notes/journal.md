@@ -12,11 +12,22 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Journal
 #### 25 June
-`Blaze` now compiles with its new element interface design. Now the issue is that it encounters a segmentation fault when the nodes are being fixed. This indicates, to me, that the pure virtual class `BeamElementVirtualClass` is not being instantiated correctly, and that perhaps the nodes are not actually becoming a part of the element. I suspect this because I had added a default constructor to it, as the code was not compiling without it. I need to debug more. Thankfully, I am now able to use `LLDB` from within VSCode to do the debugging. Another error that I suspect is that the main load-application loop of the program is faulty as it is resulting in divergence at LF = 0.88.
+`Blaze` now compiles with its new element interface design. Now the issue is that it encounters a segmentation fault when the nodes are being fixed. This indicates, to me, that the pure virtual class `BeamElementBaseClass` is not being instantiated correctly, and that perhaps the nodes are not actually becoming a part of the element. I suspect this because I had added a default constructor to it, as the code was not compiling without it. I need to debug more. Thankfully, I am now able to use `LLDB` from within VSCode to do the debugging. Another error that I suspect is that the main load-application loop of the program is faulty as it is resulting in divergence at LF = 0.88.
 
 Upon further inspection, this is (2.64e7) actually slightly above the critical buckling load of 2.58e7, so maybe it's not so strange. When changing the load to -1e5 we get an end-displacement of -0.00956003. $\delta = \frac{PL^3}{3EI} = \frac{1e5 (3)^3}{3(2.06e11)(0.0004570000)} = 0.009560026343183701$
 
 Now the *real* issue is the *segmentation fault* that I am facing with my new element design.
+
+##### Update at 11 PM
+I have resolved the issue with the segmentation fault. It was simply an issue with the initialisation function for the `Linear2DBeamElement` class. Since the base class does not know how many nodes the element should have, I changed from a `std::array` to a `std::vector`, but then forgot to change the initialisation of this vector to use `push_back` instead of assigning by index (i.e. `nodes[0] = in_nodes[0]; nodes[1] = in_nodes[1];`). I have also managed to successfully debug with `LLDB` and connect that to `VSCode` by altering the `launch.json` file. I had to remove the line about compiling first from `launch.json` so `VScode` would stop waning me that the code was not recompiled. 
+
+Now there is a bug where the global stiffness matrix has NAN values. I reconfigured the tests to run with the new element classes, and all the tests succeed. This means that the problem is somewhere in the global mapping functions all of which should be found in `BeamElementCommonInterface`. On a side note, I am kinda struggling with the number of files in the project right now. A clean up could be in order after I get these elements to work properly, including geometric nonlinearity. That is, however, a problem for another time. It is almost midnight, and while I am immensely proud of my work and myself today, it is time to sleep.
+
+P.S. I need to sort out new deadlines/timelines for this project as I started 3 weeks later than intended (today is 10 days past the deadline for task 1). I had set aside 8 weeks for material nonlinearity, though, so this might give me some buffer to work with. Let's see!!
+
+P.S. 2. I need to fix the way I test this code. Perhaps have some header files all `#include`-d in `my_test.cpp`. Since `#include` basically copies the entire contents of the files, it makes sense to use this approach so I can separate the tests for different parts of the code.
+
+
 #### 24 June
 I now realise that the likely reason my nonlinear beam-column class was not working as intended is because of errors in how it inherited some functions from the linear base class. I must use `virtual` functions in my base class to make sure the subclass functions are called when the base class is the type of the object. This is much better explained in [this short video](https://www.youtube.com/watch?v=oIV2KchSyGQ).Likewise, I must use `override` in my subclass function definition to make it absolutely clear that this function overrides a base class function. This would make future subclass design much clearer and easier for people who will come after me.
 #### 7 June
