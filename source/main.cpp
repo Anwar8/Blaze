@@ -16,8 +16,8 @@ int main () {
     
     std::vector<real> end_disp_history_y, end_disp_history_x;
     // Euler buckling load for this beam is 2.58096e7
-    real x_load = -30.0e7;
-    real y_load = -1e3;
+    real x_load = 0.0;
+    real y_load = -1e5;
     real load_factor = 0;
     glob_mesh.setup_mesh("mesh/test.msh");
     glob_mesh.count_dofs();
