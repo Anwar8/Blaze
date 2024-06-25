@@ -13,11 +13,13 @@
 #include <string>
 #include<Eigen/SparseLU>
 #include<Eigen/SparseCholesky>
+#include "main.hpp"
 #include "gmsh.h"
 #include "maths_defaults.hpp"
 #include "node.hpp"
 #include "beam_element.hpp"
 #include "Izzuddin2DNonlinearBeam.hpp"
+#include "BeamElementBaseClass.hpp"
 
 /**
  * @brief std vector of pairs each of which has an id and a 3-item coords vector.
@@ -43,8 +45,15 @@ class GlobalMesh {
         int ndofs = 0; /**< number of DOFs in the mesh.*/
         int nelems = 0; /**< number of elements in the mesh.*/
         std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes in the problem.*/
-        std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
-        // std::vector<std::shared_ptr<Izzuddin2DNonlinearBeam>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
+        #if (ELEM == 1 || ELEM == 2) 
+            std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
+        #elif (ELEM == 3)
+            std::vector<std::shared_ptr<BeamElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
+        #else 
+            std::cout << "Incorrect ELEM: " << ELEM << "; should be 1. OLD, 2. IZDN, or 3. LBE." << std::endl;
+            exit(1);
+        #endif
+        
 
         spmat K;
         spvec P;

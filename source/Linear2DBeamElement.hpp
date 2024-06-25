@@ -6,11 +6,8 @@
 #ifndef LINEAR_2D_BEAM_ELEMENT_HPP
 #define LINEAR_2D_BEAM_ELEMENT_HPP
 
-#include <string>
-#include <array>
-#include <memory>
-#include "main.hpp"
-#include "BeamElementBaseClass.hpp"
+// #include "BeamElementBaseClass.hpp"
+#include "BeamElementCommonInterface.hpp"
 
 /**
  * @brief a 2D beam element with 6 total freedoms: 1 rotation and two displacements
@@ -22,7 +19,7 @@
  * 
  * 
  */
-class Linear2DBeamElement : public BeamElementBaseClass {
+class Linear2DBeamElement : public BeamElementCommonInterface {
     private:
     protected:
         /**
@@ -186,7 +183,7 @@ class Linear2DBeamElement : public BeamElementBaseClass {
          * 
          * @param x location at which shape function is evaluated.
          */
-        virtual void calc_N(real x)
+        void calc_N(real x)
         {
             shape_func.calc_N(x, length);
         }
@@ -337,10 +334,10 @@ class Linear2DBeamElement : public BeamElementBaseClass {
          * @brief runs all stiffness function calculations
          * 
          */
-        void calc_stiffnesses()
-        {
-            this->BeamElementBaseClass::calc_stiffnesses();
-        }
+        // void calc_stiffnesses()
+        // {
+        //     this->BeamElementBaseClass::calc_stiffnesses();
+        // }
     //@}
 
     /**
@@ -363,11 +360,11 @@ class Linear2DBeamElement : public BeamElementBaseClass {
          * @brief prints the internal state of the element.
          * 
          */
-        void print_element_state(bool print_stresses = true, bool print_strains = false,
-                                 bool print_nodal_disp = false, bool print_nodal_forces = false) 
-        {
-          this->BeamElementBaseClass::print_element_state(print_stresses, print_strains, print_nodal_disp, print_nodal_forces);
-        }
+        // void print_element_state(bool print_stresses = true, bool print_strains = false,
+        //                          bool print_nodal_disp = false, bool print_nodal_forces = false) 
+        // {
+        //   this->BeamElementBaseClass::print_element_state(print_stresses, print_strains, print_nodal_disp, print_nodal_forces);
+        // }
     //@}
 
     /**
@@ -386,10 +383,10 @@ class Linear2DBeamElement : public BeamElementBaseClass {
          * @brief Get the \ref global_ele_U from each node object connected to the element.
          * 
          */
-        void get_U_from_nodes() 
-        {
-            this->BeamElementBaseClass::get_U_from_nodes();
-        }
+        // void get_U_from_nodes() 
+        // {
+        //     this->BeamElementBaseClass::get_U_from_nodes();
+        // }
 
         /**
          * @brief Calculates the resistance forces from the relationship \f$ \boldsymbol{R} = \boldsymbol{T}^T\boldsymbol{f}\f$.
@@ -401,9 +398,9 @@ class Linear2DBeamElement : public BeamElementBaseClass {
         /**
          * @brief implemented in base class.
          */
-        void populate_resistance_force_triplets() {
-            this->BeamElementBaseClass::populate_resistance_force_triplets();
-        }
+        // void populate_resistance_force_triplets() {
+        //     this->BeamElementBaseClass::populate_resistance_force_triplets();
+        // }
 
         /**
          * @brief calculates the global stiffness contribution of the local element and populates global_stiffness_triplets
@@ -413,9 +410,9 @@ class Linear2DBeamElement : public BeamElementBaseClass {
          * matrix. So, this function will populate \ref global_stiffness_triplets with sparse matrix notation
          * 
          */
-        void calc_K_global() {
-            this->BeamElementBaseClass::calc_K_global();
-        }
+        // void calc_K_global() {
+        //     this->BeamElementBaseClass::calc_K_global();
+        // }
 
         /**
          * @brief populates \ref stiffness_map considering active and inactive DOFs for each node of the element
@@ -428,10 +425,10 @@ class Linear2DBeamElement : public BeamElementBaseClass {
          *  3. zeroed contributions are not added to \ref global_stiffness_triplets
          * 
          */
-        void map_stiffness() 
-        {
-            this->BeamElementBaseClass::map_stiffness();
-        }
+        // void map_stiffness() 
+        // {
+        //     this->BeamElementBaseClass::map_stiffness();
+        // }
 
         /**
          * @brief a function to take care of correctly mapping only active DOFs; appears to have been deprecated.
@@ -440,10 +437,10 @@ class Linear2DBeamElement : public BeamElementBaseClass {
          * @param active_dofs 
          * @return std::vector<int> 
          */
-        std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs)
-        {
-            return this->BeamElementBaseClass::map_dofs(elem_dofs, active_dofs);
-        }
+        // std::vector<int> map_dofs(std::vector<int> elem_dofs, std::set<int> active_dofs)
+        // {
+        //     return this->BeamElementBaseClass::map_dofs(elem_dofs, active_dofs);
+        // }
     //@}
 
     /**
@@ -452,20 +449,20 @@ class Linear2DBeamElement : public BeamElementBaseClass {
      */
     //@{
 
-        int get_ndofs() {return this->BeamElementBaseClass::get_ndofs();}
-        mat get_N() {return this->BeamElementBaseClass::get_N();}
-        mat get_B() {return this->BeamElementBaseClass::get_B();}
-        mat get_k() {return this->BeamElementBaseClass::get_k();}
-        mat get_T() {return this->BeamElementBaseClass::get_T();}
-        vec get_eps() {return this->BeamElementBaseClass::get_eps();}
-        vec get_d() {return this->BeamElementBaseClass::get_d();}
+    //     int get_ndofs() {return this->BeamElementBaseClass::get_ndofs();}
+    //     mat get_N() {return this->BeamElementBaseClass::get_N();}
+    //     mat get_B() {return this->BeamElementBaseClass::get_B();}
+    //     mat get_k() {return this->BeamElementBaseClass::get_k();}
+    //     mat get_T() {return this->BeamElementBaseClass::get_T();}
+    //     vec get_eps() {return this->BeamElementBaseClass::get_eps();}
+    //     vec get_d() {return this->BeamElementBaseClass::get_d();}
 
-        std::vector<spnz> get_global_resistance_force_triplets() {this->BeamElementBaseClass::get_global_resistance_force_triplets();}
-        virtual std::vector<spnz> get_K_global() {this->BeamElementBaseClass::get_K_global();}
-        int const get_nth_node_id(int n) {this->BeamElementBaseClass::get_nth_node_id(n);}
-    //@}
+    //     std::vector<spnz> get_global_resistance_force_triplets() {return this->BeamElementBaseClass::get_global_resistance_force_triplets();}
+    //     virtual std::vector<spnz> get_K_global() {return this->BeamElementBaseClass::get_K_global();}
+    //     int const get_nth_node_id(int n) {return this->BeamElementBaseClass::get_nth_node_id(n);}
+    // //@}
 
-        void set_d(vec new_disp) {this->BeamElementBaseClass::set_d(new_disp);}
+    //     void set_d(vec new_disp) {this->BeamElementBaseClass::set_d(new_disp);}
 };
 
 
