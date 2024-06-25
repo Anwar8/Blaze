@@ -2,9 +2,9 @@
 #include <string>
 #include "global_mesh.hpp"
 #include "basic_utilities.hpp"
-// #include "Izzuddin2DNonlinearBeam.hpp"
+#include "Izzuddin2DNonlinearBeam.hpp"
 #include "beam_element.hpp"
-// #include "Linear2DBeamElement.hpp"
+#include "Linear2DBeamElement.hpp"
 void GlobalMesh::open_mesh_file(std::string const mesh_file) {
     gmsh::initialize();
     gmsh::open(mesh_file);

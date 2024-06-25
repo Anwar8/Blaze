@@ -125,8 +125,8 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
                 std::exit(1);
             }
             id = given_id;
-            nodes[0] = in_nodes[0];
-            nodes[1] = in_nodes[1];
+            nodes.push_back(in_nodes[0]);
+            nodes.push_back(in_nodes[1]);
             for (auto node : in_nodes) {
                 
                 node->add_connected_element(id);
