@@ -198,11 +198,37 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
             return mapped_dofs;
         }
 
+
+    /**
+     * @name setter functions
+     * @brief functions that set protected variables
+     */
+    //@{
+        /**
+         * @brief Set \ref global_ele_U to some value for testing.
+         * 
+         * @param global_U_vec a vector that the object's \ref global_ele_U will be replaced by.
+         */
+        virtual void set_global_U(vec global_U_vec) {global_ele_U = global_U_vec;}
+        /**
+         * @brief Set \ref local_d to some displacement vector.
+         * 
+         * @param new_disp the new displacement the \ref local_d would be replaced by.
+         */
+        virtual void set_d(vec new_disp) {local_d = new_disp;}
+        
+    //@}
+    /**
+     * @name getter functions
+     * @brief functions that retrieve protected variables
+     */
+    //@{
         virtual int get_ndofs() const {return ndofs;}
         virtual mat get_N() const {return shape_func.get_N();}
         virtual mat get_B() const {return shape_func.get_B();}
         virtual mat get_k() const {return shape_func.get_k();}
         virtual mat get_T() {return orient.get_T();}
+        virtual real get_L() {return orient.get_length();}
         virtual vec get_eps() const {return local_eps;}
         virtual vec get_d() const {return local_d;}
 
@@ -218,7 +244,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
             }
             return nodes[n]->get_id();
         }
-        virtual void set_d(vec new_disp) {local_d = new_disp;}
+    //@}
 };
 
 #endif

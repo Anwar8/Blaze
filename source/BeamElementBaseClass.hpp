@@ -457,7 +457,24 @@ class BeamElementBaseClass {
         //     return mapped_dofs;
         // }
     //@}
-
+    /**
+     * @name setter functions
+     * @brief functions that set protected variables
+     */
+    //@{
+        /**
+         * @brief Set \ref global_ele_U to some value for testing.
+         * 
+         * @param global_U_vec a vector that the object's \ref global_ele_U will be replaced by.
+         */
+        virtual void set_global_U(vec global_U_vec) = 0;
+        /**
+         * @brief Set \ref local_d to some displacement vector.
+         * 
+         * @param new_disp the new displacement the \ref local_d would be replaced by.
+         */
+        virtual void set_d(vec new_disp) = 0;
+    //@}
     /**
      * @name getter functions
      * @brief functions that retrieve protected variables
@@ -469,6 +486,7 @@ class BeamElementBaseClass {
         virtual mat get_B() const = 0;
         virtual mat get_k() const = 0;
         virtual mat get_T() = 0;
+        virtual real get_L() = 0;
         virtual vec get_eps() const = 0;
         virtual vec get_d() const = 0;
 
@@ -477,7 +495,7 @@ class BeamElementBaseClass {
         virtual int const get_nth_node_id(int n) const = 0;
     //@}
 
-        virtual void set_d(vec new_disp) = 0;
+        
 };
 
 
