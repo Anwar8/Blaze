@@ -131,8 +131,8 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
                 
                 node->add_connected_element(id);
             }
-            calc_length();
             calc_T();
+            calc_length();
             calc_local_constitutive_mat();
             calc_stiffnesses();
         }

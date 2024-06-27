@@ -61,7 +61,7 @@ int main () {
         // const std::string convergence_criterion = "norm"; // or "max" - of out of balance.
         int max_iter = 20;
         int iter = 1;
-
+        
         glob_mesh.calc_global_contributions();
         assembler.assemble_global_contributions(glob_mesh);
         solver.solve_for_U(assembler);

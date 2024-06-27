@@ -148,6 +148,7 @@ class GlobalMesh {
             std::cout << "Calc_global_contirbutions: There are " << ndofs << " active DoFs in the mesh." << std::endl;
             for (auto elem: elem_vector) 
             {   
+                elem->update_state();
                 elem->map_stiffness();
                 elem->calc_K_global();
             }

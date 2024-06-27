@@ -11,6 +11,11 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 27 June
+I am too tired to work properly right now. However, I managed to find one of the bugs. The length of the beam-column element was being calculated incorrectly as we are not initialising the `orientation` object before using it. This is poor design of the orientation object, which I believe should be initialised with an `initialise` function rather than the `calc_T` function, which **MUST** be called before the `calc_length` function. This means that we are able to get a stiffness matrix now. I have also added a call to `update_state` in `calc_global_contributions`, which is hoped to allow us to actually update the values for the stiffness - this might have been unnecessary, however. I should really update the test suite so that all aspect of the beam-column elements are tested and I don't have to go hunting for the bugs step-by-step. This will also enable me to quickly test the nonlinear elements in the future as they must pass the same tests as the linear elements! I really need to revisit the `main` function and restructure the code so as to make sure the process is correct. There is also a very interesting question - *why does the `Basic2DBeamElement` work, but the other elements do not?* This means that I have solved the problem already in the past, but have made some minor bug somewhere in the new beam-column element classes `BeamElementCommonInterface` and `Linear2DBeamElement`.
+
+That is, however, a problem for a less tired and less sleepy Anwar.
+
 #### 25 June
 `Blaze` now compiles with its new element interface design. Now the issue is that it encounters a segmentation fault when the nodes are being fixed. This indicates, to me, that the pure virtual class `BeamElementBaseClass` is not being instantiated correctly, and that perhaps the nodes are not actually becoming a part of the element. I suspect this because I had added a default constructor to it, as the code was not compiling without it. I need to debug more. Thankfully, I am now able to use `LLDB` from within VSCode to do the debugging. Another error that I suspect is that the main load-application loop of the program is faulty as it is resulting in divergence at LF = 0.88.
 
