@@ -15,7 +15,7 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
 
     for (auto elem: glob_mesh.elem_vector)
     {   
-        K_global_elem_triplet_contribution = elem->get_K_global();
+        K_global_elem_triplet_contribution = elem->get_global_stiffness_triplets();
         K_global_triplets.insert(K_global_triplets.end(), K_global_elem_triplet_contribution.begin(), K_global_elem_triplet_contribution.end());
     }
     for (auto node: glob_mesh.node_vector)

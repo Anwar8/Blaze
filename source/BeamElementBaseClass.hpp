@@ -482,16 +482,30 @@ class BeamElementBaseClass {
     //@{
 
         virtual int get_ndofs() const = 0;
+        virtual int get_nnodes() const = 0;
+        virtual std::string get_elem_type() const = 0;
+        virtual unsigned get_id() const = 0;
+
+        virtual vec get_global_ele_U() const = 0;
+        virtual vec get_local_d() const = 0;
+        virtual vec get_local_f() const = 0;
+        virtual vec get_element_resistance_forces() const = 0;
+        virtual std::vector<spnz> get_global_resistance_force_triplets() = 0;
+        virtual vec get_eps() const = 0;
+        virtual vec get_local_stresses() const = 0;
+        virtual mat get_local_constitutive_mat() const = 0;
+        virtual mat get_local_mat_stiffness() const = 0;
+        virtual mat get_local_geom_stiffness() const = 0;
+        virtual mat get_local_tangent_stiffness() const = 0;
+        virtual mat get_elem_global_stiffness() const = 0;
+        virtual std::vector<spnz> get_global_stiffness_triplets() = 0;
+
         virtual mat get_N() const = 0;
         virtual mat get_B() const = 0;
         virtual mat get_k() const = 0;
         virtual mat get_T() = 0;
         virtual real get_L() = 0;
-        virtual vec get_eps() const = 0;
-        virtual vec get_d() const = 0;
-
-        virtual std::vector<spnz> get_global_resistance_force_triplets() = 0;
-        virtual std::vector<spnz> get_K_global() = 0;
+        
         virtual int const get_nth_node_id(int n) const = 0;
     //@}
 

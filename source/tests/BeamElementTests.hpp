@@ -19,22 +19,23 @@ class RigidBodyMotionTest : public ::testing::Test {
 public:
     std::vector<std::shared_ptr<Node>> in_nodes;
     std::shared_ptr<BeamElementBaseClass> my_beam;
-    vec d;
+    vec U;
     void SetUp() override {
         // Create the nodes
         in_nodes.push_back(std::make_shared<Node>(0.0, 0.0, 0.0));
         in_nodes.push_back(std::make_shared<Node>(3.0, 0.0, 0.0));
         
         my_beam = std::make_shared<Linear2DBeamElement>(0, in_nodes);
-        my_beam->calc_N(1.5);
-        my_beam->calc_B(1.5);
-
         // Create the d vector
-        d = make_xd_vec(6);
+        U = make_xd_vec(12);
+
+
     }
     void TearDown() override {
         // Reset the variables to their initial state    
-        d.setZero();
+        U.setZero();
+        my_beam->set_global_U(U);
+        my_beam->update_state();
 }
 };
 class BasicTransformationTest : public ::testing::Test {
@@ -61,7 +62,7 @@ class ElementStateTests : public ::testing::Test {
 public:
     std::vector<std::shared_ptr<Node>> in_nodes;
     std::shared_ptr<BeamElementBaseClass> my_beam;
-    vec d;
+    vec U;
     void SetUp() override {
         // Create the nodes
         in_nodes.push_back(std::make_shared<Node>(0.0, 0.0, 0.0));
@@ -69,12 +70,15 @@ public:
         
         my_beam = std::make_shared<Linear2DBeamElement>(0, in_nodes);
         // Create the d vector
-        d = make_xd_vec(6);
+        U = make_xd_vec(12);
+
 
     }
     void TearDown() override {
         // Reset the variables to their initial state    
-        d.setZero();
+        U.setZero();
+        my_beam->set_global_U(U);
+        my_beam->update_state();
 }
 };
 
@@ -129,10 +133,7 @@ TEST_F(BasicTransformationTest, CheckOffsetDown) {
 }
 
 TEST_F(BasicTransformationTest, CheckTransformedStiffnessSize) {
-
-  mat T = my_beam->get_T();
-  mat k = my_beam->get_k();
-  mat k_g = T.transpose()*k*T;
+  mat k_g = my_beam->get_elem_global_stiffness();
   int n_cols = k_g.cols();
   int n_rows = k_g.rows();
   EXPECT_EQ(n_cols, 12);
@@ -141,83 +142,60 @@ TEST_F(BasicTransformationTest, CheckTransformedStiffnessSize) {
 
 TEST_F(RigidBodyMotionTest, MoveRightCheckStiffness) {
   // Modify the d vector for this test case
-  d(0) = 1;
-  d(3) = 1;
-  my_beam->set_d(d);
+  U(0) = 1; // node 1 U1
+  U(6) = 1; // node 2 U1
 
-  // Calculate eps and perform assertions
-  
-  real f = get_l1_force(my_beam, d);
-  EXPECT_NEAR(f, 0.0, TOLERANCE);
-  
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  real eps_norm = my_beam->get_eps().lpNorm<1>();
+  real f_norm = my_beam->get_local_f().lpNorm<1>();
+  real stress_norm = my_beam->get_local_stresses().lpNorm<1>();
+  real resistance_forces_norm = my_beam->get_element_resistance_forces().lpNorm<1>();
+  EXPECT_NEAR(eps_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(f_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(stress_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(resistance_forces_norm, 0.0, TOLERANCE);
 }
 
 TEST_F(RigidBodyMotionTest, MoveUpCheckStiffness) {
   // Modify the d vector for this test case
-  d(1) = 1;
-  d(4) = 1;
-  my_beam->set_d(d);
+  U(2) = 1; // node 1 U2
+  U(8) = 1; // node 2 U2
+  my_beam->set_global_U(U);
+  my_beam->update_state();
 
-  // Calculate eps and perform assertions
-  
-  real f = get_l1_force(my_beam, d);
-  EXPECT_NEAR(f, 0.0, TOLERANCE);
+  // Calculate norms and perform assertions
+  real eps_norm = my_beam->get_eps().lpNorm<1>();
+  real f_norm = my_beam->get_local_f().lpNorm<1>();
+  real stress_norm = my_beam->get_local_stresses().lpNorm<1>();
+  real resistance_forces_norm = my_beam->get_element_resistance_forces().lpNorm<1>();
+  EXPECT_NEAR(eps_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(f_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(stress_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(resistance_forces_norm, 0.0, TOLERANCE);
   
 }
 
 TEST_F(RigidBodyMotionTest, RotateCCWCheckStiffness) {
   // Modify the d vector for this test case
-  d(1) = -1; 
-  d(2) = 2.0/3;
-  d(4) = 1;
-  d(5) = 2.0/3;
-  my_beam->set_d(d);
+  U(2) = -1; // node 1 U2
+  U(5) = 2.0/3; // node 1 U33
+  U(8) = 1; // node 2 U2
+  U(11) = 2.0/3; // node 2 U33
 
-  // Calculate eps and perform assertions
-  
-  real f = get_l1_force(my_beam, d);
-  EXPECT_NEAR(f, 0.0, TOLERANCE);
-  
-}
+  my_beam->set_global_U(U);
+  my_beam->update_state();
 
-TEST_F(RigidBodyMotionTest, MoveRight) {
-  // Modify the d vector for this test case
-  d(0) = 1;
-  d(3) = 1;
-  my_beam->set_d(d);
-
-  // Calculate eps and perform assertions
-  my_beam->calc_eps();
-  vec eps = my_beam->get_eps();
-  EXPECT_NEAR(eps(0), 0.0, TOLERANCE);
-  EXPECT_NEAR(eps(1), 0.0, TOLERANCE);
-}
-
-TEST_F(RigidBodyMotionTest, MoveUp) {
-  // Modify the d vector for this test case
-  d(1) = 1;
-  d(4) = 1;
-  my_beam->set_d(d);
-
-  // Calculate eps and perform assertions
-  my_beam->calc_eps();
-  vec eps = my_beam->get_eps();
-  EXPECT_NEAR(eps(0), 0.0, TOLERANCE);
-  EXPECT_NEAR(eps(1), 0.0, TOLERANCE);
-}
-
-TEST_F(RigidBodyMotionTest, RotateCCW) {
-  // Modify the d vector for this test case
-  d(1) = -1; 
-  d(2) = 2.0/3;
-  d(4) = 1;
-  d(5) = 2.0/3;
-  my_beam->set_d(d);
-
-  // Calculate eps and perform assertions
-  my_beam->calc_eps();
-  vec eps = my_beam->get_eps();
-  EXPECT_NEAR(eps(0), 0.0, TOLERANCE);
-  EXPECT_NEAR(eps(1), 0.0, TOLERANCE);
+  // Calculate norms and perform assertions
+  real eps_norm = my_beam->get_eps().lpNorm<1>();
+  real f_norm = my_beam->get_local_f().lpNorm<1>();
+  real stress_norm = my_beam->get_local_stresses().lpNorm<1>();
+  real resistance_forces_norm = my_beam->get_element_resistance_forces().lpNorm<1>();
+  EXPECT_NEAR(eps_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(f_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(stress_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(resistance_forces_norm, 0.0, TOLERANCE);
   
 }

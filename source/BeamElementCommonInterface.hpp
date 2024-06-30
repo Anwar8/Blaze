@@ -224,16 +224,30 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
      */
     //@{
         virtual int get_ndofs() const {return ndofs;}
+        virtual int get_nnodes() const {return nnodes;}
+        virtual std::string get_elem_type() const {return elem_type;}
+        virtual unsigned get_id() const {return id;}
+
+        virtual vec get_global_ele_U() const {return global_ele_U;}
+        virtual vec get_local_d() const {return local_d;}
+        virtual vec get_local_f() const {return local_f;}
+        virtual vec get_element_resistance_forces() const {return element_resistance_forces;}   
+        virtual std::vector<spnz> get_global_resistance_force_triplets() {return global_R_triplets;}        
+        virtual vec get_eps() const {return local_eps;}
+        virtual vec get_local_stresses() const {return local_stresses;}
+        virtual mat get_local_constitutive_mat() const {return local_constitutive_mat;}
+        virtual mat get_local_mat_stiffness() const {return local_mat_stiffness;}
+        virtual mat get_local_geom_stiffness() const {return local_geom_stiffness;}
+        virtual mat get_local_tangent_stiffness() const {return local_tangent_stiffness;}
+        virtual mat get_elem_global_stiffness() const {return elem_global_stiffness;}
+        virtual std::vector<spnz> get_global_stiffness_triplets() {return global_stiffness_triplets;}
+        
         virtual mat get_N() const {return shape_func.get_N();}
         virtual mat get_B() const {return shape_func.get_B();}
         virtual mat get_k() const {return shape_func.get_k();}
         virtual mat get_T() {return orient.get_T();}
         virtual real get_L() {return orient.get_length();}
-        virtual vec get_eps() const {return local_eps;}
-        virtual vec get_d() const {return local_d;}
 
-        virtual std::vector<spnz> get_global_resistance_force_triplets() {return global_R_triplets;}        
-        virtual std::vector<spnz> get_K_global() {return global_stiffness_triplets;}
         virtual int const get_nth_node_id(int n) const 
         {
             if (n > nnodes - 1 || n < 0)
