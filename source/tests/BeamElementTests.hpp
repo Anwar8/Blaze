@@ -10,6 +10,9 @@
 #include "../node.hpp"
 
 #define BEAM_LENGTH 3.0
+#define E 2.06e11
+#define A 0.0125
+#define I 0.0004570000
 
 void common_beam_setup(std::vector<std::shared_ptr<Node>>& in_nodes, std::shared_ptr<BeamElementBaseClass>& my_beam, vec& U) 
 {
@@ -31,9 +34,22 @@ void move_up(vec& U) {
 }
 void rotate_ccw(vec& U) {
     U(2) = -1; // node 1 U2
-    U(5) = 2.0/3; // node 1 U33
+    U(5) = 2.0/BEAM_LENGTH; // node 1 U33
     U(8) = 1; // node 2 U2
-    U(11) = 2.0/3; // node 2 U33
+    U(11) = 2.0/BEAM_LENGTH; // node 2 U33
+}
+
+void constant_compression(vec& U) {
+    U(0) = 0.5; // node 1 U1
+    U(6) = -0.5; // node 2 U1
+}
+void constant_tension(vec& U) {
+    U(0) = -0.5; // node 1 U1
+    U(6) = 0.5; // node 2 U1
+}
+void constant_positive_bending(vec& U) {
+    U(5) = -1; // node 1 U33
+    U(11) = 1; // node 2 U33
 }
 
 class RigidBodyMotionTest : public ::testing::Test {
@@ -71,7 +87,7 @@ public:
 }
 };
 
-class ElementStateTests : public ::testing::Test {
+class ConstantStrainStateTest : public ::testing::Test {
     // Declare variables to be used in the fixture
 public:
     std::vector<std::shared_ptr<Node>> in_nodes;
@@ -316,3 +332,75 @@ TEST_F(RigidBodyMotionTest, RotateCCWResistanceForces) {
   real resistance_forces_norm = my_beam->get_element_resistance_forces().lpNorm<1>();
   EXPECT_NEAR(resistance_forces_norm, 0.0, TOLERANCE);
 }
+
+
+TEST_F(ConstantStrainStateTest, ConstantCompressionEps) {
+  constant_compression(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec eps = my_beam->get_eps();
+  EXPECT_NEAR(eps(0), (-1.0/BEAM_LENGTH), TOLERANCE);
+  EXPECT_NEAR(eps(1), 0.0, TOLERANCE);
+}
+
+TEST_F(ConstantStrainStateTest, ConstantCompressionStress) {
+  constant_compression(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec stress = my_beam->get_local_stresses();
+  EXPECT_NEAR(stress(0), (-1.0/BEAM_LENGTH)*E*A, TOLERANCE);
+  EXPECT_NEAR(stress(1), 0.0, TOLERANCE);
+}
+
+TEST_F(ConstantStrainStateTest, ConstantTensionEps) {
+  constant_tension(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec eps = my_beam->get_eps();
+  EXPECT_NEAR(eps(0), (1.0/BEAM_LENGTH), TOLERANCE);
+  EXPECT_NEAR(eps(1), 0.0, TOLERANCE);
+}
+
+TEST_F(ConstantStrainStateTest, ConstantTensionStress) {
+  constant_tension(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec stress = my_beam->get_local_stresses();
+  EXPECT_NEAR(stress(0), (1.0/BEAM_LENGTH)*E*A, TOLERANCE);
+  EXPECT_NEAR(stress(1), 0.0, TOLERANCE);
+}
+  /**
+   * @brief end rotation due to constant moment is \f$\theta = \frac{ML}{2EI}\f$. So, for a fixed end-rotation, the constant moment is \f$ M = \frac{\theta 2EI}{L}\f$.
+   * 
+   */
+TEST_F(ConstantStrainStateTest, ConstantRotationEps) {
+
+  constant_positive_bending(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec eps = my_beam->get_eps();
+  EXPECT_NEAR(eps(0), 0.0, TOLERANCE);
+  EXPECT_NEAR(eps(1), (2/BEAM_LENGTH), TOLERANCE);
+}
+
+TEST_F(ConstantStrainStateTest, ConstantRotationStress) {
+  constant_positive_bending(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec stress = my_beam->get_local_stresses();
+  EXPECT_NEAR(stress(0), 0.0, TOLERANCE);
+  EXPECT_NEAR(stress(1), (2*E*I/BEAM_LENGTH), TOLERANCE);
+}
+
