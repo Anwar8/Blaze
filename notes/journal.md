@@ -11,6 +11,19 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 1 July
+Continued to build the tests but the element remained buggy and would not update the resistance vector despite passing all the new tests! After significant effort in step-by-step debugging I found that none of the local vectors were being update including `local_d`. I then did a side-by-side comparison with  `Basic2DBeamElement`. There, I finally found the issue - it was in the `update_state` function. I had forgotten to call `get_U_from_nodes`, which meant my element was never updating the displacement - the element was always displacement free and thus resistance force-free!! 
+
+One line missing, and I ended up spending a week figuring it out. This, however, resulted in me significantly improving the software architecture and also tremendously enhancing the testing. Regardless, I cannot help but feel like the picture below.
+<figure>
+  <img src="hank_scorpio_meme.jpeg" alt="Hank Scorpio" style="width:100%">
+  <figcaption> Hank Scorpio: Why didn't I think of that? </figcaption>
+</figure>
+
+
+#### 30 June
+I continued to work on extending the testing for the beam-column element hierarchy of classes. I think I have found the root cause of the issue. The resistance vector is not being updated. I built a multitude of tests to check if the resistance forces are being calculated correctly. This included building many tests that tackle constant strain states.
+
 #### 28 June
 Working on new tests for beam-column elements. I was doing rigid body motion in a very rudimentary way. I now need to do the tests using the actual calculation procedure in the element by calling `update_state` and then retrieving the displacements, stresses, strains, local resistance forces, and global resistance forces. This will increase the number of tests and will incorporate testing the mapping from global to local (`calc_d_from_U`) and from local to global (`calc_global_resistance_forces`). 
 

@@ -235,7 +235,12 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          * @brief calculates element nodal forces based on nodal displacements and element stiffness.
          * @details calculates the nodal forces from the relationship \f$\boldsymbol{f} = \boldsymbol{k}\boldsymbol{d}\f$
          */
-        void calc_local_f() {local_f = local_tangent_stiffness*local_d;}
+        void calc_local_f() {
+            local_f = local_tangent_stiffness*local_d;
+            // std::cout << "calc_local_f::elem " << id << " local_tangent_stiffness is " << std::endl << local_tangent_stiffness << std::endl << std::endl;
+            // std::cout << "calc_local_f::elem " << id << " local_d is " << std::endl << local_d << std::endl << std::endl;
+            // std::cout << "calc_local_f::elem " << id << " resultant local_f is " << std::endl << local_f << std::endl << std::endl;
+        }
                 
         /**
          * @brief updates element nodal displacements, strains, stresses, element resistance forces.
@@ -244,6 +249,7 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          */
         void update_state() 
         {
+            get_U_from_nodes();
             // need to retrieve local displacement from the global displacement first of all.
             calc_d_from_U();
             // calculating element strain and stress states depends on local displacement d, even though B calculation currently does not.

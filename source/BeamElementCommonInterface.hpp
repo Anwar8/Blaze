@@ -87,6 +87,15 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
                 nz_i = node->get_nz_i();
                 for (auto active_dof: node_active_dofs)
                 {
+                    // if (1)
+                    // {
+                    //     std::cout << "element " << id << " has untransformed local_f " <<std::endl << local_f << std::endl;
+                    // }
+                    // // vec element_resistance_forces = orient.get_T().transpose()*local_f;
+                    // if (1)
+                    // {
+                    //     std::cout << "element " << id << " has element_resistance_forces " <<std::endl << element_resistance_forces << std::endl;
+                    // }
                 
                     force_value = element_resistance_forces(active_dof + total_nodal_ndofs_completed);
                     // since inactive nodes do not appear in R, we have to make sure to be careful about where we add our nodal forces.
