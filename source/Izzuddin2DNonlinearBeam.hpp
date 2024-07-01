@@ -153,7 +153,7 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
          */
         void calc_element_global_resistance_forces()
         {
-            element_resistance_forces = corot_transform.get_nl_T().transpose()*local_f;
+            element_global_resistance_forces = corot_transform.get_nl_T().transpose()*local_f;
         }
         /**
          * @brief calculates the direct external geometric stiffness contributions of the element.

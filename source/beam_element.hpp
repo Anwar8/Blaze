@@ -65,7 +65,7 @@ class Basic2DBeamElement {
         vec global_ele_U = make_xd_vec(12); /**< global nodal displacements for all freedoms of the nodes corresponding to the element.*/
         vec local_d = make_xd_vec(6); /**< local nodal-displacements for all freedoms.*/
         vec local_f = make_xd_vec(6); /**< local nodal-forces corresponding to all freedoms.*/
-        vec element_resistance_forces = make_xd_vec(12); /**< transformed resistance forces of the element from \ref local_f.*/
+        vec element_global_resistance_forces = make_xd_vec(12); /**< transformed resistance forces of the element from \ref local_f.*/
         std::vector<spnz> global_R_triplets; /**< triplet vector for global resistance forces \f$\boldsymbol{R}\f$.*/
         vec local_eps = make_xd_vec(2); /**< local strains. Here they are axial strain and curvature.*/
         vec local_stresses = make_xd_vec(2); /**< local stresses. Here they are axial force and moment.*/
@@ -391,7 +391,7 @@ class Basic2DBeamElement {
          */
         void calc_element_global_resistance_forces()
         {
-            element_resistance_forces = orient.get_T().transpose()*local_f;
+            element_global_resistance_forces = orient.get_T().transpose()*local_f;
         }
         /**
          * @brief 
@@ -404,10 +404,10 @@ class Basic2DBeamElement {
             {
             std::cout << "element " << id << " has untransformed local_f " <<std::endl << local_f << std::endl;
             }
-            vec element_resistance_forces = orient.get_T().transpose()*local_f;
+            vec element_global_resistance_forces = orient.get_T().transpose()*local_f;
             if (VERBOSE)
             {
-            std::cout << "element " << id << " has element_resistance_forces " <<std::endl << element_resistance_forces << std::endl;
+            std::cout << "element " << id << " has element_global_resistance_forces " <<std::endl << element_global_resistance_forces << std::endl;
             }
             std::set<int> node_active_dofs;
             int nz_i = 0;
@@ -423,7 +423,7 @@ class Basic2DBeamElement {
                 for (auto active_dof: node_active_dofs)
                 {
                 
-                    force_value = element_resistance_forces(active_dof + total_nodal_ndofs_completed);
+                    force_value = element_global_resistance_forces(active_dof + total_nodal_ndofs_completed);
                     // since inactive nodes do not appear in R, we have to make sure to be careful about where we add our nodal forces.
                     // here, nz_i + nodal_dof_index simply starts at where the node freedoms start in the global index, and then
                     // iterates one by one. See how we ++ nodal_dof_index for each freedom we add, and how we restrat from zero when
@@ -435,7 +435,7 @@ class Basic2DBeamElement {
                     }
                     nodal_dof_index++;
                 }
-                //**< has to be 6 because each node has 6 dofs and our \ref element_resistance_forces also has 6 rows for each node!*
+                //**< has to be 6 because each node has 6 dofs and our \ref element_global_resistance_forces also has 6 rows for each node!*
                 total_nodal_ndofs_completed += 6;
             }
         }

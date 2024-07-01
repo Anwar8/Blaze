@@ -173,12 +173,12 @@ class GlobalMesh {
          * @brief prints the selected state of each element.
          * 
          */
-        void print_elements_states(bool print_stresses = true, bool print_strains = false,
-                                 bool print_nodal_disp = false, bool print_nodal_forces = false)
+        void print_elements_states(bool print_nodal_disp = false, bool print_strains = false, 
+                                            bool print_stresses = true, bool print_nodal_forces = false)
         {
             for (auto elem: elem_vector)
             {
-                elem->print_element_state(print_stresses, print_strains, print_nodal_disp, print_nodal_forces);
+                elem->print_element_state(print_nodal_disp, print_strains, print_stresses, print_nodal_forces);
             }
         }
 
