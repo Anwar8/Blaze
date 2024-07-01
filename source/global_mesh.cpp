@@ -10,14 +10,14 @@ void GlobalMesh::open_mesh_file(std::string const mesh_file) {
     gmsh::open(mesh_file);
 }
 
-gmsh_node_map GlobalMesh::read_nodes() {
+NodeIdCoordsPairsVector GlobalMesh::read_nodes() {
     std::vector<double> coord_vec;
     std::vector<double> parametricCoords;
     std::vector<std::size_t> nodeTags;
 
     gmsh::model::mesh::getNodes(nodeTags, coord_vec, parametricCoords);
     
-    gmsh_node_map node_map;
+    NodeIdCoordsPairsVector node_map;
     node_map.reserve(nodeTags.size());
 
     auto itr = coord_vec.begin();
@@ -29,9 +29,9 @@ gmsh_node_map GlobalMesh::read_nodes() {
     return node_map;
 }
 
-gmsh_elem_map GlobalMesh::read_elements()
+ElemIdNodeIdPairVector GlobalMesh::read_elements()
 {
-    gmsh_elem_map elem_map;
+    ElemIdNodeIdPairVector elem_map;
 
     std::vector<int> element_types;
     gmsh::model::mesh::getElementTypes(element_types);
@@ -73,7 +73,7 @@ gmsh_elem_map GlobalMesh::read_elements()
     }
     return elem_map;
 }
-void GlobalMesh::make_elements (gmsh_elem_map elem_map) {
+void GlobalMesh::make_elements (ElemIdNodeIdPairVector elem_map) {
     std::vector<std::shared_ptr<Node>> elem_nodes;
     elem_nodes.reserve(2);
     for (auto element_data : elem_map)
@@ -99,7 +99,7 @@ void GlobalMesh::make_elements (gmsh_elem_map elem_map) {
 
     }   
 }
-void GlobalMesh::make_nodes (gmsh_node_map node_map) {
+void GlobalMesh::make_nodes (NodeIdCoordsPairsVector node_map) {
     for (auto node_data : node_map)
     {
         node_vector.push_back(std::make_shared<Node>(node_data.first, node_data.second));
@@ -111,11 +111,8 @@ void GlobalMesh::close_mesh_file()
     gmsh::finalize();
 }
 
-void GlobalMesh::setup_mesh(std::string const mesh_file) 
+void GlobalMesh::setup_mesh(NodeIdCoordsPairsVector node_map, ElemIdNodeIdPairVector elem_map) 
 {
-    open_mesh_file(mesh_file);
-    gmsh_node_map node_map = read_nodes();
-    gmsh_elem_map elem_map = read_elements();
     nnodes = node_map.size();
     nelems = elem_map.size();
     node_vector.clear();
@@ -124,7 +121,6 @@ void GlobalMesh::setup_mesh(std::string const mesh_file)
     elem_vector.reserve(nelems);
     make_nodes(node_map);
     make_elements(elem_map);
-    close_mesh_file();
 }
 
 void GlobalMesh::print_info()

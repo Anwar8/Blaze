@@ -25,13 +25,13 @@
  * @brief std vector of pairs each of which has an id and a 3-item coords vector.
  * 
  */
-using gmsh_node_map = std::vector<std::pair<size_t, coords>>;
+using NodeIdCoordsPairsVector = std::vector<std::pair<size_t, coords>>;
 
 /**
  * @brief std vector of pairs each of which has an id and a vector of node ids related to the element id.
  * 
  */
-using gmsh_elem_map = std::vector<std::pair<size_t, std::vector<size_t>>>;
+using ElemIdNodeIdPairVector = std::vector<std::pair<size_t, std::vector<size_t>>>;
 
 
 /**
@@ -65,40 +65,95 @@ class GlobalMesh {
         /**
          * @brief uses gmsh API to read the nodes and populate a map with ids and coordinates.
          * 
-         * @return gmsh_node_map a vector of pairs mapping each node ids and coordinates.
+         * @return NodeIdCoordsPairsVector a vector of pairs mapping each node ids and coordinates.
          */
-        gmsh_node_map read_nodes();
+        NodeIdCoordsPairsVector read_nodes();
+
 
         /**
          * @brief reads the elements from the mesh file and populates the map linking element id with its node ids.
          * 
-         * @return gmsh_elem_map elem_map a vectpr of pairs mapping elem ids and corresponding node ids.
+         * @return ElemIdNodeIdPairVector elem_map a vectpr of pairs mapping elem ids and corresponding node ids.
          */
-        gmsh_elem_map read_elements();
+        ElemIdNodeIdPairVector read_elements();
 
         /**
-         * @brief creates element objects following the \ref gmsh_elem_map object format and adds them to \ref elem_vector.
+         * @brief creates a line mesh map with a given number of divisions and end coordinates of the line. Does NOT take a gmsh mesh file.
+         * 
+         * @tparam CoordsContainer a container that has the coordinates of the end points of the line. Needs compatible with STL iterators.
+         * @param divisions number of divisions to break the line into.
+         * @param end_coords the coordinates of the end points of the line.
+         * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> the node_map and elem_map of the line mesh. 
+         * @warning assumes mapping takes place from node and element ids = 1. There is no checking for conflicting ids, and nothing to reduce bandwidth!
+         */
+        template <typename CoordsContainer>
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer end_coords)
+        {
+            if (end_coords.size() != 2)
+            {
+                std::cout << "Error: end_coords must have 2 elements." << std::endl;
+                exit(1);
+            }
+
+            NodeIdCoordsPairsVector node_map;
+            ElemIdNodeIdPairVector elem_map;
+            node_map.reserve(divisions + 1);
+            elem_map.reserve(divisions);
+
+
+            coords delta_xyz = (end_coords[1] - end_coords[0])/divisions;
+
+            for (size_t i = 0; i < divisions + 1; ++i)
+            {
+                node_map.push_back(std::make_pair(i + 1, end_coords[0] + i*delta_xyz));
+            }
+
+            for (size_t i = 0; i < divisions; ++i)
+            {
+                elem_map.push_back(std::make_pair(i + 1, std::vector<size_t>{i + 1, i + 2}));
+            }     
+            return std::make_pair(node_map, elem_map);
+        }
+
+        /**
+         * @brief creates element objects following the \ref ElemIdNodeIdPairVector object format and adds them to \ref elem_vector.
          * 
          * @param node_map a vector of pairs mapping each node ids and coordinates.
          */
-        void make_nodes (gmsh_node_map node_map);
+        void make_nodes (NodeIdCoordsPairsVector node_map);
 
         /**
-         * @brief creates element objects following the \ref gmsh_elem_map object format and adds them to \ref elem_vector.
+         * @brief creates element objects following the \ref ElemIdNodeIdPairVector object format and adds them to \ref elem_vector.
          * 
          * @attention only one type of elements available now. Functionality limited to creating 2D beam-columns.
          * 
          * @param elem_map a vector of pairs mapping elem ids and corresponding node ids.
          */
-        void make_elements (gmsh_elem_map elem_map);
+        void make_elements (ElemIdNodeIdPairVector elem_map);
         void close_mesh_file();
 
         /**
-         * @brief populates the global_mesh members: \ref nnodes, \ref nelems, \ref node_vector, and \ref elem_vector.
+         * @brief reads the mesh file (gmsh format) and populates the node and element maps.
          * 
-         * @param mesh_file a string that is the mesh file name.
+         * @param mesh_file a string that is the gmsh mesh file name and includes directory.
+         * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> a pair of node and element maps corresponding to a gmsh file.
          */
-        void setup_mesh(std::string const mesh_file);
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> read_mesh_file(std::string const mesh_file) 
+        {
+            open_mesh_file(mesh_file);
+            NodeIdCoordsPairsVector node_map = read_nodes();
+            ElemIdNodeIdPairVector elem_map = read_elements();
+            close_mesh_file();
+            return std::make_pair(node_map, elem_map);
+        }
+        
+        /**
+         * @brief populates the global_mesh members: \ref nnodes, \ref nelems, \ref node_vector, and \ref elem_vector based on mesh (node and element) maps.
+         * 
+         * @param node_map a vector of pairs mapping each node ids and coordinates.
+         * @param elem_map a vector of pairs mapping elem ids and corresponding 2 node ids.
+         */
+        void setup_mesh(NodeIdCoordsPairsVector node_map, ElemIdNodeIdPairVector elem_map);
 
         /**
          * @brief counts the active DOFs in the mesh by going over all the nodes and getting the number of active freedoms.
