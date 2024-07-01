@@ -20,6 +20,15 @@ One line missing, and I ended up spending a week figuring it out. This, however,
   <figcaption> Hank Scorpio: Why didn't I think of that? </figcaption>
 </figure>
 
+**More Done**
+Okay, so I have now update the meshing class `GlobalMesh` with a function to mesh a line given a number of divisions. Tests needed for this function:
+- Produces the right number of elements and nodes
+- `GlobalMesh` can actually create the necessary elements
+I should also consider adding a  `LoadMap` type for applying load to particular nodes so I can load more than one element at a time. 
+
+I also need to create a new class called `Model` or `BlazeModel` to publicly house, well, the model's `GlobalMesh`, `BasicSolver`, and `Assembler`. I would then create a `SolutionProcedure` class that is also part of the model. This class allows me to either solve linearly, or nonlinearly (using the approach currently in `main.cpp`). I should also be able to choose whether to solve dynamically or statically, and perhaps even have an auto switch between load-control and displacement-control to go post-buckling! 
+
+I would be able to use this new collection of classes to create unit tests that would check for correctness of solution procedure by having tests on cantilevers, simply supported beams, simple and simple frames under different load conditions. It would also enable testing whether the transformation matrix works, and maybe even <span style="color:orange;"> test whether the node-offset is able to generate a moment as it should!!</span>
 
 #### 30 June
 I continued to work on extending the testing for the beam-column element hierarchy of classes. I think I have found the root cause of the issue. The resistance vector is not being updated. I built a multitude of tests to check if the resistance forces are being calculated correctly. This included building many tests that tackle constant strain states.
