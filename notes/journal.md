@@ -30,6 +30,11 @@ I also need to create a new class called `Model` or `BlazeModel` to publicly hou
 
 I would be able to use this new collection of classes to create unit tests that would check for correctness of solution procedure by having tests on cantilevers, simply supported beams, simple and simple frames under different load conditions. It would also enable testing whether the transformation matrix works, and maybe even <span style="color:orange;"> test whether the node-offset is able to generate a moment as it should!!</span>
 
+How will the `Model` and `SolutionProcedure` work together? Does the model have a `SolutionProcedure` variable, or does the `SolutionProcedure` take a model as an argument? I think `Model` will have a `SolutionProcedure` parameter that is called from the model to solve the model. The model will pass its members: `Solver`, `Assembler`, and `GlobalMesh` to the `SolutionProcedure` which then carries out the solution procedure. Remember, all `Model` parameters are public so we can directly access them, including the solution procedure!
+
+##### `Scribe` and `Loader`?
+There should be yet another two classes: a `Scribe` that records output, and a `Loader` that controls which nodes or elements are loaded. These would be part of the `GlobalMesh` OR `Model` object, and would be called by the `SolutionProcedure` object when solving. Perhaps it is more natural to have it as part of the `GlobalMesh` object as it will be iterating over all nodes and/or elements.
+
 #### 30 June
 I continued to work on extending the testing for the beam-column element hierarchy of classes. I think I have found the root cause of the issue. The resistance vector is not being updated. I built a multitude of tests to check if the resistance forces are being calculated correctly. This included building many tests that tackle constant strain states.
 
