@@ -108,7 +108,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
          * matrix. So, this function will populate \ref global_stiffness_triplets with sparse matrix notation
          * 
          */
-        virtual void calc_K_global() 
+        virtual void calc_global_stiffness_triplets() 
         {
             global_stiffness_triplets.clear();
             // we have the same number of contribution as stiffness components 
@@ -124,7 +124,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
         /**
          * @brief populates \ref stiffness_map considering active and inactive DOFs for each node of the element
          * 
-         * @details see function \ref calc_K_global, and variables \ref stiffness_map, and \ref global_stiffness_triplets. 
+         * @details see function \ref calc_global_stiffness_triplets, and variables \ref stiffness_map, and \ref global_stiffness_triplets. 
          * 
          * @todo REALLY needs to be revisited. attempt to rewrite this function so it does the following:
          *  1. gets all the contribution without worrying about active or not

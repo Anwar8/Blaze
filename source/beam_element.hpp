@@ -266,7 +266,7 @@ class Basic2DBeamElement {
          * @brief calculates element nodal forces based on nodal displacements and element stiffness.
          * @details calculates the nodal forces from the relationship \f$\boldsymbol{f} = \boldsymbol{k}\boldsymbol{d}\f$
          */
-        void calc_nodal_forces() {local_f = local_tangent_stiffness*local_d;}
+        void calc_local_f() {local_f = local_tangent_stiffness*local_d;}
 
         /**
          * @brief maps global freedoms to element local freedoms using the transformation matrix.
@@ -303,7 +303,7 @@ class Basic2DBeamElement {
          calc_geom_stiffness();
          calc_tangent_stiffness();
          calc_elem_global_stiffness();
-         calc_nodal_forces();
+         calc_local_f();
          populate_resistance_force_triplets();
         }
 
@@ -347,12 +347,12 @@ class Basic2DBeamElement {
          * matrix. So, this function will populate \ref global_stiffness_triplets with sparse matrix notation
          * 
          */
-        void calc_K_global();
+        void calc_global_stiffness_triplets();
 
         /**
          * @brief populates \ref stiffness_map considering active and inactive DOFs for each node of the element
          * 
-         * @details see function \ref calc_K_global, and variables \ref stiffness_map, and \ref global_stiffness_triplets. 
+         * @details see function \ref calc_global_stiffness_triplets, and variables \ref stiffness_map, and \ref global_stiffness_triplets. 
          * 
          * @todo REALLY needs to be revisited. attempt to rewrite this function so it does the following:
          *  1. gets all the contribution without worrying about active or not
@@ -389,7 +389,7 @@ class Basic2DBeamElement {
         /**
          * @brief Calculates the resistance forces from the relationship \f$ \boldsymbol{R} = \boldsymbol{T}^T\boldsymbol{f}\f$.
          */
-        void calc_global_resistance_forces()
+        void calc_element_global_resistance_forces()
         {
             element_resistance_forces = orient.get_T().transpose()*local_f;
         }
@@ -442,7 +442,7 @@ class Basic2DBeamElement {
         std::vector<spnz> get_global_resistance_force_triplets() {return global_R_triplets;}
 
         std::vector<int> get_global_dof_map() {return global_dof_map;}
-        std::vector<spnz> get_K_global() {return global_stiffness_triplets;}
+        std::vector<spnz> get_global_stiffness_triplets() {return global_stiffness_triplets;}
 
         int const get_nth_node_id(int n) const;
         /**

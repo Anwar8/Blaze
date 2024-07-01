@@ -33,8 +33,8 @@ int main () {
     glob_mesh.count_dofs();
 
 
-    real max_LF = 1;
-    int nsteps = 100;
+    real max_LF = 0.01;
+    int nsteps = 1;
     real dLF = max_LF/nsteps;
     // int recording_interval = 10;
     
@@ -59,7 +59,7 @@ int main () {
         // real tolerance = 0.00002*std::max(std::abs(x_load), std::abs(y_load));
         real tolerance = 1000;
         // const std::string convergence_criterion = "norm"; // or "max" - of out of balance.
-        int max_iter = 20;
+        int max_iter = 50;
         int iter = 1;
         
         glob_mesh.calc_global_contributions();

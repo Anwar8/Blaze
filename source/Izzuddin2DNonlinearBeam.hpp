@@ -118,7 +118,7 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
          * @brief calculates \ref local_f based on (6.b) from Izzuddin.
          * 
          */
-        void calc_nodal_forces()
+        void calc_local_f()
         {
             real EI = section.get_E()*section.get_I();
             real EA = section.get_E()*section.get_A();
@@ -151,7 +151,7 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
          * @brief calculates the global resistance forces contributions of this element from \f$\boldsymbol{R}^e = \frac{\partial \boldsymbol{d}}{\partial \boldsymbol{U}}\boldsymbol{f}\f$
          * 
          */
-        void calc_global_resistance_forces()
+        void calc_element_global_resistance_forces()
         {
             element_resistance_forces = corot_transform.get_nl_T().transpose()*local_f;
         }
@@ -251,7 +251,7 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
             {
                 std::cout << "d = " << std::endl << local_d << std::endl;
             }
-            calc_nodal_forces();
+            calc_local_f();
             calc_eps();
             calc_stresses();
             if (VERBOSE_NLB)

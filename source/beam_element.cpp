@@ -140,7 +140,7 @@ void Basic2DBeamElement::map_stiffness()
     }
     }
 }
-void Basic2DBeamElement::calc_K_global() 
+void Basic2DBeamElement::calc_global_stiffness_triplets() 
 {
     // calc_T();
     // calc_k();

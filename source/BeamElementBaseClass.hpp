@@ -190,7 +190,7 @@ class BeamElementBaseClass {
          * @brief calculates element nodal forces based on nodal displacements and element stiffness.
          * @details calculates the nodal forces from the relationship \f$\boldsymbol{f} = \boldsymbol{k}\boldsymbol{d}\f$
          */
-        virtual void calc_nodal_forces() = 0;
+        virtual void calc_local_f() = 0;
                 
         /**
          * @brief updates element nodal displacements, strains, stresses, element resistance forces.
@@ -322,7 +322,7 @@ class BeamElementBaseClass {
         /**
          * @brief Calculates the resistance forces from the relationship \f$ \boldsymbol{R} = \boldsymbol{T}^T\boldsymbol{f}\f$.
          */
-        virtual void calc_global_resistance_forces() = 0;
+        virtual void calc_element_global_resistance_forces() = 0;
 
         /**
          * @brief Populates the resistance forces triplets removing any inactive freedoms.
@@ -367,7 +367,7 @@ class BeamElementBaseClass {
          * matrix. So, this function will populate \ref global_stiffness_triplets with sparse matrix notation
          * 
          */
-        virtual void calc_K_global() = 0;
+        virtual void calc_global_stiffness_triplets() = 0;
         // {
         //     global_stiffness_triplets.clear();
         //     // we have the same number of contribution as stiffness components 
@@ -383,7 +383,7 @@ class BeamElementBaseClass {
         /**
          * @brief populates \ref stiffness_map considering active and inactive DOFs for each node of the element
          * 
-         * @details see function \ref calc_K_global, and variables \ref stiffness_map, and \ref global_stiffness_triplets. 
+         * @details see function \ref calc_global_stiffness_triplets, and variables \ref stiffness_map, and \ref global_stiffness_triplets. 
          * 
          * @todo REALLY needs to be revisited. attempt to rewrite this function so it does the following:
          *  1. gets all the contribution without worrying about active or not

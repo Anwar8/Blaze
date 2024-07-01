@@ -141,7 +141,7 @@ class GlobalMesh {
         void track_nodal_dof(int id, int dof, std::vector<real>& history);
 
         /**
-         * @brief loop over elements and call each of their \ref map_stiffness and \ref calc_K_global functions.
+         * @brief loop over elements and call each of their \ref map_stiffness and \ref calc_global_stiffness_triplets functions.
          * 
          */
         void calc_global_contributions() {
@@ -150,7 +150,7 @@ class GlobalMesh {
             {   
                 elem->update_state();
                 elem->map_stiffness();
-                elem->calc_K_global();
+                elem->calc_global_stiffness_triplets();
             }
             for (auto node: node_vector)
             {

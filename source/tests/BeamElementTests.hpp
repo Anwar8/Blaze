@@ -70,7 +70,7 @@ public:
 };
 class BasicTransformationTest : public ::testing::Test {
     // Declare variables to be used in the fixture
-public:
+  public:
     std::vector<std::shared_ptr<Node>> in_nodes;
     std::shared_ptr<BeamElementBaseClass> my_beam;
     
@@ -89,7 +89,7 @@ public:
 
 class ConstantStrainStateTest : public ::testing::Test {
     // Declare variables to be used in the fixture
-public:
+  public:
     std::vector<std::shared_ptr<Node>> in_nodes;
     std::shared_ptr<BeamElementBaseClass> my_beam;
     vec U;
@@ -97,11 +97,28 @@ public:
         common_beam_setup(in_nodes, my_beam, U);
     }
     void TearDown() override {
-        // Reset the variables to their initial state    
-        U.setZero();
-        my_beam->set_global_U(U);
-        my_beam->update_state();
-}
+      // Reset the variables to their initial state    
+      U.setZero();
+      my_beam->set_global_U(U);
+      my_beam->update_state();
+    }
+};
+
+class ElementMappingTest : public ::testing::Test {
+  public:
+    std::vector<std::shared_ptr<Node>> in_nodes;
+    std::shared_ptr<BeamElementBaseClass> my_beam;
+    vec U;
+    void SetUp() override {
+      common_beam_setup(in_nodes, my_beam, U);
+    }
+
+    void TearDown() override {
+      // Reset the variables to their initial state    
+      U.setZero();
+      my_beam->set_global_U(U);
+      my_beam->update_state();
+    }
 };
 
 TEST_F(BasicTransformationTest, CheckLengthCalc) 
@@ -356,6 +373,32 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionStress) {
   EXPECT_NEAR(stress(1), 0.0, TOLERANCE);
 }
 
+TEST_F(ConstantStrainStateTest, ConstantCompressionLocalNodalForces) {
+  constant_compression(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec local_f = my_beam->get_local_f();
+  real local_f_norm = local_f.lpNorm<1>();
+  EXPECT_NEAR(local_f(0), ((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
+  EXPECT_NEAR(local_f(3), -((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
+  EXPECT_NEAR(local_f_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, TOLERANCE);
+}
+
+TEST_F(ConstantStrainStateTest, ConstantCompressionGlobalNodalForces) {
+  constant_compression(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec R = my_beam->get_element_resistance_forces();
+  real R_norm = R.lpNorm<1>();
+  EXPECT_NEAR(R(0), ((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
+  EXPECT_NEAR(R(6), -((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
+  EXPECT_NEAR(R_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, TOLERANCE);
+}
+
 TEST_F(ConstantStrainStateTest, ConstantTensionEps) {
   constant_tension(U);
   my_beam->set_global_U(U);
@@ -377,6 +420,33 @@ TEST_F(ConstantStrainStateTest, ConstantTensionStress) {
   EXPECT_NEAR(stress(0), (1.0/BEAM_LENGTH)*E*A, TOLERANCE);
   EXPECT_NEAR(stress(1), 0.0, TOLERANCE);
 }
+
+TEST_F(ConstantStrainStateTest, ConstantTensionLocalNodalForces) {
+  constant_tension(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec local_f = my_beam->get_local_f();
+  real local_f_norm = local_f.lpNorm<1>();
+  EXPECT_NEAR(local_f(0), -((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
+  EXPECT_NEAR(local_f(3), ((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
+  EXPECT_NEAR(local_f_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, TOLERANCE);
+}
+
+TEST_F(ConstantStrainStateTest, ConstantTensionGlobalNodalForces) {
+  constant_tension(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec R = my_beam->get_element_resistance_forces();
+  real R_norm = R.lpNorm<1>();
+  EXPECT_NEAR(R(0), -((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
+  EXPECT_NEAR(R(6), ((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
+  EXPECT_NEAR(R_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, TOLERANCE);
+}
+
   /**
    * @brief end rotation due to constant moment is \f$\theta = \frac{ML}{2EI}\f$. So, for a fixed end-rotation, the constant moment is \f$ M = \frac{\theta 2EI}{L}\f$.
    * 
@@ -404,3 +474,28 @@ TEST_F(ConstantStrainStateTest, ConstantRotationStress) {
   EXPECT_NEAR(stress(1), (2*E*I/BEAM_LENGTH), TOLERANCE);
 }
 
+TEST_F(ConstantStrainStateTest, ConstantRotationLocalNodalForces) {
+  constant_positive_bending(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec local_f = my_beam->get_local_f();
+  real local_f_norm = local_f.lpNorm<1>();
+  EXPECT_NEAR(local_f(2), -(2*E*I/BEAM_LENGTH), TOLERANCE);
+  EXPECT_NEAR(local_f(5), (2*E*I/BEAM_LENGTH), TOLERANCE);
+  EXPECT_NEAR(local_f_norm, (2*E*I/BEAM_LENGTH)*2.0, TOLERANCE);
+}
+
+TEST_F(ConstantStrainStateTest, ConstantRotationGlobalNodalForces) {
+  constant_positive_bending(U);
+  my_beam->set_global_U(U);
+  my_beam->update_state();
+
+  // Calculate norms and perform assertions
+  vec R = my_beam->get_element_resistance_forces();
+  real R_norm = R.lpNorm<1>();
+  EXPECT_NEAR(R(5), -(2*E*I/BEAM_LENGTH), TOLERANCE);
+  EXPECT_NEAR(R(11), (2*E*I/BEAM_LENGTH), TOLERANCE);
+  EXPECT_NEAR(R_norm, (2*E*I/BEAM_LENGTH)*2.0, TOLERANCE);
+}

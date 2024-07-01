@@ -235,7 +235,7 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          * @brief calculates element nodal forces based on nodal displacements and element stiffness.
          * @details calculates the nodal forces from the relationship \f$\boldsymbol{f} = \boldsymbol{k}\boldsymbol{d}\f$
          */
-        void calc_nodal_forces() {local_f = local_tangent_stiffness*local_d;}
+        void calc_local_f() {local_f = local_tangent_stiffness*local_d;}
                 
         /**
          * @brief updates element nodal displacements, strains, stresses, element resistance forces.
@@ -253,7 +253,9 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
             // stiffness calculation must come AFTER stress calculation as stiffness may depend on stress.
             calc_stiffnesses();
             // nodal forces depend on stiffness, so must come after stiffness calculations.
-            calc_nodal_forces();
+            calc_local_f();
+            // these local element nodal forces are then transformed to global nodal forces.
+            calc_element_global_resistance_forces();
             // finally, we map back the nodal forces to the force triplets that will be used to populate the global force/resistance vector.
             populate_resistance_force_triplets();
         }
@@ -391,7 +393,7 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
         /**
          * @brief Calculates the resistance forces from the relationship \f$ \boldsymbol{R} = \boldsymbol{T}^T\boldsymbol{f}\f$.
          */
-        void calc_global_resistance_forces() {
+        void calc_element_global_resistance_forces() {
             element_resistance_forces = orient.get_T().transpose()*local_f;
         }
 
@@ -410,14 +412,14 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          * matrix. So, this function will populate \ref global_stiffness_triplets with sparse matrix notation
          * 
          */
-        // void calc_K_global() {
-        //     this->BeamElementBaseClass::calc_K_global();
+        // void calc_global_stiffness_triplets() {
+        //     this->BeamElementBaseClass::calc_global_stiffness_triplets();
         // }
 
         /**
          * @brief populates \ref stiffness_map considering active and inactive DOFs for each node of the element
          * 
-         * @details see function \ref calc_K_global, and variables \ref stiffness_map, and \ref global_stiffness_triplets. 
+         * @details see function \ref calc_global_stiffness_triplets, and variables \ref stiffness_map, and \ref global_stiffness_triplets. 
          * 
          * @todo REALLY needs to be revisited. attempt to rewrite this function so it does the following:
          *  1. gets all the contribution without worrying about active or not
