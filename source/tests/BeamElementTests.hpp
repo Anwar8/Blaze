@@ -24,32 +24,38 @@ void common_beam_setup(std::vector<std::shared_ptr<Node>>& in_nodes, std::shared
     // Create the d vector
     U = make_xd_vec(12);
 }
-void move_right(vec& U) {
-    U(0) = 1; // node 1 U1
-    U(6) = 1; // node 2 U1
+void move_right(std::vector<std::shared_ptr<Node>>& in_nodes) 
+{
+    in_nodes[0]->set_nodal_displacement(0, 1.0); // node 1 U1
+    in_nodes[1]->set_nodal_displacement(0, 1.0); // node 2 U1
 }
-void move_up(vec& U) {
-    U(2) = 1; // node 1 U2
-    U(8) = 1; // node 2 U2
+void move_up(std::vector<std::shared_ptr<Node>>& in_nodes) 
+{
+    in_nodes[0]->set_nodal_displacement(2, 1.0); // node 1 U2
+    in_nodes[1]->set_nodal_displacement(2, 1.0); // node 2 U2
 }
-void rotate_ccw(vec& U) {
-    U(2) = -1; // node 1 U2
-    U(5) = 2.0/BEAM_LENGTH; // node 1 U33
-    U(8) = 1; // node 2 U2
-    U(11) = 2.0/BEAM_LENGTH; // node 2 U33
+void rotate_ccw(std::vector<std::shared_ptr<Node>>& in_nodes) 
+{
+    in_nodes[0]->set_nodal_displacement(2, -1.0); // node 1 U2
+    in_nodes[0]->set_nodal_displacement(5, 2.0/BEAM_LENGTH); // node 1 U33
+    in_nodes[1]->set_nodal_displacement(2, 1.0); // node 2 U2
+    in_nodes[1]->set_nodal_displacement(5, 2.0/BEAM_LENGTH); // node 2 U33
 }
 
-void constant_compression(vec& U) {
-    U(0) = 0.5; // node 1 U1
-    U(6) = -0.5; // node 2 U1
+void constant_compression(std::vector<std::shared_ptr<Node>>& in_nodes) 
+{
+    in_nodes[0]->set_nodal_displacement(0, 0.5); // node 1 U1
+    in_nodes[1]->set_nodal_displacement(0, -0.5); // node 2 U1
 }
-void constant_tension(vec& U) {
-    U(0) = -0.5; // node 1 U1
-    U(6) = 0.5; // node 2 U1
+void constant_tension(std::vector<std::shared_ptr<Node>>& in_nodes) 
+{
+    in_nodes[0]->set_nodal_displacement(0, -0.5); // node 1 U1
+    in_nodes[1]->set_nodal_displacement(0, 0.5); // node 2 U1
 }
-void constant_positive_bending(vec& U) {
-    U(5) = -1; // node 1 U33
-    U(11) = 1; // node 2 U33
+void constant_positive_bending(std::vector<std::shared_ptr<Node>>& in_nodes) 
+{
+    in_nodes[0]->set_nodal_displacement(5, -1); // node 2 U33
+    in_nodes[1]->set_nodal_displacement(5, 1); // node 2 U33
 }
 
 class RigidBodyMotionTest : public ::testing::Test {
@@ -181,8 +187,7 @@ TEST_F(BasicTransformationTest, CheckTransformedStiffnessSize) {
 
 
 TEST_F(RigidBodyMotionTest, MoveRightCheckLocald) {
-  move_right(U);
-  my_beam->set_global_U(U);
+  move_right(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -197,8 +202,7 @@ TEST_F(RigidBodyMotionTest, MoveRightCheckLocald) {
 }
 
 TEST_F(RigidBodyMotionTest, MoveRightCheckEps) {
-  move_right(U);
-  my_beam->set_global_U(U);
+  move_right(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -207,8 +211,7 @@ TEST_F(RigidBodyMotionTest, MoveRightCheckEps) {
 }
 
 TEST_F(RigidBodyMotionTest, MoveRightCheckStress) {
-  move_right(U);
-  my_beam->set_global_U(U);
+  move_right(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -217,8 +220,7 @@ TEST_F(RigidBodyMotionTest, MoveRightCheckStress) {
 }
 
 TEST_F(RigidBodyMotionTest, MoveRightCheckLocalf) {
-  move_right(U);
-  my_beam->set_global_U(U);
+  move_right(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -227,8 +229,7 @@ TEST_F(RigidBodyMotionTest, MoveRightCheckLocalf) {
   }
 
 TEST_F(RigidBodyMotionTest, MoveRightCheckResistanceForces) {
-  move_right(U);
-  my_beam->set_global_U(U);
+  move_right(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -238,8 +239,7 @@ TEST_F(RigidBodyMotionTest, MoveRightCheckResistanceForces) {
 
 
 TEST_F(RigidBodyMotionTest, MoveUpCheckLocald) {
-  move_up(U);
-  my_beam->set_global_U(U);
+  move_up(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -254,8 +254,7 @@ TEST_F(RigidBodyMotionTest, MoveUpCheckLocald) {
 }
 
 TEST_F(RigidBodyMotionTest, MoveUpCheckEps) {
-  move_up(U);
-  my_beam->set_global_U(U);
+  move_up(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -264,8 +263,7 @@ TEST_F(RigidBodyMotionTest, MoveUpCheckEps) {
 }
 
 TEST_F(RigidBodyMotionTest, MoveUpCheckStress) {
-  move_up(U);
-  my_beam->set_global_U(U);
+  move_up(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -274,8 +272,7 @@ TEST_F(RigidBodyMotionTest, MoveUpCheckStress) {
 }
 
 TEST_F(RigidBodyMotionTest, MoveUpCheckLocalf) {
-  move_up(U);
-  my_beam->set_global_U(U);
+  move_up(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -284,8 +281,7 @@ TEST_F(RigidBodyMotionTest, MoveUpCheckLocalf) {
   }
 
 TEST_F(RigidBodyMotionTest, MoveUpCheckResistanceForces) {
-  move_up(U);
-  my_beam->set_global_U(U);
+  move_up(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -295,8 +291,7 @@ TEST_F(RigidBodyMotionTest, MoveUpCheckResistanceForces) {
 
 
 TEST_F(RigidBodyMotionTest, RotateCCWCheckLocald) {
-  rotate_ccw(U);
-  my_beam->set_global_U(U);
+  rotate_ccw(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -311,8 +306,7 @@ TEST_F(RigidBodyMotionTest, RotateCCWCheckLocald) {
 }
 
 TEST_F(RigidBodyMotionTest, RotateCCWCheckEps) {
-  rotate_ccw(U);
-  my_beam->set_global_U(U);
+  rotate_ccw(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -321,8 +315,7 @@ TEST_F(RigidBodyMotionTest, RotateCCWCheckEps) {
 }
 
 TEST_F(RigidBodyMotionTest, RotateCCWCheckStress) {
-  rotate_ccw(U);
-  my_beam->set_global_U(U);
+  rotate_ccw(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -331,8 +324,7 @@ TEST_F(RigidBodyMotionTest, RotateCCWCheckStress) {
 }
 
 TEST_F(RigidBodyMotionTest, RotateCCWCheckLocalf) {
-  rotate_ccw(U);
-  my_beam->set_global_U(U);
+  rotate_ccw(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -341,8 +333,7 @@ TEST_F(RigidBodyMotionTest, RotateCCWCheckLocalf) {
   }
 
 TEST_F(RigidBodyMotionTest, RotateCCWResistanceForces) {
-  rotate_ccw(U);
-  my_beam->set_global_U(U);
+  rotate_ccw(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -352,8 +343,7 @@ TEST_F(RigidBodyMotionTest, RotateCCWResistanceForces) {
 
 
 TEST_F(ConstantStrainStateTest, ConstantCompressionEps) {
-  constant_compression(U);
-  my_beam->set_global_U(U);
+  constant_compression(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -363,8 +353,7 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionEps) {
 }
 
 TEST_F(ConstantStrainStateTest, ConstantCompressionStress) {
-  constant_compression(U);
-  my_beam->set_global_U(U);
+  constant_compression(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -374,8 +363,7 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionStress) {
 }
 
 TEST_F(ConstantStrainStateTest, ConstantCompressionLocalNodalForces) {
-  constant_compression(U);
-  my_beam->set_global_U(U);
+  constant_compression(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -387,8 +375,7 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionLocalNodalForces) {
 }
 
 TEST_F(ConstantStrainStateTest, ConstantCompressionGlobalNodalForces) {
-  constant_compression(U);
-  my_beam->set_global_U(U);
+  constant_compression(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -400,8 +387,7 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionGlobalNodalForces) {
 }
 
 TEST_F(ConstantStrainStateTest, ConstantTensionEps) {
-  constant_tension(U);
-  my_beam->set_global_U(U);
+  constant_tension(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -411,8 +397,7 @@ TEST_F(ConstantStrainStateTest, ConstantTensionEps) {
 }
 
 TEST_F(ConstantStrainStateTest, ConstantTensionStress) {
-  constant_tension(U);
-  my_beam->set_global_U(U);
+  constant_tension(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -422,8 +407,7 @@ TEST_F(ConstantStrainStateTest, ConstantTensionStress) {
 }
 
 TEST_F(ConstantStrainStateTest, ConstantTensionLocalNodalForces) {
-  constant_tension(U);
-  my_beam->set_global_U(U);
+  constant_tension(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -435,8 +419,7 @@ TEST_F(ConstantStrainStateTest, ConstantTensionLocalNodalForces) {
 }
 
 TEST_F(ConstantStrainStateTest, ConstantTensionGlobalNodalForces) {
-  constant_tension(U);
-  my_beam->set_global_U(U);
+  constant_tension(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -453,8 +436,7 @@ TEST_F(ConstantStrainStateTest, ConstantTensionGlobalNodalForces) {
    */
 TEST_F(ConstantStrainStateTest, ConstantRotationEps) {
 
-  constant_positive_bending(U);
-  my_beam->set_global_U(U);
+  constant_positive_bending(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -464,8 +446,7 @@ TEST_F(ConstantStrainStateTest, ConstantRotationEps) {
 }
 
 TEST_F(ConstantStrainStateTest, ConstantRotationStress) {
-  constant_positive_bending(U);
-  my_beam->set_global_U(U);
+  constant_positive_bending(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -475,8 +456,7 @@ TEST_F(ConstantStrainStateTest, ConstantRotationStress) {
 }
 
 TEST_F(ConstantStrainStateTest, ConstantRotationLocalNodalForces) {
-  constant_positive_bending(U);
-  my_beam->set_global_U(U);
+  constant_positive_bending(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -488,8 +468,7 @@ TEST_F(ConstantStrainStateTest, ConstantRotationLocalNodalForces) {
 }
 
 TEST_F(ConstantStrainStateTest, ConstantRotationGlobalNodalForces) {
-  constant_positive_bending(U);
-  my_beam->set_global_U(U);
+  constant_positive_bending(in_nodes);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
