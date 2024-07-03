@@ -196,6 +196,17 @@ class GlobalMesh {
         void track_nodal_dof(int id, int dof, std::vector<real>& history);
 
         /**
+         * @brief get node shared_ptr by id.
+         * @param id id of the node to get from the \ref node_vector.
+         * @return std::shared_ptr<Node> a shared pointer to the node with the given id.
+         */
+        std::shared_ptr<Node> get_node_by_id(int id)
+        {
+            auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
+            return *node_it;
+        }
+
+        /**
          * @brief loop over elements and call each of their \ref map_stiffness and \ref calc_global_stiffness_triplets functions.
          * 
          */

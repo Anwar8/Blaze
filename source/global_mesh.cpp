@@ -164,13 +164,11 @@ void GlobalMesh::fix_node(int id, int dof) {
     }
 }
 void GlobalMesh::load_node(int id, int dof, real load) {
-auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
-    (*node_it)->add_nodal_load(load, dof);
+    get_node_by_id(id)->add_nodal_load(load, dof);
 }
 
 void GlobalMesh::increment_node_load(int id, int dof, real dP) {
-auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
-    (*node_it)->increment_nodal_load(dP, dof);
+    get_node_by_id(id)->increment_nodal_load(dP, dof);
 }
 
 void GlobalMesh::track_nodal_dof(int id, int dof, std::vector<real>& history)

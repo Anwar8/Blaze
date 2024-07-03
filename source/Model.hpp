@@ -16,6 +16,7 @@ class Model
         GlobalMesh glob_mesh; 
         Assembler assembler;
         BasicSolver solver;
+        SolutionProcedure solution_procedure;
 
 };
 
