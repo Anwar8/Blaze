@@ -1,4 +1,4 @@
-#define TOLERANCE 1e-6
+#define BEAM_TOLERANCE 1e-6
 #include <iostream>
 #include <vector>
 #include "gtest/gtest.h"
@@ -130,31 +130,31 @@ class ElementMappingTest : public ::testing::Test {
 TEST_F(BasicTransformationTest, CheckLengthCalc) 
 {
     real beam_length = my_beam->get_L();
-    EXPECT_NEAR(beam_length, 3.0, TOLERANCE);
+    EXPECT_NEAR(beam_length, 3.0, BEAM_TOLERANCE);
 
 }
 
 TEST_F(BasicTransformationTest, CheckUnitTransformValues) {
 
   mat T = my_beam->get_T();
-  EXPECT_NEAR(T(0,0), 1.0, TOLERANCE);
+  EXPECT_NEAR(T(0,0), 1.0, BEAM_TOLERANCE);
   T(0,0) = 0;
-  EXPECT_NEAR(T(1,2), 1.0, TOLERANCE);
+  EXPECT_NEAR(T(1,2), 1.0, BEAM_TOLERANCE);
   T(1,2) = 0;
-  EXPECT_NEAR(T(2,5), 1.0, TOLERANCE);
+  EXPECT_NEAR(T(2,5), 1.0, BEAM_TOLERANCE);
   T(2,5) = 0;
-  EXPECT_NEAR(T(3,6), 1.0, TOLERANCE);
+  EXPECT_NEAR(T(3,6), 1.0, BEAM_TOLERANCE);
   T(3,6) = 0;
-  EXPECT_NEAR(T(4,8), 1.0, TOLERANCE);
+  EXPECT_NEAR(T(4,8), 1.0, BEAM_TOLERANCE);
   T(4,8) = 0;
-  EXPECT_NEAR(T(5,11), 1.0, TOLERANCE);
+  EXPECT_NEAR(T(5,11), 1.0, BEAM_TOLERANCE);
   T(5,11) = 0;
 
   for (int i; i < T.rows(); ++i)
   {
     for (int j; j < T.cols(); ++j)
     {
-      EXPECT_NEAR(T(i,j), 0.0, TOLERANCE);
+      EXPECT_NEAR(T(i,j), 0.0, BEAM_TOLERANCE);
     }
   }
 }
@@ -164,16 +164,16 @@ TEST_F(BasicTransformationTest, CheckOffsetUp) {
   my_beam->calc_T(0.5);
 
   mat T = my_beam->get_T();
-  EXPECT_NEAR(T(0,5), 0.5, TOLERANCE);
-  EXPECT_NEAR(T(3,11), 0.5, TOLERANCE);
+  EXPECT_NEAR(T(0,5), 0.5, BEAM_TOLERANCE);
+  EXPECT_NEAR(T(3,11), 0.5, BEAM_TOLERANCE);
 }
 
 TEST_F(BasicTransformationTest, CheckOffsetDown) {
   my_beam->calc_T(-0.5);
 
   mat T = my_beam->get_T();
-  EXPECT_NEAR(T(0,5), -0.5, TOLERANCE);
-  EXPECT_NEAR(T(3,11), -0.5, TOLERANCE);
+  EXPECT_NEAR(T(0,5), -0.5, BEAM_TOLERANCE);
+  EXPECT_NEAR(T(3,11), -0.5, BEAM_TOLERANCE);
   
 }
 
@@ -193,12 +193,12 @@ TEST_F(RigidBodyMotionTest, MoveRightCheckLocald) {
   // Calculate norms and perform assertions
   vec local_d = my_beam->get_local_d();
 
-  EXPECT_NEAR(local_d(0), 1.0, TOLERANCE);
-  EXPECT_NEAR(local_d(1), 0.0, TOLERANCE);
-  EXPECT_NEAR(local_d(2), 0.0, TOLERANCE);
-  EXPECT_NEAR(local_d(3), 1.0, TOLERANCE);
-  EXPECT_NEAR(local_d(4), 0.0, TOLERANCE);
-  EXPECT_NEAR(local_d(5), 0.0, TOLERANCE);
+  EXPECT_NEAR(local_d(0), 1.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(1), 0.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(2), 0.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(3), 1.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(4), 0.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(5), 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(RigidBodyMotionTest, MoveRightCheckEps) {
@@ -207,7 +207,7 @@ TEST_F(RigidBodyMotionTest, MoveRightCheckEps) {
 
   // Calculate norms and perform assertions
   real eps_norm = my_beam->get_eps().lpNorm<1>();
-  EXPECT_NEAR(eps_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(eps_norm, 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(RigidBodyMotionTest, MoveRightCheckStress) {
@@ -216,7 +216,7 @@ TEST_F(RigidBodyMotionTest, MoveRightCheckStress) {
 
   // Calculate norms and perform assertions
   real stress_norm = my_beam->get_local_stresses().lpNorm<1>();
-  EXPECT_NEAR(stress_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(stress_norm, 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(RigidBodyMotionTest, MoveRightCheckLocalf) {
@@ -225,7 +225,7 @@ TEST_F(RigidBodyMotionTest, MoveRightCheckLocalf) {
 
   // Calculate norms and perform assertions
   real f_norm = my_beam->get_local_f().lpNorm<1>();
-  EXPECT_NEAR(f_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(f_norm, 0.0, BEAM_TOLERANCE);
   }
 
 TEST_F(RigidBodyMotionTest, MoveRightCheckResistanceForces) {
@@ -234,7 +234,7 @@ TEST_F(RigidBodyMotionTest, MoveRightCheckResistanceForces) {
 
   // Calculate norms and perform assertions
   real resistance_forces_norm = my_beam->get_element_resistance_forces().lpNorm<1>();
-  EXPECT_NEAR(resistance_forces_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(resistance_forces_norm, 0.0, BEAM_TOLERANCE);
 }
 
 
@@ -245,12 +245,12 @@ TEST_F(RigidBodyMotionTest, MoveUpCheckLocald) {
   // Calculate norms and perform assertions
   vec local_d = my_beam->get_local_d();
 
-  EXPECT_NEAR(local_d(0), 0.0, TOLERANCE);
-  EXPECT_NEAR(local_d(1), 1.0, TOLERANCE);
-  EXPECT_NEAR(local_d(2), 0.0, TOLERANCE);
-  EXPECT_NEAR(local_d(3), 0.0, TOLERANCE);
-  EXPECT_NEAR(local_d(4), 1.0, TOLERANCE);
-  EXPECT_NEAR(local_d(5), 0.0, TOLERANCE);
+  EXPECT_NEAR(local_d(0), 0.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(1), 1.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(2), 0.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(3), 0.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(4), 1.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(5), 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(RigidBodyMotionTest, MoveUpCheckEps) {
@@ -259,7 +259,7 @@ TEST_F(RigidBodyMotionTest, MoveUpCheckEps) {
 
   // Calculate norms and perform assertions
   real eps_norm = my_beam->get_eps().lpNorm<1>();
-  EXPECT_NEAR(eps_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(eps_norm, 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(RigidBodyMotionTest, MoveUpCheckStress) {
@@ -268,7 +268,7 @@ TEST_F(RigidBodyMotionTest, MoveUpCheckStress) {
 
   // Calculate norms and perform assertions
   real stress_norm = my_beam->get_local_stresses().lpNorm<1>();
-  EXPECT_NEAR(stress_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(stress_norm, 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(RigidBodyMotionTest, MoveUpCheckLocalf) {
@@ -277,7 +277,7 @@ TEST_F(RigidBodyMotionTest, MoveUpCheckLocalf) {
 
   // Calculate norms and perform assertions
   real f_norm = my_beam->get_local_f().lpNorm<1>();
-  EXPECT_NEAR(f_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(f_norm, 0.0, BEAM_TOLERANCE);
   }
 
 TEST_F(RigidBodyMotionTest, MoveUpCheckResistanceForces) {
@@ -286,7 +286,7 @@ TEST_F(RigidBodyMotionTest, MoveUpCheckResistanceForces) {
 
   // Calculate norms and perform assertions
   real resistance_forces_norm = my_beam->get_element_resistance_forces().lpNorm<1>();
-  EXPECT_NEAR(resistance_forces_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(resistance_forces_norm, 0.0, BEAM_TOLERANCE);
 }
 
 
@@ -297,12 +297,12 @@ TEST_F(RigidBodyMotionTest, RotateCCWCheckLocald) {
   // Calculate norms and perform assertions
   vec local_d = my_beam->get_local_d();
 
-  EXPECT_NEAR(local_d(0), 0.0, TOLERANCE);
-  EXPECT_NEAR(local_d(1), -1.0, TOLERANCE);
-  EXPECT_NEAR(local_d(2), (2.0/BEAM_LENGTH), TOLERANCE);
-  EXPECT_NEAR(local_d(3), 0.0, TOLERANCE);
-  EXPECT_NEAR(local_d(4), 1.0, TOLERANCE);
-  EXPECT_NEAR(local_d(5), (2.0/BEAM_LENGTH), TOLERANCE);
+  EXPECT_NEAR(local_d(0), 0.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(1), -1.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(2), (2.0/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(3), 0.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(4), 1.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_d(5), (2.0/BEAM_LENGTH), BEAM_TOLERANCE);
 }
 
 TEST_F(RigidBodyMotionTest, RotateCCWCheckEps) {
@@ -311,7 +311,7 @@ TEST_F(RigidBodyMotionTest, RotateCCWCheckEps) {
 
   // Calculate norms and perform assertions
   real eps_norm = my_beam->get_eps().lpNorm<1>();
-  EXPECT_NEAR(eps_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(eps_norm, 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(RigidBodyMotionTest, RotateCCWCheckStress) {
@@ -320,7 +320,7 @@ TEST_F(RigidBodyMotionTest, RotateCCWCheckStress) {
 
   // Calculate norms and perform assertions
   real stress_norm = my_beam->get_local_stresses().lpNorm<1>();
-  EXPECT_NEAR(stress_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(stress_norm, 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(RigidBodyMotionTest, RotateCCWCheckLocalf) {
@@ -329,7 +329,7 @@ TEST_F(RigidBodyMotionTest, RotateCCWCheckLocalf) {
 
   // Calculate norms and perform assertions
   real f_norm = my_beam->get_local_f().lpNorm<1>();
-  EXPECT_NEAR(f_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(f_norm, 0.0, BEAM_TOLERANCE);
   }
 
 TEST_F(RigidBodyMotionTest, RotateCCWResistanceForces) {
@@ -338,7 +338,7 @@ TEST_F(RigidBodyMotionTest, RotateCCWResistanceForces) {
 
   // Calculate norms and perform assertions
   real resistance_forces_norm = my_beam->get_element_resistance_forces().lpNorm<1>();
-  EXPECT_NEAR(resistance_forces_norm, 0.0, TOLERANCE);
+  EXPECT_NEAR(resistance_forces_norm, 0.0, BEAM_TOLERANCE);
 }
 
 
@@ -348,8 +348,8 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionEps) {
 
   // Calculate norms and perform assertions
   vec eps = my_beam->get_eps();
-  EXPECT_NEAR(eps(0), (-1.0/BEAM_LENGTH), TOLERANCE);
-  EXPECT_NEAR(eps(1), 0.0, TOLERANCE);
+  EXPECT_NEAR(eps(0), (-1.0/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(eps(1), 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantCompressionStress) {
@@ -358,8 +358,8 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionStress) {
 
   // Calculate norms and perform assertions
   vec stress = my_beam->get_local_stresses();
-  EXPECT_NEAR(stress(0), (-1.0/BEAM_LENGTH)*E*A, TOLERANCE);
-  EXPECT_NEAR(stress(1), 0.0, TOLERANCE);
+  EXPECT_NEAR(stress(0), (-1.0/BEAM_LENGTH)*E*A, BEAM_TOLERANCE);
+  EXPECT_NEAR(stress(1), 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantCompressionLocalNodalForces) {
@@ -369,9 +369,9 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionLocalNodalForces) {
   // Calculate norms and perform assertions
   vec local_f = my_beam->get_local_f();
   real local_f_norm = local_f.lpNorm<1>();
-  EXPECT_NEAR(local_f(0), ((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
-  EXPECT_NEAR(local_f(3), -((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
-  EXPECT_NEAR(local_f_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, TOLERANCE);
+  EXPECT_NEAR(local_f(0), ((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f(3), -((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantCompressionGlobalNodalForces) {
@@ -381,9 +381,9 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionGlobalNodalForces) {
   // Calculate norms and perform assertions
   vec R = my_beam->get_element_resistance_forces();
   real R_norm = R.lpNorm<1>();
-  EXPECT_NEAR(R(0), ((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
-  EXPECT_NEAR(R(6), -((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
-  EXPECT_NEAR(R_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, TOLERANCE);
+  EXPECT_NEAR(R(0), ((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(R(6), -((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(R_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantTensionEps) {
@@ -392,8 +392,8 @@ TEST_F(ConstantStrainStateTest, ConstantTensionEps) {
 
   // Calculate norms and perform assertions
   vec eps = my_beam->get_eps();
-  EXPECT_NEAR(eps(0), (1.0/BEAM_LENGTH), TOLERANCE);
-  EXPECT_NEAR(eps(1), 0.0, TOLERANCE);
+  EXPECT_NEAR(eps(0), (1.0/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(eps(1), 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantTensionStress) {
@@ -402,8 +402,8 @@ TEST_F(ConstantStrainStateTest, ConstantTensionStress) {
 
   // Calculate norms and perform assertions
   vec stress = my_beam->get_local_stresses();
-  EXPECT_NEAR(stress(0), (1.0/BEAM_LENGTH)*E*A, TOLERANCE);
-  EXPECT_NEAR(stress(1), 0.0, TOLERANCE);
+  EXPECT_NEAR(stress(0), (1.0/BEAM_LENGTH)*E*A, BEAM_TOLERANCE);
+  EXPECT_NEAR(stress(1), 0.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantTensionLocalNodalForces) {
@@ -413,9 +413,9 @@ TEST_F(ConstantStrainStateTest, ConstantTensionLocalNodalForces) {
   // Calculate norms and perform assertions
   vec local_f = my_beam->get_local_f();
   real local_f_norm = local_f.lpNorm<1>();
-  EXPECT_NEAR(local_f(0), -((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
-  EXPECT_NEAR(local_f(3), ((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
-  EXPECT_NEAR(local_f_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, TOLERANCE);
+  EXPECT_NEAR(local_f(0), -((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f(3), ((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantTensionGlobalNodalForces) {
@@ -425,9 +425,9 @@ TEST_F(ConstantStrainStateTest, ConstantTensionGlobalNodalForces) {
   // Calculate norms and perform assertions
   vec R = my_beam->get_element_resistance_forces();
   real R_norm = R.lpNorm<1>();
-  EXPECT_NEAR(R(0), -((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
-  EXPECT_NEAR(R(6), ((1.0/BEAM_LENGTH)*E*A), TOLERANCE);
-  EXPECT_NEAR(R_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, TOLERANCE);
+  EXPECT_NEAR(R(0), -((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(R(6), ((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(R_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, BEAM_TOLERANCE);
 }
 
   /**
@@ -441,8 +441,8 @@ TEST_F(ConstantStrainStateTest, ConstantRotationEps) {
 
   // Calculate norms and perform assertions
   vec eps = my_beam->get_eps();
-  EXPECT_NEAR(eps(0), 0.0, TOLERANCE);
-  EXPECT_NEAR(eps(1), (2/BEAM_LENGTH), TOLERANCE);
+  EXPECT_NEAR(eps(0), 0.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(eps(1), (2/BEAM_LENGTH), BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantRotationStress) {
@@ -451,8 +451,8 @@ TEST_F(ConstantStrainStateTest, ConstantRotationStress) {
 
   // Calculate norms and perform assertions
   vec stress = my_beam->get_local_stresses();
-  EXPECT_NEAR(stress(0), 0.0, TOLERANCE);
-  EXPECT_NEAR(stress(1), (2*E*I/BEAM_LENGTH), TOLERANCE);
+  EXPECT_NEAR(stress(0), 0.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(stress(1), (2*E*I/BEAM_LENGTH), BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantRotationLocalNodalForces) {
@@ -462,9 +462,9 @@ TEST_F(ConstantStrainStateTest, ConstantRotationLocalNodalForces) {
   // Calculate norms and perform assertions
   vec local_f = my_beam->get_local_f();
   real local_f_norm = local_f.lpNorm<1>();
-  EXPECT_NEAR(local_f(2), -(2*E*I/BEAM_LENGTH), TOLERANCE);
-  EXPECT_NEAR(local_f(5), (2*E*I/BEAM_LENGTH), TOLERANCE);
-  EXPECT_NEAR(local_f_norm, (2*E*I/BEAM_LENGTH)*2.0, TOLERANCE);
+  EXPECT_NEAR(local_f(2), -(2*E*I/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f(5), (2*E*I/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f_norm, (2*E*I/BEAM_LENGTH)*2.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantRotationGlobalNodalForces) {
@@ -474,7 +474,7 @@ TEST_F(ConstantStrainStateTest, ConstantRotationGlobalNodalForces) {
   // Calculate norms and perform assertions
   vec R = my_beam->get_element_resistance_forces();
   real R_norm = R.lpNorm<1>();
-  EXPECT_NEAR(R(5), -(2*E*I/BEAM_LENGTH), TOLERANCE);
-  EXPECT_NEAR(R(11), (2*E*I/BEAM_LENGTH), TOLERANCE);
-  EXPECT_NEAR(R_norm, (2*E*I/BEAM_LENGTH)*2.0, TOLERANCE);
+  EXPECT_NEAR(R(5), -(2*E*I/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(R(11), (2*E*I/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(R_norm, (2*E*I/BEAM_LENGTH)*2.0, BEAM_TOLERANCE);
 }

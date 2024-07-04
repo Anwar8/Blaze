@@ -182,7 +182,6 @@ class Node {
          * @param dof the DoF to which the nodal load will be added.
          */
         void add_nodal_load(real nodal_load, int dof);
-
         /**
          * @brief increments the nodal at DoF dof by dP.
          * 
@@ -190,6 +189,11 @@ class Node {
          * @param dof the DoF to which the nodal load will be added.
          */
         void increment_nodal_load(real dP, int dof);
+        void clear_nodal_loads() 
+        {
+            nodal_loads = {0., 0., 0., 0., 0., 0.};
+            loaded_dofs.clear();
+        }
         /**
          * @brief converts the \ref nodal_loads array into a std vector of triplets to be collected by the assembler.
          * 

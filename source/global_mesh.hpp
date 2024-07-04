@@ -20,6 +20,7 @@
 #include "beam_element.hpp"
 #include "Izzuddin2DNonlinearBeam.hpp"
 #include "BeamElementBaseClass.hpp"
+#include "basic_utilities.hpp"
 
 /**
  * @brief std vector of pairs each of which has an id and a 3-item coords vector.

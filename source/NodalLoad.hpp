@@ -84,6 +84,19 @@ class NodalLoad
                 loaded_nodes.push_back(glob_mesh.get_node_by_id(node_id));
             }
         }
+
+        /**
+         * @brief assigns the shared pointer to the nodes directly to the \ref loaded_nodes container.
+         * 
+         * @param nodes a shared_ptr to a node object that will be loaded.
+         */
+        void assign_nodes_by_ptr(std::vector<std::shared_ptr<Node>> nodes)
+        {
+            for (auto node : nodes)
+            {
+                loaded_nodes.push_back(node);
+            }
+        }
         /**
          * @brief initialises the nodal load on all loaded nodes by calling the \ref Node::add_nodal_load function with a 0.0 load. 
          * This prevents having to have an if-statement during load incrementation.
@@ -114,5 +127,50 @@ class NodalLoad
                 }
             }
         }
+        /**
+         * @brief removes all loaded DoFs and resets the nodal_loads to zero. Useful for unit testing.
+         */
+        void clear_loads()
+        {
+            loaded_dofs.clear();
+            nodal_loads = {0., 0., 0., 0., 0., 0.};
+        }
+        /**
+         * @brief clears the nodes vector. Used for unit testing.
+         */
+        void clear_loaded_nodes()
+        {
+            loaded_nodes.clear();
+        }
+        /**
+         * @brief clear both the loads and the loaded nodes. Basically resets state of the nodal load. Useful for unit testing.
+         * 
+         */
+        void reset()
+        {
+            clear_loads();
+            clear_loaded_nodes();
+        }
+        /**
+         * @brief removes ALL loads from the loaded_nodes. Calls the \ref Node::clear_nodal_loads function.
+         * 
+         */
+        void unload_loaded_nodes()
+        {
+            for (auto node: loaded_nodes)
+            {
+                node->clear_nodal_loads();
+            }
+        }
+        /**
+         * @name getters
+         * @brief used for testing, mostly.
+         * 
+         */
+        //@{
+        std::vector<std::shared_ptr<Node>> get_loaded_nodes() const {return loaded_nodes;}
+        std::set<int> get_loaded_dofs() const {return loaded_dofs;};
+        std::array<real, 6> get_nodal_loads() const {return nodal_loads;}
+        //@}
 };
 #endif
