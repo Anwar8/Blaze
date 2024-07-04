@@ -63,12 +63,12 @@ TEST_F(NodalLoadTest, LoadOrderCorrect)
     std::vector<int> dofs = {0, 5, 2, 3};
     std::vector<real> loads = {1.0, 23.0, -3.0, 1e4};
     setup_nodal_load(nodal_load, in_nodes, dofs, loads);
-    auto aobject_loads = nodal_load.get_nodal_loads();
+    auto load_object_loads = nodal_load.get_nodal_loads();
 
     int i = 0;
     for (auto dof: dofs)
     {
-         EXPECT_NEAR(aobject_loads[dof], loads[i], NODAL_LOAD_TOL);
+         EXPECT_NEAR(load_object_loads[dof], loads[i], NODAL_LOAD_TOL);
          ++i;
     }
 }
@@ -78,12 +78,12 @@ TEST_F(NodalLoadTest, ConstructBySetLoadOrderCorrect)
     std::set<int> dofs = {0, 5, 2, 3};
     std::vector<real> loads = {1.0, 23.0, -3.0, 1e4};
     setup_nodal_load(nodal_load, in_nodes, dofs, loads);
-    auto aobject_loads = nodal_load.get_nodal_loads();
+    auto load_object_loads = nodal_load.get_nodal_loads();
 
     int i = 0;
     for (auto dof: dofs)
     {
-         EXPECT_NEAR(aobject_loads[dof], loads[i], NODAL_LOAD_TOL);
+         EXPECT_NEAR(load_object_loads[dof], loads[i], NODAL_LOAD_TOL);
          ++i;
     }
 }

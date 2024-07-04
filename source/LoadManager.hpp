@@ -8,7 +8,7 @@
 #include <vector>
 #include <map>
 #include "global_mesh.hpp"
-#include "nodal_load.hpp"
+#include "NodalLoad.hpp"
 #include "node.hpp"
 #include "maths_defaults.hpp"
 /**
@@ -19,12 +19,76 @@
 class LoadManager
 {   
     protected:
-
-        
+        std::vector<NodalLoad> nodal_loads; /**< a vector of NodalLoad objects that are used to store information about the load conditions for a set of loaded nodes.*/
+        GlobalMesh* global_mesh; /**< a pointer to the GlobalMesh object that contains the nodes to be loaded.*/
     public:
+        /**
+         * @brief Links the LoadManager object to a GlobalMesh object which nodes it will load.
+         * 
+         */
+        void link_to_mesh( GlobalMesh* glob_mesh)
+        {
+            global_mesh = glob_mesh;
+        }
+        /**
+         * @brief creates a \ref NodalLoad object and adds it to the nodal loads controlled by this \ref LoadManager. Uses node shared_ptrs to assign nodes in stead of using ids.
+         * @tparam NodePtrContainer STL container that can be dereferenced with the [] operator - used for the nodes to be loaded.
+         * @tparam DofContainer STL container that can be dereferenced with the [] operator - used for the DoFs to be loaded. Can also be a std::set.
+         * @tparam LoadContainer STL container that can be dereferenced with the [] operator - used for the loads corresponding to the DoFs.
+         * @param loaded_nodes the nodes to be loaded.
+         * @param loaded_dofs the DoFs to be loaded.
+         * @param loads the loads corresponding to the DoFs.
+         */
+        template <typename NodePtrContainer, typename DofContainer, typename LoadContainer>
+        void create_a_nodal_load_by_ptr(NodePtrContainer loaded_nodes, DofContainer loaded_dofs, LoadContainer loads)
+        {
+            NodalLoad nodal_load;
+            nodal_load.assign_nodes_by_ptr(loaded_nodes);
+            nodal_load.assign_dofs_loads(loaded_dofs, loads);
+            nodal_loads.push_back(nodal_load);
+        }
 
+        /**
+         * @brief creates a \ref NodalLoad object and adds it to the nodal loads controlled by this \ref LoadManager. Uses node IDs to assign nodes in stead of using ptrs.
+         * @tparam DofContainer STL container that can be dereferenced with the [] operator - used for the DoFs to be loaded. Can also be a std::set.
+         * @tparam LoadContainer STL container that can be dereferenced with the [] operator - used for the loads corresponding to the DoFs.
+         * @param loaded_nodes the node IDs to be loaded.
+         * @param loaded_dofs the DoFs to be loaded.
+         * @param loads the loads corresponding to the DoFs.
+         */
+        template <typename DofContainer, typename LoadContainer>
+        void create_a_nodal_load_by_id(std::vector<unsigned> loaded_node_ids, DofContainer loaded_dofs, LoadContainer loads)
+        {
+            NodalLoad nodal_load;
+            nodal_load.assign_nodes_by_id(loaded_node_ids);
+            nodal_load.assign_dofs_loads(loaded_dofs, loads);
+            nodal_loads.push_back(nodal_load);
+        }
         
-        
+        /**
+         * @brief initialise all load objects managed by this manager.
+         * 
+         */
+        void initialise_loads()
+        {
+            for (auto nodal_load : nodal_loads)
+            {
+                nodal_load.initialise_loads();
+            }
+        }
+
+        /**
+         * @brief increment the loads of all the nodal loads managed by this manager by the increment load_factor_increment.
+         * 
+         * @param load_factor_increment the multiplier by which to increment the loads: \f$ \Delta LF\f$.
+         */
+        void  increment_loads(real load_factor_increment)
+        {
+            for (auto nodal_load : nodal_loads)
+            {
+                nodal_load.increment_loads(load_factor_increment);
+            }
+        }
 
 };
 
