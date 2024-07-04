@@ -232,6 +232,13 @@ class Node {
          * @return std::array<real,6>  nodal_displacements array.
          */
         std::array<real,6> get_nodal_displacements() {return nodal_displacements;}
+        /**
+         * @brief Get the nodal displacements for a given dof.
+         * 
+         * @param dof the degree of freedom for which to return the displacement.
+         * @return the nodal displacement corresponding to the dof requested.
+         */
+        real get_nodal_displacements(int dof) {return nodal_displacements[dof];}
         //@}
 };
 
