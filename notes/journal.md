@@ -11,6 +11,21 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 4 July
+I have not written here for a while, but I have been working very hard on `Blaze`. You can now find that most of hte classes discussed on 1 July have been created. That is:
+- `Model`
+- `SolutionProcedure`
+- `Scribe` and its managed-class `Record`
+- `LoadManager` and its managed-class `NodalLoad` (corresponds to "`Loader`" mentioned on 1 July)
+I am now almost ready to proceed to proper unit testing as discussed last time, which requires me to now complete the `Model` and `SolutionProcedure` classes and actually get them working as hoped. `Model` should have an overarching interface that prevents the user from having to directly interact with its variables, but that is really not an issue to worry about now. I have to finish `SolutionProcedure` and `Model` first. 
+
+One thing I am quite engrossed in thinking about is how I would parallelise `Blaze` especially across compute nodes. This is because I am using quite advanced classes and rather unique containers. Having the `Model` class here is quite useful as I can create independent models and allow them to interface with each other using the solution procedure. I suppose I could add a `PostPerson` class or perhaps a `Messenger` class that would manage messages between `Models`. This sounds like a rather straight-forward way to parallelise using sub-modelling approaches.
+
+Finally, I think I will need to create a class or two for managing boundary conditions in a very similar way to the `LoadManager` and `NodalLoad` classes, or the `Scribe` and `Record` classes. Perhaps call it the `BoundaryConditioner`? `BoundaryConditionManager`? `BCManager`? `ConstraintsManager`?
+
+Finally, all of these classes that I have created will directly help me in expanding `Blaze` for the future work packages. I can't imagine I would be able to implement nonlinear material (WP2) without the new beam-column element hierarchy, nor do I think applying thermal loading (WP3) would be feasible without the `LoadManager` and `NodalLoad`. I am basically laying the groundwork for the future, not forgetting that enabling good testing is absolutely essential so I don't end up in a situation like now where geometric nonlinearity is not working and I still have no idea why. At least now, once this work on improving the interface and enabling proper testing is done, I will be able to efficiently find out why geometric nonlienarity is not working.
+
+
 #### 1 July
 Continued to build the tests but the element remained buggy and would not update the resistance vector despite passing all the new tests! After significant effort in step-by-step debugging I found that none of the local vectors were being update including `local_d`. I then did a side-by-side comparison with  `Basic2DBeamElement`. There, I finally found the issue - it was in the `update_state` function. I had forgotten to call `get_U_from_nodes`, which meant my element was never updating the displacement - the element was always displacement free and thus resistance force-free!! 
 
