@@ -143,6 +143,19 @@ class BeamElementBaseClass {
          */
         virtual void set_gauss_points() = 0;
     //@}
+    /**
+     * @name element operator overloads
+     * @brief allows for overloading some operators for easier operations and for some common STL algorithms such as for sorting.
+     * 
+     */
+    //@{
+    /**
+     * @brief overloads the less than operator to compare elements by their ID, allowing easy sorting of element STL containers via \ref std::sort.
+     * @todo Understand how I could implement a pure virtual operator override knowing that the function signatures would not match as the derived 
+     * class cannot access the base class protected members, and so must use a operator<(const DerivedClass& other_elem) signature vs the base class' operator<(const BaseClass& other_elem) signature.
+     */
+    // virtual bool operator<(const BeamElementBaseClass& other_elem) const = 0;
+    //@}
 
     /**
      * @name element property calculation functions

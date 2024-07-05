@@ -64,6 +64,15 @@ class Node {
          */
         Node(int i, coords xyz);
 
+        /**
+         * @brief overloads the less than operator to compare nodes by their node ID, allowing easy sorting of node STL containers via \ref std::sort.
+         * 
+         */
+        bool operator<(const Node& other_node) const
+        { 
+            return id < other_node.id; 
+        } 
+
         void print_info();
 
         /**

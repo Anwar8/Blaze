@@ -2,14 +2,10 @@
 #include <iostream>
 #include <memory>
 #include "main.hpp"
-#include "basic_utilities.hpp"
-#include "node.hpp"
-#include "beam_element.hpp"
-#include "global_mesh.hpp"
-#include "assembler.hpp"
-#include "basic_solver.hpp"
+#include "Model.hpp"
 
 int main () {
+    /*
     GlobalMesh glob_mesh; 
     Assembler assembler;
     BasicSolver solver;
@@ -33,80 +29,41 @@ int main () {
     }
     glob_mesh.count_dofs();
 
+    */
 
+
+
+    // create mesh
+    Model model;
+    std::vector<coords> end_coords = {coords(0, 0, 0), coords(3, 0, 0)};
+    int num_divisions = 10;
+    int num_elements = num_divisions;
+    int num_nodes = num_elements + 1;
+    model.create_line_mesh(num_divisions, end_coords);
+
+    // create restraints
+    NodalRestraint end_restraint;
+    end_restraint.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5});
+    end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+
+    NodalRestraint out_of_plane_restraint;  
+    out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
+    out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+    
+    model.restraints.push_back(end_restraint);
+    model.restraints.push_back(out_of_plane_restraint);
+
+    // create loads
+    real y_load = -1e5;
+    model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes}, std::set<int>{1}, std::vector<real>{y_load});
+    
+    // initialise restraints and loads
+    model.initialise_restraints_n_loads();
+
+    // initialise solution parameters
     real max_LF = 1;
     int nsteps = 100;
-    real dLF = max_LF/nsteps;
-    // int recording_interval = 10;
-    
-    int step = 1;
-    real LF = 0;
-
-    // loop over steps
-    while (LF < max_LF)
-    {
-        LF += dLF;
-        std::cout << std::endl << "-----------------------------<Load step " << step << " - LF = " << LF << ">-----------------------------" << std::endl;
-        if (step != 1)
-        {
-            glob_mesh.increment_node_load(2, 2, dLF*y_load); // load the y translation with a load for the last node (which happens to have id = 2).
-            glob_mesh.increment_node_load(2, 0, dLF*x_load); // load the x translation with a load for the last node (which happens to have id = 2).
-        } else {
-            glob_mesh.load_node(2, 2, dLF*y_load); // load the y translation with a load for the last node (which happens to have id = 2).
-            glob_mesh.load_node(2, 0, dLF*x_load); // load the x translation with a load for the last node (which happens to have id = 2).
-        }
-        
-        bool converged = false;
-        // real tolerance = 0.00002*std::max(std::abs(x_load), std::abs(y_load));
-        real tolerance = 1000;
-        // const std::string convergence_criterion = "norm"; // or "max" - of out of balance.
-        int max_iter = 10;
-        int iter = 1;
-        
-        glob_mesh.calc_global_contributions();
-        assembler.assemble_global_contributions(glob_mesh);
-        solver.solve_for_U(assembler);
-        // begin nonlinear iterations:
-        while ((iter <= max_iter) && !(converged))
-        {   
-            std::cout << std::endl << "-----------------------------<Iteration " << iter << ">-----------------------------" << std::endl;
-            assembler.map_U_to_nodes(glob_mesh);
-            if (VERBOSE)
-            {
-                glob_mesh.print_info();
-            }
-            glob_mesh.update_elements_states(); // calculates internal state of strain, stress, and nodal responses
-            assembler.map_elements_f_to_R(glob_mesh);
-            assembler.calculate_out_of_balance();
-            converged = assembler.check_convergence(tolerance);
-            solver.solve_for_deltaU(assembler);
-            assembler.increment_U();
-            std::cout << std::endl << "-----------------------------<Completed: Iteration " << iter << ">-----------------------------" << std::endl;
-            iter++;
-        }
-        if (VERBOSE) 
-        {
-            glob_mesh.print_elements_states(true, true, true, true);
-        }
-        
-        step++;
-        
-        // if (!(step%recording_interval))
-        // {
-            glob_mesh.track_nodal_dof(2, 2, end_disp_history_y);
-            glob_mesh.track_nodal_dof(2, 0, end_disp_history_x);
-        // }
-        std::cout << "LF = " << LF << " and node 2 DoF 2 (U2) = " << *(end_disp_history_y.end()-1) << std::endl;
-        std::cout << "LF = " << LF << " and node 2 DoF 0 (U1) = " << *(end_disp_history_x.end()-1) << std::endl;
-        if ((iter >= max_iter) && !(converged))
-        {
-            break;
-        }
-    }
-    std::cout << std::endl << "---<Analysis complete. LF = " << LF << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
-    std::cout << "nodal displacement history for DoF 2 of node 2 is: " << std::endl;
-    print_container(end_disp_history_y);
-    std::cout << "nodal displacement history for DoF 0 of node 2 is: " << std::endl;
-    print_container(end_disp_history_x);
-    
+    real tolerance = 1e-5;
+    int max_iterations = 10;
+    model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
 }

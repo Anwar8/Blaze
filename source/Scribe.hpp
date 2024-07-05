@@ -106,6 +106,8 @@ class Scribe
             std::cout << "current_row = " << current_row << "Flushing records to file still not implemented. Exiting." << std::endl;
             exit(1);
         }
+
+
         /**
          * @brief reads the contents of a particular record corresponding to a particular node ID to the output stream.
          * 

@@ -121,6 +121,9 @@ void GlobalMesh::setup_mesh(NodeIdCoordsPairsVector node_map, ElemIdNodeIdPairVe
     elem_vector.reserve(nelems);
     make_nodes(node_map);
     make_elements(elem_map);
+    std::sort(node_vector.begin(), node_vector.end());
+    std::sort(elem_vector.begin(), elem_vector.end());
+    count_dofs();
 }
 
 void GlobalMesh::print_info()

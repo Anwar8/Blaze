@@ -20,16 +20,7 @@ class LoadManager
 {   
     protected:
         std::vector<NodalLoad> nodal_loads; /**< a vector of NodalLoad objects that are used to store information about the load conditions for a set of loaded nodes.*/
-        GlobalMesh* global_mesh; /**< a pointer to the GlobalMesh object that contains the nodes to be loaded.*/
     public:
-        /**
-         * @brief Links the LoadManager object to a GlobalMesh object which nodes it will load.
-         * 
-         */
-        void link_to_mesh( GlobalMesh* glob_mesh)
-        {
-            global_mesh = glob_mesh;
-        }
         /**
          * @brief creates a \ref NodalLoad object and adds it to the nodal loads controlled by this \ref LoadManager. Uses node shared_ptrs to assign nodes in stead of using ids.
          * @tparam NodePtrContainer STL container that can be dereferenced with the [] operator - used for the nodes to be loaded.

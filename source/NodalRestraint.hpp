@@ -19,8 +19,8 @@
 class NodalRestraint
 {
     protected:
-        std::set<std::shared_ptr<Node>> restrained_nodes; /**< a std::set of shared pointers to nodes that are loaded.*/
-        std::set<int> restrained_dofs; /**< a std set of loaded DoFs; none at first, then those loaded are added.*/
+        std::set<std::shared_ptr<Node>> restrained_nodes; /**< a std::set of shared pointers to nodes that are restrained.*/
+        std::set<int> restrained_dofs; /**< a std set of restrained DoFs; none at first, then those restrained are added.*/
     public:
         /**
          * @brief assigns dofs to be restrained by this instant of the \ref NodalRestraint object.
@@ -29,7 +29,7 @@ class NodalRestraint
          * @param dofs the DoFs to be restrained by this restraint object.
          */
         template <typename Container>
-        void assign_dofs_loads(Container dofs)
+        void assign_dofs_restraints(Container dofs)
         {
             for (auto dof : dofs)
             {
@@ -42,7 +42,7 @@ class NodalRestraint
          * @brief assigns nodes by ID to the \ref NodalRestraint object. That is, the nodes that this object will restrain.
          * 
          * @tparam Container STL container that is compatible with standard STL iterators and contains node IDs.
-         * @param node_ids the IDs of the nodes to be loaded.
+         * @param node_ids the IDs of the nodes to be restrained.
          * @param glob_mesh the global mesh object that contains all the nodes of the model.
          */
         template <typename Container>
@@ -57,7 +57,7 @@ class NodalRestraint
         /**
          * @brief assigns the shared pointer to the nodes directly to the \ref restrained_nodes container.
          * 
-         * @param nodes a shared_ptr to a node object that will be loaded.
+         * @param nodes a shared_ptr to a node object that will be restrained.
          */
         void assign_nodes_by_ptr(std::vector<std::shared_ptr<Node>> nodes)
         {
@@ -71,22 +71,24 @@ class NodalRestraint
          * @brief applies the restraint conditions to the nodes restrained by this object.
          * 
          */
-        void apply_restraints()
+        void apply_restraints(GlobalMesh& glob_mesh)
         {
             for (auto node : restrained_nodes)
             {
                 node->fix_dofs(restrained_dofs);
             }
+            glob_mesh.count_dofs();
         }
         /**
          * @brief removes the restraints this \ref NodalRestraint object imposes on the nodes from the nodes it imposes them on.
          */
-        void free_restraints()
+        void free_restraints(GlobalMesh& glob_mesh)
         {
             for (auto node : restrained_nodes)
             {
                 node->free_dofs(restrained_dofs);
             }
+            glob_mesh.count_dofs();
         }
 
         /**
@@ -106,7 +108,7 @@ class NodalRestraint
         }
 
         /**
-         * @brief clear both the loads and the loaded nodes. Basically resets state of the nodal load. Useful for unit testing.
+         * @brief clear the restrained nodes. Basically resets state of the nodal restraint object. Useful for unit testing.
          * 
          */
         void reset()

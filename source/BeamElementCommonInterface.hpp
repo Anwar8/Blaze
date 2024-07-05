@@ -49,7 +49,21 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
     //@{
         // all element initialisers are element-specific.
     //@}
-
+    /**
+     * @name element operator overloads
+     * @brief allows for overloading some operators for easier operations and for some common STL algorithms such as for sorting.
+     * 
+     */
+    //@{
+    /**
+     * @brief overloads the less than operator to compare elements by their ID, allowing easy sorting of element STL containers via \ref std::sort.
+     * 
+     */
+    virtual bool operator<(const BeamElementCommonInterface& other_elem) const
+    { 
+        return id < other_elem.id; 
+    } 
+    //@}
     /**
      * @name element property calculation functions
      * @brief functions that are used to calculate element properties such as stress, shape, length, and strain

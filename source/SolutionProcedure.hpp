@@ -36,6 +36,7 @@ class SolutionProcedure
             tolerance = convergence_tolerance;
             max_iter = max_num_of_iterations;
         }
+
         void solve(GlobalMesh& glob_mesh, Assembler& assembler, BasicSolver& solver, LoadManager& load_manager, Scribe& scribe)
         {
             // should not hard-code which DOFs are tracked - that should be part of the `global_mesh` object.
@@ -62,16 +63,16 @@ class SolutionProcedure
             
             // This really needs to be handled by a different type of object, and this setup should be done elsewhere in an initialisation function.
             //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            int nelems = glob_mesh.get_num_elems();
-            int nnodes = nelems + 1;
-            glob_mesh.fix_node(1, -1);
-            for (int i = 2; i <= nnodes; ++i)
-            {
-                glob_mesh.fix_node(i, 1);
-                glob_mesh.fix_node(i, 3);
-                glob_mesh.fix_node(i, 4);
-            }
-            glob_mesh.count_dofs();
+            // int nelems = glob_mesh.get_num_elems();
+            // int nnodes = nelems + 1;
+            // glob_mesh.fix_node(1, -1);
+            // for (int i = 2; i <= nnodes; ++i)
+            // {
+            //     glob_mesh.fix_node(i, 1);
+            //     glob_mesh.fix_node(i, 3);
+            //     glob_mesh.fix_node(i, 4);
+            // }
+            // glob_mesh.count_dofs();
             //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
             
 
@@ -80,20 +81,7 @@ class SolutionProcedure
             {
                 load_factor += dLF;
                 std::cout << std::endl << "-----------------------------<Load step " << step << " - LF = " << load_factor << ">-----------------------------" << std::endl;
-                
-                // I should be able to get an idea of what is loaded from the `global_mesh` object and not have to hard code the node and DoF.
-                //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                // if (step != 1)
-                // {
-                //     glob_mesh.increment_node_load(2, 2, dLF*y_load); // load the y translation with a load for the last node (which happens to have id = 2).
-                //     glob_mesh.increment_node_load(2, 0, dLF*x_load); // load the x translation with a load for the last node (which happens to have id = 2).
-                // } else {
-                //     glob_mesh.load_node(2, 2, dLF*y_load); // load the y translation with a load for the last node (which happens to have id = 2).
-                //     glob_mesh.load_node(2, 0, dLF*x_load); // load the x translation with a load for the last node (which happens to have id = 2).
-                // }
                 load_manager.increment_loads(dLF);
-                //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                
                 bool converged = false;
                 int iter = 1;
                 
@@ -121,31 +109,16 @@ class SolutionProcedure
                 if (VERBOSE) 
                 {
                     glob_mesh.print_elements_states(true, true, true, true);
-                }
-                
+                }              
                 step++;
-                // should not hard-code which DOFs are tracked - that should be part of the `global_mesh` object.
-                //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                // if (!(step%recording_interval))
-                // {
-                    // glob_mesh.track_nodal_dof(2, 2, end_disp_history_y);
-                    // glob_mesh.track_nodal_dof(2, 0, end_disp_history_x);
-                // }
-                // std::cout << "LF = " << load_factor << " and node 2 DoF 2 (U2) = " << *(end_disp_history_y.end()-1) << std::endl;
-                // std::cout << "LF = " << load_factor << " and node 2 DoF 0 (U1) = " << *(end_disp_history_x.end()-1) << std::endl;
                 scribe.write_to_records();
                 scribe.read_all_records();
-                //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 if ((iter >= max_iter) && !(converged))
                 {
                     break;
                 }
             }
             std::cout << std::endl << "---<Analysis complete. LF = " << load_factor << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
-            // std::cout << "nodal displacement history for DoF 2 of node 2 is: " << std::endl;
-            // print_container(end_disp_history_y);
-            // std::cout << "nodal displacement history for DoF 0 of node 2 is: " << std::endl;
-            // print_container(end_disp_history_x);
             scribe.read_all_records();
         }
 };
