@@ -49,9 +49,11 @@ class Record {
          */
         void write_to_record(int row)
         {
+            int i = 0;
             for (auto dof : tracked_dofs)
             {
-                recorded_data(row, dof) = tracked_node->get_nodal_displacements(dof);
+                recorded_data(row, i) = tracked_node->get_nodal_displacements(dof);
+                ++i;
             }
         }
         
@@ -75,8 +77,17 @@ class Record {
             std::cout << "Record contents are: " << std::endl << recorded_data << std::endl;
         }
 
+        /**
+         * @brief reads the contents of the record to the output stream for a particular row.
+         * @param i the row number to read.
+         */
+        void read_record_at(int i)
+        {
+            std::cout << "Record for node " << tracked_node_id << " tracking DoFs:";
+            print_container(tracked_dofs);
+            std::cout << "Record contents at i = " << i << " are: " << std::endl << recorded_data.row(i) << std::endl;
+        }
         unsigned get_tracked_node_id() const {return tracked_node_id;}
-        unsigned get_id() const {return get_tracked_node_id();}
 };
 
 #endif

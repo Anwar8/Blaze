@@ -13,12 +13,13 @@
 
 #include <vector>
 #include <set>
+#include <algorithm>
 
 
 /**
  * @brief  the size of the buffer used to store the data beyond which the data has to be flushed to file.
  */
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 5
 
 /**
  * @brief A scribe manages the recording of the state of the model.
@@ -48,7 +49,7 @@ class Scribe
         {
             for (auto node_id : node_ids)
             {
-                record_library.push_back(Record(glob_mesh.get_node_by_id(node_id)), dofs);
+                record_library.push_back(Record(glob_mesh.get_node_by_id(node_id), dofs, buffer_size));
             }
             sort_record_library();
         }
@@ -107,16 +108,46 @@ class Scribe
             exit(1);
         }
 
+        /**
+         * @brief reads the contents of a particular record corresponding to a particular node ID to the output stream.
+         * 
+         */
+        void read_a_record_at(unsigned node_id, int i)
+        {
+            auto record_it =  get_record_id_iterator(node_id);
+            record_it->read_record_at(i);
+        }
 
         /**
          * @brief reads the contents of a particular record corresponding to a particular node ID to the output stream.
          * 
          */
-        void read_a_record(int node_id)
+        void read_a_record(unsigned node_id)
         {
-            auto record_it =  get_id_iterator<std::vector<Record>::iterator, std::vector<Record>>(node_id, record_library);
+            auto record_it =  get_record_id_iterator(node_id);
             record_it->read_record();
         }
+
+        /**
+         * @brief Get the record id iterator from the \ref record_library vector by using std::find_if.
+         * 
+         * @param id the id of the node that is tracked by the record.
+         * @return Iterator a std::vector<Record>::iterator pointing to the record with the given id.
+         */     
+        std::vector<Record>::iterator get_record_id_iterator(unsigned id)
+        {   
+            auto record_it = std::find_if(std::begin(record_library), std::end(record_library), [id](Record record_obj) {return record_obj.get_tracked_node_id() == id;});
+            if (record_it != std::end(record_library))
+            {
+                return record_it;
+            } else 
+            {
+                std::cout << "could not find record with id " << id << " in record_library." << std::endl;
+                std::exit(1);
+            }
+        }
+
+
         /**
          * @brief reads the contents of all records in the \ref records_library to the output stream.
          * 

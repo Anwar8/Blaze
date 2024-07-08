@@ -48,10 +48,10 @@ class LoadManager
          * @param loads the loads corresponding to the DoFs.
          */
         template <typename DofContainer, typename LoadContainer>
-        void create_a_nodal_load_by_id(std::vector<unsigned> loaded_node_ids, DofContainer loaded_dofs, LoadContainer loads)
+        void create_a_nodal_load_by_id(std::vector<unsigned> loaded_node_ids, DofContainer loaded_dofs, LoadContainer loads, GlobalMesh& glob_mesh)
         {
             NodalLoad nodal_load;
-            nodal_load.assign_nodes_by_id(loaded_node_ids);
+            nodal_load.assign_nodes_by_id(loaded_node_ids, glob_mesh);
             nodal_load.assign_dofs_loads(loaded_dofs, loads);
             nodal_loads.push_back(nodal_load);
         }
