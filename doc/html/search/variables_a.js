@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['offset_0',['offset',['../class_basic_orientation.html#ac634621bdcd7e2d127a8b943a7df968e',1,'BasicOrientation']]],
-  ['orient_1',['orient',['../class_basic2_d_beam_element.html#a248759e5af813ac3b7075fbed8717073',1,'Basic2DBeamElement']]]
+  ['mass_0',['mass',['../class_node.html#a60cd454fd5600a76ba47aa877e4c7269',1,'Node']]],
+  ['max_5fiter_1',['max_iter',['../class_solution_procedure.html#ab6a8a3d3997633954ab1d88e53681e0b',1,'SolutionProcedure']]],
+  ['max_5flf_2',['max_LF',['../class_solution_procedure.html#a71f3015d265f9fcd3de28d9c4e244172',1,'SolutionProcedure']]]
 ];

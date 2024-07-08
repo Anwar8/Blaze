@@ -97,11 +97,14 @@ $(function() {
 <code>#include &lt;string&gt;</code><br />
 <code>#include &lt;Eigen/SparseLU&gt;</code><br />
 <code>#include &lt;Eigen/SparseCholesky&gt;</code><br />
+<code>#include &quot;<a class="el" href="main_8hpp_source.html">main.hpp</a>&quot;</code><br />
 <code>#include &quot;gmsh.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="maths__defaults_8hpp_source.html">maths_defaults.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="node_8hpp_source.html">node.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="beam__element_8hpp_source.html">beam_element.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_izzuddin2_d_nonlinear_beam_8hpp_source.html">Izzuddin2DNonlinearBeam.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_beam_element_base_class_8hpp_source.html">BeamElementBaseClass.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="basic__utilities_8hpp_source.html">basic_utilities.hpp</a>&quot;</code><br />
 </div>
 <p><a href="global__mesh_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -113,18 +116,49 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a36f583533847e09a3fcbdbef40afdbe7" id="r_a36f583533847e09a3fcbdbef40afdbe7"><td class="memItemLeft" align="right" valign="top"><a id="a36f583533847e09a3fcbdbef40afdbe7" name="a36f583533847e09a3fcbdbef40afdbe7"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>gmsh_node_map</b> = std::vector&lt;std::pair&lt;size_t, <a class="el" href="group___maths_types_functions.html#gab3d4c41a199cde03926b4b8365af577e">coords</a>&gt;&gt;</td></tr>
-<tr class="memdesc:a36f583533847e09a3fcbdbef40afdbe7"><td class="mdescLeft">&#160;</td><td class="mdescRight">std vector of pairs each of which has an id and a 3-item coords vector. <br /></td></tr>
-<tr class="separator:a36f583533847e09a3fcbdbef40afdbe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a987962d026ba124882f4ff31f0e76cb6" id="r_a987962d026ba124882f4ff31f0e76cb6"><td class="memItemLeft" align="right" valign="top"><a id="a987962d026ba124882f4ff31f0e76cb6" name="a987962d026ba124882f4ff31f0e76cb6"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>gmsh_elem_map</b> = std::vector&lt;std::pair&lt;size_t, std::vector&lt;size_t&gt;&gt;&gt;</td></tr>
-<tr class="memdesc:a987962d026ba124882f4ff31f0e76cb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">std vector of pairs each of which has an id and a vector of node ids related to the element id. <br /></td></tr>
-<tr class="separator:a987962d026ba124882f4ff31f0e76cb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3965fb1a90b3812945a9348450fe5903" id="r_a3965fb1a90b3812945a9348450fe5903"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a> = <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">std::vector</a>&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">std::pair</a>&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">size_t</a>, <a class="el" href="group___maths_types_functions.html#gab3d4c41a199cde03926b4b8365af577e">coords</a>&gt;&gt;</td></tr>
+<tr class="memdesc:a3965fb1a90b3812945a9348450fe5903"><td class="mdescLeft">&#160;</td><td class="mdescRight">std vector of pairs each of which has an id and a 3-item coords vector.  <br /></td></tr>
+<tr class="separator:a3965fb1a90b3812945a9348450fe5903"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55957c3c6cac0fc34e54b7a6085509a5" id="r_a55957c3c6cac0fc34e54b7a6085509a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> = <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">std::vector</a>&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">std::pair</a>&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">size_t</a>, <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">std::vector</a>&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">size_t</a>&gt;&gt;&gt;</td></tr>
+<tr class="memdesc:a55957c3c6cac0fc34e54b7a6085509a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">std vector of pairs each of which has an id and a vector of node ids related to the element id.  <br /></td></tr>
+<tr class="separator:a55957c3c6cac0fc34e54b7a6085509a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>global mesh object, and functions related to creating model and operating on it </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Typedef Documentation</h2>
+<a id="a55957c3c6cac0fc34e54b7a6085509a5" name="a55957c3c6cac0fc34e54b7a6085509a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55957c3c6cac0fc34e54b7a6085509a5">&#9670;&#160;</a></span>ElemIdNodeIdPairVector</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">using</a> <a class="el" href="#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> = <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">std::vector</a>&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">std::pair</a>&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">size_t</a>, <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">std::vector</a>&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">size_t</a>&gt;&gt;&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>std vector of pairs each of which has an id and a vector of node ids related to the element id. </p>
+
+</div>
+</div>
+<a id="a3965fb1a90b3812945a9348450fe5903" name="a3965fb1a90b3812945a9348450fe5903"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3965fb1a90b3812945a9348450fe5903">&#9670;&#160;</a></span>NodeIdCoordsPairsVector</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">using</a> <a class="el" href="#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a> = <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">std::vector</a>&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">std::pair</a>&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">size_t</a>, <a class="el" href="group___maths_types_functions.html#gab3d4c41a199cde03926b4b8365af577e">coords</a>&gt;&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>std vector of pairs each of which has an id and a 3-item coords vector. </p>
+
+</div>
+</div>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.10.0

@@ -94,103 +94,95 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a0a383f602bed42db57b33da066eb54e3" id="r_a0a383f602bed42db57b33da066eb54e3"><td class="memItemLeft" align="right" valign="top"><a id="a0a383f602bed42db57b33da066eb54e3" name="a0a383f602bed42db57b33da066eb54e3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>open_mesh_file</b> (std::string const mesh_file)</td></tr>
+<tr class="memitem:a0a383f602bed42db57b33da066eb54e3" id="r_a0a383f602bed42db57b33da066eb54e3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0a383f602bed42db57b33da066eb54e3">open_mesh_file</a> (std::string <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">const</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">mesh_file</a>)</td></tr>
 <tr class="separator:a0a383f602bed42db57b33da066eb54e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3bce936c81c4a8bf2cfc6c76c042609c" id="r_a3bce936c81c4a8bf2cfc6c76c042609c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="global__mesh_8hpp.html#a36f583533847e09a3fcbdbef40afdbe7">gmsh_node_map</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3bce936c81c4a8bf2cfc6c76c042609c">read_nodes</a> ()</td></tr>
-<tr class="memdesc:a3bce936c81c4a8bf2cfc6c76c042609c"><td class="mdescLeft">&#160;</td><td class="mdescRight">uses gmsh API to read the nodes and populate a map with ids and coordinates.  <br /></td></tr>
-<tr class="separator:a3bce936c81c4a8bf2cfc6c76c042609c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acae6637502168a49e683bc4c99656eec" id="r_acae6637502168a49e683bc4c99656eec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="global__mesh_8hpp.html#a987962d026ba124882f4ff31f0e76cb6">gmsh_elem_map</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acae6637502168a49e683bc4c99656eec">read_elements</a> ()</td></tr>
-<tr class="memdesc:acae6637502168a49e683bc4c99656eec"><td class="mdescLeft">&#160;</td><td class="mdescRight">reads the elements from the mesh file and populates the map linking element id with its node ids.  <br /></td></tr>
-<tr class="separator:acae6637502168a49e683bc4c99656eec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac6687ec2c7d235a7d5f8534cb6bd450c" id="r_ac6687ec2c7d235a7d5f8534cb6bd450c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac6687ec2c7d235a7d5f8534cb6bd450c">make_nodes</a> (<a class="el" href="global__mesh_8hpp.html#a36f583533847e09a3fcbdbef40afdbe7">gmsh_node_map</a> node_map)</td></tr>
-<tr class="memdesc:ac6687ec2c7d235a7d5f8534cb6bd450c"><td class="mdescLeft">&#160;</td><td class="mdescRight">creates element objects following the <a class="el" href="global__mesh_8hpp.html#a987962d026ba124882f4ff31f0e76cb6">gmsh_elem_map</a> object format and adds them to <a class="el" href="#acffc44e1077a84377020087d6597b4da">elem_vector</a>.  <br /></td></tr>
-<tr class="separator:ac6687ec2c7d235a7d5f8534cb6bd450c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e1c1846637682356c094407e3b32efa" id="r_a6e1c1846637682356c094407e3b32efa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6e1c1846637682356c094407e3b32efa">make_elements</a> (<a class="el" href="global__mesh_8hpp.html#a987962d026ba124882f4ff31f0e76cb6">gmsh_elem_map</a> elem_map)</td></tr>
-<tr class="memdesc:a6e1c1846637682356c094407e3b32efa"><td class="mdescLeft">&#160;</td><td class="mdescRight">creates element objects following the <a class="el" href="global__mesh_8hpp.html#a987962d026ba124882f4ff31f0e76cb6">gmsh_elem_map</a> object format and adds them to <a class="el" href="#acffc44e1077a84377020087d6597b4da">elem_vector</a>.  <br /></td></tr>
-<tr class="separator:a6e1c1846637682356c094407e3b32efa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af2ccbece261a116f2dcfd9cdc7ea1a5f" id="r_af2ccbece261a116f2dcfd9cdc7ea1a5f"><td class="memItemLeft" align="right" valign="top"><a id="af2ccbece261a116f2dcfd9cdc7ea1a5f" name="af2ccbece261a116f2dcfd9cdc7ea1a5f"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>close_mesh_file</b> ()</td></tr>
+<tr class="memitem:afd54822c1332dfadab77f3a0cd4cecf2" id="r_afd54822c1332dfadab77f3a0cd4cecf2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="global__mesh_8hpp.html#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afd54822c1332dfadab77f3a0cd4cecf2">read_nodes</a> ()</td></tr>
+<tr class="memdesc:afd54822c1332dfadab77f3a0cd4cecf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">uses gmsh API to read the nodes and populate a map with ids and coordinates.  <br /></td></tr>
+<tr class="separator:afd54822c1332dfadab77f3a0cd4cecf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8de8eb59a3c00e9ee06e2e0082369a0c" id="r_a8de8eb59a3c00e9ee06e2e0082369a0c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8de8eb59a3c00e9ee06e2e0082369a0c">read_elements</a> ()</td></tr>
+<tr class="memdesc:a8de8eb59a3c00e9ee06e2e0082369a0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">reads the elements from the mesh file and populates the map linking element id with its node ids.  <br /></td></tr>
+<tr class="separator:a8de8eb59a3c00e9ee06e2e0082369a0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7de89ecae721494e62ee3f398e612420" id="r_a7de89ecae721494e62ee3f398e612420"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">typename</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">CoordsContainer</a> &gt; </td></tr>
+<tr class="memitem:a7de89ecae721494e62ee3f398e612420"><td class="memTemplItemLeft" align="right" valign="top">std::pair&lt; <a class="el" href="global__mesh_8hpp.html#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a>, <a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a7de89ecae721494e62ee3f398e612420">map_a_line_mesh</a> (<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">unsigned</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">divisions</a>, <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">CoordsContainer</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">end_coords</a>)</td></tr>
+<tr class="memdesc:a7de89ecae721494e62ee3f398e612420"><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a line mesh map with a given number of divisions and end coordinates of the line.  <br /></td></tr>
+<tr class="separator:a7de89ecae721494e62ee3f398e612420"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87c8aae300c12b9749428d09b5fb82d0" id="r_a87c8aae300c12b9749428d09b5fb82d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a87c8aae300c12b9749428d09b5fb82d0">make_nodes</a> (<a class="el" href="global__mesh_8hpp.html#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">node_map</a>)</td></tr>
+<tr class="memdesc:a87c8aae300c12b9749428d09b5fb82d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">creates element objects following the <a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> object format and adds them to <a class="el" href="#a93375c96ff98ef2638ea63d4e4d0f1a6">elem_vector</a>.  <br /></td></tr>
+<tr class="separator:a87c8aae300c12b9749428d09b5fb82d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f291fe1c58070cf1d17ab03731d328f" id="r_a2f291fe1c58070cf1d17ab03731d328f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2f291fe1c58070cf1d17ab03731d328f">make_elements</a> (<a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">elem_map</a>)</td></tr>
+<tr class="memdesc:a2f291fe1c58070cf1d17ab03731d328f"><td class="mdescLeft">&#160;</td><td class="mdescRight">creates element objects following the <a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> object format and adds them to <a class="el" href="#a93375c96ff98ef2638ea63d4e4d0f1a6">elem_vector</a>.  <br /></td></tr>
+<tr class="separator:a2f291fe1c58070cf1d17ab03731d328f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2ccbece261a116f2dcfd9cdc7ea1a5f" id="r_af2ccbece261a116f2dcfd9cdc7ea1a5f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af2ccbece261a116f2dcfd9cdc7ea1a5f">close_mesh_file</a> ()</td></tr>
 <tr class="separator:af2ccbece261a116f2dcfd9cdc7ea1a5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0741aab3c1bc20c7d30625e22affb6d" id="r_ae0741aab3c1bc20c7d30625e22affb6d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae0741aab3c1bc20c7d30625e22affb6d">setup_mesh</a> (std::string const mesh_file)</td></tr>
-<tr class="memdesc:ae0741aab3c1bc20c7d30625e22affb6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">populates the global_mesh members: <a class="el" href="#ae75e93aeada325450acbd879400647d4">nnodes</a>, <a class="el" href="#ac247ac7d4cdd43979c9efb49fbe819fe">nelems</a>, <a class="el" href="#a35deedf8a2bdef877be9a1949e976edc">node_vector</a>, and <a class="el" href="#acffc44e1077a84377020087d6597b4da">elem_vector</a>.  <br /></td></tr>
-<tr class="separator:ae0741aab3c1bc20c7d30625e22affb6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1bd84d79729c0e00e76d001af2756df2" id="r_a1bd84d79729c0e00e76d001af2756df2"><td class="memItemLeft" align="right" valign="top"><a id="a1bd84d79729c0e00e76d001af2756df2" name="a1bd84d79729c0e00e76d001af2756df2"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>count_dofs</b> ()</td></tr>
-<tr class="memdesc:a1bd84d79729c0e00e76d001af2756df2"><td class="mdescLeft">&#160;</td><td class="mdescRight">counts the active DOFs in the mesh by going over all the nodes and getting the number of active freedoms. <br /></td></tr>
+<tr class="memitem:a86ba98562d3cb0c535cba265c86a2985" id="r_a86ba98562d3cb0c535cba265c86a2985"><td class="memItemLeft" align="right" valign="top">std::pair&lt; <a class="el" href="global__mesh_8hpp.html#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a>, <a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a86ba98562d3cb0c535cba265c86a2985">read_mesh_file</a> (std::string <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">const</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">mesh_file</a>)</td></tr>
+<tr class="memdesc:a86ba98562d3cb0c535cba265c86a2985"><td class="mdescLeft">&#160;</td><td class="mdescRight">reads the mesh file (gmsh format) and populates the node and element maps.  <br /></td></tr>
+<tr class="separator:a86ba98562d3cb0c535cba265c86a2985"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7ca68839067d9114f893b40caee7189" id="r_ae7ca68839067d9114f893b40caee7189"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae7ca68839067d9114f893b40caee7189">setup_mesh</a> (<a class="el" href="global__mesh_8hpp.html#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">node_map</a>, <a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">elem_map</a>)</td></tr>
+<tr class="memdesc:ae7ca68839067d9114f893b40caee7189"><td class="mdescLeft">&#160;</td><td class="mdescRight">populates the global_mesh members: <a class="el" href="#ae75e93aeada325450acbd879400647d4">nnodes</a>, <a class="el" href="#ac247ac7d4cdd43979c9efb49fbe819fe">nelems</a>, <a class="el" href="#a35deedf8a2bdef877be9a1949e976edc">node_vector</a>, and <a class="el" href="#a93375c96ff98ef2638ea63d4e4d0f1a6">elem_vector</a> based on mesh (node and element) maps.  <br /></td></tr>
+<tr class="separator:ae7ca68839067d9114f893b40caee7189"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bd84d79729c0e00e76d001af2756df2" id="r_a1bd84d79729c0e00e76d001af2756df2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1bd84d79729c0e00e76d001af2756df2">count_dofs</a> ()</td></tr>
+<tr class="memdesc:a1bd84d79729c0e00e76d001af2756df2"><td class="mdescLeft">&#160;</td><td class="mdescRight">counts the active DOFs in the mesh by going over all the nodes and getting the number of active freedoms.  <br /></td></tr>
 <tr class="separator:a1bd84d79729c0e00e76d001af2756df2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae8d6c2f8fa275566965be67638623665" id="r_ae8d6c2f8fa275566965be67638623665"><td class="memItemLeft" align="right" valign="top"><a id="ae8d6c2f8fa275566965be67638623665" name="ae8d6c2f8fa275566965be67638623665"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>print_info</b> ()</td></tr>
-<tr class="memdesc:ae8d6c2f8fa275566965be67638623665"><td class="mdescLeft">&#160;</td><td class="mdescRight">calls the Node::print_info function of all nodes and Basic2DBeamElement::print_info of all elements. <br /></td></tr>
+<tr class="memitem:ae8d6c2f8fa275566965be67638623665" id="r_ae8d6c2f8fa275566965be67638623665"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae8d6c2f8fa275566965be67638623665">print_info</a> ()</td></tr>
+<tr class="memdesc:ae8d6c2f8fa275566965be67638623665"><td class="mdescLeft">&#160;</td><td class="mdescRight">calls the <a class="el" href="class_node.html#a05aaf57ffce54e5441ff774325a8eeb2">Node::print_info</a> function of all nodes and <a class="el" href="class_basic2_d_beam_element.html#ab11bf61cb3b00ea1e88d708bdc55bc11">Basic2DBeamElement::print_info</a> of all elements.  <br /></td></tr>
 <tr class="separator:ae8d6c2f8fa275566965be67638623665"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6230d51c86cd6b909f2065ef243c0891" id="r_a6230d51c86cd6b909f2065ef243c0891"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6230d51c86cd6b909f2065ef243c0891">fix_node</a> (int id, int dof)</td></tr>
+<tr class="memitem:a6230d51c86cd6b909f2065ef243c0891" id="r_a6230d51c86cd6b909f2065ef243c0891"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6230d51c86cd6b909f2065ef243c0891">fix_node</a> (<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> id, <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">dof</a>)</td></tr>
 <tr class="memdesc:a6230d51c86cd6b909f2065ef243c0891"><td class="mdescLeft">&#160;</td><td class="mdescRight">calls a node's <a class="el" href="class_node.html#a90dbe4bbc8c673f2b7fe796843b4930e">Node::fix_dof</a> function.  <br /></td></tr>
 <tr class="separator:a6230d51c86cd6b909f2065ef243c0891"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac529d41ac4798383de8c351b82d16163" id="r_ac529d41ac4798383de8c351b82d16163"><td class="memItemLeft" align="right" valign="top"><a id="ac529d41ac4798383de8c351b82d16163" name="ac529d41ac4798383de8c351b82d16163"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>load_node</b> (int id, int dof, <a class="el" href="group___maths_types_functions.html#gaedc0ad84d1e764530814f57ad931d02a">real</a> load)</td></tr>
-<tr class="memdesc:ac529d41ac4798383de8c351b82d16163"><td class="mdescLeft">&#160;</td><td class="mdescRight">calls a node's <a class="el" href="class_node.html#ac8d74e9798a8168073c0ff6c60b9724b">Node::add_nodal_load</a> command and loads it. <br /></td></tr>
+<tr class="memitem:ac529d41ac4798383de8c351b82d16163" id="r_ac529d41ac4798383de8c351b82d16163"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac529d41ac4798383de8c351b82d16163">load_node</a> (<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> id, <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">dof</a>, <a class="el" href="group___maths_types_functions.html#gaedc0ad84d1e764530814f57ad931d02a">real</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">load</a>)</td></tr>
+<tr class="memdesc:ac529d41ac4798383de8c351b82d16163"><td class="mdescLeft">&#160;</td><td class="mdescRight">calls a node's <a class="el" href="class_node.html#ac8d74e9798a8168073c0ff6c60b9724b">Node::add_nodal_load</a> command and loads it.  <br /></td></tr>
 <tr class="separator:ac529d41ac4798383de8c351b82d16163"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a72af3282c326ce189269a9486854b761" id="r_a72af3282c326ce189269a9486854b761"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a72af3282c326ce189269a9486854b761">increment_node_load</a> (int id, int dof, <a class="el" href="group___maths_types_functions.html#gaedc0ad84d1e764530814f57ad931d02a">real</a> dP)</td></tr>
+<tr class="memitem:a72af3282c326ce189269a9486854b761" id="r_a72af3282c326ce189269a9486854b761"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a72af3282c326ce189269a9486854b761">increment_node_load</a> (<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> id, <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">dof</a>, <a class="el" href="group___maths_types_functions.html#gaedc0ad84d1e764530814f57ad931d02a">real</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">dP</a>)</td></tr>
 <tr class="memdesc:a72af3282c326ce189269a9486854b761"><td class="mdescLeft">&#160;</td><td class="mdescRight">increments the nodal load of DoF dof of node id by load increment dP.  <br /></td></tr>
 <tr class="separator:a72af3282c326ce189269a9486854b761"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73270153d9048658b7189fe37d3a3c7c" id="r_a73270153d9048658b7189fe37d3a3c7c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73270153d9048658b7189fe37d3a3c7c">track_nodal_dof</a> (int id, int dof, std::vector&lt; <a class="el" href="group___maths_types_functions.html#gaedc0ad84d1e764530814f57ad931d02a">real</a> &gt; &amp;history)</td></tr>
+<tr class="memitem:a73270153d9048658b7189fe37d3a3c7c" id="r_a73270153d9048658b7189fe37d3a3c7c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73270153d9048658b7189fe37d3a3c7c">track_nodal_dof</a> (<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> id, <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">dof</a>, std::vector&lt; <a class="el" href="group___maths_types_functions.html#gaedc0ad84d1e764530814f57ad931d02a">real</a> &gt; &amp;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">history</a>)</td></tr>
 <tr class="memdesc:a73270153d9048658b7189fe37d3a3c7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">keeps track of the history of a nodal DoF.  <br /></td></tr>
 <tr class="separator:a73270153d9048658b7189fe37d3a3c7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8a13fc2a08821fe12a599f282fd11989" id="r_a8a13fc2a08821fe12a599f282fd11989"><td class="memItemLeft" align="right" valign="top"><a id="a8a13fc2a08821fe12a599f282fd11989" name="a8a13fc2a08821fe12a599f282fd11989"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>calc_global_contributions</b> ()</td></tr>
-<tr class="memdesc:a8a13fc2a08821fe12a599f282fd11989"><td class="mdescLeft">&#160;</td><td class="mdescRight">loop over elements and call each of their map_stiffness and calc_K_global functions. <br /></td></tr>
+<tr class="memitem:a517c7eabed94c0a547c04fa21d144d57" id="r_a517c7eabed94c0a547c04fa21d144d57"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="class_node.html">Node</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a517c7eabed94c0a547c04fa21d144d57">get_node_by_id</a> (<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> id)</td></tr>
+<tr class="memdesc:a517c7eabed94c0a547c04fa21d144d57"><td class="mdescLeft">&#160;</td><td class="mdescRight">get node shared_ptr by id.  <br /></td></tr>
+<tr class="separator:a517c7eabed94c0a547c04fa21d144d57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a13fc2a08821fe12a599f282fd11989" id="r_a8a13fc2a08821fe12a599f282fd11989"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a13fc2a08821fe12a599f282fd11989">calc_global_contributions</a> ()</td></tr>
+<tr class="memdesc:a8a13fc2a08821fe12a599f282fd11989"><td class="mdescLeft">&#160;</td><td class="mdescRight">loop over elements and call each of their map_stiffness and calc_global_stiffness_triplets functions.  <br /></td></tr>
 <tr class="separator:a8a13fc2a08821fe12a599f282fd11989"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0f10197c67e6933b7d18435b8d54813" id="r_ae0f10197c67e6933b7d18435b8d54813"><td class="memItemLeft" align="right" valign="top"><a id="ae0f10197c67e6933b7d18435b8d54813" name="ae0f10197c67e6933b7d18435b8d54813"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>update_elements_states</b> ()</td></tr>
-<tr class="memdesc:ae0f10197c67e6933b7d18435b8d54813"><td class="mdescLeft">&#160;</td><td class="mdescRight">updates the state of each element after calculating global displacements. <br /></td></tr>
+<tr class="memitem:ae0f10197c67e6933b7d18435b8d54813" id="r_ae0f10197c67e6933b7d18435b8d54813"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae0f10197c67e6933b7d18435b8d54813">update_elements_states</a> ()</td></tr>
+<tr class="memdesc:ae0f10197c67e6933b7d18435b8d54813"><td class="mdescLeft">&#160;</td><td class="mdescRight">updates the state of each element after calculating global displacements.  <br /></td></tr>
 <tr class="separator:ae0f10197c67e6933b7d18435b8d54813"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada3d83749f52a62a9107ec158258f3b7" id="r_ada3d83749f52a62a9107ec158258f3b7"><td class="memItemLeft" align="right" valign="top"><a id="ada3d83749f52a62a9107ec158258f3b7" name="ada3d83749f52a62a9107ec158258f3b7"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>print_elements_states</b> (bool print_stresses=true, bool print_strains=false, bool print_nodal_disp=false, bool print_nodal_forces=false)</td></tr>
-<tr class="memdesc:ada3d83749f52a62a9107ec158258f3b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">prints the selected state of each element. <br /></td></tr>
-<tr class="separator:ada3d83749f52a62a9107ec158258f3b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a433928ff8d7df279bfdf87fd45b5abbb" id="r_a433928ff8d7df279bfdf87fd45b5abbb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a433928ff8d7df279bfdf87fd45b5abbb">solve_for_U</a> ()</td></tr>
+<tr class="memitem:aaabcde3f3fa8bebe840375ac233c30a5" id="r_aaabcde3f3fa8bebe840375ac233c30a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaabcde3f3fa8bebe840375ac233c30a5">print_elements_states</a> (<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">bool</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">print_nodal_disp</a>=<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">false</a>, <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">bool</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">print_strains</a>=<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">false</a>, <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">bool</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">print_stresses</a>=<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">true</a>, <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">bool</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">print_nodal_forces</a>=<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">false</a>)</td></tr>
+<tr class="memdesc:aaabcde3f3fa8bebe840375ac233c30a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">prints the selected state of each element.  <br /></td></tr>
+<tr class="separator:aaabcde3f3fa8bebe840375ac233c30a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a433928ff8d7df279bfdf87fd45b5abbb" id="r_a433928ff8d7df279bfdf87fd45b5abbb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a433928ff8d7df279bfdf87fd45b5abbb">solve_for_U</a> ()</td></tr>
 <tr class="memdesc:a433928ff8d7df279bfdf87fd45b5abbb"><td class="mdescLeft">&#160;</td><td class="mdescRight">No idea why we have a template to solve for U here.  <br /></td></tr>
 <tr class="separator:a433928ff8d7df279bfdf87fd45b5abbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a333d4d83adf9b459fa18f4529e9b967b" id="r_a333d4d83adf9b459fa18f4529e9b967b"><td class="memItemLeft" align="right" valign="top"><a id="a333d4d83adf9b459fa18f4529e9b967b" name="a333d4d83adf9b459fa18f4529e9b967b"></a>
-int const&#160;</td><td class="memItemRight" valign="bottom"><b>get_num_elems</b> () const</td></tr>
+<tr class="memitem:a333d4d83adf9b459fa18f4529e9b967b" id="r_a333d4d83adf9b459fa18f4529e9b967b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">const</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a333d4d83adf9b459fa18f4529e9b967b">get_num_elems</a> () <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">const</a></td></tr>
 <tr class="separator:a333d4d83adf9b459fa18f4529e9b967b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:ae75e93aeada325450acbd879400647d4" id="r_ae75e93aeada325450acbd879400647d4"><td class="memItemLeft" align="right" valign="top"><a id="ae75e93aeada325450acbd879400647d4" name="ae75e93aeada325450acbd879400647d4"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>nnodes</b> = 0</td></tr>
-<tr class="memdesc:ae75e93aeada325450acbd879400647d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of nodes in the mesh. <br /></td></tr>
+<tr class="memitem:ae75e93aeada325450acbd879400647d4" id="r_ae75e93aeada325450acbd879400647d4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae75e93aeada325450acbd879400647d4">nnodes</a> = 0</td></tr>
+<tr class="memdesc:ae75e93aeada325450acbd879400647d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of nodes in the mesh.  <br /></td></tr>
 <tr class="separator:ae75e93aeada325450acbd879400647d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0cab9cd0300ed7f77d1691309371bc50" id="r_a0cab9cd0300ed7f77d1691309371bc50"><td class="memItemLeft" align="right" valign="top"><a id="a0cab9cd0300ed7f77d1691309371bc50" name="a0cab9cd0300ed7f77d1691309371bc50"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>ndofs</b> = 0</td></tr>
-<tr class="memdesc:a0cab9cd0300ed7f77d1691309371bc50"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of DOFs in the mesh. <br /></td></tr>
+<tr class="memitem:a0cab9cd0300ed7f77d1691309371bc50" id="r_a0cab9cd0300ed7f77d1691309371bc50"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0cab9cd0300ed7f77d1691309371bc50">ndofs</a> = 0</td></tr>
+<tr class="memdesc:a0cab9cd0300ed7f77d1691309371bc50"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of DOFs in the mesh.  <br /></td></tr>
 <tr class="separator:a0cab9cd0300ed7f77d1691309371bc50"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac247ac7d4cdd43979c9efb49fbe819fe" id="r_ac247ac7d4cdd43979c9efb49fbe819fe"><td class="memItemLeft" align="right" valign="top"><a id="ac247ac7d4cdd43979c9efb49fbe819fe" name="ac247ac7d4cdd43979c9efb49fbe819fe"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>nelems</b> = 0</td></tr>
-<tr class="memdesc:ac247ac7d4cdd43979c9efb49fbe819fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of elements in the mesh. <br /></td></tr>
+<tr class="memitem:ac247ac7d4cdd43979c9efb49fbe819fe" id="r_ac247ac7d4cdd43979c9efb49fbe819fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac247ac7d4cdd43979c9efb49fbe819fe">nelems</a> = 0</td></tr>
+<tr class="memdesc:ac247ac7d4cdd43979c9efb49fbe819fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of elements in the mesh.  <br /></td></tr>
 <tr class="separator:ac247ac7d4cdd43979c9efb49fbe819fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35deedf8a2bdef877be9a1949e976edc" id="r_a35deedf8a2bdef877be9a1949e976edc"><td class="memItemLeft" align="right" valign="top"><a id="a35deedf8a2bdef877be9a1949e976edc" name="a35deedf8a2bdef877be9a1949e976edc"></a>
-std::vector&lt; std::shared_ptr&lt; <a class="el" href="class_node.html">Node</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>node_vector</b></td></tr>
-<tr class="memdesc:a35deedf8a2bdef877be9a1949e976edc"><td class="mdescLeft">&#160;</td><td class="mdescRight">a vector of shared ptrs referring to all the nodes in the problem. <br /></td></tr>
+<tr class="memitem:a35deedf8a2bdef877be9a1949e976edc" id="r_a35deedf8a2bdef877be9a1949e976edc"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::shared_ptr&lt; <a class="el" href="class_node.html">Node</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a35deedf8a2bdef877be9a1949e976edc">node_vector</a></td></tr>
+<tr class="memdesc:a35deedf8a2bdef877be9a1949e976edc"><td class="mdescLeft">&#160;</td><td class="mdescRight">a vector of shared ptrs referring to all the nodes in the problem.  <br /></td></tr>
 <tr class="separator:a35deedf8a2bdef877be9a1949e976edc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acffc44e1077a84377020087d6597b4da" id="r_acffc44e1077a84377020087d6597b4da"><td class="memItemLeft" align="right" valign="top"><a id="acffc44e1077a84377020087d6597b4da" name="acffc44e1077a84377020087d6597b4da"></a>
-std::vector&lt; std::shared_ptr&lt; <a class="el" href="class_basic2_d_beam_element.html">Basic2DBeamElement</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>elem_vector</b></td></tr>
-<tr class="memdesc:acffc44e1077a84377020087d6597b4da"><td class="mdescLeft">&#160;</td><td class="mdescRight">a vector of shared ptrs referring to all the elements in the problem. <br /></td></tr>
-<tr class="separator:acffc44e1077a84377020087d6597b4da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59a717aa6dd327785dda2ac588cbf9f0" id="r_a59a717aa6dd327785dda2ac588cbf9f0"><td class="memItemLeft" align="right" valign="top"><a id="a59a717aa6dd327785dda2ac588cbf9f0" name="a59a717aa6dd327785dda2ac588cbf9f0"></a>
-<a class="el" href="group___maths_types_functions.html#gaa8633f855cb16f9eb80c4b39c7c5e0af">spmat</a>&#160;</td><td class="memItemRight" valign="bottom"><b>K</b></td></tr>
+<tr class="memitem:a93375c96ff98ef2638ea63d4e4d0f1a6" id="r_a93375c96ff98ef2638ea63d4e4d0f1a6"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::shared_ptr&lt; <a class="el" href="class_beam_element_base_class.html">BeamElementBaseClass</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a93375c96ff98ef2638ea63d4e4d0f1a6">elem_vector</a></td></tr>
+<tr class="memdesc:a93375c96ff98ef2638ea63d4e4d0f1a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">a vector of shared ptrs referring to all the elements in the problem.  <br /></td></tr>
+<tr class="separator:a93375c96ff98ef2638ea63d4e4d0f1a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59a717aa6dd327785dda2ac588cbf9f0" id="r_a59a717aa6dd327785dda2ac588cbf9f0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___maths_types_functions.html#gaa8633f855cb16f9eb80c4b39c7c5e0af">spmat</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a59a717aa6dd327785dda2ac588cbf9f0">K</a></td></tr>
 <tr class="separator:a59a717aa6dd327785dda2ac588cbf9f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a816a3ff9af4ac8c7465aa8a545da32f7" id="r_a816a3ff9af4ac8c7465aa8a545da32f7"><td class="memItemLeft" align="right" valign="top"><a id="a816a3ff9af4ac8c7465aa8a545da32f7" name="a816a3ff9af4ac8c7465aa8a545da32f7"></a>
-<a class="el" href="group___maths_types_functions.html#ga99c0594d9f8762c081079b5841e9bca6">spvec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>P</b></td></tr>
+<tr class="memitem:a816a3ff9af4ac8c7465aa8a545da32f7" id="r_a816a3ff9af4ac8c7465aa8a545da32f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___maths_types_functions.html#ga99c0594d9f8762c081079b5841e9bca6">spvec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a816a3ff9af4ac8c7465aa8a545da32f7">P</a></td></tr>
 <tr class="separator:a816a3ff9af4ac8c7465aa8a545da32f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1451f28324cfc5b1b5464e8639871bdb" id="r_a1451f28324cfc5b1b5464e8639871bdb"><td class="memItemLeft" align="right" valign="top"><a id="a1451f28324cfc5b1b5464e8639871bdb" name="a1451f28324cfc5b1b5464e8639871bdb"></a>
-<a class="el" href="group___maths_types_functions.html#gacfdac1e066396441fd2156f447a4c0dc">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>U</b></td></tr>
+<tr class="memitem:a1451f28324cfc5b1b5464e8639871bdb" id="r_a1451f28324cfc5b1b5464e8639871bdb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___maths_types_functions.html#gacfdac1e066396441fd2156f447a4c0dc">vec</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1451f28324cfc5b1b5464e8639871bdb">U</a></td></tr>
 <tr class="separator:a1451f28324cfc5b1b5464e8639871bdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
-<tr class="memitem:a08829e094e460cdd0df495c883c39ce2" id="r_a08829e094e460cdd0df495c883c39ce2"><td class="memItemLeft" align="right" valign="top"><a id="a08829e094e460cdd0df495c883c39ce2" name="a08829e094e460cdd0df495c883c39ce2"></a>
-class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></tr>
+<tr class="memitem:a08829e094e460cdd0df495c883c39ce2" id="r_a08829e094e460cdd0df495c883c39ce2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">class</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a08829e094e460cdd0df495c883c39ce2">Assembler</a></td></tr>
 <tr class="separator:a08829e094e460cdd0df495c883c39ce2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -198,6 +190,69 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 <p>Also contains the references to the nodes and elements.</p>
 <dl class="section attention"><dt>Attention</dt><dd>does not use the global matrices/vectors, so they should be removed as members. </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a8a13fc2a08821fe12a599f282fd11989" name="a8a13fc2a08821fe12a599f282fd11989"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a13fc2a08821fe12a599f282fd11989">&#9670;&#160;</a></span>calc_global_contributions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::calc_global_contributions </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>loop over elements and call each of their map_stiffness and calc_global_stiffness_triplets functions. </p>
+
+</div>
+</div>
+<a id="af2ccbece261a116f2dcfd9cdc7ea1a5f" name="af2ccbece261a116f2dcfd9cdc7ea1a5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2ccbece261a116f2dcfd9cdc7ea1a5f">&#9670;&#160;</a></span>close_mesh_file()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::close_mesh_file </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1bd84d79729c0e00e76d001af2756df2" name="a1bd84d79729c0e00e76d001af2756df2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bd84d79729c0e00e76d001af2756df2">&#9670;&#160;</a></span>count_dofs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::count_dofs </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>counts the active DOFs in the mesh by going over all the nodes and getting the number of active freedoms. </p>
+
+</div>
+</div>
 <a id="a6230d51c86cd6b909f2065ef243c0891" name="a6230d51c86cd6b909f2065ef243c0891"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6230d51c86cd6b909f2065ef243c0891">&#9670;&#160;</a></span>fix_node()</h2>
 
@@ -205,14 +260,14 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void GlobalMesh::fix_node </td>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::fix_node </td>
           <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>id</em>, </span></td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a></td>          <td class="paramname"><span class="paramname"><em>id</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>dof</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a></td>          <td class="paramname"><span class="paramname"><em>dof</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -228,6 +283,65 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 
 </div>
 </div>
+<a id="a517c7eabed94c0a547c04fa21d144d57" name="a517c7eabed94c0a547c04fa21d144d57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a517c7eabed94c0a547c04fa21d144d57">&#9670;&#160;</a></span>get_node_by_id()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::shared_ptr&lt; <a class="el" href="class_node.html">Node</a> &gt; GlobalMesh::get_node_by_id </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a></td>          <td class="paramname"><span class="paramname"><em>id</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>get node shared_ptr by id. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>id of the node to get from the <a class="el" href="#a35deedf8a2bdef877be9a1949e976edc">node_vector</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>std::shared_ptr&lt;Node&gt; a shared pointer to the node with the given id. </dd></dl>
+
+</div>
+</div>
+<a id="a333d4d83adf9b459fa18f4529e9b967b" name="a333d4d83adf9b459fa18f4529e9b967b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a333d4d83adf9b459fa18f4529e9b967b">&#9670;&#160;</a></span>get_num_elems()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">const</a> GlobalMesh::get_num_elems </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a72af3282c326ce189269a9486854b761" name="a72af3282c326ce189269a9486854b761"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a72af3282c326ce189269a9486854b761">&#9670;&#160;</a></span>increment_node_load()</h2>
 
@@ -235,14 +349,14 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void GlobalMesh::increment_node_load </td>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::increment_node_load </td>
           <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>id</em>, </span></td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a></td>          <td class="paramname"><span class="paramname"><em>id</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>dof</em>, </span></td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a></td>          <td class="paramname"><span class="paramname"><em>dof</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -265,22 +379,50 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 
 </div>
 </div>
-<a id="a6e1c1846637682356c094407e3b32efa" name="a6e1c1846637682356c094407e3b32efa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6e1c1846637682356c094407e3b32efa">&#9670;&#160;</a></span>make_elements()</h2>
+<a id="ac529d41ac4798383de8c351b82d16163" name="ac529d41ac4798383de8c351b82d16163"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac529d41ac4798383de8c351b82d16163">&#9670;&#160;</a></span>load_node()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void GlobalMesh::make_elements </td>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::load_node </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="global__mesh_8hpp.html#a987962d026ba124882f4ff31f0e76cb6">gmsh_elem_map</a></td>          <td class="paramname"><span class="paramname"><em>elem_map</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a></td>          <td class="paramname"><span class="paramname"><em>id</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a></td>          <td class="paramname"><span class="paramname"><em>dof</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group___maths_types_functions.html#gaedc0ad84d1e764530814f57ad931d02a">real</a></td>          <td class="paramname"><span class="paramname"><em>load</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>calls a node's <a class="el" href="class_node.html#ac8d74e9798a8168073c0ff6c60b9724b">Node::add_nodal_load</a> command and loads it. </p>
+
+</div>
+</div>
+<a id="a2f291fe1c58070cf1d17ab03731d328f" name="a2f291fe1c58070cf1d17ab03731d328f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f291fe1c58070cf1d17ab03731d328f">&#9670;&#160;</a></span>make_elements()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::make_elements </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a></td>          <td class="paramname"><span class="paramname"><em>elem_map</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>creates element objects following the <a class="el" href="global__mesh_8hpp.html#a987962d026ba124882f4ff31f0e76cb6">gmsh_elem_map</a> object format and adds them to <a class="el" href="#acffc44e1077a84377020087d6597b4da">elem_vector</a>. </p>
+<p>creates element objects following the <a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> object format and adds them to <a class="el" href="#a93375c96ff98ef2638ea63d4e4d0f1a6">elem_vector</a>. </p>
 <dl class="section attention"><dt>Attention</dt><dd>only one type of elements available now. Functionality limited to creating 2D beam-columns.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -291,22 +433,22 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 
 </div>
 </div>
-<a id="ac6687ec2c7d235a7d5f8534cb6bd450c" name="ac6687ec2c7d235a7d5f8534cb6bd450c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac6687ec2c7d235a7d5f8534cb6bd450c">&#9670;&#160;</a></span>make_nodes()</h2>
+<a id="a87c8aae300c12b9749428d09b5fb82d0" name="a87c8aae300c12b9749428d09b5fb82d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87c8aae300c12b9749428d09b5fb82d0">&#9670;&#160;</a></span>make_nodes()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void GlobalMesh::make_nodes </td>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::make_nodes </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="global__mesh_8hpp.html#a36f583533847e09a3fcbdbef40afdbe7">gmsh_node_map</a></td>          <td class="paramname"><span class="paramname"><em>node_map</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="global__mesh_8hpp.html#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a></td>          <td class="paramname"><span class="paramname"><em>node_map</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>creates element objects following the <a class="el" href="global__mesh_8hpp.html#a987962d026ba124882f4ff31f0e76cb6">gmsh_elem_map</a> object format and adds them to <a class="el" href="#acffc44e1077a84377020087d6597b4da">elem_vector</a>. </p>
+<p>creates element objects following the <a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> object format and adds them to <a class="el" href="#a93375c96ff98ef2638ea63d4e4d0f1a6">elem_vector</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">node_map</td><td>a vector of pairs mapping each node ids and coordinates. </td></tr>
@@ -316,14 +458,140 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 
 </div>
 </div>
-<a id="acae6637502168a49e683bc4c99656eec" name="acae6637502168a49e683bc4c99656eec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acae6637502168a49e683bc4c99656eec">&#9670;&#160;</a></span>read_elements()</h2>
+<a id="a7de89ecae721494e62ee3f398e612420" name="a7de89ecae721494e62ee3f398e612420"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7de89ecae721494e62ee3f398e612420">&#9670;&#160;</a></span>map_a_line_mesh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">typename</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">CoordsContainer</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; <a class="el" href="global__mesh_8hpp.html#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a>, <a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> &gt; GlobalMesh::map_a_line_mesh </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">unsigned</a></td>          <td class="paramname"><span class="paramname"><em>divisions</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">CoordsContainer</a></td>          <td class="paramname"><span class="paramname"><em>end_coords</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>creates a line mesh map with a given number of divisions and end coordinates of the line. </p>
+<p>Does NOT take a gmsh mesh file.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">CoordsContainer</td><td>a container that has the coordinates of the end points of the line. Needs compatible with STL iterators. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">divisions</td><td>number of divisions to break the line into. </td></tr>
+    <tr><td class="paramname">end_coords</td><td>the coordinates of the end points of the line. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>std::pair&lt;NodeIdCoordsPairsVector, ElemIdNodeIdPairVector&gt; the node_map and elem_map of the line mesh. </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>assumes mapping takes place from node and element ids = 1. There is no checking for conflicting ids, and nothing to reduce bandwidth! </dd></dl>
+
+</div>
+</div>
+<a id="a0a383f602bed42db57b33da066eb54e3" name="a0a383f602bed42db57b33da066eb54e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a383f602bed42db57b33da066eb54e3">&#9670;&#160;</a></span>open_mesh_file()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="global__mesh_8hpp.html#a987962d026ba124882f4ff31f0e76cb6">gmsh_elem_map</a> GlobalMesh::read_elements </td>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::open_mesh_file </td>
+          <td>(</td>
+          <td class="paramtype">std::string <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">const</a></td>          <td class="paramname"><span class="paramname"><em>mesh_file</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaabcde3f3fa8bebe840375ac233c30a5" name="aaabcde3f3fa8bebe840375ac233c30a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaabcde3f3fa8bebe840375ac233c30a5">&#9670;&#160;</a></span>print_elements_states()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::print_elements_states </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">bool</a></td>          <td class="paramname"><span class="paramname"><em>print_nodal_disp</em><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">false</a></span>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">bool</a></td>          <td class="paramname"><span class="paramname"><em>print_strains</em><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">false</a></span>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">bool</a></td>          <td class="paramname"><span class="paramname"><em>print_stresses</em><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">true</a></span>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">bool</a></td>          <td class="paramname"><span class="paramname"><em>print_nodal_forces</em><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">false</a></span></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>prints the selected state of each element. </p>
+
+</div>
+</div>
+<a id="ae8d6c2f8fa275566965be67638623665" name="ae8d6c2f8fa275566965be67638623665"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8d6c2f8fa275566965be67638623665">&#9670;&#160;</a></span>print_info()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::print_info </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>calls the <a class="el" href="class_node.html#a05aaf57ffce54e5441ff774325a8eeb2">Node::print_info</a> function of all nodes and <a class="el" href="class_basic2_d_beam_element.html#ab11bf61cb3b00ea1e88d708bdc55bc11">Basic2DBeamElement::print_info</a> of all elements. </p>
+
+</div>
+</div>
+<a id="a8de8eb59a3c00e9ee06e2e0082369a0c" name="a8de8eb59a3c00e9ee06e2e0082369a0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8de8eb59a3c00e9ee06e2e0082369a0c">&#9670;&#160;</a></span>read_elements()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> GlobalMesh::read_elements </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -332,18 +600,52 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 </div><div class="memdoc">
 
 <p>reads the elements from the mesh file and populates the map linking element id with its node ids. </p>
-<dl class="section return"><dt>Returns</dt><dd>gmsh_elem_map elem_map a vectpr of pairs mapping elem ids and corresponding node ids. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>ElemIdNodeIdPairVector elem_map a vectpr of pairs mapping elem ids and corresponding node ids. </dd></dl>
 
 </div>
 </div>
-<a id="a3bce936c81c4a8bf2cfc6c76c042609c" name="a3bce936c81c4a8bf2cfc6c76c042609c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3bce936c81c4a8bf2cfc6c76c042609c">&#9670;&#160;</a></span>read_nodes()</h2>
+<a id="a86ba98562d3cb0c535cba265c86a2985" name="a86ba98562d3cb0c535cba265c86a2985"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86ba98562d3cb0c535cba265c86a2985">&#9670;&#160;</a></span>read_mesh_file()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; <a class="el" href="global__mesh_8hpp.html#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a>, <a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a> &gt; GlobalMesh::read_mesh_file </td>
+          <td>(</td>
+          <td class="paramtype">std::string <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">const</a></td>          <td class="paramname"><span class="paramname"><em>mesh_file</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>reads the mesh file (gmsh format) and populates the node and element maps. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mesh_file</td><td>a string that is the gmsh mesh file name and includes directory. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>std::pair&lt;NodeIdCoordsPairsVector, ElemIdNodeIdPairVector&gt; a pair of node and element maps corresponding to a gmsh file. </dd></dl>
+
+</div>
+</div>
+<a id="afd54822c1332dfadab77f3a0cd4cecf2" name="afd54822c1332dfadab77f3a0cd4cecf2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd54822c1332dfadab77f3a0cd4cecf2">&#9670;&#160;</a></span>read_nodes()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="global__mesh_8hpp.html#a36f583533847e09a3fcbdbef40afdbe7">gmsh_node_map</a> GlobalMesh::read_nodes </td>
+          <td class="memname"><a class="el" href="global__mesh_8hpp.html#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a> GlobalMesh::read_nodes </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -352,29 +654,34 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 </div><div class="memdoc">
 
 <p>uses gmsh API to read the nodes and populate a map with ids and coordinates. </p>
-<dl class="section return"><dt>Returns</dt><dd>gmsh_node_map a vector of pairs mapping each node ids and coordinates. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>NodeIdCoordsPairsVector a vector of pairs mapping each node ids and coordinates. </dd></dl>
 
 </div>
 </div>
-<a id="ae0741aab3c1bc20c7d30625e22affb6d" name="ae0741aab3c1bc20c7d30625e22affb6d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae0741aab3c1bc20c7d30625e22affb6d">&#9670;&#160;</a></span>setup_mesh()</h2>
+<a id="ae7ca68839067d9114f893b40caee7189" name="ae7ca68839067d9114f893b40caee7189"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7ca68839067d9114f893b40caee7189">&#9670;&#160;</a></span>setup_mesh()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void GlobalMesh::setup_mesh </td>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::setup_mesh </td>
           <td>(</td>
-          <td class="paramtype">std::string const</td>          <td class="paramname"><span class="paramname"><em>mesh_file</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="global__mesh_8hpp.html#a3965fb1a90b3812945a9348450fe5903">NodeIdCoordsPairsVector</a></td>          <td class="paramname"><span class="paramname"><em>node_map</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="global__mesh_8hpp.html#a55957c3c6cac0fc34e54b7a6085509a5">ElemIdNodeIdPairVector</a></td>          <td class="paramname"><span class="paramname"><em>elem_map</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>populates the global_mesh members: <a class="el" href="#ae75e93aeada325450acbd879400647d4">nnodes</a>, <a class="el" href="#ac247ac7d4cdd43979c9efb49fbe819fe">nelems</a>, <a class="el" href="#a35deedf8a2bdef877be9a1949e976edc">node_vector</a>, and <a class="el" href="#acffc44e1077a84377020087d6597b4da">elem_vector</a>. </p>
+<p>populates the global_mesh members: <a class="el" href="#ae75e93aeada325450acbd879400647d4">nnodes</a>, <a class="el" href="#ac247ac7d4cdd43979c9efb49fbe819fe">nelems</a>, <a class="el" href="#a35deedf8a2bdef877be9a1949e976edc">node_vector</a>, and <a class="el" href="#a93375c96ff98ef2638ea63d4e4d0f1a6">elem_vector</a> based on mesh (node and element) maps. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">mesh_file</td><td>a string that is the mesh file name. </td></tr>
+    <tr><td class="paramname">node_map</td><td>a vector of pairs mapping each node ids and coordinates. </td></tr>
+    <tr><td class="paramname">elem_map</td><td>a vector of pairs mapping elem ids and corresponding 2 node ids. </td></tr>
   </table>
   </dd>
 </dl>
@@ -388,7 +695,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void GlobalMesh::solve_for_U </td>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::solve_for_U </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -397,7 +704,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 </div><div class="memdoc">
 
 <p>No idea why we have a template to solve for U here. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000016">Todo</a></b></dt><dd>reconcile this function with the <a class="el" href="class_basic_solver.html">BasicSolver</a> object</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000022">Todo</a></b></dt><dd>reconcile this function with the <a class="el" href="class_basic_solver.html">BasicSolver</a> object</dd></dl>
 
 </div>
 </div>
@@ -408,14 +715,14 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void GlobalMesh::track_nodal_dof </td>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::track_nodal_dof </td>
           <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>id</em>, </span></td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a></td>          <td class="paramname"><span class="paramname"><em>id</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>dof</em>, </span></td>
+          <td class="paramtype"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a></td>          <td class="paramname"><span class="paramname"><em>dof</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -437,9 +744,246 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Assembler</b></td></
 
 </div>
 </div>
+<a id="ae0f10197c67e6933b7d18435b8d54813" name="ae0f10197c67e6933b7d18435b8d54813"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0f10197c67e6933b7d18435b8d54813">&#9670;&#160;</a></span>update_elements_states()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">void</a> GlobalMesh::update_elements_states </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>updates the state of each element after calculating global displacements. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Friends And Related Symbol Documentation</h2>
+<a id="a08829e094e460cdd0df495c883c39ce2" name="a08829e094e460cdd0df495c883c39ce2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08829e094e460cdd0df495c883c39ce2">&#9670;&#160;</a></span>Assembler</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">friend</a> <a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">class</a> <a class="el" href="class_assembler.html">Assembler</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a93375c96ff98ef2638ea63d4e4d0f1a6" name="a93375c96ff98ef2638ea63d4e4d0f1a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93375c96ff98ef2638ea63d4e4d0f1a6">&#9670;&#160;</a></span>elem_vector</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::shared_ptr&lt;<a class="el" href="class_beam_element_base_class.html">BeamElementBaseClass</a>&gt; &gt; GlobalMesh::elem_vector</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>a vector of shared ptrs referring to all the elements in the problem. </p>
+
+</div>
+</div>
+<a id="a59a717aa6dd327785dda2ac588cbf9f0" name="a59a717aa6dd327785dda2ac588cbf9f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59a717aa6dd327785dda2ac588cbf9f0">&#9670;&#160;</a></span>K</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___maths_types_functions.html#gaa8633f855cb16f9eb80c4b39c7c5e0af">spmat</a> GlobalMesh::K</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0cab9cd0300ed7f77d1691309371bc50" name="a0cab9cd0300ed7f77d1691309371bc50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cab9cd0300ed7f77d1691309371bc50">&#9670;&#160;</a></span>ndofs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> GlobalMesh::ndofs = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>number of DOFs in the mesh. </p>
+
+</div>
+</div>
+<a id="ac247ac7d4cdd43979c9efb49fbe819fe" name="ac247ac7d4cdd43979c9efb49fbe819fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac247ac7d4cdd43979c9efb49fbe819fe">&#9670;&#160;</a></span>nelems</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> GlobalMesh::nelems = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>number of elements in the mesh. </p>
+
+</div>
+</div>
+<a id="ae75e93aeada325450acbd879400647d4" name="ae75e93aeada325450acbd879400647d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae75e93aeada325450acbd879400647d4">&#9670;&#160;</a></span>nnodes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___utility.html#ga7acbcbb4d62cedbe344d5dcf63183342">int</a> GlobalMesh::nnodes = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>number of nodes in the mesh. </p>
+
+</div>
+</div>
+<a id="a35deedf8a2bdef877be9a1949e976edc" name="a35deedf8a2bdef877be9a1949e976edc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35deedf8a2bdef877be9a1949e976edc">&#9670;&#160;</a></span>node_vector</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::shared_ptr&lt;<a class="el" href="class_node.html">Node</a>&gt; &gt; GlobalMesh::node_vector</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>a vector of shared ptrs referring to all the nodes in the problem. </p>
+
+</div>
+</div>
+<a id="a816a3ff9af4ac8c7465aa8a545da32f7" name="a816a3ff9af4ac8c7465aa8a545da32f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a816a3ff9af4ac8c7465aa8a545da32f7">&#9670;&#160;</a></span>P</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___maths_types_functions.html#ga99c0594d9f8762c081079b5841e9bca6">spvec</a> GlobalMesh::P</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1451f28324cfc5b1b5464e8639871bdb" name="a1451f28324cfc5b1b5464e8639871bdb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1451f28324cfc5b1b5464e8639871bdb">&#9670;&#160;</a></span>U</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___maths_types_functions.html#gacfdac1e066396441fd2156f447a4c0dc">vec</a> GlobalMesh::U</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>source/<a class="el" href="global__mesh_8hpp_source.html">global_mesh.hpp</a></li>
-<li>source/<b>global_mesh.cpp</b></li>
+<li>source/<a class="el" href="global__mesh_8cpp.html">global_mesh.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

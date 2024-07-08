@@ -97,17 +97,17 @@ $(function() {
 <li>add functionality to apply non-uniform thermal loading interpolation (LOW PRIORITY) </li>
 </ol>
 </dd>
-<dt>Member <a class="el" href="class_basic2_d_beam_element.html#ade617de74d60dc973e07558c461abc86">Basic2DBeamElement::Basic2DBeamElement</a>  (std::shared_ptr&lt; Node &gt; &amp;node_1, std::shared_ptr&lt; Node &gt; &amp;node_2)</dt>
-<dd><a class="anchor" id="_todo000009"></a>deprecate this constructor </dd>
-<dt>Member <a class="el" href="class_basic2_d_beam_element.html#a1a64cdfbe3ca598ac3a9223fd1cf7a80">Basic2DBeamElement::Basic2DBeamElement</a>  ()</dt>
-<dd><a class="anchor" id="_todo000008"></a>deprecate this constructor  </dd>
 <dt>Member <a class="el" href="class_basic2_d_beam_element.html#a3da63c5dae44d0b8ee8eb10419940197">Basic2DBeamElement::Basic2DBeamElement</a>  (int given_id, std::vector&lt; std::shared_ptr&lt; Node &gt; &gt; &amp;in_nodes)</dt>
 <dd><a class="anchor" id="_todo000010"></a>deprecate in favour of template that accepts any container type </dd>
+<dt>Member <a class="el" href="class_basic2_d_beam_element.html#a1a64cdfbe3ca598ac3a9223fd1cf7a80">Basic2DBeamElement::Basic2DBeamElement</a>  ()</dt>
+<dd><a class="anchor" id="_todo000008"></a>deprecate this constructor  </dd>
+<dt>Member <a class="el" href="class_basic2_d_beam_element.html#ade617de74d60dc973e07558c461abc86">Basic2DBeamElement::Basic2DBeamElement</a>  (std::shared_ptr&lt; Node &gt; &amp;node_1, std::shared_ptr&lt; Node &gt; &amp;node_2)</dt>
+<dd><a class="anchor" id="_todo000009"></a>deprecate this constructor </dd>
 <dt>Member <a class="el" href="class_basic2_d_beam_element.html#a42f559778f2f0e1f2a1fb179355ce038">Basic2DBeamElement::map_stiffness</a>  ()</dt>
 <dd><a class="anchor" id="_todo000012"></a>REALLY needs to be revisited. attempt to rewrite this function so it does the following:<ol type="1">
 <li>gets all the contribution without worrying about active or not</li>
 <li>if a contribution is inactive then that contribution is zeroed AND</li>
-<li>zeroed contributions are not added to <a class="el" href="class_basic2_d_beam_element.html#a24385f4ad70e87c9dc0a811e6a0ef1cc">K_global</a> </li>
+<li>zeroed contributions are not added to <a class="el" href="class_basic2_d_beam_element.html#a9c5c9dd50e3316d1832b137816fb1e28">global_stiffness_triplets</a> </li>
 </ol>
 </dd>
 <dt>Member <a class="el" href="class_basic2_d_beam_element.html#a2a3714ea71a6415ce8a38e20fae99543">Basic2DBeamElement::populate_resistance_force_triplets</a>  ()</dt>
@@ -132,26 +132,53 @@ $(function() {
 </dd>
 <dt>File <a class="el" href="beam__element_8hpp.html">beam_element.hpp</a>  </dt>
 <dd><a class="anchor" id="_todo000006"></a>get rid of the shape function object, or modify it so that it is more powerful.  </dd>
+<dt>Class <a class="el" href="class_beam_element_base_class.html">BeamElementBaseClass</a>  </dt>
+<dd><p class="startdd"><a class="anchor" id="_todo000014"></a>1. add functionality to apply distributed mechanical loading </p>
+<p class="interdd"></p>
+<p class="interdd">2. add functionality to apply thermal gradient and uniform temperature </p>
+<p class="interdd"></p>
+<p class="enddd">3. add functionality to apply non-uniform thermal loading interpolation (LOW PRIORITY) </p>
+</dd>
+<dt>Member <a class="el" href="class_beam_element_base_class.html#ac2d1ac6aebd9dc482ff58b11e408b30b">BeamElementBaseClass::update_state</a>  ()=0</dt>
+<dd><p class="startdd"><a class="anchor" id="_todo000017"></a>no need to evaluate EA and EI every state update - move to initialisation stage. </p>
+<p class="interdd"></p>
+<p class="interdd">Change the way B matrix is calculated so it is not done for midpoint of beam. </p>
+<p class="interdd"></p>
+<p class="interdd">add calculation of geometric and tangent stiffnesses. </p>
+<p class="interdd"></p>
+<p class="enddd">remove redundant calculation of material stiffness unless it needs to be recalculated again. Remember, it was calculated before finding global U to begin with.  </p>
+</dd>
+<dt>Member <a class="el" href="class_beam_element_common_interface.html#a71661d175472fe4d1e8bc97240215e7b">BeamElementCommonInterface::map_stiffness</a>  ()</dt>
+<dd><a class="anchor" id="_todo000019"></a>REALLY needs to be revisited. attempt to rewrite this function so it does the following:<ol type="1">
+<li>gets all the contribution without worrying about active or not</li>
+<li>if a contribution is inactive then that contribution is zeroed AND</li>
+<li>zeroed contributions are not added to <a class="el" href="class_beam_element_base_class.html#a889c73556facb6db164ddc92864012f4">global_stiffness_triplets</a> </li>
+</ol>
+</dd>
+<dt>Member <a class="el" href="class_beam_element_common_interface.html#a154584b5a29277071c0cfe5c1958d7a8">BeamElementCommonInterface::populate_resistance_force_triplets</a>  ()</dt>
+<dd><a class="anchor" id="_todo000018"></a>I seem to be doing the active_dofs thing too often. Perhaps the element should also have a set that contains its active dofs?  </dd>
 <dt>Member <a class="el" href="group___numerical_debuggers.html#gac0d7f5844052fa477510d8d6c7391eaf">check_matrix</a>  (spmat A)</dt>
-<dd><a class="anchor" id="_todo000021"></a>Fix. </dd>
+<dd><a class="anchor" id="_todo000028"></a>Fix. </dd>
 <dt>Member <a class="el" href="class_element_configuration.html#a0c79bb441670137241e40bd8b681a0d7">ElementConfiguration::calc_axes</a>  ()</dt>
-<dd><a class="anchor" id="_todo000015"></a>make sure this function returns general rotations for 3D. I suspect it already does, but better double-check. Replace with proper reference for transformations.  </dd>
+<dd><a class="anchor" id="_todo000021"></a>make sure this function returns general rotations for 3D. I suspect it already does, but better double-check. Replace with proper reference for transformations.  </dd>
 <dt>Member <a class="el" href="class_element_configuration.html#aa407c197f565ac2981117c5752f89645">ElementConfiguration::update_pts</a>  (coords node1, coords node2)</dt>
-<dd><a class="anchor" id="_todo000014"></a>consider whether I should just use the constructor again. </dd>
+<dd><a class="anchor" id="_todo000020"></a>consider whether I should just use the constructor again. </dd>
 <dt>Member <a class="el" href="group___utility.html#ga48c30c944fc2fbc66bf97b638ccc343d">get_id_iterator</a>  (int id, Container &amp;a_vec)</dt>
 <dd><a class="anchor" id="_todo000005"></a>create test cases that searches when there is no node or element with the given id in the searched container. </dd>
 <dt>Member <a class="el" href="class_global_mesh.html#a433928ff8d7df279bfdf87fd45b5abbb">GlobalMesh::solve_for_U</a>  ()</dt>
-<dd><a class="anchor" id="_todo000016"></a>reconcile this function with the <a class="el" href="class_basic_solver.html">BasicSolver</a> object </dd>
+<dd><a class="anchor" id="_todo000022"></a>reconcile this function with the <a class="el" href="class_basic_solver.html">BasicSolver</a> object </dd>
 <dt>Member <a class="el" href="group___numerical_debuggers.html#ga8799045403ef3807d1ebfe3d967dac5b">has_zero_row</a>  (spmat A)</dt>
-<dd><a class="anchor" id="_todo000022"></a>Fix. </dd>
+<dd><a class="anchor" id="_todo000029"></a>Fix. </dd>
+<dt>Class <a class="el" href="class_nodal_load.html">NodalLoad</a>  </dt>
+<dd><a class="anchor" id="_todo000023"></a>consider whether to change the way the loaded nodes are stored from a vector to a std::set so that the same node cannot be loaded twice by the same load object.  </dd>
 <dt>Class <a class="el" href="class_node.html">Node</a>  </dt>
-<dd><a class="anchor" id="_todo000017"></a>Add functionality and interface to apply mechanical loading on nodes. </dd>
+<dd><a class="anchor" id="_todo000024"></a>Add functionality and interface to apply mechanical loading on nodes. </dd>
 <dt>Member <a class="el" href="class_node.html#a29f8a0fd4d6e6426f8e2a42392cb95da">Node::get_coords</a>  () const</dt>
-<dd><a class="anchor" id="_todo000019"></a>inline this function so that it directly returns the coordinates. </dd>
+<dd><a class="anchor" id="_todo000026"></a>inline this function so that it directly returns the coordinates. </dd>
 <dt>Member <a class="el" href="class_node.html#a60cd454fd5600a76ba47aa877e4c7269">Node::mass</a>  </dt>
-<dd><a class="anchor" id="_todo000018"></a>nodal displacements should be Eigen3 vector types not std array types.  </dd>
+<dd><a class="anchor" id="_todo000025"></a>nodal displacements should be Eigen3 vector types not std array types.  </dd>
 <dt>Class <a class="el" href="class_nonlinear_transform.html">NonlinearTransform</a>  </dt>
-<dd><a class="anchor" id="_todo000020"></a>should inherit many of the functionality of the Orientation object which only needs to host an axis system and do some simple trig operations. </dd>
+<dd><a class="anchor" id="_todo000027"></a>should inherit many of the functionality of the Orientation object which only needs to host an axis system and do some simple trig operations. </dd>
 </dl>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
