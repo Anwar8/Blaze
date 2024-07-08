@@ -256,6 +256,7 @@ class GlobalMesh {
          */
         void solve_for_U();
         int const get_num_elems() const {return nelems;}
+        int const get_num_nodes() const {return nnodes;}
 };
 
 #endif

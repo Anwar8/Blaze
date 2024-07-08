@@ -1,3 +1,6 @@
+#ifndef BEAM_ELEMENT_TESTS_HPP
+#define BEAM_ELEMENT_TESTS_HPP
+
 #define BEAM_TOLERANCE 1e-6
 #include <iostream>
 #include <vector>
@@ -478,3 +481,5 @@ TEST_F(ConstantStrainStateTest, ConstantRotationGlobalNodalForces) {
   EXPECT_NEAR(R(11), (2*E*I/BEAM_LENGTH), BEAM_TOLERANCE);
   EXPECT_NEAR(R_norm, (2*E*I/BEAM_LENGTH)*2.0, BEAM_TOLERANCE);
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef NODAL_LOAD_TESTS_HPP
+#define NODAL_LOAD_TESTS_HPP
+
 #include "gtest/gtest.h"
 #include "../NodalLoad.hpp"
 #define NODAL_LOAD_TOL 1e-6
@@ -87,3 +90,4 @@ TEST_F(NodalLoadTest, ConstructBySetLoadOrderCorrect)
          ++i;
     }
 }
+#endif

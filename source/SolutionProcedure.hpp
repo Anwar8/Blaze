@@ -37,7 +37,7 @@ class SolutionProcedure
             max_iter = max_num_of_iterations;
         }
 
-        void solve(GlobalMesh& glob_mesh, Assembler& assembler, BasicSolver& solver, LoadManager& load_manager, Scribe& scribe)
+        void solve(GlobalMesh& glob_mesh, Assembler& assembler, BasicSolver& solver, LoadManager& load_manager, Scribe& scribe, int logging_frequency)
         {
             // should not hard-code which DOFs are tracked - that should be part of the `global_mesh` object.
             //------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -112,14 +112,21 @@ class SolutionProcedure
                 }              
                 step++;
                 scribe.write_to_records();
-                scribe.read_all_records();
+                if (step%logging_frequency == 0 && logging_frequency > 0)
+                {
+                    scribe.read_all_records();
+                }
                 if ((iter >= max_iter) && !(converged))
                 {
                     break;
                 }
             }
             std::cout << std::endl << "---<Analysis complete. LF = " << load_factor << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
-            scribe.read_all_records();
+            if (logging_frequency > 0)
+            {
+                scribe.read_all_records();
+            }
+            
         }
 };
 

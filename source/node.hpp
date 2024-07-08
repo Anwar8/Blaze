@@ -247,7 +247,20 @@ class Node {
          * @param dof the degree of freedom for which to return the displacement.
          * @return the nodal displacement corresponding to the dof requested.
          */
-        real get_nodal_displacements(int dof) {return nodal_displacements[dof];}
+        real get_nodal_displacement(int dof) {return nodal_displacements[dof];}
+
+        /**
+         * @brief Get the loaded dofs set. Used for testing.
+         * 
+         * @return std::set<int> loaded_dofs.
+         */
+        std::set<int> get_loaded_dofs() {return loaded_dofs;}
+        /**
+         * @brief Get the nodal_loads std::array. Used for testing.
+         * 
+         * @return std::array<real, 6> nodal_loads.
+         */
+        std::array<real, 6> get_loads() {return nodal_loads;}
         //@}
 };
 

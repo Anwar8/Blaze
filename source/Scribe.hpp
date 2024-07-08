@@ -159,6 +159,17 @@ class Scribe
                 record.read_record();
             }
         }
+        /**
+         * @brief Get the record library vector. Used for testing.
+         * 
+         * @return std::vector<Record> the record library.
+         */
+        std::vector<Record> get_record_library() {return record_library;}
+        /**
+         * @brief clears the record library. Used for testing.
+         * 
+         */
+        void clear_record_library() {record_library.clear();}
 
 };
 #endif

@@ -41,9 +41,9 @@ class Model
             solution_procedure.initialise_solution_parameters(max_load_factor, num_steps, convergence_tolerance, max_num_of_iterations);
         }
 
-        void solve()
+        void solve(int logging_frequency = -1)
         {
-            solution_procedure.solve(glob_mesh, assembler, solver, load_manager, scribe);
+            solution_procedure.solve(glob_mesh, assembler, solver, load_manager, scribe, logging_frequency);
         }
 
         void create_line_mesh(int divisions, std::vector<coords> end_coords)

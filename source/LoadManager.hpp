@@ -81,6 +81,18 @@ class LoadManager
             }
         }
 
+        /**
+         * @brief remove all loads and clear loaded_dofs from the loaded nodes.
+         * 
+         */
+        void remove_loads()
+        {
+            for (auto nodal_load : nodal_loads)
+            {
+                nodal_load.unload_loaded_nodes();
+            }
+        }
+
 };
 
 #endif 

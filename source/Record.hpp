@@ -52,7 +52,10 @@ class Record {
             int i = 0;
             for (auto dof : tracked_dofs)
             {
-                recorded_data(row, i) = tracked_node->get_nodal_displacements(dof);
+                recorded_data(row, i) = tracked_node->get_nodal_displacement(dof);
+                std::cout << "Recorded data at row " << row << " and column " << i << " is " << recorded_data(row, i) << std::endl;
+                std::cout << "the actual displacement from the node is " << tracked_node->get_nodal_displacement(dof) << std::endl;
+                std::cout << "the whole recorded data is:" << std::endl << recorded_data << std::endl;
                 ++i;
             }
         }
@@ -87,7 +90,33 @@ class Record {
             print_container(tracked_dofs);
             std::cout << "Record contents at i = " << i << " are: " << std::endl << recorded_data.row(i) << std::endl;
         }
+        /**
+         * @brief Get the tracked node id.
+         * 
+         * @return unsigned 
+         */
         unsigned get_tracked_node_id() const {return tracked_node_id;}
+        
+        /**
+         * @brief Get the tracked node shared ptr.
+         * 
+         * @return std::shared_ptr<Node> tracked node.
+         */
+        std::shared_ptr<Node> get_tracked_node() const {return tracked_node;}
+
+        /**
+         * @brief Get the tracked dofs set.
+         * 
+         * @return std::set<int> tracked DoFs.
+         */
+        std::set<int> get_tracked_dofs() const {return tracked_dofs;}
+
+        /**
+         * @brief Get the recorded data.
+         * 
+         * @return mat recorded data.
+         */
+        mat get_recorded_data() const {return recorded_data;}
 };
 
 #endif
