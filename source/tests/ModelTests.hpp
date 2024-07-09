@@ -197,26 +197,34 @@ TEST_F(ScribeTests, CheckTrackedNodeDisp)
     std::shared_ptr<Node> node = record.get_tracked_node();
     node->set_nodal_displacement(tracked_dof, 1.0);
     model.scribe.write_to_records();
+    model.scribe.read_all_records();
 
-    auto last_disp = record.get_recorded_data()(0,0);
+    std::map<int, std::vector<real>> record_map = record.get_recorded_data();
+    
+    for (const auto& [key, value] : record_map)
+        std::cout << '[' << key << "] = " << std::endl; 
+ 
+    std::vector<real> last_disp = record_map[tracked_dof];
 
-    EXPECT_NEAR(last_disp, 1.0, DISP_TOLERANCE);
+    EXPECT_NEAR(last_disp.back(), 1.0, DISP_TOLERANCE);
 }
 
 TEST_F(ScribeTests, CheckTrackedNodeDispTwice)
 {
     Record record = model.scribe.get_record_library()[0];
     std::shared_ptr<Node> node = record.get_tracked_node();
-    
+
     node->set_nodal_displacement(tracked_dof, 1.0);
     model.scribe.write_to_records();
 
     node->set_nodal_displacement(tracked_dof, 2.0);
     model.scribe.write_to_records();
+    
 
-    auto last_disp = record.get_recorded_data()(1,0);
-
-    EXPECT_NEAR(last_disp, 2.0, DISP_TOLERANCE);
+    auto disps = record.get_recorded_data()[tracked_dof];
+    
+    EXPECT_NEAR(disps[0], 1.0, DISP_TOLERANCE);
+    EXPECT_NEAR(disps[1], 2.0, DISP_TOLERANCE);
 }
 
 

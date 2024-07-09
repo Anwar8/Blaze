@@ -142,7 +142,6 @@ void GlobalMesh::print_info()
 void GlobalMesh::count_dofs() 
 {
     ndofs = 0;
-    std::cout << "WARNING: count_dofs assumes nodes are ordered by id" << std::endl;
     for (auto node: node_vector)
     {
         node->set_nz_i(ndofs);
@@ -152,7 +151,7 @@ void GlobalMesh::count_dofs()
         }
         ndofs += node->get_ndof();
     }
-    std::cout << "There are " << ndofs << " active DoFs in the mesh." << std::endl;
+    // std::cout << "There are " << ndofs << " active DoFs in the mesh." << std::endl;
 }
 
 void GlobalMesh::fix_node(int id, int dof) {

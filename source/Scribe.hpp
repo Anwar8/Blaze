@@ -49,7 +49,8 @@ class Scribe
         {
             for (auto node_id : node_ids)
             {
-                record_library.push_back(Record(glob_mesh.get_node_by_id(node_id), dofs, buffer_size));
+                record_library.push_back(Record());
+                record_library.back().initialise_record(glob_mesh.get_node_by_id(node_id), dofs, buffer_size);
             }
             sort_record_library();
         }
@@ -64,7 +65,8 @@ class Scribe
         {
             for (auto node : nodes)
             {
-                record_library.push_back(Record(node, dofs, buffer_size));
+                record_library.push_back(Record());
+                record_library.back().initialise_record(node, dofs, buffer_size);
             }
             sort_record_library();
         }

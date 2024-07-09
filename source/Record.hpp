@@ -8,7 +8,8 @@
 #include "node.hpp"
 #include "basic_utilities.hpp"
 #include <set>
-
+#include <utility>
+#include <map>
 
 
 
@@ -16,7 +17,7 @@ class Record {
     protected:
         std::shared_ptr<Node> tracked_node; /**< a shared pointer to the node that is being tracked by this record.*/
         unsigned tracked_node_id; /**< the ID of the node that is being tracked by this record.*/
-        mat recorded_data; /**< the data that is recorded in this record by the scribe.*/
+        std::map<int, std::vector<real>> recorded_data; /**< the data that is recorded in this record by the scribe.*/
         std::set<int> tracked_dofs; /**< a std set of tracked DoFs as decided by the scribe.*/
         
         bool full = false; /**< tells if the record is full and requires flushing. */
@@ -24,10 +25,10 @@ class Record {
     public:
         Record() = default;
 
-        Record(std::shared_ptr<Node> node, std::set<int> dofs, int buffer_size)
-        {
-            initialise_record(node, dofs, buffer_size);
-        } 
+        // Record(std::shared_ptr<Node> node, std::set<int> dofs, int buffer_size)
+        // {
+        //     initialise_record(node, dofs, buffer_size);
+        // } 
 
         /**
          * @brief initialises the record with the number of columns and rows that the recorded data will have, as well as the node being tracked and its ID.
@@ -37,10 +38,16 @@ class Record {
          */
         void initialise_record(std::shared_ptr<Node> node, std::set<int> dofs, int buffer_size)
         {
+            
             tracked_node = node;
             tracked_node_id = node->get_id();
             tracked_dofs = dofs;
-            recorded_data = make_xd_mat(buffer_size, tracked_dofs.size());
+            // this->recorded_data = make_xd_mat(buffer_size, tracked_dofs.size());
+            for (auto dof : tracked_dofs)
+            {
+                recorded_data.insert(std::pair<int,std::vector<real>>(dof, std::vector<real>()));
+                // this->recorded_data[dof] = std::vector<real>();
+            }
         }
         
         /**
@@ -52,10 +59,12 @@ class Record {
             int i = 0;
             for (auto dof : tracked_dofs)
             {
-                recorded_data(row, i) = tracked_node->get_nodal_displacement(dof);
-                std::cout << "Recorded data at row " << row << " and column " << i << " is " << recorded_data(row, i) << std::endl;
+                this->recorded_data[dof].push_back(tracked_node->get_nodal_displacement(dof));
+                // this->recorded_data(row, i) = tracked_node->get_nodal_displacement(dof);
+                std::cout << "Recorded data at row " << row << " and column " << i << " is " << this->recorded_data[dof].back() << std::endl;
                 std::cout << "the actual displacement from the node is " << tracked_node->get_nodal_displacement(dof) << std::endl;
-                std::cout << "the whole recorded data is:" << std::endl << recorded_data << std::endl;
+                std::cout << "the whole recorded data is:" << std::endl;
+                print_container(this->recorded_data[dof]);
                 ++i;
             }
         }
@@ -77,7 +86,12 @@ class Record {
         {
             std::cout << "Record for node " << tracked_node_id << " tracking DoFs:";
             print_container(tracked_dofs);
-            std::cout << "Record contents are: " << std::endl << recorded_data << std::endl;
+            std::cout << "Record contents are: " << std::endl;
+            for (auto dof: tracked_dofs)
+            {
+                print_container(this->recorded_data[dof]);
+            }
+            
         }
 
         /**
@@ -88,7 +102,12 @@ class Record {
         {
             std::cout << "Record for node " << tracked_node_id << " tracking DoFs:";
             print_container(tracked_dofs);
-            std::cout << "Record contents at i = " << i << " are: " << std::endl << recorded_data.row(i) << std::endl;
+            std::cout << "Record contents at i = " << i << " are: " << std::endl;
+            for (auto dof: tracked_dofs)
+            {
+                std::cout << "dof: [" << dof << "] = " << this->recorded_data[dof][i] << ", ";
+            }
+            std::cout << std::endl;
         }
         /**
          * @brief Get the tracked node id.
@@ -116,7 +135,7 @@ class Record {
          * 
          * @return mat recorded data.
          */
-        mat get_recorded_data() const {return recorded_data;}
+        std::map<int, std::vector<real>> get_recorded_data() const {return this->recorded_data;}
 };
 
 #endif
