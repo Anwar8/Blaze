@@ -11,6 +11,36 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 12 July
+I am now writing here less religiously than before, which is both good and bad. For the past days I have been engaged in two things: 
+- Fixing the error with the `Scribe` class
+- Covering the background for material nonlinearity
+
+After many days of trying to understand why `Scribe` and `Record` were not recording any result, I figured it out today. The following code:
+```
+void write_to_records()
+        {
+            for (Record record: record_library)
+            {
+                record.write_to_record(current_row);
+            }
+        ...
+        }
+```
+Instantiates a new `Record` object for each iteration of the loop!!! To overcome this, we need the loop to access the members by reference! That is:
+```
+void write_to_records()
+        {
+            for (Record& record: record_library)
+            {
+                record.write_to_record(current_row);
+            }
+        ...
+        }
+```
+I figured this out thanks to [this video from The Cherno on YouTube](https://www.youtube.com/watch?v=HcESuwmlHEY)! I also learned how `emplace_back()` for a `std::vector` creates the object right in the vector, while `push_back` creates it outside the vector and then copies it back in. Likewise, the first loop up there creates a new instance and copy of `Record` for each loop over the vector, while the `&` causes access by reference which resolves this issue.
+
+I will write about material nonlinearity another time as I am late to an appointment now!
 #### 4 July
 I have not written here for a while, but I have been working very hard on `Blaze`. You can now find that most of hte classes discussed on 1 July have been created. That is:
 - `Model`

@@ -1,7 +1,9 @@
 #include "gtest/gtest.h"
 #include "BeamElementTests.hpp"
 #include "NodalLoadTests.hpp"
+#include "ScribeTest.hpp"
 #include "ModelTests.hpp"
+
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);

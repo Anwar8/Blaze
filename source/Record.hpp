@@ -17,7 +17,7 @@ class Record {
     protected:
         std::shared_ptr<Node> tracked_node; /**< a shared pointer to the node that is being tracked by this record.*/
         unsigned tracked_node_id; /**< the ID of the node that is being tracked by this record.*/
-        std::map<int, std::vector<real>> recorded_data; /**< the data that is recorded in this record by the scribe.*/
+        std::array<std::vector<real>, 6> recorded_data; /**< the data that is recorded in this record by the scribe.*/
         std::set<int> tracked_dofs; /**< a std set of tracked DoFs as decided by the scribe.*/
         
         bool full = false; /**< tells if the record is full and requires flushing. */
@@ -43,11 +43,12 @@ class Record {
             tracked_node_id = node->get_id();
             tracked_dofs = dofs;
             // this->recorded_data = make_xd_mat(buffer_size, tracked_dofs.size());
-            for (auto dof : tracked_dofs)
-            {
-                recorded_data.insert(std::pair<int,std::vector<real>>(dof, std::vector<real>()));
-                // this->recorded_data[dof] = std::vector<real>();
-            }
+            // for (auto dof : tracked_dofs)
+            // {
+            //     // recorded_data.insert(std::pair<int,std::vector<real>>(dof, std::vector<real>()));
+            //     this->recorded_data.push_back(std::vector<real>());
+            //     // this->recorded_data[dof] = std::vector<real>();
+            // }
         }
         
         /**
@@ -59,12 +60,13 @@ class Record {
             int i = 0;
             for (auto dof : tracked_dofs)
             {
-                this->recorded_data[dof].push_back(tracked_node->get_nodal_displacement(dof));
+                real displacement = tracked_node->get_nodal_displacement(dof);
+                (this->recorded_data[dof]).push_back(displacement);
                 // this->recorded_data(row, i) = tracked_node->get_nodal_displacement(dof);
-                std::cout << "Recorded data at row " << row << " and column " << i << " is " << this->recorded_data[dof].back() << std::endl;
-                std::cout << "the actual displacement from the node is " << tracked_node->get_nodal_displacement(dof) << std::endl;
-                std::cout << "the whole recorded data is:" << std::endl;
-                print_container(this->recorded_data[dof]);
+                // std::cout << "Recorded data at row " << row << " and column " << i << " is " << this->recorded_data[i].back() << std::endl;
+                // std::cout << "the actual displacement from the node is " << tracked_node->get_nodal_displacement(dof) << std::endl;
+                // std::cout << "the whole recorded data is:" << std::endl;
+                print_container(this->recorded_data[i]);
                 ++i;
             }
         }
@@ -135,7 +137,7 @@ class Record {
          * 
          * @return mat recorded data.
          */
-        std::map<int, std::vector<real>> get_recorded_data() const {return this->recorded_data;}
+        std::array<std::vector<real>,6> get_recorded_data() const {return this->recorded_data;}
 };
 
 #endif

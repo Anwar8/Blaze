@@ -86,7 +86,7 @@ class Scribe
          */
         void write_to_records()
         {
-            for (auto record: record_library)
+            for (Record& record: record_library)
             {
                 record.write_to_record(current_row);
             }

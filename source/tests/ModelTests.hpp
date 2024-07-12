@@ -159,14 +159,15 @@ class ScribeTests : public ::testing::Test {
     Model model;
     int divisions = 10;
     int tracked_dof = 1;
+    unsigned tracked_node_id = divisions+1;
 
     void SetUp() override {
         model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}});
-        model.scribe.track_nodes_by_id(std::set<unsigned>{(unsigned)(divisions+1)}, std::set<int>{tracked_dof}, model.glob_mesh);
+        model.scribe.track_nodes_by_id(std::set<unsigned>{tracked_node_id}, std::set<int>{tracked_dof}, model.glob_mesh);
         
     }
     void TearDown() override {
-        model.load_manager.remove_loads();
+        
 }
 };
 
@@ -193,39 +194,41 @@ TEST_F(ScribeTests, CheckTrackedNodeId)
 
 TEST_F(ScribeTests, CheckTrackedNodeDisp)
 {
-    Record record = model.scribe.get_record_library()[0];
-    std::shared_ptr<Node> node = record.get_tracked_node();
+    std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(tracked_node_id);
+
     node->set_nodal_displacement(tracked_dof, 1.0);
     model.scribe.write_to_records();
-    model.scribe.read_all_records();
 
-    std::map<int, std::vector<real>> record_map = record.get_recorded_data();
-    
-    for (const auto& [key, value] : record_map)
-        std::cout << '[' << key << "] = " << std::endl; 
- 
-    std::vector<real> last_disp = record_map[tracked_dof];
+    std::vector<Record> record_library = model.scribe.get_record_library();
+    Record record = record_library.back();
 
-    EXPECT_NEAR(last_disp.back(), 1.0, DISP_TOLERANCE);
+    std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data();
+
+
+    EXPECT_NEAR(recorded_data[tracked_dof].back(), 1.0, DISP_TOLERANCE);
 }
 
 TEST_F(ScribeTests, CheckTrackedNodeDispTwice)
 {
-    Record record = model.scribe.get_record_library()[0];
-    std::shared_ptr<Node> node = record.get_tracked_node();
+    std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(tracked_node_id);
 
     node->set_nodal_displacement(tracked_dof, 1.0);
     model.scribe.write_to_records();
-
     node->set_nodal_displacement(tracked_dof, 2.0);
     model.scribe.write_to_records();
-    
 
-    auto disps = record.get_recorded_data()[tracked_dof];
-    
-    EXPECT_NEAR(disps[0], 1.0, DISP_TOLERANCE);
-    EXPECT_NEAR(disps[1], 2.0, DISP_TOLERANCE);
+    std::vector<Record> record_library = model.scribe.get_record_library();
+    Record record = record_library.back();
+
+    std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
+    std::vector<real> disp_data = recorded_data[tracked_dof];
+
+
+    EXPECT_NEAR(disp_data[0], 1.0, DISP_TOLERANCE);
+    EXPECT_NEAR(disp_data[1], 2.0, DISP_TOLERANCE);
+    EXPECT_NEAR(disp_data[2], 2.0, DISP_TOLERANCE);
 }
+
 
 
 // class SolutionTests : public ::testing::Test {
