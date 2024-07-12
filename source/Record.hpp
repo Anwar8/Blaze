@@ -43,7 +43,7 @@ class Record {
             tracked_node_id = node->get_id();
             tracked_dofs = dofs;
             // this->recorded_data = make_xd_mat(buffer_size, tracked_dofs.size());
-            // for (auto dof : tracked_dofs)
+            // for (auto& dof : tracked_dofs)
             // {
             //     // recorded_data.insert(std::pair<int,std::vector<real>>(dof, std::vector<real>()));
             //     this->recorded_data.push_back(std::vector<real>());
@@ -58,7 +58,7 @@ class Record {
         void write_to_record(int row)
         {
             int i = 0;
-            for (auto dof : tracked_dofs)
+            for (auto& dof : tracked_dofs)
             {
                 real displacement = tracked_node->get_nodal_displacement(dof);
                 (this->recorded_data[dof]).push_back(displacement);
@@ -89,7 +89,7 @@ class Record {
             std::cout << "Record for node " << tracked_node_id << " tracking DoFs:";
             print_container(tracked_dofs);
             std::cout << "Record contents are: " << std::endl;
-            for (auto dof: tracked_dofs)
+            for (auto& dof: tracked_dofs)
             {
                 print_container(this->recorded_data[dof]);
             }
@@ -105,7 +105,7 @@ class Record {
             std::cout << "Record for node " << tracked_node_id << " tracking DoFs:";
             print_container(tracked_dofs);
             std::cout << "Record contents at i = " << i << " are: " << std::endl;
-            for (auto dof: tracked_dofs)
+            for (auto& dof: tracked_dofs)
             {
                 std::cout << "dof: [" << dof << "] = " << this->recorded_data[dof][i] << ", ";
             }

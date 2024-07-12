@@ -84,6 +84,7 @@ void Node::increment_nodal_load(real dP, int dof) {
   if (valid_dof(dof))
   {
     if (loaded_dofs.contains(dof)) {
+      std::cout << "Incrementing load at DoF " << dof << " of node " << id << " by " << dP << "." << std::endl;
       nodal_loads[dof] += dP;
     } else {
     std::cout << "ERROR: Cannot increment load at DoF " << dof << "as this DoF is not already loaded." << std::endl;
@@ -98,7 +99,7 @@ void Node::increment_nodal_load(real dP, int dof) {
 void Node::compute_global_load_triplets() {
     global_nodal_loads_triplets.clear();
     int dof_index = 0;
-    for (auto active_dof: active_dofs) {
+    for (auto& active_dof: active_dofs) {
       if (VERBOSE)
       {
         std::cout << "node " << id << " checking active dof: " << active_dof << " with index " << dof_index << std::endl;

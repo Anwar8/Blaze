@@ -61,7 +61,7 @@ class NodalLoad
                 exit(1);
             }
             int i = 0;
-            for (auto dof : dofs)
+            for (auto& dof : dofs)
             {
                 loaded_dofs.insert(dof);
                 nodal_loads[dof] = loads[i];
@@ -79,7 +79,7 @@ class NodalLoad
         template <typename Container>
         void assign_nodes_by_id(Container node_ids, GlobalMesh& glob_mesh)
         {
-            for (auto node_id : node_ids)
+            for (auto& node_id : node_ids)
             {
                 loaded_nodes.push_back(glob_mesh.get_node_by_id(node_id));
             }
@@ -92,7 +92,7 @@ class NodalLoad
          */
         void assign_nodes_by_ptr(std::vector<std::shared_ptr<Node>> nodes)
         {
-            for (auto node : nodes)
+            for (auto& node : nodes)
             {
                 loaded_nodes.push_back(node);
             }
@@ -104,9 +104,9 @@ class NodalLoad
          */
         void initialise_loads()
         {
-            for (auto node : loaded_nodes)
+            for (auto& node : loaded_nodes)
             {
-                for (auto dof : loaded_dofs)
+                for (auto& dof : loaded_dofs)
                 {
                     node->add_nodal_load(0.0, dof);
                 }
@@ -119,9 +119,9 @@ class NodalLoad
          */
         void increment_loads(real load_factor_increment)
         {
-            for (auto loaded_node: loaded_nodes)
+            for (auto& loaded_node: loaded_nodes)
             {
-                for (auto dof : loaded_dofs)
+                for (auto& dof : loaded_dofs)
                 {
                     loaded_node->increment_nodal_load(nodal_loads[dof]*load_factor_increment, dof);
                 }
@@ -157,7 +157,7 @@ class NodalLoad
          */
         void unload_loaded_nodes()
         {
-            for (auto node: loaded_nodes)
+            for (auto& node: loaded_nodes)
             {
                 node->clear_nodal_loads();
             }

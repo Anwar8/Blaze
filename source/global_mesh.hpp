@@ -213,14 +213,15 @@ class GlobalMesh {
          */
         void calc_global_contributions() {
             std::cout << "Calc_global_contirbutions: There are " << ndofs << " active DoFs in the mesh." << std::endl;
-            for (auto elem: elem_vector) 
+            for (auto& elem: elem_vector) 
             {   
                 elem->update_state();
                 elem->map_stiffness();
                 elem->calc_global_stiffness_triplets();
             }
-            for (auto node: node_vector)
+            for (auto& node: node_vector)
             {
+                std::cout << "Computing global load triplets for node " << node->get_id() << std::endl;
                 node->compute_global_load_triplets();
             }
         }
@@ -231,7 +232,7 @@ class GlobalMesh {
          */
         void update_elements_states()
         {
-            for (auto elem: elem_vector)
+            for (auto& elem: elem_vector)
             {
                 elem->update_state();
             }
@@ -243,7 +244,7 @@ class GlobalMesh {
         void print_elements_states(bool print_nodal_disp = false, bool print_strains = false, 
                                             bool print_stresses = true, bool print_nodal_forces = false)
         {
-            for (auto elem: elem_vector)
+            for (auto& elem: elem_vector)
             {
                 elem->print_element_state(print_nodal_disp, print_strains, print_stresses, print_nodal_forces);
             }

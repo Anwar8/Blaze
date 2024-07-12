@@ -41,6 +41,12 @@ void write_to_records()
 I figured this out thanks to [this video from The Cherno on YouTube](https://www.youtube.com/watch?v=HcESuwmlHEY)! I also learned how `emplace_back()` for a `std::vector` creates the object right in the vector, while `push_back` creates it outside the vector and then copies it back in. Likewise, the first loop up there creates a new instance and copy of `Record` for each loop over the vector, while the `&` causes access by reference which resolves this issue.
 
 I will write about material nonlinearity another time as I am late to an appointment now!
+
+
+**Night** 
+The nodes are resetting between incrementing the loads and then computing the P-vector contributions from `compute_global_load_triplets`. Something is happening in between!!
+
+Okay, my mistake was not in the code!!!! it was in model-building. I had, mistakenly, loaded and tracked DoF "1", which is rotation about x. Rotation about x is restrained!!!!! There should be a warning or a check that will check if a node being loaded is restrained or not. Now everything works perfectly!!
 #### 4 July
 I have not written here for a while, but I have been working very hard on `Blaze`. You can now find that most of hte classes discussed on 1 July have been created. That is:
 - `Model`

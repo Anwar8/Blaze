@@ -182,7 +182,7 @@ class Basic2DBeamElement {
             id = given_id;
             nodes[0] = in_nodes[0];
             nodes[1] = in_nodes[1];
-            for (auto node : in_nodes) {
+            for (auto& node : in_nodes) {
                 
                 node->add_connected_element(id);
             }
@@ -415,12 +415,12 @@ class Basic2DBeamElement {
             int total_nodal_ndofs_completed = 0; // each node we finish with, we add 6 to this. 
             // This means we have to move to the next set of values corresponding to the next 
             // node in the full resistance vector.         
-            for (auto node: nodes)
+            for (auto& node: nodes)
             {
                 int nodal_dof_index = 0;
                 node_active_dofs = node->get_active_dofs();
                 nz_i = node->get_nz_i();
-                for (auto active_dof: node_active_dofs)
+                for (auto& active_dof: node_active_dofs)
                 {
                 
                     force_value = element_global_resistance_forces(active_dof + total_nodal_ndofs_completed);
@@ -453,7 +453,7 @@ class Basic2DBeamElement {
          * @param up distance to move nodes by, which is done along the y-axis.
          */
         void move_nodes_up(real up) {
-            for (auto node: nodes) {
+            for (auto& node: nodes) {
                 node->set_z(up);
             }
         }

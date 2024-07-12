@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     // output the results
     std::cout << "Number of nodes: " << numNodes << std::endl;
 
-    for (auto tag : nodeTags) {
+    for (auto& tag : nodeTags) {
         std::vector<double> node_coords;
         std::vector<double> param_node_coords;
         // temp1 and temp2: "dimension dim and tag tag of the entity on which the node is classified"
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     gmsh::model::mesh::getElements(elem_types, elem_tags, node_tags);
     std::cout << "printing element tags vector:" << std::endl;
     int i = 0;
-    for (auto ele : elem_tags)
+    for (auto& ele : elem_tags)
     {
         ++i;
         std::cout << "element category = " << i << std::endl;
@@ -46,23 +46,23 @@ int main(int argc, char** argv) {
     }
     std::cout << "printing node tags vector:" << std::endl;
     i = 0;
-    for (auto node : node_tags)
+    for (auto& node : node_tags)
     {
         ++i;
         std::cout << "node category = " << i << std::endl;
         print_vector(node);
     }
     std::vector <size_t> element_tags;
-    for (auto elem_vec : elem_tags)
+    for (auto& elem_vec : elem_tags)
     {
-        for (auto tag : elem_vec)
+        for (auto& tag : elem_vec)
         {
             element_tags.push_back(tag);
         }
 
     }
     std::unordered_map <size_t, std::vector<size_t>> elem_nodes;
-    for (auto tag : element_tags) 
+    for (auto& tag : element_tags) 
     {
         std::vector<size_t> nodes;
         int element_type, dim, _tag;
@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
 }
 void print_vector(std::vector<size_t> V) 
 {
-    for (auto it = V.begin(); it != V.end(); ++it) {
+    for (auto& it = V.begin(); it != V.end(); ++it) {
         std::cout << *it;
         if (it != V.end() - 1)
         {

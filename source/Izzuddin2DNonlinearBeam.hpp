@@ -46,7 +46,7 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
             id = given_id;
             nodes[0] = in_nodes[0];
             nodes[1] = in_nodes[1];
-            for (auto node : in_nodes) {  
+            for (auto& node : in_nodes) {  
                 node->add_connected_element(id);
             }
             corot_transform.initialise(nodes);

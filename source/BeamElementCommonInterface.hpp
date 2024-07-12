@@ -100,7 +100,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
          */
         virtual void print_info() {
             std::cout << "elem " << id << " of type " <<elem_type << " with " << ndofs << " dofs, and " << nnodes << " nodes:" << std::endl;
-            for (auto node_i: nodes) {
+            for (auto& node_i: nodes) {
                 node_i->print_info();
             }
             std::cout << "it is also of length " << length << std::endl;
@@ -145,10 +145,10 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
             std::array<real, 6> nodal_disp;
             int i = 0;
             // global_ele_U
-            for (auto node: nodes)
+            for (auto& node: nodes)
             {
                 nodal_disp = node->get_nodal_displacements();
-                for (auto dof: nodal_disp)
+                for (auto& dof: nodal_disp)
                 {
                     global_ele_U(i) = dof;
                     ++i;
@@ -169,12 +169,12 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
             int total_nodal_ndofs_completed = 0; // each node we finish with, we add 6 to this. 
             // This means we have to move to the next set of values corresponding to the next 
             // node in the full resistance vector.         
-            for (auto node: nodes)
+            for (auto& node: nodes)
             {
                 int nodal_dof_index = 0;
                 node_active_dofs = node->get_active_dofs();
                 nz_i = node->get_nz_i();
-                for (auto active_dof: node_active_dofs)
+                for (auto& active_dof: node_active_dofs)
                 {
                     force_value = element_global_resistance_forces(active_dof + total_nodal_ndofs_completed);
                     // since inactive nodes do not appear in R, we have to make sure to be careful about where we add our nodal forces.
@@ -202,7 +202,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
             // we have the same number of contribution as stiffness components 
             // assuming all are non-zero, which is not correct but okay as it is "safe" although not very memory efficient.
             global_stiffness_triplets.reserve(elem_global_stiffness.rows() * elem_global_stiffness.cols());
-            for (auto kmap: stiffness_map)
+            for (auto& kmap: stiffness_map)
             {
                 real val = elem_global_stiffness(kmap[0], kmap[1]);
                 global_stiffness_triplets.push_back(spnz(kmap[2], kmap[3], val));
@@ -225,7 +225,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
              // local to global stiffness map: <<local_row, local_col, global_row, global_col>, ...>
             stiffness_map.clear();
             int stiffness_size = 0;
-            for (auto node: nodes) 
+            for (auto& node: nodes) 
             {
                 stiffness_size += std::size(node->get_active_dofs());
             }
@@ -233,22 +233,22 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
            
             stiffness_map.reserve(stiffness_size);
             int i = 0;
-            for (auto node_i: nodes)
+            for (auto& node_i: nodes)
             {
                 int j = 0;
                 std::set<int> active_dofs_i = node_i->get_active_dofs();
                 int nz_i_i = node_i->get_nz_i();
-                for (auto node_j: nodes)
+                for (auto& node_j: nodes)
                 {
                     
                     std::set<int> active_dofs_j = node_j->get_active_dofs();
                     
                     int nz_i_j = node_j->get_nz_i();
                     int dof_i_index = 0;
-                    for (auto dof_i: active_dofs_i)
+                    for (auto& dof_i: active_dofs_i)
                     {
                         int dof_j_index = 0;
-                        for (auto dof_j: active_dofs_j)
+                        for (auto& dof_j: active_dofs_j)
                         {
                             stiffness_map.push_back({6*i+dof_i, 6*j+dof_j, nz_i_i + dof_i_index, nz_i_j+dof_j_index});
                             ++dof_j_index;

@@ -21,7 +21,7 @@ NodeIdCoordsPairsVector GlobalMesh::read_nodes() {
     node_map.reserve(nodeTags.size());
 
     auto itr = coord_vec.begin();
-    for (auto tag : nodeTags)
+    for (auto& tag : nodeTags)
     {
         node_map.push_back(std::make_pair(tag, coords(*itr, *(itr+1), *(itr+2))));
         itr += 3;
@@ -35,7 +35,7 @@ ElemIdNodeIdPairVector GlobalMesh::read_elements()
 
     std::vector<int> element_types;
     gmsh::model::mesh::getElementTypes(element_types);
-    for (auto elem_type: element_types)
+    for (auto& elem_type: element_types)
     {
         std::string type_name;
         int num_nodes_per_elem;
@@ -57,7 +57,7 @@ ElemIdNodeIdPairVector GlobalMesh::read_elements()
         std::vector<std::size_t> element_nodes;
         element_nodes.reserve(num_nodes_per_elem);
         auto node_itr = node_tags.begin() ;
-        for (auto elem_tag: elem_tags)
+        for (auto& elem_tag: elem_tags)
         {
             element_nodes.clear();
             for (int i = 0; i < num_nodes_per_elem; ++i)
@@ -76,10 +76,10 @@ ElemIdNodeIdPairVector GlobalMesh::read_elements()
 void GlobalMesh::make_elements (ElemIdNodeIdPairVector elem_map) {
     std::vector<std::shared_ptr<Node>> elem_nodes;
     elem_nodes.reserve(2);
-    for (auto element_data : elem_map)
+    for (auto& element_data : elem_map)
     {
         elem_nodes.clear();
-        for (auto node_id: element_data.second)
+        for (auto& node_id: element_data.second)
         {
             auto node = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(node_id, node_vector);
             elem_nodes.push_back(*node);
@@ -100,7 +100,7 @@ void GlobalMesh::make_elements (ElemIdNodeIdPairVector elem_map) {
     }   
 }
 void GlobalMesh::make_nodes (NodeIdCoordsPairsVector node_map) {
-    for (auto node_data : node_map)
+    for (auto& node_data : node_map)
     {
         node_vector.push_back(std::make_shared<Node>(node_data.first, node_data.second));
     }
@@ -129,11 +129,11 @@ void GlobalMesh::setup_mesh(NodeIdCoordsPairsVector node_map, ElemIdNodeIdPairVe
 void GlobalMesh::print_info()
 {
     std::cout << "Mesh contains " << nelems << " elements and " << nnodes << " nodes." << std::endl;
-    for (auto node: node_vector)
+    for (auto& node: node_vector)
     {
         node->print_info();
     }
-    for (auto elem: elem_vector)
+    for (auto& elem: elem_vector)
     {
         elem->print_info();
     }
@@ -142,7 +142,7 @@ void GlobalMesh::print_info()
 void GlobalMesh::count_dofs() 
 {
     ndofs = 0;
-    for (auto node: node_vector)
+    for (auto& node: node_vector)
     {
         node->set_nz_i(ndofs);
         if (VERBOSE)

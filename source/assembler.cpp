@@ -13,18 +13,18 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
     K_global_triplets.reserve(glob_mesh.nelems*glob_mesh.ndofs);
     P_global_triplets.reserve(glob_mesh.ndofs);
 
-    for (auto elem: glob_mesh.elem_vector)
+    for (auto& elem: glob_mesh.elem_vector)
     {   
         K_global_elem_triplet_contribution = elem->get_global_stiffness_triplets();
         K_global_triplets.insert(K_global_triplets.end(), K_global_elem_triplet_contribution.begin(), K_global_elem_triplet_contribution.end());
     }
-    for (auto node: glob_mesh.node_vector)
+    for (auto& node: glob_mesh.node_vector)
     {
         P_global_node_triplet_contribution = node->get_load_triplets();
         if (VERBOSE)
         {
         std::cout << "Assembler: Node " << node->get_id() << " with coords: "  << node->get_coords()[0] << "," << node->get_coords()[1] << "," << node->get_coords()[2] << ". its triplets are: " << std::endl;
-        for (auto triplet: P_global_node_triplet_contribution)
+        for (auto& triplet: P_global_node_triplet_contribution)
         {
             std::cout << "row, col, val: " << triplet.row() << "," << triplet.col() << "," << triplet.value() << std::endl;
         }
@@ -34,7 +34,7 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
     if (VERBOSE)
     {
     std::cout << "Assembler: all triplets are: " << std::endl;
-    for (auto triplet: P_global_triplets)
+    for (auto& triplet: P_global_triplets)
     {
         std::cout << "row, col, val: " << triplet.row() << "," << triplet.col() << "," << triplet.value() << std::endl;
     }
@@ -61,14 +61,14 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
 
 void Assembler::map_U_to_nodes(GlobalMesh& glob_mesh) 
 {
-    for (auto node: glob_mesh.node_vector)
+    for (auto& node: glob_mesh.node_vector)
     {
         int nzi = node->get_nz_i(); // where the node displacements start in the U vector.
         int num_node_dofs = node->get_ndof(); // how many there are to loop over.
         std::set<int> node_active_dofs = node->get_active_dofs();
         int i = 0;
         
-        for (auto dof: node_active_dofs) {
+        for (auto& dof: node_active_dofs) {
             node->set_nodal_displacement(dof, U.coeff(i + nzi,0));
             ++i;
         }
@@ -79,7 +79,7 @@ void Assembler::map_elements_f_to_R(GlobalMesh& glob_mesh)
 {
     std::vector<spnz> R_global_triplets;
     std::vector<spnz> R_global_triplets_elem_contributions;
-    for (auto elem: glob_mesh.elem_vector)
+    for (auto& elem: glob_mesh.elem_vector)
     {
         R_global_triplets_elem_contributions = elem->get_global_resistance_force_triplets();
         R_global_triplets.insert(R_global_triplets.end(), R_global_triplets_elem_contributions.begin(), R_global_triplets_elem_contributions.end());

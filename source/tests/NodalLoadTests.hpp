@@ -69,7 +69,7 @@ TEST_F(NodalLoadTest, LoadOrderCorrect)
     auto load_object_loads = nodal_load.get_nodal_loads();
 
     int i = 0;
-    for (auto dof: dofs)
+    for (auto& dof: dofs)
     {
          EXPECT_NEAR(load_object_loads[dof], loads[i], NODAL_LOAD_TOL);
          ++i;
@@ -84,7 +84,7 @@ TEST_F(NodalLoadTest, ConstructBySetLoadOrderCorrect)
     auto load_object_loads = nodal_load.get_nodal_loads();
 
     int i = 0;
-    for (auto dof: dofs)
+    for (auto& dof: dofs)
     {
          EXPECT_NEAR(load_object_loads[dof], loads[i], NODAL_LOAD_TOL);
          ++i;

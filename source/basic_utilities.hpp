@@ -72,7 +72,7 @@ Iterator get_id_iterator(int id, Container& a_vec)
 template <typename T>
 void print_container(T V)
 {
-  for (auto v: V)
+  for (auto& v: V)
   {
     std::cout << v << " ";
   }

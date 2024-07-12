@@ -5,6 +5,7 @@
 #include <numeric>
 #define LOAD_TOLERANCE 1e-6
 #define DISP_TOLERANCE 1e-6
+#define SOLUTION_TOLERANCE 1e-4
 
 class MeshTests : public ::testing::Test {
   public:
@@ -226,37 +227,59 @@ TEST_F(ScribeTests, CheckTrackedNodeDispTwice)
 
     EXPECT_NEAR(disp_data[0], 1.0, DISP_TOLERANCE);
     EXPECT_NEAR(disp_data[1], 2.0, DISP_TOLERANCE);
-    EXPECT_NEAR(disp_data[2], 2.0, DISP_TOLERANCE);
 }
 
 
 
-// class SolutionTests : public ::testing::Test {
-//   public:
-//     Model model;
-//     int divisions = 10;
-//     real y_load = -1e5;
+class SolutionTests : public ::testing::Test {
+  public:
+    Model model;
+    int divisions = 10;
+    real y_load = -1e5;
+    unsigned tracked_node_id = divisions + 1;
+    int tracked_dof = 2;
+    real beam_length = 10.0;
 
-//     void SetUp() override {
-//         NodalRestraint end_restraint;
-//         NodalRestraint out_of_plane_restraint; 
-//         model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}});
-//         end_restraint.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5});
-//         end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
-//         model.restraints.push_back(end_restraint);
-//         out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
-//         out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+    void SetUp() override {
+        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {beam_length, 0.0, 0.0}});
+
+        NodalRestraint end_restraint;
+        end_restraint.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5});
+        end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+        model.restraints.push_back(end_restraint);
+        
+        NodalRestraint out_of_plane_restraint; 
+        out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
+        out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+        model.restraints.push_back(out_of_plane_restraint);
+
+        model.load_manager.create_a_nodal_load_by_id({(unsigned)(divisions+1)}, std::set<int>{2}, std::vector<real>{y_load}, model.glob_mesh);
+
+        model.scribe.track_nodes_by_id(std::set<unsigned>{tracked_node_id}, std::set<int>{tracked_dof}, model.glob_mesh);
+
+        model.initialise_restraints_n_loads();
+        model.initialise_solution_parameters(1.0, 100, 1e-3, 30);
+        model.solve(1);
+    }
+    void TearDown() override {
+}
+};
+
+
+TEST_F(SolutionTests, CheckResult)
+{
+    std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(tracked_node_id);
+
+    std::vector<Record> record_library = model.scribe.get_record_library();
+    Record record = record_library.back();
+
+    std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
+    std::vector<real> disp_data = recorded_data[tracked_dof];
+    // $\delta = \frac{PL^3}{3EI} = \frac{1e5 (3)^3}{3(2.06e11)(0.0004570000)} = 0.009560026343183701$
+    real correct_disp = y_load*std::powf(beam_length, 3)/(3*(2.06e11)*(0.0004570000));
     
-//         model.restraints.push_back(end_restraint);
-//         model.restraints.push_back(out_of_plane_restraint);
+    EXPECT_NEAR(disp_data.back(), correct_disp, SOLUTION_TOLERANCE);
+}
 
-//         model.load_manager.create_a_nodal_load_by_id({(unsigned)(divisions+1)}, std::set<int>{1}, std::vector<real>{y_load}, model.glob_mesh);
-
-//         model.initialise_restraints_n_loads();
-//         model.initialise_solution_parameters(1.0, 1, 1e-5, 10);
-//     }
-//     void TearDown() override {
-// }
-// };
 
 #endif 

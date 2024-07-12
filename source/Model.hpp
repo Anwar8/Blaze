@@ -27,7 +27,7 @@ class Model
         void initialise_restraints_n_loads()
         {
             // apply the restraints to the global mesh and thus reduce the active freedoms. 
-            for (auto restraint : restraints)
+            for (auto& restraint : restraints)
             {
                 restraint.apply_restraints(glob_mesh);
             }

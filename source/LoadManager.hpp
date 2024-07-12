@@ -62,7 +62,7 @@ class LoadManager
          */
         void initialise_loads()
         {
-            for (auto nodal_load : nodal_loads)
+            for (auto& nodal_load : nodal_loads)
             {
                 nodal_load.initialise_loads();
             }
@@ -75,7 +75,7 @@ class LoadManager
          */
         void  increment_loads(real load_factor_increment)
         {
-            for (auto nodal_load : nodal_loads)
+            for (auto&& nodal_load : nodal_loads)
             {
                 nodal_load.increment_loads(load_factor_increment);
             }
@@ -87,7 +87,7 @@ class LoadManager
          */
         void remove_loads()
         {
-            for (auto nodal_load : nodal_loads)
+            for (auto&& nodal_load : nodal_loads)
             {
                 nodal_load.unload_loaded_nodes();
             }

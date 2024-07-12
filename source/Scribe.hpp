@@ -19,7 +19,7 @@
 /**
  * @brief  the size of the buffer used to store the data beyond which the data has to be flushed to file.
  */
-#define BUFFER_SIZE 5
+#define BUFFER_SIZE 1000
 
 /**
  * @brief A scribe manages the recording of the state of the model.
@@ -47,7 +47,7 @@ class Scribe
         template <typename Container>
         void track_nodes_by_id(Container node_ids, std::set<int> dofs,  GlobalMesh& glob_mesh)
         {
-            for (auto node_id : node_ids)
+            for (auto& node_id : node_ids)
             {
                 record_library.push_back(Record());
                 record_library.back().initialise_record(glob_mesh.get_node_by_id(node_id), dofs, buffer_size);
@@ -63,7 +63,7 @@ class Scribe
          */
         void track_nodes_by_ptr(std::vector<std::shared_ptr<Node>> nodes, std::set<int> dofs)
         {
-            for (auto node : nodes)
+            for (auto& node : nodes)
             {
                 record_library.push_back(Record());
                 record_library.back().initialise_record(node, dofs, buffer_size);
@@ -156,7 +156,7 @@ class Scribe
          */
         void read_all_records()
         {
-            for (auto record: record_library)
+            for (auto& record: record_library)
             {
                 record.read_record();
             }

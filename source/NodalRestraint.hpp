@@ -31,7 +31,7 @@ class NodalRestraint
         template <typename Container>
         void assign_dofs_restraints(Container dofs)
         {
-            for (auto dof : dofs)
+            for (auto& dof : dofs)
             {
                 restrained_dofs.insert(dof);
             }
@@ -48,7 +48,7 @@ class NodalRestraint
         template <typename Container>
         void assign_nodes_by_id(Container node_ids, GlobalMesh& glob_mesh)
         {
-            for (auto node_id : node_ids)
+            for (auto& node_id : node_ids)
             {
                 restrained_nodes.insert(glob_mesh.get_node_by_id(node_id));
             }
@@ -61,7 +61,7 @@ class NodalRestraint
          */
         void assign_nodes_by_ptr(std::vector<std::shared_ptr<Node>> nodes)
         {
-            for (auto node : nodes)
+            for (auto& node : nodes)
             {
                 restrained_nodes.insert(node);
             }
@@ -73,7 +73,7 @@ class NodalRestraint
          */
         void apply_restraints(GlobalMesh& glob_mesh)
         {
-            for (auto node : restrained_nodes)
+            for (auto& node : restrained_nodes)
             {
                 node->fix_dofs(restrained_dofs);
             }
@@ -84,7 +84,7 @@ class NodalRestraint
          */
         void free_restraints(GlobalMesh& glob_mesh)
         {
-            for (auto node : restrained_nodes)
+            for (auto& node : restrained_nodes)
             {
                 node->free_dofs(restrained_dofs);
             }

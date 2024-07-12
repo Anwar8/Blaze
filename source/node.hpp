@@ -156,7 +156,7 @@ class Node {
          */
         template <typename STLContainer>
         void fix_dofs(STLContainer dofs) {
-            for (auto dof: dofs) {
+            for (auto& dof: dofs) {
                 fix_dof(dof);
             }
         }
@@ -169,7 +169,7 @@ class Node {
          */
         template <typename STLContainer>
         void free_dofs(STLContainer dofs) {
-            for (auto dof: dofs) {
+            for (auto& dof: dofs) {
                 free_dof(dof);
             }
         }
