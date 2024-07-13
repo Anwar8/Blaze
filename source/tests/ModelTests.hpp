@@ -261,7 +261,7 @@ class CantileverBeam : public ::testing::Test {
         model.glob_mesh.check_nodal_loads();
 
         model.initialise_solution_parameters(1.0, 100, 1e-3, 30);
-        model.solve(1);
+        model.solve(-1);
     }
     void TearDown() override {
 }
@@ -319,7 +319,7 @@ class SimplySupported : public ::testing::Test {
         model.glob_mesh.check_nodal_loads();
 
         model.initialise_solution_parameters(1.0, 100, 1e-3, 30);
-        model.solve(1);
+        model.solve(-1);
     }
     void TearDown() override {
 }
@@ -340,5 +340,67 @@ TEST_F(SimplySupported, CheckResult)
     EXPECT_NEAR(disp_data.back(), correct_disp, SOLUTION_TOLERANCE);
 }
 
+class SimplySupportedUdl : public ::testing::Test {
+  public:
+    Model model;
+    int divisions = 100;
+    real y_udl = -1e4; // N/m
+    unsigned mid_node = (divisions/2) + 1;
+    std::vector<unsigned> loaded_nodes = std::vector<unsigned>(divisions - 1);
+    int tracked_dof = 2;
+    real beam_length = 5.0;
+
+    void SetUp() override {
+        
+        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {beam_length, 0.0, 0.0}});
+
+        NodalRestraint end_restraint_1;
+        end_restraint_1.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4}); // restrain x translation, x rotation, y translation, y rotation, and z translation
+        end_restraint_1.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+        model.restraints.push_back(end_restraint_1);
+
+        NodalRestraint end_restraint_2;
+        end_restraint_2.assign_dofs_restraints(std::set<int>{1, 2, 3, 4}); // restrain x rotation, y translation, y rotation, and z translation
+        end_restraint_2.assign_nodes_by_id(std::set<int>{divisions + 1}, model.glob_mesh);
+        model.restraints.push_back(end_restraint_2);
+        // create the loaded and restrained intermediate nodes
+        std::iota(loaded_nodes.begin(), loaded_nodes.end(), 2);
+
+        NodalRestraint out_of_plane_restraint; 
+        out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4}); // restrain x rotation, y rotation, and z translation
+        out_of_plane_restraint.assign_nodes_by_id(loaded_nodes, model.glob_mesh);
+        model.restraints.push_back(out_of_plane_restraint);
+
+        // calculate load
+        //
+        real y_load = y_udl*beam_length/(divisions - 1);
+        model.load_manager.create_a_nodal_load_by_id(loaded_nodes, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
+
+        model.scribe.track_nodes_by_id(std::set<unsigned>{mid_node}, std::set<int>{tracked_dof}, model.glob_mesh);
+
+        model.initialise_restraints_n_loads();
+        model.glob_mesh.check_nodal_loads();
+
+        model.initialise_solution_parameters(1.0, 100, 1e-3, 30);
+        model.solve(-1);
+    }
+    void TearDown() override {
+}
+};
+
+TEST_F(SimplySupportedUdl, CheckResult)
+{
+    std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(mid_node);
+
+    std::vector<Record> record_library = model.scribe.get_record_library();
+    Record record = record_library.back();
+
+    std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
+    std::vector<real> disp_data = recorded_data[tracked_dof];
+    // $\delta = \frac{5 w L^4}{384 EI} $
+    real correct_disp = 5*y_udl*std::powf(beam_length, 4)/(384*(2.06e11)*(0.0004570000));
+    
+    EXPECT_NEAR(disp_data.back(), correct_disp, SOLUTION_TOLERANCE);
+}
 
 #endif 
