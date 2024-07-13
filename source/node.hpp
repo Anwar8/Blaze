@@ -198,6 +198,21 @@ class Node {
          * @param dof the DoF to which the nodal load will be added.
          */
         void increment_nodal_load(real dP, int dof);
+
+        /**
+         * @brief checks if the nodal loads are applied to inactive DoFs, and prints a warning if so.
+         * 
+         */
+        void check_loads() 
+        {
+            for (auto& dof : loaded_dofs)
+            {
+                if (inactive_dofs.contains(dof))
+                {
+                    std::cout << "WARNING: node "<< id << " DoF " << dof << " is inactive. A nodal load was added but will not be applied." << std::endl;
+                }
+            }
+        }
         void clear_nodal_loads() 
         {
             nodal_loads = {0., 0., 0., 0., 0., 0.};

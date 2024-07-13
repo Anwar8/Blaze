@@ -62,6 +62,7 @@ int main () {
     
     // initialise restraints and loads
     model.initialise_restraints_n_loads();
+    model.glob_mesh.check_nodal_loads();
 
     // initialise solution parameters
     real max_LF = 1;

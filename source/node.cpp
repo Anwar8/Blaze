@@ -68,6 +68,7 @@ void Node::add_nodal_load(real nodal_load, int dof) {
   {
     nodal_loads[dof] = nodal_load;
     loaded_dofs.insert(dof);
+
     if (VERBOSE)
     {
       std::cout << "node " << id << " loaded dofs are:" << std::endl;

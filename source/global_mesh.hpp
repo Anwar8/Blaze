@@ -227,6 +227,17 @@ class GlobalMesh {
         }
 
         /**
+         * @brief checks the nodal loads of all nodes in the mesh using the \ref Node::check_loads function, which prints an error if a DoF is both loaded and restrained.
+         * 
+         */
+        void check_nodal_loads()
+        {
+            for (auto& node: node_vector)
+            {
+                node->check_loads();
+            }
+        }
+        /**
          * @brief updates the state of each element after calculating global displacements.
          * 
          */
