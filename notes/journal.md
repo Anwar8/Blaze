@@ -11,6 +11,24 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 14 July
+After some work, I have finished adding the `Nonlinear2DBeamElement` class that implements a nonlinear beam-column element based on Izzuddin and Felippa's notes. I believe that the solution procedure in `SolutionProcedure` and the way that $d\boldsymbol{U}$ is being calculated is incorrect as right now I am getting an oscillating response as shown in the figure below. 
+<figure>
+  <img src="oscilLating_response.png" alt="Incorrect and oscillating response" style="width:100%">
+  <figcaption> Change of end displacement during the predictor-corrector processes </figcaption>
+</figure>
+
+There are a few things that I need to note:
+- The linear beam-column element did not have any problem because its state was always predicted with one step - convergence was always reached within 1 iteration. 
+- The nonlinear beam-column element response is oscillating meaning that $d\boldsymbol{U}$ always overshoots the mark, and the element state is never correct.
+- The interface between the programme and `Nonlinear2DBeamElement` is identical to that of `Linear2DBeamElement`. It is unlikely that the interface is incorrect.
+
+Some possible sources of error:
+- I could be missing something in the `update_state` function in `Nonlinear2DBeamElement`.
+- Given that `Nonlinear2DBeamElement` is nonlinear has interdependencies between displacement and resistance, it is possible that it always needs a corrector step. If this is done incorrectly, then the calculation will oscillate and we will never get convergence.
+- I could have incorrectly implemented some calculations in `NonlinearTransform`.
+- I may have incorrectly implemented some of the calculations done in `Nonlinear2DBeamElement` such as calculating strains and stresses. It is also possible that due to rearranging the freedoms, I might have incorrectly related a rotation and axial force somehow (forgot that the freedoms are reordered).
+
 #### 12 July
 I am now writing here less religiously than before, which is both good and bad. For the past days I have been engaged in two things: 
 - Fixing the error with the `Scribe` class

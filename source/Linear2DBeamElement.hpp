@@ -296,6 +296,14 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
             // does nothing. Geometric stiffness is zero.
         }
         /**
+         * @brief since this is a purely linear element, there is no external geometric stiffness to calculate - do nothing.
+         * 
+         */
+        virtual void calc_external_geom_stiffness()
+        {
+            // does nothing. External geometric stiffness is zero.
+        }
+        /**
          * @brief sums the \ref local_mat_stiffness and \ref local_geom_stiffness to create the tangent stiffness.
          * 
          */

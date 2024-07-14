@@ -5,6 +5,8 @@
 #include "Izzuddin2DNonlinearBeam.hpp"
 #include "beam_element.hpp"
 #include "Linear2DBeamElement.hpp"
+#include "Nonlinear2DBeamElement.hpp"
+
 void GlobalMesh::open_mesh_file(std::string const mesh_file) {
     gmsh::initialize();
     gmsh::open(mesh_file);
@@ -92,6 +94,8 @@ void GlobalMesh::make_elements (ElemIdNodeIdPairVector elem_map) {
             elem_vector.push_back(std::make_shared<Izzuddin2DNonlinearBeam>(element_data.first, elem_nodes));
         #elif (ELEM == 3)
             elem_vector.push_back(std::make_shared<Linear2DBeamElement>(element_data.first, elem_nodes));
+        #elif (ELEM == 4)
+            elem_vector.push_back(std::make_shared<Nonlinear2DBeamElement>(element_data.first, elem_nodes));
         #else 
             std::cout << "Incorrect ELEM: " << ELEM << "; should be 1. OLD, 2. IZDN, or 3. LBE." << std::endl;
             exit(1);

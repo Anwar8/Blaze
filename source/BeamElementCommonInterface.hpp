@@ -86,6 +86,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
             calc_mat_stiffness();
             calc_geom_stiffness();
             calc_tangent_stiffness();
+            calc_external_geom_stiffness();
             calc_elem_global_stiffness();
         }
     //@}

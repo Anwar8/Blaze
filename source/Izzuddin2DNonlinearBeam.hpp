@@ -279,6 +279,7 @@ class Izzuddin2DNonlinearBeam : public Basic2DBeamElement
             calc_elem_global_stiffness();
             if (VERBOSE_STIFFNESSES)
                 std::cout << "elem " << id << " global_stiffness contribution is " << std::endl << elem_global_stiffness << std::endl;
+            // WARNING: there is a missing function of calculating the element global reistance forces - that is, we are not mapping from local_f to global triplets...
             populate_resistance_force_triplets();
         }
         

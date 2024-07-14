@@ -241,6 +241,11 @@ class BeamElementBaseClass {
          */
         virtual void calc_geom_stiffness() = 0;
         /**
+         * @brief calculates the "external" nonlinear contribution of the element to the global tangent stiffness.
+         * 
+         */
+        virtual void calc_external_geom_stiffness() = 0;
+        /**
          * @brief sums the \ref local_mat_stiffness and \ref local_geom_stiffness to create the tangent stiffness.
          * 
          */

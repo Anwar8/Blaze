@@ -42,7 +42,8 @@ public:
      * 
      * @param nodes 
      */
-    void initialise(std::array<std::shared_ptr<Node>, 2>& nodes)
+    template <typename Container>
+    void initialise(Container& nodes)
     {
         coords pt1, pt2;
         pt1 = nodes[0]->get_coords();
@@ -58,7 +59,6 @@ public:
         calc_trigonometric_identities();
         calc_nl_T();
         calc_T();
-
     }
     void print_state()
     {

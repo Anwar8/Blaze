@@ -5,33 +5,6 @@
 #include "Model.hpp"
 
 int main () {
-    /*
-    GlobalMesh glob_mesh; 
-    Assembler assembler;
-    BasicSolver solver;
-    
-    std::vector<real> end_disp_history_y, end_disp_history_x;
-    // Euler buckling load for this beam is 2.58096e7
-    real x_load = 0.0;
-    real y_load = -1e5;
-    real load_factor = 0;
-    std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> mesh_maps = glob_mesh.read_mesh_file("mesh/test.msh");
-    glob_mesh.setup_mesh(mesh_maps.first, mesh_maps.second);
-    glob_mesh.count_dofs();
-    int nelems = glob_mesh.get_num_elems();
-    int nnodes = nelems + 1;
-    glob_mesh.fix_node(1, -1);
-    for (int i = 2; i <= nnodes; ++i)
-    {
-        glob_mesh.fix_node(i, 1);
-        glob_mesh.fix_node(i, 3);
-        glob_mesh.fix_node(i, 4);
-    }
-    glob_mesh.count_dofs();
-
-    */
-
-
 
     // create mesh
     Model model;
@@ -66,9 +39,10 @@ int main () {
 
     // initialise solution parameters
     real max_LF = 1;
-    int nsteps = 5;
+    int nsteps = 1;
     real tolerance = 1e-5;
-    int max_iterations = 10;
+    int max_iterations = 200;
     model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
     model.solve(1);
+    model.scribe.read_all_records();
 }

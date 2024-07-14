@@ -48,7 +48,7 @@ class GlobalMesh {
         std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes in the problem.*/
         #if (ELEM == 1 || ELEM == 2) 
             std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
-        #elif (ELEM == 3)
+        #elif (ELEM == 3 || ELEM == 4)
             std::vector<std::shared_ptr<BeamElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
         #else 
             std::cout << "Incorrect ELEM: " << ELEM << "; should be 1. OLD, 2. IZDN, or 3. LBE." << std::endl;
