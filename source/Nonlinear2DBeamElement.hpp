@@ -121,8 +121,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             element_global_resistance_forces = make_xd_vec(12); /**< transformed resistance forces of the element from \ref local_f. 6 per node since we have 3D global nodes, and two nodes giving us 12 components.*/
             local_eps = make_xd_vec(2); /**< local strains. \f$ \boldsymbol{\varepsilon} = \begin{bmatrix} \varepsilon_{xx} & \kappa\end{bmatrix}^T\f$*/
             local_stresses = make_xd_vec(2); /**< local stresses.\f$ \boldsymbol{\sigma} = \begin{bmatrix} N & M \end{bmatrix}^T\f$*/
-            N = make_xd_mat(2,6); /**< the shape function of the element. For this 2D element, that is 2 rows and 6 columns.*/
-            B = make_xd_mat(2,6); /**< the derivative of the shape function of the element. In this case 2 rows and 6 columns.*/   
+            N = make_xd_mat(2,3); /**< the shape function of the element. For this 2D element, that is 2 rows and 6 columns.*/
+            B = make_xd_mat(2,3); /**< the derivative of the shape function of the element. In this case 2 rows and 6 columns.*/   
             local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix \f$\boldsymbol{D} = \begin{bmatrix} EA & 0 \\ 0 & EI\end{bmatrix}\f$.*/
             local_mat_stiffness = make_xd_mat(3,3); /**< local element 3x3 material stiffness matrix.*/
             local_geom_stiffness = make_xd_mat(3,3); /**< local element 3x3 geometric stiffness matrix.*/
@@ -156,45 +156,48 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             length = transformation.get_L();
         }
         /**
-         * @brief calculates the shape function of the beam-column element for location x.
-         * @details this shape function is the same as the linear element \ref Linear2DBeamElement shape function but uses the current deformed length in stead of the initial length.
-         * @warning Must call \ref calc_length before this function to ensure the length calculation is correct.
+         * @brief The shape functions for the element are not needed for this element, and are not used. I might want to revisit this later.
+         * @details The displacement and rotation fields can be interpolated from Izzuddin's notes equation (2), and its derivative:
+         * \f$ v(x) = \left[x - \frac{2 x^2}{L_0} + \frac{x^3}{L_0 ^2} \right] \theta_1 + \left[- \frac{x^2}{L_0} + \frac{x^3}{L_0 ^2} \right] \theta_2\f$ 
+         * \f$ \frac{d v(x)}{dx} = \left[1 - \frac{4 x}{L_0} + \frac{3 x^2}{L_0 ^2} \right] \theta_1 + \left[- \frac{2 x}{L_0} + \frac{3 x^2}{L_0 ^2} \right] \theta_2\f$ 
          * @param x location at which shape function is evaluated.
          */
         void calc_N(real x)
         {
-            N(0,0) = 1 - (x/length);
-            N(0,3) = x / length;
-            N(1,1) = 1 - 3*std::pow(x/length,2) + 2*std::pow(x/length,3);
-            N(1,2) = x - 2*std::pow(x,2)/length + std::pow(x/length, 2)*x;
-            N(1,4) = 3*std::pow(x/length, 2) - 2*std::pow(x/length, 3);
-            N(1,5) = -x*(x/length) + x * std::pow(x/length,2);
+            // do nothing.
+            std::cout << "WARNING: this function from Nonlinear2DBeamElement does not do anything at the moment." << std::endl;
         }
         /**
          * @brief call the shape function's derivative of the shape function operation to calculate at a specific point.
-         * @details this shape function derivative is the same as the linear element \ref Linear2DBeamElement shape function derivative but uses the current deformed length in stead of the initial length.
-         * @warning Must call \ref calc_length before this function to ensure the length calculation is correct.
+         * @details This shape function derivative corresponds to Izzudin's notes equation (5.b)
+         * \f$\boldsymbol{B} = \frac{\partial \boldsymbol{\varepsilon}}{\partial \boldsymbol{d}^T} = \begin{bmatrix} \frac{1}{L_0} & \frac{2\theta_1}{15} - \frac{\theta_2}{30} & -\frac{\theta_1}{30} + \frac{2\theta_2}{15} \\
+         * 0 & -\frac{4}{L_0} + \frac{6x}{L_0 ^2} & -\frac{2}{L_0} + \frac{6x}{L_0 ^2}\end{bmatrix} \f$ 
          * @param x location along beam-column element at which to calculate the derivative of the shape function.
          */
         void calc_B(real x) 
         {
-            B(0,0) = -1/length;
-            B(0,3) = 1/length;
-            B(1,1) = -6*std::pow(1/length,2) + 12*x*std::pow(1/length,3);
-            B(1,2) = - 4/length + 6*x*std::pow(1/length, 2);
-            B(1,4) = 6*std::pow(1/length, 2) - 12*x*std::pow(1/length, 3);
-            B(1,5) = -2/length + 6 * x* std::pow(1/length,2);
+            real theta_1 = local_d(1);
+            real theta_2 = local_d(2);
+            B(0,0) = -1/initial_length;
+            B(1,0) = 0;
+
+            B(0,1) = 2*theta_1/15 - theta_2/30;
+            B(1,1) = -4/initial_length + 6*x/(initial_length*initial_length);
+
+            B(0,2) = -theta_1/30 + 2*theta_2/15;
+            B(1,2) = -2/initial_length + 6*x/(initial_length*initial_length); 
         }
 
         /**
          * @brief calculates the transformation matrix from the \ref NonlinearTransform \ref NonlinearTransfor::get_T function.
-         * @warning: doesn not use the input variables. Just pass nothing, please, as the function needs to match the generic interface defined in \ref BeamElementBaseClass.
+         * @warning doesn not use the input variables. Just pass nothing, please, as the function needs to match the generic interface defined in \ref BeamElementBaseClass.
+         * @warning This function is not used in this nonlinear element.
          * @param sec_offset is the y-axis offset of the section nodes from their actual coordinates. IGNORED.
          * @param origin_x the x-axis of the global coordinate system. IGNORED.
          */
         void calc_T(real sec_offset = 0.0, coords origin_x = {1.0, 0.0, 0.0}) {
             // orient.evaluate(nodes, sec_offset, origin_x);  
-            transformation.get_T(); 
+            transformation.calc_T(); 
         }
 
         /**
@@ -219,7 +222,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             real theta2 = local_d(2);
 
             real x = 0.5*initial_length;
-            local_eps(0) = ((delta/initial_length) + (2*theta1*theta1 - theta1*theta2 + 2*theta2*theta2)/30);
+            local_eps(0) = (delta/initial_length) + (2*theta1*theta1 - theta1*theta2 + 2*theta2*theta2)/30;
             local_eps(1) = ((-4/initial_length) + 6*x/(initial_length*initial_length))*theta1 + ((-2/initial_length) + 6*x/(initial_length*initial_length))*theta2;
 
         }
@@ -327,9 +330,9 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
         /**
          * @brief calculates the direct external geometric stiffness contributions of the element.
          * @details
-         * equation (10.c) \f$ \frac{\partial ^2\theta}{\partial \boldsymbol{U}^2} =  * \begin{bmatrix} NA & \bf{0} & \bf{1} & \bf{2} & \bf{3} & \bf{4} & \bf{5} & \bf{6} & \bf{7} & \bf{8} & \bf{9} & \bf{10} & \bf{11} \\ \bf{0} & -g_1 & 0 & g_2 & 0 & 0 & 0 & g_1 & 0 & -g_2 & 0 & 0 & 0 \\ \bf{1} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{2} & g_2 & 0 & g_1 & 0 & 0 & 0 & -g_2 & 0 & -g_1 & 0 & 0 & 0  \\ \bf{3} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{4} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{5} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{6} & g_1 & 0 & -g_2 & 0 & 0 & 0 & -g_1 & 0 & g_2 & 0 & 0 & 0 \\ \bf{7} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{8} & -g_2 & 0 & -g_1 & 0 & 0 & 0 & g_2 & 0 & g_1 & 0 & 0 & 0  \\ \bf{9} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{10} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{11} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \end{bmatrix}\f$
+         * equation (10.c) \f$ \frac{\partial ^2\theta}{\partial \boldsymbol{U} \partial \boldsymbol{U}^T} =  * \begin{bmatrix} NA & \bf{0} & \bf{1} & \bf{2} & \bf{3} & \bf{4} & \bf{5} & \bf{6} & \bf{7} & \bf{8} & \bf{9} & \bf{10} & \bf{11} \\ \bf{0} & -g_1 & 0 & g_2 & 0 & 0 & 0 & g_1 & 0 & -g_2 & 0 & 0 & 0 \\ \bf{1} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{2} & g_2 & 0 & g_1 & 0 & 0 & 0 & -g_2 & 0 & -g_1 & 0 & 0 & 0  \\ \bf{3} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{4} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{5} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{6} & g_1 & 0 & -g_2 & 0 & 0 & 0 & -g_1 & 0 & g_2 & 0 & 0 & 0 \\ \bf{7} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{8} & -g_2 & 0 & -g_1 & 0 & 0 & 0 & g_2 & 0 & g_1 & 0 & 0 & 0  \\ \bf{9} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{10} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{11} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \end{bmatrix}\f$
          * 
-         * equation (10.d) \f$ \frac{\partial ^2\Delta}{\partial \boldsymbol{U}^2} =  * \begin{bmatrix} NA & \bf{0} & \bf{1} & \bf{2} & \bf{3} & \bf{4} & \bf{5} & \bf{6} & \bf{7} & \bf{8} & \bf{9} & \bf{10} & \bf{11} \\ \bf{0} & g_5 & 0 & -g_4 & 0 & 0 & 0 & -g_5 & 0 & g_4 & 0 & 0 & 0 \\ \bf{1} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{2} & -g_4 & 0 & g_3 & 0 & 0 & 0 & g_4 & 0 & -g_3 & 0 & 0 & 0  \\ \bf{3} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{4} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{5} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{6} & -g_5 & 0 & g_4 & 0 & 0 & 0 & g_5 & 0 & -g_4 & 0 & 0 & 0 \\ \bf{7} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{8} & g_4 & 0 & -g_3 & 0 & 0 & 0 & -g_4 & 0 & g_3 & 0 & 0 & 0  \\ \bf{9} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{10} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{11} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \end{bmatrix}\f$
+         * equation (10.d) \f$ \frac{\partial ^2\Delta}{\partial \boldsymbol{U} \partial \boldsymbol{U}^T} =  * \begin{bmatrix} NA & \bf{0} & \bf{1} & \bf{2} & \bf{3} & \bf{4} & \bf{5} & \bf{6} & \bf{7} & \bf{8} & \bf{9} & \bf{10} & \bf{11} \\ \bf{0} & g_5 & 0 & -g_4 & 0 & 0 & 0 & -g_5 & 0 & g_4 & 0 & 0 & 0 \\ \bf{1} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{2} & -g_4 & 0 & g_3 & 0 & 0 & 0 & g_4 & 0 & -g_3 & 0 & 0 & 0  \\ \bf{3} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{4} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{5} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{6} & -g_5 & 0 & g_4 & 0 & 0 & 0 & g_5 & 0 & -g_4 & 0 & 0 & 0 \\ \bf{7} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{8} & g_4 & 0 & -g_3 & 0 & 0 & 0 & -g_4 & 0 & g_3 & 0 & 0 & 0  \\ \bf{9} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{10} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bf{11} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \end{bmatrix}\f$
          * 
          * 
          * Note that the DoFs are originally \f$ \boldsymbol{U} = \begin{bmatrix} U_1 & V_1 & \alpha_1 & U_2 &  V_2 & \alpha_2 \end{bmatrix}^T\f$ 
@@ -346,7 +349,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             g3 = transformation.get_g3();
             g4 = transformation.get_g4();
             g5 = transformation.get_g5();
-
+            /** \f$ \frac{\partial^2 \Delta}{\partial \boldsymbol{U} \partial \boldsymbol{U}^T}\f$*/
             d2delta_du2(0,0) = g5;
             d2delta_du2(0,2) = -g4;
             d2delta_du2(0,6) = -g5;
@@ -366,7 +369,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             d2delta_du2(8,2) = -g3;
             d2delta_du2(8,6) = -g4;
             d2delta_du2(8,8) = g3;
-
+            /** \f$ \frac{\partial^2 \theta_1}{\partial \boldsymbol{U} \partial \boldsymbol{U}^T} = \frac{\partial^2 \theta_2}{\partial \boldsymbol{U} \partial \boldsymbol{U}^T}\f$*/
             d2theta_du2(0,0) = -g1;
             d2theta_du2(0,2) = g2;
             d2theta_du2(0,6) = g1;

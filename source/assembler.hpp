@@ -33,15 +33,24 @@ class Assembler {
     public:
         friend class BasicSolver;
         /**
+         * @brief initialises the K, P, U, and dU sparse matrices and vectors to the sizes that correspond to the mesh being used.
+         * 
+         * @param glob_mesh  the global_mesh object which contains information about the number of nodes and degrees of freedom.
+         */
+        void initialise_global_matrices(GlobalMesh& glob_mesh) {
+            K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
+            P = make_spd_mat(glob_mesh.ndofs, 1);
+            U = make_spd_vec(glob_mesh.ndofs);
+            dU = make_spd_vec(glob_mesh.ndofs);
+        }
+        /**
          * @brief retrieves global contributions from all elements.
          * 
          * @details creates triplets by retrieving all global contributions from
          * the elements and then uses the triplets to creat the global sparse stiffness
-         * matrix. Also allocates the force and displacement vectors.
-         * 
-         * @attention sets a force of -1e4 in one of the locations.
-         * 
-         * @todo add a function to read and apply forces to nodes.
+         * matrix. Also allocates the force and displacement vectors. Note that as per the 
+         * documentation of Eigen: "The initial contents of *this is destroyed." when calling [setFromTriplets](https://eigen.tuxfamily.org/dox-devel/classEigen_1_1SparseMatrix.html#a8f09e3597f37aa8861599260af6a53e0).
+         * So this means that this function does not add to the existing matrix but recreates it from the contributions of the elements.
          * @todo add a function to calculate constrained nodes reactions.
          * 
          * @param glob_mesh takes the global_mesh object as input to get the counters and containers for nodes and elements.

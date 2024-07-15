@@ -85,7 +85,10 @@ void Node::increment_nodal_load(real dP, int dof) {
   if (valid_dof(dof))
   {
     if (loaded_dofs.contains(dof)) {
-      std::cout << "Incrementing load at DoF " << dof << " of node " << id << " by " << dP << "." << std::endl;
+      if (VERBOSE_NLB)
+      {
+        std::cout << "Incrementing load at DoF " << dof << " of node " << id << " by " << dP << "." << std::endl;
+      }
       nodal_loads[dof] += dP;
     } else {
     std::cout << "ERROR: Cannot increment load at DoF " << dof << "as this DoF is not already loaded." << std::endl;

@@ -11,6 +11,9 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 15 July
+I can easily conform the linear element to use the `NonlinearTransform` object as well, as it subsumes the `BasicOrientation` object since it can calculate the linear transformation as well. The linear transformation is really *never* used in the nonlinear element, though. Since it is not used, then maybe `Nonlinear2DBeamElement::calc_T` should be deprecated or left empty (since it must be implemented as it is part of the virtual interface defined by `BeamElementBaseClass`). Also, I can really build the calculation of the material stiffness by using $\int_0 ^L \boldsymbol{B}^T \boldsymbol{D} \boldsymbol{B} dx = \sum _{i = 1} ^2 w_i\left[\boldsymbol{B}(x_i\right]^T \boldsymbol{D} \boldsymbol{B}(x_i)$, which would make it <span style="color:green;">much easier to implement material nonlinearity as well, since it would be the same calculation!!!</span>
+
 #### 14 July
 After some work, I have finished adding the `Nonlinear2DBeamElement` class that implements a nonlinear beam-column element based on Izzuddin and Felippa's notes. I believe that the solution procedure in `SolutionProcedure` and the way that $d\boldsymbol{U}$ is being calculated is incorrect as right now I am getting an oscillating response as shown in the figure below. 
 <figure>

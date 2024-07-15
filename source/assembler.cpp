@@ -39,12 +39,6 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
         std::cout << "row, col, val: " << triplet.row() << "," << triplet.col() << "," << triplet.value() << std::endl;
     }
     }
-    K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
-    P = make_spd_mat(glob_mesh.ndofs, 1);
-    // TODO: Decide whether U is sparse or dense
-    // U = make_xd_vec(glob_mesh.ndofs);
-    U = make_spd_vec(glob_mesh.ndofs);
-    dU = make_spd_vec(glob_mesh.ndofs);
     if (VERBOSE)
     {
         std::cout << "There are " << std::size(P_global_triplets) << " P_global contributions to add up." << std::endl;
@@ -56,7 +50,11 @@ void Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)
     
     P.setFromTriplets(P_global_triplets.begin(), P_global_triplets.end());
     P.makeCompressed();
-    std::cout << "The P vector is:" << std::endl << Eigen::MatrixXd(P) << std::endl;
+    if (VERBOSE_NLB)
+    {
+        std::cout << "The P vector is:" << std::endl << Eigen::MatrixXd(P) << std::endl;
+    }
+    
 }
 
 void Assembler::map_U_to_nodes(GlobalMesh& glob_mesh) 

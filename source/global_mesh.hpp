@@ -208,20 +208,38 @@ class GlobalMesh {
         }
 
         /**
+         * @brief maps the stiffness of each element in the \ref elem_vector by calling \ref BeamElementCommonInterface::map_stiffness.
+         * @details this function should be called after defining the constraints on the nodes, but before actually beginning th solution procedure.
+         */
+        void map_element_stiffnesses()
+        {
+            for (auto& elem: elem_vector)
+            {
+                elem->map_stiffness();
+            }
+        }
+
+        /**
          * @brief loop over elements and call each of their \ref map_stiffness and \ref calc_global_stiffness_triplets functions.
          * 
          */
         void calc_global_contributions() {
-            std::cout << "Calc_global_contirbutions: There are " << ndofs << " active DoFs in the mesh." << std::endl;
+            if (VERBOSE)
+            {
+                std::cout << "Calc_global_contirbutions: There are " << ndofs << " active DoFs in the mesh." << std::endl;
+            }
             for (auto& elem: elem_vector) 
             {   
-                elem->update_state();
-                elem->map_stiffness();
+                // elem->update_state(); // Should not update state if we are calling update_state explicitly on its own!
+                // elem->map_stiffness();
                 elem->calc_global_stiffness_triplets();
             }
             for (auto& node: node_vector)
             {
-                std::cout << "Computing global load triplets for node " << node->get_id() << std::endl;
+                if (VERBOSE)
+                {
+                    std::cout << "Computing global load triplets for node " << node->get_id() << std::endl;
+                }
                 node->compute_global_load_triplets();
             }
         }
