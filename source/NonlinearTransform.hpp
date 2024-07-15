@@ -71,18 +71,20 @@ public:
      */
     void extract_global_elem_disps(vec& global_ele_U)
     {
-        ux1 = global_ele_U(0);
-        ux2 = global_ele_U(6);
-        uy1 = global_ele_U(1);
-        uy2 = global_ele_U(7);
+        // x-displacements.
+        ux1 = global_ele_U(0); // U_1^i
+        ux2 = global_ele_U(6); // U_1^{ii}
+        // y-displacements.
+        uy1 = global_ele_U(2); // U_2^i
+        uy2 = global_ele_U(8); // U_2^{ii}
         // zz-rotations.
-        theta1 = global_ele_U(5);
-        theta2 = global_ele_U(11);
+        theta1 = global_ele_U(5); // U_{33}^i
+        theta2 = global_ele_U(11); // U_{33}^{ii}
     }
     /**
      * @brief calculates geometric quantities from  from Felippa \f$ x_{21}, y_{21}\f$ and Izzuddin \f$ \hat{X}_E, \hat{Y}_E\f$.
      * @details equations 8.c and 8.d from Izzuddin, equation 11.30 from Felippa.
-     * 
+     * (8.c) \f$ \hat{X}_E = X_E + U_1^{ii} - U_1^{i}\f$, and (8.d) \f$ \hat{Y}_E = Y_E + U_2^{ii} - U_2^{i}\f$.
      */
     void calc_distance_between_nodes()
     {
@@ -91,7 +93,7 @@ public:
     }
     /**
      * @brief calculates current L from equation 11.30 from Felippa: \f$ L=\sqrt{x_{21}^2 + y_{21}^2}.\f$
-     * 
+     * @details and also uses equation (8.e) from Izzuddin: \f$ L = \sqrt{\hat{X}_E^2 + \hat{Y}_E^2}\f$.
      */
     void calculate_L()
     {
@@ -107,27 +109,49 @@ public:
     }
     /**
      * @brief calculates the trigonometric identities based on 11.28, 11.29, 11.30, and 11.31 from Felippa.
-     * 
+     * @details 
+     * |Felippa|Izzuddin|
+     * |---|---|
+     * |\f$\phi\f$| \f$ \hat{\rho}\f$ 
+     * |\f$\varphi\f$ (varphi)|\f$ \rho \f$|
+     * |\f$\psi = \phi - \varphi\f$|\f$ \hat{\rho} - \rho \f$|
      */
     void calc_trigonometric_identities()
     {
-        cos_phi = x21/L;
-        sin_phi = y21/L;
-        phi = std::acos(cos_phi);
+        // cos_phi = x21/L;
+        // sin_phi = y21/L;
+        // phi = std::acos(cos_phi);
 
-        cos_varphi = base_configuration.X21/L0;
-        sin_varphi = base_configuration.Y21/L0;
-        varphi = std::acos(cos_varphi);
+        // cos_varphi = base_configuration.X21/L0;
+        // sin_varphi = base_configuration.Y21/L0;
+        // varphi = std::acos(cos_varphi);
 
-        cos_psi = (base_configuration.X21*x21 + base_configuration.Y21*y21)/(L*L0);
-        sin_psi = (base_configuration.X21*y21 - base_configuration.Y21*x21)/(L*L0);
-        psi = std::acos(cos_psi);
+        // cos_psi = (base_configuration.X21*x21 + base_configuration.Y21*y21)/(L*L0);
+        // sin_psi = (base_configuration.X21*y21 - base_configuration.Y21*x21)/(L*L0);
+        // psi = std::acos(cos_psi);
+
+        phi = std::atan2(y21,x21);
+        cos_phi = std::cos(phi);
+        sin_phi = std::sin(phi);
+
+        // from base_configuration: pt21 = pt2 - pt1; X21 = pt21(0); Y21 = pt21(1); Z21 = pt21(2);
+        varphi = std::atan2(base_configuration.Y21, base_configuration.X21);
+        cos_varphi = std::cos(varphi);
+        sin_varphi = std::sin(varphi);
+
+        psi = phi - varphi;
+        cos_psi = std::cos(psi);
+        sin_psi = std::sin(psi);
+
     }
     /**
      * @brief calculations the deformational displacements based on 16.11.
      * 
      * @details we do not have vertical displacements corresponding to y because those would result in rotation
      * of the configuration which is then captured by psi!
+     * Also, from Izzuddin (8.f) \f$ \theta_1 = \alpha_1 + \rho - \hat{\rho} = \alpha_1 - \psi\f$ and \f$\theta_2 = \alpha_2 + \rho -\hat{\rho} = \alpha_2 - \psi\f$.
+     * @warning in Izzuddin's notes, the global rotational displacement is \f$ \alpha_1\f$ and \f$ \alpha_2\f$, while in Felippa's notes they are \f$ \theta_1\f$ and 
+     * \f$ \theta_2\f$. Felippa's notation of \f$\theta\f$ is used by Izzuddin for his local rotational displacements in \f$\boldsymbol{d}\f$
      */
     void calc_deformational_displacements(vec& deformational_displacements)
     {
@@ -143,7 +167,7 @@ public:
      * global system as compared to the 6 in Izzuddin's and Felippa's notes. Finally, we need to be wary
      * that Izzuddin places the \f$ \Delta\f$ defromational freedom last, while Felippa places it first
      * as I would also prefer.
-     * \f$ \frac{\partial \boldsymbol{d}}{\partial \boldsymbol{U}} = \begin{bmatrix} NA & \bf{0} & \bf{1} & \bf{2} & \bf{3} & \bf{4} & \bf{5} & \bf{6} & \bf{7} & \bf{8} & \bf{9} & \bf{10} & \bf{11} \\ \bf{0} & -c_{\phi} & 0 & -s_{\phi} & 0 & 0 & 0 & c_{\phi} & 0 & s_{\phi} & 0 & 0 & 0 \\ \bf{1} & -s_{\phi}/L & 0 & c_{\phi}/L & 0 & 0 & 1 & s_{\phi}/L & 0 & -c_{\phi}/L & 0 & 0 & 0 \\ \bf{2} & -s_{\phi}/L & 0 & c_{\phi}/L & 0 & 0 & 0 & s_{\phi}/L & 0 & -c_{\phi}/L & 0 & 0 & 1\end{bmatrix}\f$
+     * \f$ \frac{\partial \boldsymbol{d}}{\partial \boldsymbol{U}^T} = \begin{bmatrix} NA & \bf{0} U_{1}^i & \bf{1} U_{11}^i & \bf{2} U_{2}^i & \bf{3} U_{22}^i & \bf{4} U_{3}^i & \bf{5} U_{33}^i & \bf{6} U_1^{ii} & \bf{7} U_{11}^{ii} & \bf{8} U_{2}^{ii} & \bf{9} U_{22}^{ii} & \bf{10} U_{3}^{ii} & \bf{11} U_{33}^{ii}\\ \bf{0} \Delta & -c_{\phi} & 0 & -s_{\phi} & 0 & 0 & 0 & c_{\phi} & 0 & s_{\phi} & 0 & 0 & 0 \\ \bf{1} \theta_1 & -s_{\phi}/L & 0 & c_{\phi}/L & 0 & 0 & 1 & s_{\phi}/L & 0 & -c_{\phi}/L & 0 & 0 & 0 \\ \bf{2} \theta_2 & -s_{\phi}/L & 0 & c_{\phi}/L & 0 & 0 & 0 & s_{\phi}/L & 0 & -c_{\phi}/L & 0 & 0 & 1\end{bmatrix}\f$
      */
     void calc_nl_T() {
         nl_T(0,0) = -cos_phi;
@@ -164,7 +188,7 @@ public:
         nl_T(2,11) = 1;
     }
     mat get_nl_T() {return nl_T;}
-        /**
+    /**
      * @brief 
      * creates the T matrix
      * 
@@ -173,8 +197,8 @@ public:
      * 6 rows.
      */
     void calc_T() {
-        real c = cos_phi;
-        real s = sin_phi;
+        real c = cos_varphi;
+        real s = sin_varphi;
         T(0,0) = c;
         T(0,2) = s;
         T(1,0) = -s;
@@ -195,7 +219,7 @@ public:
 
     real get_g1()
     {
-        return 2*cos_phi/(L*L);
+        return 2*cos_phi*sin_phi/(L*L);
     }
     real get_g2()
     {
@@ -203,7 +227,7 @@ public:
     }
     real get_g3()
     {
-        return (cos_phi*cos_phi)/(L*L);
+        return (cos_phi*cos_phi)/(L);
     }
     real get_g4()
     {

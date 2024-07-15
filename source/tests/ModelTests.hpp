@@ -5,7 +5,7 @@
 #include <numeric>
 #define LOAD_TOLERANCE 1e-6
 #define DISP_TOLERANCE 1e-6
-#define SOLUTION_TOLERANCE 1e-4
+#define SOLUTION_TOLERANCE_PERCENT 0.02
 
 class MeshTests : public ::testing::Test {
   public:
@@ -260,7 +260,7 @@ class CantileverBeam : public ::testing::Test {
         model.initialise_restraints_n_loads();
         model.glob_mesh.check_nodal_loads();
 
-        model.initialise_solution_parameters(1.0, 100, 1e-3, 30);
+        model.initialise_solution_parameters(1.0, 100, 1e-4, 30);
         model.solve(-1);
     }
     void TearDown() override {
@@ -279,8 +279,8 @@ TEST_F(CantileverBeam, CheckResult)
     std::vector<real> disp_data = recorded_data[tracked_dof];
     // $\delta = \frac{PL^3}{3EI} = \frac{1e5 (3)^3}{3(2.06e11)(0.0004570000)} = 0.009560026343183701$
     real correct_disp = y_load*std::powf(beam_length, 3)/(3*(2.06e11)*(0.0004570000));
-    
-    EXPECT_NEAR(disp_data.back(), correct_disp, SOLUTION_TOLERANCE);
+    real tolerance = std::abs(SOLUTION_TOLERANCE_PERCENT*correct_disp);
+    EXPECT_NEAR(disp_data.back(), correct_disp, tolerance);
 }
 
 class SimplySupported : public ::testing::Test {
@@ -336,8 +336,8 @@ TEST_F(SimplySupported, CheckResult)
     std::vector<real> disp_data = recorded_data[tracked_dof];
     // $\delta = \frac{PL^3}{48EI} $
     real correct_disp = y_load*std::powf(beam_length, 3)/(48*(2.06e11)*(0.0004570000));
-    
-    EXPECT_NEAR(disp_data.back(), correct_disp, SOLUTION_TOLERANCE);
+    real tolerance = std::abs(SOLUTION_TOLERANCE_PERCENT*correct_disp);
+    EXPECT_NEAR(disp_data.back(), correct_disp, tolerance);
 }
 
 class SimplySupportedUdl : public ::testing::Test {
@@ -399,8 +399,8 @@ TEST_F(SimplySupportedUdl, CheckResult)
     std::vector<real> disp_data = recorded_data[tracked_dof];
     // $\delta = \frac{5 w L^4}{384 EI} $
     real correct_disp = 5*y_udl*std::powf(beam_length, 4)/(384*(2.06e11)*(0.0004570000));
-    
-    EXPECT_NEAR(disp_data.back(), correct_disp, SOLUTION_TOLERANCE);
+    real tolerance = std::abs(SOLUTION_TOLERANCE_PERCENT*correct_disp);
+    EXPECT_NEAR(disp_data.back(), correct_disp, tolerance);
 }
 
 #endif 

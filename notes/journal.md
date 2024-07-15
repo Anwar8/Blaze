@@ -12,12 +12,31 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Journal
 #### 15 July
-I can easily conform the linear element to use the `NonlinearTransform` object as well, as it subsumes the `BasicOrientation` object since it can calculate the linear transformation as well. The linear transformation is really *never* used in the nonlinear element, though. Since it is not used, then maybe `Nonlinear2DBeamElement::calc_T` should be deprecated or left empty (since it must be implemented as it is part of the virtual interface defined by `BeamElementBaseClass`). Also, I can really build the calculation of the material stiffness by using $\int_0 ^L \boldsymbol{B}^T \boldsymbol{D} \boldsymbol{B} dx = \sum _{i = 1} ^2 w_i\left[\boldsymbol{B}(x_i\right]^T \boldsymbol{D} \boldsymbol{B}(x_i)$, which would make it <span style="color:green;">much easier to implement material nonlinearity as well, since it would be the same calculation!!!</span>
+I can easily conform the linear element to use the `NonlinearTransform` object as well, as it subsumes the `BasicOrientation` object since it can calculate the linear transformation as well. The linear transformation is really *never* used in the nonlinear element, though. Since it is not used, then maybe `Nonlinear2DBeamElement::calc_T` should be deprecated or left empty (since it must be implemented as it is part of the virtual interface defined by `BeamElementBaseClass`). Also, I can really build the calculation of the material stiffness by using $\int_0 ^L \boldsymbol{B}^T \boldsymbol{D} \boldsymbol{B} dx = \sum _{i = 1} ^2 w_i\left[\boldsymbol{B}(x_i\right]^T \boldsymbol{D} \boldsymbol{B}(x_i)$, which would make it <span style="color:orange;">much easier to implement material nonlinearity as well, since it would be the same calculation!!!</span>
+
+<span style="color:green; font-size:120%"> I have established why `Nonlinear2DBeamElement` was failing. </span> 
+
+This was because of bugs in `NonlinearTransform`:
+- the variables `uy1` and `uy2` in `extract_global_elem_disps` where referencing elements 1 and 7 from the global displacement vector, which for our problem is always zero as they are rotations about x. This was corrected to 2, and 8 which are the displacements along y.
+- The function `get_g1()` was missing a sin in the numerator.
+- The function `get_g3()` had an extra `L` in the denominator.
+
+These tiny bugs completely destroyed the performance of the element as the external geometric matrix was incorrect, and the mapping between global and local displacement was also incorrect. I have also cross checked everything against the implementation from Izzuddin's notes, and it checks out. I have added some extra comments that included the mathematical implementation. 
+
+Today's work was an amazing achievement - the geometrically nonlinear element has finally been implemented, and it passes all the tests. 
+
+All is not done, however. The tests implemented now are all linear, while the nonlinear element needs nonlinear tests. Some clean-up of the code is needed but is not urgent. 
+
+After implementing a nonlinear element test(s), I have to start working on the material nonlinearity. 
+- The first part of that is adding an interface to change the section properties, or to assign a particular section to a beam-column element. 
+- It is also important to add some functionality that enables choosing element type for a mesh.
+- I also need to add an element-type `Record` that can track element state. 
+- Speaking of `ElementState` - this can be its own data-type as this would make it easy to transfer data when implementing cross-compute-node communication with `MPI` - just exchange the *contiguous* `ElementState` object and use it to update element states across nodes. It can also help with Gauss-point-specific calculations (one `ElementState` per Gauss point? probably not, lots of non-Gauss-point-specific matrices are needed for element state). 
 
 #### 14 July
 After some work, I have finished adding the `Nonlinear2DBeamElement` class that implements a nonlinear beam-column element based on Izzuddin and Felippa's notes. I believe that the solution procedure in `SolutionProcedure` and the way that $d\boldsymbol{U}$ is being calculated is incorrect as right now I am getting an oscillating response as shown in the figure below. 
 <figure>
-  <img src="oscilLating_response.png" alt="Incorrect and oscillating response" style="width:100%">
+  <img src="oscilLating_response.png" alt="Incorrect and oscillating response" style="width:30%">
   <figcaption> Change of end displacement during the predictor-corrector processes </figcaption>
 </figure>
 
@@ -88,7 +107,7 @@ Continued to build the tests but the element remained buggy and would not update
 
 One line missing, and I ended up spending a week figuring it out. This, however, resulted in me significantly improving the software architecture and also tremendously enhancing the testing. Regardless, I cannot help but feel like the picture below.
 <figure>
-  <img src="hank_scorpio_meme.jpeg" alt="Hank Scorpio" style="width:100%">
+  <img src="hank_scorpio_meme.jpeg" alt="Hank Scorpio" style="width:30%">
   <figcaption> Hank Scorpio: Why didn't I think of that? </figcaption>
 </figure>
 

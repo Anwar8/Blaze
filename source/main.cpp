@@ -9,7 +9,7 @@ int main () {
     // create mesh
     Model model;
     std::vector<coords> end_coords = {coords(0, 0, 0), coords(3, 0, 0)};
-    int num_divisions = 10;
+    int num_divisions = 2;
     int num_elements = num_divisions;
     int num_nodes = num_elements + 1;
     model.create_line_mesh(num_divisions, end_coords);
@@ -21,8 +21,9 @@ int main () {
 
     NodalRestraint out_of_plane_restraint;  
     out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
-    out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);
-    
+    // out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);
+    out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3}, model.glob_mesh);
+
     model.restraints.push_back(end_restraint);
     model.restraints.push_back(out_of_plane_restraint);
 
@@ -41,7 +42,7 @@ int main () {
     real max_LF = 1;
     int nsteps = 1;
     real tolerance = 1e-5;
-    int max_iterations = 200;
+    int max_iterations = 5;
     model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
     model.solve(1);
     model.scribe.read_all_records();

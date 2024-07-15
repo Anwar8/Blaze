@@ -104,10 +104,6 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             initial_length = transformation.get_L0(); // the initial length does not change and only needs to be calculated once.
             calc_local_constitutive_mat();
             update_state();
-            // calc_T();
-            // calc_length();
-            // calc_local_constitutive_mat();
-            // calc_stiffnesses();
         }
 
         /**
@@ -160,6 +156,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @details The displacement and rotation fields can be interpolated from Izzuddin's notes equation (2), and its derivative:
          * \f$ v(x) = \left[x - \frac{2 x^2}{L_0} + \frac{x^3}{L_0 ^2} \right] \theta_1 + \left[- \frac{x^2}{L_0} + \frac{x^3}{L_0 ^2} \right] \theta_2\f$ 
          * \f$ \frac{d v(x)}{dx} = \left[1 - \frac{4 x}{L_0} + \frac{3 x^2}{L_0 ^2} \right] \theta_1 + \left[- \frac{2 x}{L_0} + \frac{3 x^2}{L_0 ^2} \right] \theta_2\f$ 
+         * I assume I can easily find \f$ u(x)\f$ from my self-assumed \f$ u(x) = \frac{\Delta}{L_0} x \f$
          * @param x location at which shape function is evaluated.
          */
         void calc_N(real x)
