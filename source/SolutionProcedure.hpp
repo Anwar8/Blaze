@@ -42,7 +42,7 @@ class SolutionProcedure
             while (load_factor < max_LF)
             {
                 load_factor += dLF;
-                std::cout << std::endl << "-----------------------------<Load step " << step << " - LF = " << load_factor << ">-----------------------------" << std::endl;
+                std::cout << std::endl << "===================================[Load step " << step << " - LF = " << load_factor << "]===================================" << std::endl;
                 load_manager.increment_loads(dLF);
                 bool converged = false;
                 int iter = 1;
@@ -51,7 +51,7 @@ class SolutionProcedure
                 // begin nonlinear iterations:
                 while ((iter <= max_iter) && !(converged))
                 {   
-                    std::cout << std::endl << "-----------------------------<Iteration " << iter << ">-----------------------------" << std::endl;
+                    std::cout << "-----------------------------------<Started: Iteration " << iter << ">-------------------------------------" << std::endl;
                     
                     // solver.solve_for_U(assembler);
 
@@ -81,7 +81,14 @@ class SolutionProcedure
                     }
                     // WARNING: this is a debugging line that MUST be removed after problem with convergence is solved.
                     // scribe.write_to_records();
-                    std::cout << std::endl << "-----------------------------<Completed: Iteration " << iter << ">-----------------------------" << std::endl;
+                    
+                    if (!converged)
+                    {
+                        std::cout << "G_max = " << assembler.get_G_max() << " while tolerance " << tolerance << std::endl;
+                        std::cout << "---------------------------------<Iteration " << iter << " Did Not Converge>--------------------------------" << std::endl;
+                    } else {
+                        std::cout << "-------------------------------------<Iteration " << iter << " Converged>-----------------------------------" << std::endl;
+                    }
                     iter++;
                 }
                 if (VERBOSE) 
