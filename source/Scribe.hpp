@@ -19,7 +19,7 @@
 /**
  * @brief  the size of the buffer used to store the data beyond which the data has to be flushed to file.
  */
-#define BUFFER_SIZE 1000
+#define BUFFER_SIZE 2000
 
 /**
  * @brief A scribe manages the recording of the state of the model.
