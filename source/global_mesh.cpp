@@ -93,9 +93,9 @@ void GlobalMesh::make_elements (ElemIdNodeIdPairVector elem_map) {
         #elif (ELEM == 2)
             elem_vector.push_back(std::make_shared<Izzuddin2DNonlinearBeam>(element_data.first, elem_nodes));
         #elif (ELEM == 3)
-            elem_vector.push_back(std::make_shared<Linear2DBeamElement>(element_data.first, elem_nodes));
+            elem_vector.push_back(std::make_shared<Linear2DBeamElement>(element_data.first, elem_nodes, section));
         #elif (ELEM == 4)
-            elem_vector.push_back(std::make_shared<Nonlinear2DBeamElement>(element_data.first, elem_nodes));
+            elem_vector.push_back(std::make_shared<Nonlinear2DBeamElement>(element_data.first, elem_nodes, section));
         #else 
             std::cout << "Incorrect ELEM: " << ELEM << "; should be 1. OLD, 2. IZDN, or 3. LBE." << std::endl;
             exit(1);

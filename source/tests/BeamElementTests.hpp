@@ -9,6 +9,7 @@
 #include "../BeamElementBaseClass.hpp"
 #include "../BeamElementCommonInterface.hpp"
 #include "../Linear2DBeamElement.hpp"
+#include "../Nonlinear2DBeamElement.hpp"
 #include "../maths_defaults.hpp"
 #include "../node.hpp"
 
@@ -22,8 +23,8 @@ void common_beam_setup(std::vector<std::shared_ptr<Node>>& in_nodes, std::shared
     // Create the nodes
     in_nodes.push_back(std::make_shared<Node>(0.0, 0.0, 0.0));
     in_nodes.push_back(std::make_shared<Node>(BEAM_LENGTH, 0.0, 0.0));
-    
-    my_beam = std::make_shared<Linear2DBeamElement>(0, in_nodes);
+    BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+    my_beam = std::make_shared<Linear2DBeamElement>(0, in_nodes, sect);
     // Create the d vector
     U = make_xd_vec(12);
 }
@@ -82,14 +83,12 @@ class BasicTransformationTest : public ::testing::Test {
   public:
     std::vector<std::shared_ptr<Node>> in_nodes;
     std::shared_ptr<BeamElementBaseClass> my_beam;
+    vec U; // not needed for this test but I don't want to create another \ref common_beam_setup function.
     
   
     void SetUp() override {
         // Create the nodes
-        in_nodes.push_back(std::make_shared<Node>(0.0, 0.0, 0.0));
-        in_nodes.push_back(std::make_shared<Node>(BEAM_LENGTH, 0.0, 0.0));
-        my_beam = std::make_shared<Linear2DBeamElement>(0, in_nodes);
-        
+        common_beam_setup(in_nodes, my_beam, U);  
     }
     void TearDown() override {
       

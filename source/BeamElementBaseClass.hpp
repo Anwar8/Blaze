@@ -106,9 +106,10 @@ class BeamElementBaseClass {
          * @tparam Container any type of std container that has a std::size and built-in iterators
          * @param given_id unique identifier for the element; will be passed to the nodes
          * @param in_nodes a container of shared pointers to node objects
+         * @param sect the \ref BasicSection object that contains the material properties of the element.
          */
         template<typename Container>
-        BeamElementBaseClass(int given_id, Container& in_nodes) {
+        BeamElementBaseClass(int given_id, Container& in_nodes, BasicSection sect) {
             initialise(given_id, in_nodes);
         }
         /**
@@ -125,7 +126,7 @@ class BeamElementBaseClass {
          * @param in_nodes a container of shared pointers to node objects
          */
         template<typename Container>
-        void initialise(int given_id, Container& in_nodes) {
+        void initialise(int given_id, Container& in_nodes, BasicSection section) {
             std::cout << "This is a pseudo virtual function. Must define an overriding initialiser for your class." << std::endl;
             std::exit(1);  
         }

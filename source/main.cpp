@@ -15,7 +15,8 @@ int main () {
     int num_divisions = 10;
     int num_elements = num_divisions;
     int num_nodes = num_elements + 1;
-    model.create_line_mesh(num_divisions, end_coords);
+    BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+    model.create_line_mesh(num_divisions, end_coords, sect);
 
     std::vector<unsigned> restrained_nodes = std::vector<unsigned>(num_divisions - 1);
     std::iota(restrained_nodes.begin(), restrained_nodes.end(), 2);

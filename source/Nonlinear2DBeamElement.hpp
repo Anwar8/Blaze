@@ -64,8 +64,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @param in_nodes a container of shared pointers to node objects.
          */
         template<typename Container>
-        Nonlinear2DBeamElement(int given_id, Container& in_nodes) {
-            initialise(given_id, in_nodes);
+        Nonlinear2DBeamElement(int given_id, Container& in_nodes, BasicSection sect) {
+            initialise(given_id, in_nodes, sect);
         }
 
         /**
@@ -74,9 +74,10 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @tparam Container any type of std container that has a std::size and built-in iterators
          * @param given_id unique identifier for the element; will be passed to the nodes
          * @param in_nodes a container of shared pointers to node objects
+         * @param sect the \ref BasicSection object that contains the material properties of the element.
          */
         template<typename Container>
-        void initialise(int given_id, Container& in_nodes) {
+        void initialise(int given_id, Container& in_nodes, BasicSection sect) {
             // initialise the fundamental aspects of the element
             // -----------------------------------------------------
             elem_type = "Nonlinear_2D_EulerBernouli_beam-column"; /**< string that represents the type of the element.*/
@@ -84,6 +85,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             nnodes = 2; /**< number of nodes. 2 nodes for this element type.*/
             set_gauss_points(); /**< set the gauss points (numbers and locations) for the element.*/
             initialise_state_containers();
+            section = sect;
             // -----------------------------------------------------
 
             if (std::size(in_nodes) != nnodes)

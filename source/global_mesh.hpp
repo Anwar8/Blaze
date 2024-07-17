@@ -55,7 +55,7 @@ class GlobalMesh {
             exit(1);
         #endif
         
-
+        BasicSection section; /**< a BasicSection object that is used by all elements in the mesh.*/
         spmat K;
         spvec P;
         vec U; 
@@ -84,12 +84,15 @@ class GlobalMesh {
          * @tparam CoordsContainer a container that has the coordinates of the end points of the line. Needs compatible with STL iterators.
          * @param divisions number of divisions to break the line into.
          * @param end_coords the coordinates of the end points of the line.
+         * @param sect a \ref BasicSection object that is used to initialise the beam-column elements.
          * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> the node_map and elem_map of the line mesh. 
          * @warning assumes mapping takes place from node and element ids = 1. There is no checking for conflicting ids, and nothing to reduce bandwidth!
          */
         template <typename CoordsContainer>
-        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer end_coords)
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer end_coords, BasicSection sect)
         {
+            section = sect;
+
             if (end_coords.size() != 2)
             {
                 std::cout << "Error: end_coords must have 2 elements." << std::endl;
@@ -135,12 +138,13 @@ class GlobalMesh {
 
         /**
          * @brief reads the mesh file (gmsh format) and populates the node and element maps.
-         * 
          * @param mesh_file a string that is the gmsh mesh file name and includes directory.
+         * @param sect a \ref BasicSection object that is used to initialise the beam-column elements.
          * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> a pair of node and element maps corresponding to a gmsh file.
          */
-        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> read_mesh_file(std::string const mesh_file) 
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> read_mesh_file(std::string const mesh_file, BasicSection sect) 
         {
+            section = sect;
             open_mesh_file(mesh_file);
             NodeIdCoordsPairsVector node_map = read_nodes();
             ElemIdNodeIdPairVector elem_map = read_elements();

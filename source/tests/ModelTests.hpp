@@ -13,7 +13,8 @@ class MeshTests : public ::testing::Test {
     int divisions = 10;
   
     void SetUp() override {
-        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}});
+        BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}}, sect);
     }
     void TearDown() override {
 }
@@ -38,7 +39,8 @@ class RestraintTests : public ::testing::Test {
     void SetUp() override {
         NodalRestraint end_restraint;
         NodalRestraint out_of_plane_restraint; 
-        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}});
+        BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}}, sect);
         end_restraint.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5});
         end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
         model.restraints.push_back(end_restraint);
@@ -90,7 +92,8 @@ class LoadTests : public ::testing::Test {
     real y_load = -1e5;
 
     void SetUp() override {
-        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}});
+        BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}}, sect);
         
         model.load_manager.create_a_nodal_load_by_id({(unsigned)(divisions+1)}, std::set<int>{1}, std::vector<real>{y_load}, model.glob_mesh);
         model.initialise_restraints_n_loads();
@@ -163,7 +166,8 @@ class ScribeTests : public ::testing::Test {
     unsigned tracked_node_id = divisions+1;
 
     void SetUp() override {
-        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}});
+        BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}}, sect);
         model.scribe.track_nodes_by_id(std::set<unsigned>{tracked_node_id}, std::set<int>{tracked_dof}, model.glob_mesh);
         
     }
@@ -241,7 +245,8 @@ class CantileverBeam : public ::testing::Test {
     real beam_length = 10.0;
 
     void SetUp() override {
-        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {beam_length, 0.0, 0.0}});
+        BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {beam_length, 0.0, 0.0}}, sect);
 
         NodalRestraint end_restraint;
         end_restraint.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5});
@@ -294,7 +299,8 @@ class SimplySupported : public ::testing::Test {
     real beam_length = 10.0;
 
     void SetUp() override {
-        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {beam_length, 0.0, 0.0}});
+        BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {beam_length, 0.0, 0.0}}, sect);
 
         NodalRestraint end_restraint_1;
         end_restraint_1.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4}); // restrain x translation, x rotation, y translation, y rotation, and z translation
@@ -351,8 +357,8 @@ class SimplySupportedUdl : public ::testing::Test {
     real beam_length = 5.0;
 
     void SetUp() override {
-        
-        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {beam_length, 0.0, 0.0}});
+        BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {beam_length, 0.0, 0.0}}, sect);
 
         NodalRestraint end_restraint_1;
         end_restraint_1.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4}); // restrain x translation, x rotation, y translation, y rotation, and z translation
