@@ -55,6 +55,11 @@ class Model
             std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> mesh_maps = glob_mesh.map_a_line_mesh(divisions, end_coords, sect);
             glob_mesh.setup_mesh(mesh_maps.first, mesh_maps.second);
         }
+
+        void read_all_records()
+        {
+            scribe.read_all_records();
+        }
 };
 
 #endif 

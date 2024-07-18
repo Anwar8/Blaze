@@ -11,7 +11,9 @@ void BasicSolver::solve_for_U(Assembler& assembler) {
     
     if (solver.info() == Eigen::Success)
     {
+        #if LF_VERBOSE
         std::cout << "Factorisation successful." << std::endl;
+        #endif
     } else {
         std::cout << "ERROR: Factorisation unsuccessfull! Matrix is:" << std::endl;
         // convert to dense matrix to print correctly
@@ -37,7 +39,9 @@ void BasicSolver::solve_for_deltaU(Assembler& assembler) {
     
     if (solver.info() == Eigen::Success)
     {
+        #if LF_VERBOSE
         std::cout << "Factorisation successful." << std::endl;
+        #endif
     } else {
         std::cout << "ERROR: Factorisation unsuccessful! Matrix is:" << std::endl;
         // convert to dense matrix to print correctly

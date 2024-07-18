@@ -42,7 +42,9 @@ class SolutionProcedure
             while (load_factor < max_LF)
             {
                 load_factor += dLF;
-                std::cout << std::endl << "===================================[Load step " << step << " - LF = " << load_factor << "]===================================" << std::endl;
+                #if LF_VERBOSE
+                    std::cout << std::endl << "===================================[Load step " << step << " - LF = " << load_factor << "]===================================" << std::endl;
+                #endif
                 load_manager.increment_loads(dLF);
                 bool converged = false;
                 int iter = 1;
@@ -51,8 +53,9 @@ class SolutionProcedure
                 // begin nonlinear iterations:
                 while ((iter <= max_iter) && !(converged))
                 {   
+                    #if LF_VERBOSE
                     std::cout << "-----------------------------------<Started: Iteration " << iter << ">-------------------------------------" << std::endl;
-                    
+                    #endif
                     // solver.solve_for_U(assembler);
 
                     /**
@@ -81,7 +84,7 @@ class SolutionProcedure
                     }
                     // WARNING: this is a debugging line that MUST be removed after problem with convergence is solved.
                     // scribe.write_to_records();
-                    
+                    #if LF_VERBOSE
                     if (!converged)
                     {
                         std::cout << "G_max = " << assembler.get_G_max() << " while tolerance " << tolerance << std::endl;
@@ -89,6 +92,7 @@ class SolutionProcedure
                     } else {
                         std::cout << "-------------------------------------<Iteration " << iter << " Converged>-----------------------------------" << std::endl;
                     }
+                    #endif
                     iter++;
                 }
                 if (VERBOSE) 
@@ -103,16 +107,15 @@ class SolutionProcedure
                 }
                 if ((iter >= max_iter) && !(converged))
                 {
+                    #if LF_VERBOSE
                     std::cout << std::endl << "---<WARNING: Analysis incomplete due to convergence errors. LF = " << load_factor << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
+                    #endif
                     break;
                 }
             }
+            #if LF_VERBOSE
             std::cout << std::endl << "---<Analysis complete. LF = " << load_factor << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
-            if (logging_frequency > 0)
-            {
-                scribe.read_all_records();
-            }
-            
+            #endif
         }
 };
 
