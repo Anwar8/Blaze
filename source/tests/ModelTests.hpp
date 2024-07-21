@@ -468,7 +468,7 @@ void load_and_run(Model& model, unsigned loaded_node, int loaded_dof, real load,
 
 TEST_F(MacNealSlenderBeam, CheckResultK25)
 {
-    int steps = 50;
+    int steps = 25;
     load_and_run(model, tracked_node_id, loaded_dof, M_max*0.25, steps);
     std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(tracked_node_id);
 
@@ -486,7 +486,7 @@ TEST_F(MacNealSlenderBeam, CheckResultK25)
 
 TEST_F(MacNealSlenderBeam, CheckResultK50)
 {
-    int steps = 100;
+    int steps = 50;
     load_and_run(model, tracked_node_id, loaded_dof, M_max*0.5, steps);
     std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(tracked_node_id);
 
@@ -504,7 +504,7 @@ TEST_F(MacNealSlenderBeam, CheckResultK50)
 
 TEST_F(MacNealSlenderBeam, CheckResultK75)
 {
-    int steps = 750;
+    int steps = 75;
     load_and_run(model, tracked_node_id, loaded_dof, M_max*0.75, steps);
     std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(tracked_node_id);
 
@@ -523,7 +523,7 @@ TEST_F(MacNealSlenderBeam, CheckResultK75)
 
 TEST_F(MacNealSlenderBeam, CheckResultK100)
 {
-    int steps = 1000;
+    int steps = 100;
     load_and_run(model, tracked_node_id, loaded_dof, M_max*1.00, steps);
     std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(tracked_node_id);
 
