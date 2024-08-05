@@ -2,8 +2,12 @@
 This journal contains the day-to-day project management and notes taken. It was also used as an indirect form of communication with the MSc supervisor so they are always up to date with my progress.
 
 ## Work plan
-### WP1: Debugging of geometric nonlinearity - 2 weeks - due 15/06/2024
-### WP2: Implementation of 1D nonlinear material - 8 weeks - due 15/08/2024
+### WP1: Debugging of geometric nonlinearity - 2 weeks - due 15/06/2024 - COMPLETED
+### WP2: Implementation of 1D nonlinear material - 8 weeks - due 15/08/2024 - IN PROGRESS
+- [x] 1D material base class: `Material1D`.
+- [x] Isotropic material implementation: `ElasticPlasticMaterial`.
+- [ ] Implementation of `BeamColumnFiberSection`.
+- [ ] Implementation of `Nonlinear2DPlasticBeamElement` which accounts for spread of plasticity.
 ### WP3: Thermal loading interface - 4 weeks - due 15/09/2024
 ### WP4: Shared-memory parallelisation on Cirrus using Kokkos - 6 weeks - due 01/11/2024
 ### WP5: Internode parallelisation with MPI - 12 weeks - due 01/02/2025
@@ -11,6 +15,11 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 5 August
+I have finished implementing and testing the 1D material base class `Material1D` and the isotropic hardening implementation `ElasticPlasticMaterial`. I now need to do the following:
+- Create a class implementation for a fiber-based beam-column element section. This section should be able to take a list fiber areas and centroids, and perform moment and force calculations based on the materials attached to each of them.
+- Implement a fiber-based beam-column element that allows for spread of plasticity as shown in Izzuddin's notes. This will require  
+
 #### 15 July
 I can easily conform the linear element to use the `NonlinearTransform` object as well, as it subsumes the `BasicOrientation` object since it can calculate the linear transformation as well. The linear transformation is really *never* used in the nonlinear element, though. Since it is not used, then maybe `Nonlinear2DBeamElement::calc_T` should be deprecated or left empty (since it must be implemented as it is part of the virtual interface defined by `BeamElementBaseClass`). Also, I can really build the calculation of the material stiffness by using $\int_0 ^L \boldsymbol{B}^T \boldsymbol{D} \boldsymbol{B} dx = \sum _{i = 1} ^2 w_i\left[\boldsymbol{B}(x_i\right]^T \boldsymbol{D} \boldsymbol{B}(x_i)$, which would make it <span style="color:orange;">much easier to implement material nonlinearity as well, since it would be the same calculation!!!</span>
 
