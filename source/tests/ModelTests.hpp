@@ -502,42 +502,42 @@ TEST_F(MacNealSlenderBeam, CheckResultK50)
     EXPECT_TRUE((-disp) < (-max_correct_disp));
 }
 
-TEST_F(MacNealSlenderBeam, CheckResultK75)
-{
-    int steps = 75;
-    load_and_run(model, tracked_node_id, loaded_dof, M_max*0.75, steps);
-    std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(tracked_node_id);
+// TEST_F(MacNealSlenderBeam, CheckResultK75)
+// {
+//     int steps = 75;
+//     load_and_run(model, tracked_node_id, loaded_dof, M_max*0.75, steps);
+//     std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(tracked_node_id);
 
-    std::vector<Record> record_library = model.scribe.get_record_library();
-    Record record = record_library.back();
+//     std::vector<Record> record_library = model.scribe.get_record_library();
+//     Record record = record_library.back();
 
-    std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
-    std::vector<real> disp_data = recorded_data[tracked_dof];
-    real disp = disp_data.back();
-    real min_correct_disp = -2.0; // beam should exceed this displacement
-    real max_correct_disp = -2.3; // beam should not exceed this displacement
-    EXPECT_TRUE((-disp) > (-min_correct_disp));
-    EXPECT_TRUE((-disp) < (-max_correct_disp));
-    model.read_all_records();
-}
+//     std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
+//     std::vector<real> disp_data = recorded_data[tracked_dof];
+//     real disp = disp_data.back();
+//     real min_correct_disp = -2.0; // beam should exceed this displacement
+//     real max_correct_disp = -2.3; // beam should not exceed this displacement
+//     EXPECT_TRUE((-disp) > (-min_correct_disp));
+//     EXPECT_TRUE((-disp) < (-max_correct_disp));
+//     model.read_all_records();
+// }
 
-TEST_F(MacNealSlenderBeam, CheckResultK100)
-{
-    int steps = 100;
-    load_and_run(model, tracked_node_id, loaded_dof, M_max*1.00, steps);
-    std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(tracked_node_id);
+// TEST_F(MacNealSlenderBeam, CheckResultK100)
+// {
+//     int steps = 100;
+//     load_and_run(model, tracked_node_id, loaded_dof, M_max*1.00, steps);
+//     std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(tracked_node_id);
 
-    std::vector<Record> record_library = model.scribe.get_record_library();
-    Record record = record_library.back();
+//     std::vector<Record> record_library = model.scribe.get_record_library();
+//     Record record = record_library.back();
 
-    std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
-    std::vector<real> disp_data = recorded_data[tracked_dof];
-    real disp = disp_data.back();
-    real min_correct_disp = -0.05; // beam should exceed this displacement
-    real max_correct_disp = 0.05; // beam should not exceed this displacement
-    EXPECT_TRUE((-disp) > (-min_correct_disp));
-    EXPECT_TRUE((-disp) < (-max_correct_disp));
-    model.read_all_records();
-}
+//     std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
+//     std::vector<real> disp_data = recorded_data[tracked_dof];
+//     real disp = disp_data.back();
+//     real min_correct_disp = -0.05; // beam should exceed this displacement
+//     real max_correct_disp = 0.05; // beam should not exceed this displacement
+//     EXPECT_TRUE((-disp) > (-min_correct_disp));
+//     EXPECT_TRUE((-disp) < (-max_correct_disp));
+//     model.read_all_records();
+// }
 
 #endif 

@@ -14,7 +14,7 @@
 #include "../node.hpp"
 
 #define BEAM_LENGTH 3.0
-#define E 2.06e11
+#define YOUNGS_MODULUS_BEAM_TEST 2.06e11
 #define A 0.0125
 #define I 0.0004570000
 
@@ -360,7 +360,7 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionStress) {
 
   // Calculate norms and perform assertions
   vec stress = my_beam->get_local_stresses();
-  EXPECT_NEAR(stress(0), (-1.0/BEAM_LENGTH)*E*A, BEAM_TOLERANCE);
+  EXPECT_NEAR(stress(0), (-1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A, BEAM_TOLERANCE);
   EXPECT_NEAR(stress(1), 0.0, BEAM_TOLERANCE);
 }
 
@@ -371,9 +371,9 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionLocalNodalForces) {
   // Calculate norms and perform assertions
   vec local_f = my_beam->get_local_f();
   real local_f_norm = local_f.lpNorm<1>();
-  EXPECT_NEAR(local_f(0), ((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
-  EXPECT_NEAR(local_f(3), -((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
-  EXPECT_NEAR(local_f_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f(0), ((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f(3), -((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f_norm, ((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A)*2.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantCompressionGlobalNodalForces) {
@@ -383,9 +383,9 @@ TEST_F(ConstantStrainStateTest, ConstantCompressionGlobalNodalForces) {
   // Calculate norms and perform assertions
   vec R = my_beam->get_element_resistance_forces();
   real R_norm = R.lpNorm<1>();
-  EXPECT_NEAR(R(0), ((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
-  EXPECT_NEAR(R(6), -((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
-  EXPECT_NEAR(R_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(R(0), ((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(R(6), -((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(R_norm, ((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A)*2.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantTensionEps) {
@@ -404,7 +404,7 @@ TEST_F(ConstantStrainStateTest, ConstantTensionStress) {
 
   // Calculate norms and perform assertions
   vec stress = my_beam->get_local_stresses();
-  EXPECT_NEAR(stress(0), (1.0/BEAM_LENGTH)*E*A, BEAM_TOLERANCE);
+  EXPECT_NEAR(stress(0), (1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A, BEAM_TOLERANCE);
   EXPECT_NEAR(stress(1), 0.0, BEAM_TOLERANCE);
 }
 
@@ -415,9 +415,9 @@ TEST_F(ConstantStrainStateTest, ConstantTensionLocalNodalForces) {
   // Calculate norms and perform assertions
   vec local_f = my_beam->get_local_f();
   real local_f_norm = local_f.lpNorm<1>();
-  EXPECT_NEAR(local_f(0), -((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
-  EXPECT_NEAR(local_f(3), ((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
-  EXPECT_NEAR(local_f_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f(0), -((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f(3), ((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f_norm, ((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A)*2.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantTensionGlobalNodalForces) {
@@ -427,9 +427,9 @@ TEST_F(ConstantStrainStateTest, ConstantTensionGlobalNodalForces) {
   // Calculate norms and perform assertions
   vec R = my_beam->get_element_resistance_forces();
   real R_norm = R.lpNorm<1>();
-  EXPECT_NEAR(R(0), -((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
-  EXPECT_NEAR(R(6), ((1.0/BEAM_LENGTH)*E*A), BEAM_TOLERANCE);
-  EXPECT_NEAR(R_norm, ((1.0/BEAM_LENGTH)*E*A)*2.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(R(0), -((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(R(6), ((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A), BEAM_TOLERANCE);
+  EXPECT_NEAR(R_norm, ((1.0/BEAM_LENGTH)*YOUNGS_MODULUS_BEAM_TEST*A)*2.0, BEAM_TOLERANCE);
 }
 
   /**
@@ -454,7 +454,7 @@ TEST_F(ConstantStrainStateTest, ConstantRotationStress) {
   // Calculate norms and perform assertions
   vec stress = my_beam->get_local_stresses();
   EXPECT_NEAR(stress(0), 0.0, BEAM_TOLERANCE);
-  EXPECT_NEAR(stress(1), (2*E*I/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(stress(1), (2*YOUNGS_MODULUS_BEAM_TEST*I/BEAM_LENGTH), BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantRotationLocalNodalForces) {
@@ -464,9 +464,9 @@ TEST_F(ConstantStrainStateTest, ConstantRotationLocalNodalForces) {
   // Calculate norms and perform assertions
   vec local_f = my_beam->get_local_f();
   real local_f_norm = local_f.lpNorm<1>();
-  EXPECT_NEAR(local_f(2), -(2*E*I/BEAM_LENGTH), BEAM_TOLERANCE);
-  EXPECT_NEAR(local_f(5), (2*E*I/BEAM_LENGTH), BEAM_TOLERANCE);
-  EXPECT_NEAR(local_f_norm, (2*E*I/BEAM_LENGTH)*2.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f(2), -(2*YOUNGS_MODULUS_BEAM_TEST*I/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f(5), (2*YOUNGS_MODULUS_BEAM_TEST*I/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(local_f_norm, (2*YOUNGS_MODULUS_BEAM_TEST*I/BEAM_LENGTH)*2.0, BEAM_TOLERANCE);
 }
 
 TEST_F(ConstantStrainStateTest, ConstantRotationGlobalNodalForces) {
@@ -476,9 +476,9 @@ TEST_F(ConstantStrainStateTest, ConstantRotationGlobalNodalForces) {
   // Calculate norms and perform assertions
   vec R = my_beam->get_element_resistance_forces();
   real R_norm = R.lpNorm<1>();
-  EXPECT_NEAR(R(5), -(2*E*I/BEAM_LENGTH), BEAM_TOLERANCE);
-  EXPECT_NEAR(R(11), (2*E*I/BEAM_LENGTH), BEAM_TOLERANCE);
-  EXPECT_NEAR(R_norm, (2*E*I/BEAM_LENGTH)*2.0, BEAM_TOLERANCE);
+  EXPECT_NEAR(R(5), -(2*YOUNGS_MODULUS_BEAM_TEST*I/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(R(11), (2*YOUNGS_MODULUS_BEAM_TEST*I/BEAM_LENGTH), BEAM_TOLERANCE);
+  EXPECT_NEAR(R_norm, (2*YOUNGS_MODULUS_BEAM_TEST*I/BEAM_LENGTH)*2.0, BEAM_TOLERANCE);
 }
 
 #endif

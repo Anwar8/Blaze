@@ -43,7 +43,7 @@ public:
         starting_stress = 0.0;
         starting_strain = 0.0;
         starting_plastic_strain = 0.0;
-        starting_elastic = false;
+        starting_elastic = true;
     }
 
     /**
@@ -129,7 +129,7 @@ public:
      */
     virtual void calc_plastic_flow(real d_eps)
     {
-        plastic_strain = plastic_strain + ((1 - beta)/(H/E))*abs(d_eps);
+        plastic_strain = plastic_strain + ((1 - beta)/(1 + (H/E)))*abs(d_eps);
     }
     
     /**
@@ -145,7 +145,17 @@ public:
      * @brief updates the starting state of the material by making the current state the next starting state.
      * 
      */
-    virtual void update_starting_state() = 0;
+    virtual void update_starting_state()
+    {
+        starting_E = E;
+        starting_E_t = E_t;
+        starting_fy = fy;
+        starting_fy_bar = fy_bar;
+        starting_stress = stress;
+        starting_strain = strain;
+        starting_plastic_strain = plastic_strain;
+        starting_elastic = elastic;
+    }
 
 
 
@@ -155,8 +165,170 @@ public:
      * 
      * @param dT 
      */
-    virtual void increment_temperature(real dT) = 0;
+    virtual void increment_temperature(real dT) 
+    {
+        return;
+    }
 
+    /**
+     * @brief Get the current Young's modulus of the material.
+     * 
+     * @return real The current Young's modulus.
+     */
+    virtual real get_E() const 
+    {
+        return E;
+    }
+
+    /**
+     * @brief Get the current tangent Young's modulus of the material.
+     * 
+     * @return real The current tangent Young's modulus.
+     */
+    virtual real get_E_t() const
+    {
+        return E_t;
+    }
+
+    /**
+     * @brief Get the current yield strength of the material.
+     * 
+     * @return real The current yield strength.
+     */
+    virtual real get_fy() const
+    {
+        return fy;
+    }
+
+    /**
+     * @brief Get the current yield stress of the material after hardening/softening.
+     * 
+     * @return real The current yield stress.
+     */
+    virtual real get_fy_bar() const
+    {
+        return fy_bar;
+    }
+
+    /**
+     * @brief Get the current stress in the material.
+     * 
+     * @return real The current stress.
+     */
+    virtual real get_stress() const
+    {
+        return stress;
+    }
+
+    /**
+     * @brief Get the current total strain in the material.
+     * 
+     * @return real The current total strain.
+     */
+    virtual real get_strain() const
+    {
+        return strain;
+    }
+
+    /**
+     * @brief 
+     * 
+     * @return real The current accumulated plastic strain.
+     */
+    virtual real get_plastic_strain() const
+    {
+        return plastic_strain;
+    }
+
+    /**
+     * @brief 
+     * 
+     * @return bool True if the material is elastic, false otherwise.
+     */
+    virtual bool is_elastic() const
+    {
+        return elastic;
+    }
+
+    /**
+     * @brief Get the starting Young's modulus of the material.
+     * 
+     * @return real The starting Young's modulus.
+     */
+    virtual real get_starting_E() const
+    {
+        return starting_E;
+    }
+
+    /**
+     * @brief Get the starting tangent Young's modulus of the material.
+     * 
+     * @return real The starting tangent Young's modulus.
+     */
+    virtual real get_starting_E_t() const
+    {
+        return starting_E_t;
+    }
+
+    /**
+     * @brief Get the starting yield strength of the material.
+     * 
+     * @return real The starting yield strength.
+     */
+    virtual real get_starting_fy() const
+    {
+        return starting_fy;
+    }
+
+    /**
+     * @brief Get the starting yield stress of the material after hardening/softening.
+     * 
+     * @return real The starting yield stress.
+     */
+    virtual real get_starting_fy_bar() const
+    {
+        return starting_fy_bar;
+    }
+
+    /**
+     * @brief Get the starting stress in the material.
+     * 
+     * @return real The starting stress.
+     */
+    virtual real get_starting_stress() const
+    {
+        return starting_stress;
+    }
+
+    /**
+     * @brief Get the starting total strain in the material.
+     * 
+     * @return real The starting total strain.
+     */
+    virtual real get_starting_strain() const
+    {
+        return starting_strain;
+    }
+
+    /**
+     * @brief Get the starting accumulated plastic strain in the material.
+     * 
+     * @return real The starting accumulated plastic strain.
+     */
+    virtual real get_starting_plastic_strain() const
+    {
+        return starting_plastic_strain;
+    }
+
+    /**
+     * @brief Check if the material was elastic at the start of the load step.
+     * 
+     * @return bool True if the material was elastic, false otherwise.
+     */
+    virtual bool is_starting_elastic() const
+    {
+        return starting_elastic;
+    }
 };
 
 #endif

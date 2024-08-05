@@ -105,6 +105,62 @@ public:
      */
     virtual void increment_temperature(real dT) = 0;
 
+    /**
+     * @brief Get the current Young's modulus of the material.
+     * 
+     * @return real The current Young's modulus.
+     */
+    virtual real get_E() const = 0;
+
+    /**
+     * @brief Get the current tangent Young's modulus of the material.
+     * 
+     * @return real The current tangent Young's modulus.
+     */
+    virtual real get_E_t() const = 0;
+
+    /**
+     * @brief Get the current yield strength of the material.
+     * 
+     * @return real The current yield strength.
+     */
+    virtual real get_fy() const = 0;
+
+    /**
+     * @brief Get the current yield stress of the material after hardening/softening.
+     * 
+     * @return real The current yield stress.
+     */
+    virtual real get_fy_bar() const = 0;
+
+    /**
+     * @brief Get the current stress in the material.
+     * 
+     * @return real The current stress.
+     */
+    virtual real get_stress() const = 0;
+
+    /**
+     * @brief Get the current total strain in the material.
+     * 
+     * @return real The current total strain.
+     */
+    virtual real get_strain() const = 0;
+
+    /**
+     * @brief Get the current accumulated plastic strain in the material.
+     * 
+     * @return real The current accumulated plastic strain.
+     */
+    virtual real get_plastic_strain() const = 0;
+
+    /**
+     * @brief Check if the material is currently elastic or not.
+     * 
+     * @return bool True if the material is elastic, false otherwise.
+     */
+    virtual bool is_elastic() const = 0;
+
 };
 
 #endif // MATERIAL1D_HPP

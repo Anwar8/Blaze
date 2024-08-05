@@ -3,6 +3,7 @@
 #include "NodalLoadTests.hpp"
 #include "ScribeTest.hpp"
 #include "ModelTests.hpp"
+#include "ElasticPlasticMaterialTests.hpp"
 
 
 int main(int argc, char **argv) {
