@@ -161,6 +161,62 @@ public:
      */
     virtual bool is_elastic() const = 0;
 
+    /**
+     * @brief Get the starting Young's modulus of the material.
+     * 
+     * @return real The starting Young's modulus.
+     */
+    virtual real get_starting_E() const = 0;
+
+    /**
+     * @brief Get the starting tangent Young's modulus of the material.
+     * 
+     * @return real The starting tangent Young's modulus.
+     */
+    virtual real get_starting_E_t() const = 0;
+
+    /**
+     * @brief Get the starting yield strength of the material.
+     * 
+     * @return real The starting yield strength.
+     */
+    virtual real get_starting_fy() const = 0;
+
+    /**
+     * @brief Get the starting yield stress of the material after hardening/softening.
+     * 
+     * @return real The starting yield stress.
+     */
+    virtual real get_starting_fy_bar() const = 0;
+
+    /**
+     * @brief Get the starting stress in the material.
+     * 
+     * @return real The starting stress.
+     */
+    virtual real get_starting_stress() const = 0;
+
+    /**
+     * @brief Get the starting total strain in the material.
+     * 
+     * @return real The starting total strain.
+     */
+    virtual real get_starting_strain() const = 0;
+
+    /**
+     * @brief Get the starting accumulated plastic strain in the material.
+     * 
+     * @return real The starting accumulated plastic strain.
+     */
+    virtual real get_starting_plastic_strain() const = 0;
+
+    /**
+     * @brief Check if the material was elastic at the start of the load step.
+     * 
+     * @return bool True if the material was elastic, false otherwise.
+     */
+    virtual bool is_starting_elastic() const = 0;
+
 };
 
 #endif // MATERIAL1D_HPP
