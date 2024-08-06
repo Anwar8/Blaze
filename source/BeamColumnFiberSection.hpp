@@ -85,7 +85,7 @@ class BeamColumnFiberSection {
             // careful - since each fibre has a unique_ptr, it cannot be copied and so must be accessed by reference even in the loop.
             for (auto& fibre : fibres)
             {
-                real strain_increment = d_axial_strain - fibre.get_y()*d_curvature; // the minus sign is as per Izzuddin's notation.
+                real strain_increment = d_axial_strain - (fibre.get_y() - y_bar)*d_curvature; // the minus sign is as per Izzuddin's notation.
                 fibre.material_ptr->increment_strain(strain_increment);
             }
         }
@@ -100,6 +100,7 @@ class BeamColumnFiberSection {
             moment_yy = 0.0;
             for (auto& fibre : fibres)
             {
+                // std::cout << "fibre y = " << fibre.get_y() << " has area " << fibre.get_area() << " and has stress = " << fibre.material_ptr->get_stress() << std::endl;
                 real force = (fibre.material_ptr->get_stress())*fibre.get_area();
                 axial_force += force;
                 moment_yy += force*-(fibre.get_y() - y_bar);

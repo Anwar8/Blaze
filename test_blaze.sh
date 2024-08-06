@@ -6,6 +6,8 @@ elif [ $1 = "mat" ]; then
 elif [ $1 = "fibre" ]; then
 	./TestBlaze --gtest_filter="FibreSectionCentroidTests.*"
     ./TestBlaze --gtest_filter="MaterialFibreTests.*"
+    ./TestBlaze --gtest_filter="FibreSectionPureBendingTests.*"
+    
 else
     echo "Unknown input: $1. Expected \"mat\" or nothing."
 fi
