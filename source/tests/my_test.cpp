@@ -4,6 +4,7 @@
 #include "ScribeTest.hpp"
 #include "ModelTests.hpp"
 #include "ElasticPlasticMaterialTests.hpp"
+#include "FibreSectionTests.hpp"
 
 
 int main(int argc, char **argv) {

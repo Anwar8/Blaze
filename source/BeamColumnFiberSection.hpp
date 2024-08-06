@@ -30,9 +30,9 @@ class BeamColumnFiberSection {
         real starting_axial_strain; /**< Current axial strain \f$\varepsilon_{axial}\f$.*/
         real starting_curvature;  /**< Current curvature \f$\kappa\f$.*/
 
-        real y_bar; /**< distance to the centroid of the section relative to the bottom.*/
+        real y_bar; /**< distance to the centroid of the section relative to the plane at which y = 0.*/
 
-        mat  D_t = make_xd_mat(2,2); /**< the 2x2 tangent constitutive matrix of the section. */
+        mat  D_t = make_xd_mat(2,2); /**< the 2x2 tangent constitutive matrix of the section.*/
         
     public:
         /**
@@ -43,15 +43,15 @@ class BeamColumnFiberSection {
          * @param areas the area of each fibre.
          * @param ys the y-coordinate of each fibre in order.
          */
-        template <typename stl_container>
-        void add_fibres(Material1D* mat, stl_container areas, stl_container ys)
+        template <typename stl_container, typename MaterialType>
+        void add_fibres(MaterialType* mat, stl_container areas, stl_container ys)
         {
             if (areas.size() != ys.size())
             {
                 std::cout << "BeamColumnFiberSection::add_fibres can only take equally-sized input arrays. sizes of area and ys are: " << areas.size() << ", " << ys.size() << "." << std::endl;
                 exit(1);
             }
-            std::iterator<real> y_iterator = ys.begin();
+            auto y_iterator = ys.begin();
             
             for (auto area: areas)
             {
@@ -154,7 +154,7 @@ class BeamColumnFiberSection {
          */
         void calc_tan_contitutive_matrix()
         {             
-            D_t.Zero();
+            D_t.setZero();
             for (auto& fibre : fibres)
             {
                 real E_t_i = fibre.material_ptr->get_E_t();
@@ -167,5 +167,76 @@ class BeamColumnFiberSection {
                 D_t(0,1) = D_t(1,0);
             }
         }
+
+
+        /**
+         * @brief Get the total area of the section.
+         * 
+         * @return The total area of the section.
+         */
+        real get_section_area() const { return section_area; }
+
+        /**
+         * @brief Get the equivalent Young's modulus of the section.
+         * 
+         * @return The equivalent Young's modulus of the section.
+         */
+        real get_weighted_E() const { return weighted_E; }
+
+        /**
+         * @brief Get the moment of the section about its y axis.
+         * 
+         * @return The moment of the section about its y axis.
+         */
+        real get_moment_yy() const { return moment_yy; }
+
+        /**
+         * @brief Get the axial force in the section.
+         * 
+         * @return The axial force in the section.
+         */
+        real get_axial_force() const { return axial_force; }
+
+        /**
+         * @brief Get the current axial strain.
+         * 
+         * @return The current axial strain.
+         */
+        real get_axial_strain() const { return axial_strain; }
+
+        /**
+         * @brief Get the current curvature.
+         * 
+         * @return The current curvature.
+         */
+        real get_curvature() const { return curvature; }
+
+        /**
+         * @brief Get the starting axial strain.
+         * 
+         * @return The starting axial strain.
+         */
+        real get_starting_axial_strain() const { return starting_axial_strain; }
+
+        /**
+         * @brief Get the starting curvature.
+         * 
+         * @return The starting curvature.
+         */
+        real get_starting_curvature() const { return starting_curvature; }
+
+        /**
+         * @brief Get the distance to the centroid of the section relative to the y = 0 plane.
+         * 
+         * @return The distance to the centroid of the section relative to the y = 0 plane.
+         */
+        real get_y_bar() const { return y_bar; }
+
+        /**
+         * @brief Get the tangent constitutive matrix of the section.
+         * 
+         * @return The tangent constitutive matrix of the section.
+         */
+        const mat& get_D_t() const { return D_t; }
 };
 #endif

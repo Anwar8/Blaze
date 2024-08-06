@@ -18,10 +18,15 @@ protected:
     bool loading = true; /**< is the material currently being continuously loaded by the strain increment? if material is unloading or reloading then this is false.*/
 
 public:
+    ElasticPlasticMaterial() = default;
     ElasticPlasticMaterial(real E, real f, real H)
     {
         initialise_material(E, f, H);
     }
+
+    // Copy constructor
+    ElasticPlasticMaterial(const ElasticPlasticMaterial& other) : Material1D(other), beta(other.beta), loading(other.loading)
+    {}
 
     /**
      * @brief initialise the material and all its properties.
@@ -44,6 +49,7 @@ public:
         starting_strain = 0.0;
         starting_plastic_strain = 0.0;
         starting_elastic = true;
+        initialise_current_state();
     }
 
     /**

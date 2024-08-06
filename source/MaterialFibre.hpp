@@ -27,8 +27,8 @@ class MaterialFibre {
          * 
          */
         MaterialFibre() = default;
-
-        MaterialFibre(Material1D* mat, real area, real y, real z = 0)
+        template <typename MaterialType>
+        MaterialFibre(MaterialType* mat, real area, real y, real z = 0)
         {
             initialise_fibre(mat, area, y, z);
         }
@@ -40,9 +40,10 @@ class MaterialFibre {
          * @param y the y-coordinate of the fibre.
          * @param z the z-coordinate of the fibre.
          */
-        void initialise_fibre(Material1D* mat, real area, real y, real z)
+        template <typename MaterialType>
+        void initialise_fibre(MaterialType* mat, real area, real y, real z)
         {
-            material_ptr = std::make_unique<Material1D>(*mat);
+            material_ptr = std::make_unique<MaterialType>(*mat);
             this->area = area;
             this->y = y;
             this->z = z;
