@@ -13,6 +13,7 @@
 #define TOLERANCE_FIBRE 1e-6
 #define TOLERANCE_SECTION_FORCES 0.02
 
+
 class MaterialFibreTests : public ::testing::Test {
   public:
     ElasticPlasticMaterial steel = ElasticPlasticMaterial(YOUNGS_MODULUS_FIBRE, YIELD_STRENGTH_FIBRE, HARDENING_RATIO_FIBRE*YOUNGS_MODULUS_FIBRE);
@@ -203,10 +204,13 @@ TEST_F(FibreSectionPureBendingTests, ElasticMoment)
     I_section.increment_fibre_strains();
     I_section.calc_section_forces();
     real calculated_section_moment = I_section.get_moment_yy();
+    real calculated_section_force = I_section.get_axial_force();
+
     
     real percent_error = abs(correct_elastic_moment - calculated_section_moment)/abs(correct_elastic_moment);
 
     EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(calculated_section_force, 0.0, TOLERANCE_FIBRE);
 }
 
 /**
@@ -219,10 +223,148 @@ TEST_F(FibreSectionPureBendingTests, PlasticMoment)
     I_section.increment_fibre_strains();
     I_section.calc_section_forces();
     real calculated_section_moment = I_section.get_moment_yy();
+    real calculated_section_force = I_section.get_axial_force();
     
     real percent_error = abs(correct_plastic_moment - calculated_section_moment)/abs(correct_plastic_moment);
 
     EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(calculated_section_force, 0.0, TOLERANCE_FIBRE);
 }
 
+
+
+/**
+ * @brief checks that \ref BeamColumnFiberSection correctly calculates the negative elastic moment of a section.
+ * 
+ */
+TEST_F(FibreSectionPureBendingTests, NegativeElasticMoment)
+{
+    I_section.increment_section_strains(0.0, -kappa_elastic);
+    I_section.increment_fibre_strains();
+    I_section.calc_section_forces();
+    real calculated_section_moment = I_section.get_moment_yy();
+    real calculated_section_force = I_section.get_axial_force();
+
+    
+    real percent_error = abs(-correct_elastic_moment - calculated_section_moment)/abs(-correct_elastic_moment);
+
+    EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(calculated_section_force, 0.0, TOLERANCE_FIBRE);
+}
+
+/**
+ * @brief checks that \ref BeamColumnFiberSection correctly calculates the negative plastic moment of a section.
+ * 
+ */
+TEST_F(FibreSectionPureBendingTests, NegativePlasticMoment)
+{
+    I_section.increment_section_strains(0.0, -kappa_plastic);
+    I_section.increment_fibre_strains();
+    I_section.calc_section_forces();
+    real calculated_section_moment = I_section.get_moment_yy();
+    real calculated_section_force = I_section.get_axial_force();
+    
+    real percent_error = abs(-correct_plastic_moment - calculated_section_moment)/abs(-correct_plastic_moment);
+
+    EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(calculated_section_force, 0.0, TOLERANCE_FIBRE);
+}
+
+
+class FibreSectionPureAxialTests : public ::testing::Test {
+  public:
+    ElasticPlasticMaterial steel = ElasticPlasticMaterial(YOUNGS_MODULUS_FIBRE, YIELD_STRENGTH_FIBRE, HARDENING_RATIO_FIBRE*YOUNGS_MODULUS_FIBRE);
+    BeamColumnFiberSection I_section;
+    
+    real tf = 19.6e-3;
+    real tw = 11.4e-3;
+    real b = 192.8e-3;
+    real h = 467.2e-3;
+    real d = h - 2*tf;
+
+    real section_area = d*tw + 2*tf*b;
+    real axial_yield_strain = YIELD_STRENGTH_FIBRE/YOUNGS_MODULUS_FIBRE;
+    real correct_force = YIELD_STRENGTH_FIBRE*section_area;
+
+    void SetUp() override {
+        build_I_section(I_section, steel, 0.0, tf, b, tw, h, 10, 40);
+        I_section.calc_area_weighted_E();
+        I_section.calc_section_centroid();
+    }
+    void TearDown() override {
+}
+};
+
+/**
+ * @brief checks that \ref BeamColumnFiberSection correctly calculates the tensile axial force of a section.
+ * 
+ */
+TEST_F(FibreSectionPureAxialTests, YieldTensileForce)
+{
+    I_section.increment_section_strains(axial_yield_strain, 0.0);
+    I_section.increment_fibre_strains();
+    I_section.calc_section_forces();
+    real calculated_section_force = I_section.get_axial_force();
+    real calculated_section_moment = I_section.get_moment_yy();
+
+    real percent_error = abs(correct_force - calculated_section_force)/abs(correct_force);
+
+    EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(calculated_section_moment, 0.0, TOLERANCE_FIBRE);
+}
+
+/**
+ * @brief checks that \ref BeamColumnFiberSection correctly calculates the compressive axial force of a section.
+ * 
+ */
+TEST_F(FibreSectionPureAxialTests, YieldCompressiveForce)
+{
+    I_section.increment_section_strains(-axial_yield_strain, 0.0);
+    I_section.increment_fibre_strains();
+    I_section.calc_section_forces();
+    real calculated_section_force = I_section.get_axial_force();
+    real calculated_section_moment = I_section.get_moment_yy();
+
+    real percent_error = abs(-correct_force - calculated_section_force)/abs(-correct_force);
+
+    EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(calculated_section_moment, 0.0, TOLERANCE_FIBRE);
+}
+
+
+/**
+ * @brief checks that \ref BeamColumnFiberSection correctly calculates the tensile axial force of a section beyond yield.
+ * 
+ */
+TEST_F(FibreSectionPureAxialTests, PostYieldTensileForce)
+{
+    I_section.increment_section_strains(1.2*axial_yield_strain, 0.0);
+    I_section.increment_fibre_strains();
+    I_section.calc_section_forces();
+    real calculated_section_force = I_section.get_axial_force();
+    real calculated_section_moment = I_section.get_moment_yy();
+
+    real percent_error = abs(correct_force - calculated_section_force)/abs(correct_force);
+
+    EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(calculated_section_moment, 0.0, TOLERANCE_FIBRE);
+}
+
+/**
+ * @brief checks that \ref BeamColumnFiberSection correctly calculates the compressive axial force of a section beyond yield.
+ * 
+ */
+TEST_F(FibreSectionPureAxialTests, PostYieldCompressiveForce)
+{
+    I_section.increment_section_strains(-1.2*axial_yield_strain, 0.0);
+    I_section.increment_fibre_strains();
+    I_section.calc_section_forces();
+    real calculated_section_force = I_section.get_axial_force();
+    real calculated_section_moment = I_section.get_moment_yy();
+
+    real percent_error = abs(-correct_force - calculated_section_force)/abs(-correct_force);
+
+    EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(calculated_section_moment, 0.0, TOLERANCE_FIBRE);
+}
 #endif 
