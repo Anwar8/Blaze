@@ -8,3 +8,6 @@ source/mesh/mesh_analysis
 /build
 /doc
 /bin
+.DS_Store
+.vscode/
+source/.DS_Store
