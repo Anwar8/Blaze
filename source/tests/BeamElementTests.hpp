@@ -1,3 +1,8 @@
+/**
+ * @file BeamElementTests.hpp
+ * @brief tests the linear beam-column element. Careful as some of these tests not suitable for the nonlinear beam-column.
+ * 
+ */
 #ifndef BEAM_ELEMENT_TESTS_HPP
 #define BEAM_ELEMENT_TESTS_HPP
 

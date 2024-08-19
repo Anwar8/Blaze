@@ -119,11 +119,11 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
             }
             if (print_strains) 
             {
-                std::cout << "element " << id << " strains are:"  << std::endl << local_eps << std::endl;
+                std::cout << "element " << id << " strains are:"  << std::endl << local_eps[0] << std::endl;
             }
             if (print_stresses) 
             {
-                std::cout << "element " << id << " stresses are:"  << std::endl << local_stresses << std::endl;
+                std::cout << "element " << id << " stresses are:"  << std::endl << local_stresses[0] << std::endl;
             }
             if (print_nodal_forces) 
             {
@@ -297,17 +297,17 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
         virtual vec get_local_f() const {return local_f;}
         virtual vec get_element_resistance_forces() const {return element_global_resistance_forces;}   
         virtual std::vector<spnz> get_global_resistance_force_triplets() {return global_R_triplets;}        
-        virtual vec get_eps() const {return local_eps;}
-        virtual vec get_local_stresses() const {return local_stresses;}
-        virtual mat get_local_constitutive_mat() const {return local_constitutive_mat;}
+        virtual vec get_eps() const {return local_eps[0];}
+        virtual vec get_local_stresses() const {return local_stresses[0];}
+        virtual mat get_local_constitutive_mat() const {return local_constitutive_mat[0];}
         virtual mat get_local_mat_stiffness() const {return local_mat_stiffness;}
         virtual mat get_local_geom_stiffness() const {return local_geom_stiffness;}
         virtual mat get_local_tangent_stiffness() const {return local_tangent_stiffness;}
         virtual mat get_elem_global_stiffness() const {return elem_global_stiffness;}
         virtual std::vector<spnz> get_global_stiffness_triplets() {return global_stiffness_triplets;}
         
-        virtual mat get_N() const {return N;}
-        virtual mat get_B() const {return B;}
+        virtual mat get_N() const {return N[0];}
+        virtual mat get_B() const {return B[0];}
         virtual mat get_T() {return orient.get_T();}
         virtual real get_L() {return orient.get_length();}
 

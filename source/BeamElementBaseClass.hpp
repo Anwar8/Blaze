@@ -67,11 +67,11 @@ class BeamElementBaseClass {
         vec local_f; /**< local nodal-forces corresponding to all freedoms.*/
         vec element_global_resistance_forces; /**< transformed resistance forces of the element from \ref local_f.*/
         std::vector<spnz> global_R_triplets; /**< triplet vector for global resistance forces \f$\boldsymbol{R}\f$.*/
-        vec local_eps; /**< local strains.*/
-        vec local_stresses; /**< local stresses.*/
-        mat N; /**< the shape function of the element.*/
-        mat B; /**< the derivative of the shape function of the element.*/
-        mat local_constitutive_mat; /**< local constitutive matrix \f$\boldsymbol{D}\f$.*/
+        std::vector<vec> local_eps; /**< local strains.*/
+        std::vector<vec> local_stresses; /**< local stresses.*/
+        std::vector<mat> N; /**< the shape function of the element.*/
+        std::vector<mat> B; /**< the derivative of the shape function of the element.*/
+        std::vector<mat> local_constitutive_mat; /**< local constitutive matrix \f$\boldsymbol{D}\f$.*/
         mat local_mat_stiffness; /**< local element material stiffness matrix.*/
         mat local_geom_stiffness; /**< local element geometric stiffness matrix.*/
         mat local_tangent_stiffness; /**< local element tangent stiffness matrix.*/

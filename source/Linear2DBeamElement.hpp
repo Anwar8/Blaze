@@ -116,11 +116,14 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
             local_d = make_xd_vec(6); /**< local nodal-displacements for all freedoms. 3 DOFs per node.*/
             local_f = make_xd_vec(6); /**< local nodal-forces corresponding to all freedoms. 3 element forces per node (Fx, Fy, and Mzz).*/
             element_global_resistance_forces = make_xd_vec(12); /**< transformed resistance forces of the element from \ref local_f. 6 per node since we have 3D global nodes, and two nodes giving us 12 components.*/
-            local_eps = make_xd_vec(2); /**< local strains. \f$ \boldsymbol{\varepsilon} = \begin{bmatrix} \varepsilon_{xx} & \kappa\end{bmatrix}^T\f$*/
-            local_stresses = make_xd_vec(2); /**< local stresses.\f$ \boldsymbol{\sigma} = \begin{bmatrix} N & M \end{bmatrix}^T\f$*/
-            N = make_xd_mat(2,6); /**< the shape function of the element. For this 2D element, that is 2 rows and 6 columns.*/
-            B = make_xd_mat(2,6); /**< the derivative of the shape function of the element. In this case 2 rows and 6 columns.*/
-            local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix \f$\boldsymbol{D} = \begin{bmatrix} EA & 0 \\ 0 & EI\end{bmatrix}\f$.*/
+            for (auto& gauss_point : gauss_points)
+            {
+                local_eps.emplace_back(make_xd_vec(2)); /**< local strains. \f$ \boldsymbol{\varepsilon} = \begin{bmatrix} \varepsilon_{xx} & \kappa\end{bmatrix}^T\f$*/
+                local_stresses.emplace_back(make_xd_vec(2)); /**< local stresses.\f$ \boldsymbol{\sigma} = \begin{bmatrix} N & M \end{bmatrix}^T\f$*/
+                N.emplace_back(make_xd_mat(2,6)); /**< the shape function of the element. For this 2D element, that is 2 rows and 6 columns.*/
+                B.emplace_back(make_xd_mat(2,6)); /**< the derivative of the shape function of the element. In this case 2 rows and 6 columns.*/
+                local_constitutive_mat.emplace_back(make_xd_mat(2,2)); /**< local constitutive matrix \f$\boldsymbol{D} = \begin{bmatrix} EA & 0 \\ 0 & EI\end{bmatrix}\f$.*/
+            }
             local_mat_stiffness = make_xd_mat(6,6); /**< local element material stiffness matrix.*/
             local_geom_stiffness = make_xd_mat(6,6); /**< local element geometric stiffness matrix.*/
             local_tangent_stiffness = make_xd_mat(6,6); /**< local element tangent stiffness matrix.*/
@@ -134,7 +137,7 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          * 
          */
         void set_gauss_points() {
-            gauss_points = {-0.57735, 0.57735};
+            gauss_points = {0.5};
         }
     //@}
 
@@ -157,12 +160,12 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          */
         void calc_N(real x)
         {
-            N(0,0) = 1 - (x/length);
-            N(0,3) = x / length;
-            N(1,1) = 1 - 3*std::pow(x/length,2) + 2*std::pow(x/length,3);
-            N(1,2) = x - 2*std::pow(x,2)/length + std::pow(x/length, 2)*x;
-            N(1,4) = 3*std::pow(x/length, 2) - 2*std::pow(x/length, 3);
-            N(1,5) = -x*(x/length) + x * std::pow(x/length,2);
+            N[0](0,0) = 1 - (x/length);
+            N[0](0,3) = x / length;
+            N[0](1,1) = 1 - 3*std::pow(x/length,2) + 2*std::pow(x/length,3);
+            N[0](1,2) = x - 2*std::pow(x,2)/length + std::pow(x/length, 2)*x;
+            N[0](1,4) = 3*std::pow(x/length, 2) - 2*std::pow(x/length, 3);
+            N[0](1,5) = -x*(x/length) + x * std::pow(x/length,2);
         }
         /**
          * @brief call the shape function's derivative of the shape function operation to calculate at a specific point.
@@ -171,12 +174,12 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          */
         void calc_B(real x) 
         {
-            B(0,0) = -1/length;
-            B(0,3) = 1/length;
-            B(1,1) = -6*std::pow(1/length,2) + 12*x*std::pow(1/length,3);
-            B(1,2) = - 4/length + 6*x*std::pow(1/length, 2);
-            B(1,4) = 6*std::pow(1/length, 2) - 12*x*std::pow(1/length, 3);
-            B(1,5) = -2/length + 6 * x* std::pow(1/length,2);
+            B[0](0,0) = -1/length;
+            B[0](0,3) = 1/length;
+            B[0](1,1) = -6*std::pow(1/length,2) + 12*x*std::pow(1/length,3);
+            B[0](1,2) = - 4/length + 6*x*std::pow(1/length, 2);
+            B[0](1,4) = 6*std::pow(1/length, 2) - 12*x*std::pow(1/length, 3);
+            B[0](1,5) = -2/length + 6 * x* std::pow(1/length,2);
         }
 
         /**
@@ -195,8 +198,8 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          */
         void calc_local_constitutive_mat() {
             // given all constitutive mat elements are zeroed we only need to calculate the non-zero diagonal members of this element.
-            local_constitutive_mat(0,0) = section.get_E()*section.get_A();
-            local_constitutive_mat(1,1) = section.get_E()*section.get_I();
+            local_constitutive_mat[0](0,0) = section.get_E()*section.get_A();
+            local_constitutive_mat[0](1,1) = section.get_E()*section.get_I();
         }
 
         /**
@@ -204,14 +207,14 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          * @warning requires \ref B to be calculated before this function is called.
          */
         void calc_eps() {
-            local_eps = B * local_d;
+            local_eps[0] = B[0] * local_d;
         }
 
         /**
          * @brief calculates the local stresses from \f$\boldsymbol{\sigma}=\boldsymbol{D}{\boldsymbol{\varepsilon}}\f$
          * @warning requires \ref local_constitutive_mat and \ref local_eps to be calculated before this function is called.
          */
-        void calc_stresses()  {local_stresses = local_constitutive_mat*local_eps;}
+        void calc_stresses()  {local_stresses[0] = local_constitutive_mat[0]*local_eps[0];}
         
         /**
          * @brief calculates element nodal forces based on nodal displacements and element stiffness.

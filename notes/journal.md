@@ -6,7 +6,7 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP2: Implementation of 1D nonlinear material - 8 weeks - due 15/08/2024 - IN PROGRESS
 - [x] 1D material base class: `Material1D`.
 - [x] Isotropic material implementation: `ElasticPlasticMaterial`.
-- [ ] Implementation of `BeamColumnFiberSection`.
+- [x] Implementation of `BeamColumnFiberSection`.
 - [ ] Implementation of `Nonlinear2DPlasticBeamElement` which accounts for spread of plasticity.
 ### WP3: Thermal loading interface - 4 weeks - due 15/09/2024
 ### WP4: Shared-memory parallelisation on Cirrus using Kokkos - 6 weeks - due 01/11/2024
@@ -15,6 +15,18 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 19 August
+The next and final step in implementing material nonlinearity is the development of the element `Nonlinear2DPlasticBeamElement`. This, however, is simply a small modification of the existing `Nonlinear2DBeamElement`. That being said, it will require a modification of `BeamElementBaseClass` so that the relevant matrices/vectors that are calculated at the Gauss point are turned into `std::vectors`. This will, in turn, result in changing all beam-column elements. Steps are:
+1. Update `BeamElementBaseClass` so that: `local_eps`, `local_stresses`, `N`, `B`, and `local_constitutive_mat` are all `std::vectors`. 
+2. Update `Linear2DBeamElement` and `Nonlinear2DBeamElement` so that they both are still correct and functional with the modified interface where the Gauass point specific matrices and vectors are `std::vectors`.
+3. Implement `Nonlinear2DPlasticBeamElement` as a derived class from `Nonlinear2DBeamElement` that only modifies the way material nonlinearity is calculated.
+
+*things to consider*
+- Actually, we can also implement a geometrically linear plastic beam-column by inheriting from `Linear2DBeamElement`. 
+- We need to update `BeamElementBaseClass` to take a generic base section class that will then allow us to use the implementation of `Linear2DPlasticBeamElement` and `Nonlinear2DPlasticBeamElement` along with and elastic section to give elastic behaviour. This means we would not need both a plastic and elastic beam-column implementation, only a single beam-column implementation.
+- The same could possibly be done for geometric nonlinearity, but it might be a bit more involved as the calculation procedure is significantly different between the two despite the commonalities. It would take more work and will not return a much better software.
+
+
 #### 5 August
 I have finished implementing and testing the 1D material base class `Material1D` and the isotropic hardening implementation `ElasticPlasticMaterial`. I now need to do the following:
 - Create a class implementation for a fiber-based beam-column element section. This section should be able to take a list fiber areas and centroids, and perform moment and force calculations based on the materials attached to each of them.

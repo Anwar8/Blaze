@@ -117,11 +117,14 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             local_d = make_xd_vec(3); /**< local deformational displacements \f$\boldsymbol{d} = [\Delta,    \theta_1,   \theta_2]^T\f$.*/
             local_f = make_xd_vec(3); /**< local nodal-forces corresponding to deformational displacements \f$ \boldsymbol{f} = [F, M_1, M_2]^T\f$.*/
             element_global_resistance_forces = make_xd_vec(12); /**< transformed resistance forces of the element from \ref local_f. 6 per node since we have 3D global nodes, and two nodes giving us 12 components.*/
-            local_eps = make_xd_vec(2); /**< local strains. \f$ \boldsymbol{\varepsilon} = \begin{bmatrix} \varepsilon_{xx} & \kappa\end{bmatrix}^T\f$*/
-            local_stresses = make_xd_vec(2); /**< local stresses.\f$ \boldsymbol{\sigma} = \begin{bmatrix} N & M \end{bmatrix}^T\f$*/
-            N = make_xd_mat(2,3); /**< the shape function of the element. For this 2D element, that is 2 rows and 6 columns.*/
-            B = make_xd_mat(2,3); /**< the derivative of the shape function of the element. In this case 2 rows and 6 columns.*/   
-            local_constitutive_mat = make_xd_mat(2,2); /**< local constitutive matrix \f$\boldsymbol{D} = \begin{bmatrix} EA & 0 \\ 0 & EI\end{bmatrix}\f$.*/
+            for (auto& gauss_point : gauss_points)
+            {
+                local_eps.emplace_back(make_xd_vec(2)); /**< local strains. \f$ \boldsymbol{\varepsilon} = \begin{bmatrix} \varepsilon_{xx} & \kappa\end{bmatrix}^T\f$*/
+                local_stresses.emplace_back(make_xd_vec(2)); /**< local stresses.\f$ \boldsymbol{\sigma} = \begin{bmatrix} N & M \end{bmatrix}^T\f$*/
+                N.emplace_back(make_xd_mat(2,3)); /**< the shape function of the element. For this 2D element, that is 2 rows and 6 columns.*/
+                B.emplace_back(make_xd_mat(2,3)); /**< the derivative of the shape function of the element. In this case 2 rows and 6 columns.*/   
+                local_constitutive_mat.emplace_back(make_xd_mat(2,2)); /**< local constitutive matrix \f$\boldsymbol{D} = \begin{bmatrix} EA & 0 \\ 0 & EI\end{bmatrix}\f$.*/
+            }
             local_mat_stiffness = make_xd_mat(3,3); /**< local element 3x3 material stiffness matrix.*/
             local_geom_stiffness = make_xd_mat(3,3); /**< local element 3x3 geometric stiffness matrix.*/
             local_tangent_stiffness = make_xd_mat(3,3); /**< local element 3x3 tangent stiffness matrix.*/
@@ -137,7 +140,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * 
          */
         void set_gauss_points() {
-            gauss_points = {-0.57735, 0.57735};
+            gauss_points = {0.5};
         }
     //@}
 
@@ -177,14 +180,14 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
         {
             real theta_1 = local_d(1);
             real theta_2 = local_d(2);
-            B(0,0) = -1/initial_length;
-            B(1,0) = 0;
+            B[0](0,0) = -1/initial_length;
+            B[0](1,0) = 0;
 
-            B(0,1) = 2*theta_1/15 - theta_2/30;
-            B(1,1) = -4/initial_length + 6*x/(initial_length*initial_length);
+            B[0](0,1) = 2*theta_1/15 - theta_2/30;
+            B[0](1,1) = -4/initial_length + 6*x/(initial_length*initial_length);
 
-            B(0,2) = -theta_1/30 + 2*theta_2/15;
-            B(1,2) = -2/initial_length + 6*x/(initial_length*initial_length); 
+            B[0](0,2) = -theta_1/30 + 2*theta_2/15;
+            B[0](1,2) = -2/initial_length + 6*x/(initial_length*initial_length); 
         }
 
         /**
@@ -205,8 +208,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          */
         void calc_local_constitutive_mat() {
             // given all constitutive mat elements are zeroed we only need to calculate the non-zero diagonal members of this element.
-            local_constitutive_mat(0,0) = section.get_E()*section.get_A();
-            local_constitutive_mat(1,1) = section.get_E()*section.get_I();
+            local_constitutive_mat[0](0,0) = section.get_E()*section.get_A();
+            local_constitutive_mat[0](1,1) = section.get_E()*section.get_I();
         }
 
         /**
@@ -221,8 +224,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             real theta2 = local_d(2);
 
             real x = 0.5*initial_length;
-            local_eps(0) = (delta/initial_length) + (2*theta1*theta1 - theta1*theta2 + 2*theta2*theta2)/30;
-            local_eps(1) = ((-4/initial_length) + 6*x/(initial_length*initial_length))*theta1 + ((-2/initial_length) + 6*x/(initial_length*initial_length))*theta2;
+            local_eps[0](0) = (delta/initial_length) + (2*theta1*theta1 - theta1*theta2 + 2*theta2*theta2)/30;
+            local_eps[0](1) = ((-4/initial_length) + 6*x/(initial_length*initial_length))*theta1 + ((-2/initial_length) + 6*x/(initial_length*initial_length))*theta2;
 
         }
 
@@ -231,7 +234,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @details despite being a nonlinear element, the stress calculation remains simply as \f$ \boldsymbol{\sigma} = \boldsymbol{D} \boldsymbol{\varepsilon}\f$
          * @warning requires \ref local_constitutive_mat and \ref local_eps to be calculated before this function is called.
          */
-        void calc_stresses()  {local_stresses = local_constitutive_mat*local_eps;}
+        void calc_stresses()  {local_stresses[0] = local_constitutive_mat[0]*local_eps[0];}
         
         /**
          * @brief  calculates \ref local_f based on (6.b) from Izzuddin noting we changed the order of the DoFs.
@@ -243,8 +246,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          */
         void calc_local_f() {
 
-            real EI = local_constitutive_mat(1,1);
-            real EA = local_constitutive_mat(0,0);
+            real EI = local_constitutive_mat[0](1,1);
+            real EA = local_constitutive_mat[0](0,0);
 
             real F = local_f(0);
             real delta = local_d(0);
@@ -295,8 +298,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * 
          */
         void calc_mat_stiffness() {
-            real EA = local_constitutive_mat(0,0);
-            real EI = local_constitutive_mat(1,1);
+            real EA = local_constitutive_mat[0](0,0);
+            real EI = local_constitutive_mat[0](1,1);
             
             real theta1 = local_d(1);
             real theta2 = local_d(2);
