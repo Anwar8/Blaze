@@ -60,30 +60,6 @@ public:
     
     virtual ~Material1D() = default;
     Material1D() = default;
-    Material1D(const Material1D& other)
-    {
-        E = other.E;
-        E_t = other.E_t;
-        fy = other.fy;
-        fy_bar = other.fy_bar;
-        stress = other.stress;
-        strain = other.strain;
-        plastic_strain = other.plastic_strain;
-        elastic = other.elastic;
-
-        starting_E = other.starting_E;
-        starting_E_t = other.starting_E_t;
-        starting_fy = other.starting_fy;
-        starting_fy_bar = other.starting_fy_bar;
-        starting_stress = other.starting_stress;
-        starting_strain = other.starting_strain;
-        starting_plastic_strain = other.starting_plastic_strain;
-        starting_elastic = other.starting_elastic;
-
-        temperature = other.temperature;
-        thermal_strain = other.thermal_strain;
-        alpha = other.alpha;
-    }
     /**
      * @brief initialise the material and all its properties.
      * 

@@ -7,6 +7,7 @@
 #define NONLINEAR_2D_BEAM_ELEMENT_HPP
 
 #include "BeamElementCommonInterface.hpp"
+#include "BeamColumnFiberSection.hpp"
 
 /**
  * @brief a geometrically nonlinear 2D beam element with 6 total freedoms: 1 rotation and two displacements
@@ -27,7 +28,6 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
         /**
          * @name basic_information
          * @brief the basic data about the generic beam element.
-         * all basic_information is inherited from \ref BeamElementBaseClass.
          */
         //@{
             real initial_length; //**<the initial length of the element before any deformation.*/
@@ -36,9 +36,9 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
         /**
          * @name beam_basic_objects
          * @brief basic objects needed by the beam-column elements. Section, shape function, transformation, etc.
-         * all beam_basic_objects are inherited from \ref BeamElementBaseClass
          */
         //@{
+            std::vector<BeamColumnFiberSection> fibre_section; /**< The fibre section assigned to each Gauss point. */
         //@}
 
         /**
@@ -63,8 +63,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @param given_id unique identifier for the element; will be passed to the nodes.
          * @param in_nodes a container of shared pointers to node objects.
          */
-        template<typename Container>
-        Nonlinear2DBeamElement(int given_id, Container& in_nodes, BasicSection sect) {
+        template<typename Container, typename SectionType>
+        Nonlinear2DBeamElement(int given_id, Container& in_nodes, SectionType sect) {
             initialise(given_id, in_nodes, sect);
         }
 
@@ -76,16 +76,20 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @param in_nodes a container of shared pointers to node objects
          * @param sect the \ref BasicSection object that contains the material properties of the element.
          */
-        template<typename Container>
-        void initialise(int given_id, Container& in_nodes, BasicSection sect) {
+        template<typename Container, typename SectionType>
+        void initialise(int given_id, Container& in_nodes, SectionType sect) {
             // initialise the fundamental aspects of the element
             // -----------------------------------------------------
-            elem_type = "Nonlinear_2D_EulerBernouli_beam-column"; /**< string that represents the type of the element.*/
+            elem_type = "Nonlinear_2D_EulerBernouli_Plastic_beam-column"; /**< string that represents the type of the element.*/
             ndofs = 3; /**< number of freedoms at each node. 3 for this element type.*/
             nnodes = 2; /**< number of nodes. 2 nodes for this element type.*/
             initialise_gauss_points(); /**< set the gauss points (numbers and locations) for the element.*/
             initialise_state_containers();
-            section = sect;
+            for (int i = 0; i < gauss_points_x.size(); ++i)
+            {
+                fibre_section.push_back(sect);
+            }
+            
             // -----------------------------------------------------
 
             if (std::size(in_nodes) != nnodes)
@@ -95,15 +99,15 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
                 std::exit(1);
             }
             id = given_id;
-            nodes.push_back(in_nodes[0]);
-            nodes.push_back(in_nodes[1]);
-            for (auto& node : in_nodes) {
-                
+            for (auto& node: in_nodes)
+            {
+                nodes.emplace_back(node);
                 node->add_connected_element(id);
             }
             // CAUTION: copied from Izzuddin2DNonlinearBeam.hpp
             transformation.initialise(nodes);
             initial_length = transformation.get_L0(); // the initial length does not change and only needs to be calculated once.
+            update_gauss_points();
             calc_local_constitutive_mat();
             update_state();
         }
@@ -123,25 +127,27 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
                 local_stresses.emplace_back(make_xd_vec(2)); /**< local stresses.\f$ \boldsymbol{\sigma} = \begin{bmatrix} N & M \end{bmatrix}^T\f$*/
                 N.emplace_back(make_xd_mat(2,3)); /**< the shape function of the element. For this 2D element, that is 2 rows and 6 columns.*/
                 B.emplace_back(make_xd_mat(2,3)); /**< the derivative of the shape function of the element. In this case 2 rows and 6 columns.*/   
-                local_constitutive_mat.emplace_back(make_xd_mat(2,2)); /**< local constitutive matrix \f$\boldsymbol{D} = \begin{bmatrix} EA & 0 \\ 0 & EI\end{bmatrix}\f$.*/
+                local_constitutive_mat.emplace_back(make_xd_mat(2,2)); /**< local tangent constitutive matrix \f$\boldsymbol{D_t}\f$ which is retrieved from the fibre section.*/
             }
             local_mat_stiffness = make_xd_mat(3,3); /**< local element 3x3 material stiffness matrix.*/
             local_geom_stiffness = make_xd_mat(3,3); /**< local element 3x3 geometric stiffness matrix.*/
             local_tangent_stiffness = make_xd_mat(3,3); /**< local element 3x3 tangent stiffness matrix.*/
             elem_global_stiffness = make_xd_mat(12,12); /**< the global contribution of the element - as in, tangent stiffness after transform via \f$ \boldsymbol{K}_t^e = \boldsymbol{T}^T \boldsymbol{k}_t \boldsymbol{T}\f$*/
-            external_geom_stiffness = make_xd_mat(12,12); /**< Geometric stiffness matrix contribution to global geometric stiffness - a 12x12 matrix.*/
-            
+            external_geom_stiffness = make_xd_mat(12,12); /**< Geometric stiffness matrix contribution to global geometric stiffness - a 12x12 matrix.*/   
         }
 
         /**
          * @brief Set the gauss points std::vector.
-         * @details Sets \ref gauss_points_x to an appropriate size and set of values. To be called by constructor. 
-         * Not actually needed for this beam-column element without material nonlinearity, but will become necessary for materially-nonlinear versions.
+         * @details Sets \ref gauss_points_x to an appropriate size and set of values. To be called by constructor. From Materially Nonlinear FEM - Izzuddin Eq (7):
+         * 
+         * \f$ x_{g,1} = \frac{L}{2} \left( 1 - \frac{\sqrt{3}}{3}\right) = 0.2113248654L\f$ and \f$ x_{g,2} = \frac{L}{2} \left( 1 + \frac{\sqrt{3}}{3}\right) = 0.78867513459 L\f$
+         * 
+         * \f$ w_{g,1} = L/2 \f$ and \f$ w_{g,2} = L/2\f$
          * 
          */
         void initialise_gauss_points() {
-            gauss_points_x = {0.5};
-            gauss_points_w = {1.0};
+            gauss_points_x = {0.2113248654, 0.78867513459};
+            gauss_points_w = {0.5, 0.5};
         }
         /**
          * @brief Updates Gauss points after the length of the element is known.
@@ -227,8 +233,15 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          */
         void calc_local_constitutive_mat() {
             // given all constitutive mat elements are zeroed we only need to calculate the non-zero diagonal members of this element.
-            local_constitutive_mat[0](0,0) = section.get_E()*section.get_A();
-            local_constitutive_mat[0](1,1) = section.get_E()*section.get_I();
+            for (int i = 0; i < fibre_section.size(); ++i)
+            {
+                fibre_section[i].update_section_state(local_eps[i]);
+            }
+
+            for (int i = 0; i < gauss_points_x.size(); ++i)
+            {
+                local_constitutive_mat[i] = fibre_section[i].get_D_t();
+            }
         }
 
         /**
@@ -247,7 +260,6 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
                 local_eps[i](0) = (delta/initial_length) + (2*theta1*theta1 - theta1*theta2 + 2*theta2*theta2)/30;
                 local_eps[i](1) = ((-4/initial_length) + 6*gauss_points_x[i]/(initial_length*initial_length))*theta1 + ((-2/initial_length) + 6*gauss_points_x[i]/(initial_length*initial_length))*theta2;
             }
-
         }
 
         /**
@@ -263,27 +275,25 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
         }
         
         /**
-         * @brief  calculates \ref local_f based on (6.b) from Izzuddin noting we changed the order of the DoFs.
+         * @brief  calculates \ref local_f based on (6.b) from Izzuddin noting we changed the order of the DoFs, and that we are including nonlinearity.
          * @details
          * \f$ \boldsymbol{f} = \begin{bmatrix} F \\ M_1 \\ M_2 \end{bmatrix} 
-         * = \begin{bmatrix} F_i + EA\left( \frac{\Delta}{L} + \frac{2\theta_1^2 - \theta_1 \theta_2 + 2 \theta_2 ^2}{30}\right) \\
-         * \left( \frac{4 EI}{L_0} + \frac{2FL_0}{15}\right) \theta_1 + \left(\frac{2EI}{L_0}  - \frac{FL_0}{30}\right)\theta_2 \\ 
-         * \left( \frac{2 EI}{L_0} - \frac{FL_0}{30}\right) \theta_1 + \left(\frac{4EI}{L_0}  + \frac{2FL_0}{15}\right)\theta_2 \end{bmatrix}\f$
+         * \sum_{i=1}^n w_{g,i} \left(\boldsymbol{B}^T \boldsymbol{\sigma}\right)|_{x=x_{g,i}}
+         * \f$
          */
-        void calc_local_f() {
-
-            real EI = local_constitutive_mat[0](1,1);
-            real EA = local_constitutive_mat[0](0,0);
-
+        void calc_local_f() 
+        {
             real F = local_f(0);
             real delta = local_d(0);
             real theta1 = local_d(1);
             real theta2 = local_d(2);
-            
-            local_f(0) = EA*((delta/initial_length) + (2*theta1*theta1 - theta1*theta2 + 2*theta2*theta2)/30);
-            local_f(1) = ((4*EI/initial_length) + (2*F*initial_length/15))*theta1 + ((2*EI/initial_length) - F*initial_length/30)*theta2;
-            local_f(2) = ((2*EI/initial_length) - F*initial_length/30)*theta1 + ((4*EI/initial_length) + (2*F*initial_length/15))*theta2;
 
+            local_f.setZero();
+
+            for (int i = 0; i < gauss_points_w.size(); ++i)
+            {
+                local_f += gauss_points_w[i] * B[i] * local_stresses[i];
+            }
         }
                 
         /**
@@ -301,6 +311,9 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
 
             // calculating element strain, stress, and resistance forces local_f depends on local displacement d in a nonlinear way.
             calc_eps();
+
+            calc_local_constitutive_mat();
+
             calc_stresses();
             calc_local_f();
 

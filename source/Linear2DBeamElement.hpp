@@ -63,8 +63,8 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          * @param given_id unique identifier for the element; will be passed to the nodes.
          * @param in_nodes a container of shared pointers to node objects.
          */
-        template<typename Container>
-        Linear2DBeamElement(int given_id, Container& in_nodes, BasicSection sect) {
+        template<typename Container, typename SectionType>
+        Linear2DBeamElement(int given_id, Container& in_nodes, SectionType sect) {
             initialise(given_id, in_nodes, sect);
         }
 

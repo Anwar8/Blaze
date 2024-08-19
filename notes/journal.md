@@ -15,6 +15,8 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 20 August
+
 #### 19 August
 The next and final step in implementing material nonlinearity is the development of the element `Nonlinear2DPlasticBeamElement`. This, however, is simply a small modification of the existing `Nonlinear2DBeamElement`. That being said, it will require a modification of `BeamElementBaseClass` so that the relevant matrices/vectors that are calculated at the Gauss point are turned into `std::vectors`. This will, in turn, result in changing all beam-column elements. Steps are:
 1. Update `BeamElementBaseClass` so that: `local_eps`, `local_stresses`, `N`, `B`, and `local_constitutive_mat` are all `std::vectors`. 
@@ -29,6 +31,8 @@ The next and final step in implementing material nonlinearity is the development
 **Issues that have arisen**
 - We need to update the Gauss points after calculating the initial length, or otherwise we may have to calcualte the length first which might not be easy as container initialisation requires a known number of Gauss points.
 - `BeamColumnFiberSection` requires a set of new commands to update current and starting states.
+- The calculation of $\boldsymbol{D}_t$ has a bug when hardening is involved. This arises from the fibres not actually copying the material hardening parameter and instead setting the hardening parameter to zero.  <span style="color:orange;">This bug was due to an incorrect copy-constructor that was missing some parameters (the hardening parameter).</span>
+
 
 
 #### 5 August

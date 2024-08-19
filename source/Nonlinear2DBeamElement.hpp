@@ -76,8 +76,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @param in_nodes a container of shared pointers to node objects
          * @param sect the \ref BasicSection object that contains the material properties of the element.
          */
-        template<typename Container>
-        void initialise(int given_id, Container& in_nodes, BasicSection sect) {
+        template<typename Container, typename SectionType>
+        void initialise(int given_id, Container& in_nodes, SectionType sect) {
             // initialise the fundamental aspects of the element
             // -----------------------------------------------------
             elem_type = "Nonlinear_2D_EulerBernouli_beam-column"; /**< string that represents the type of the element.*/
@@ -95,15 +95,15 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
                 std::exit(1);
             }
             id = given_id;
-            nodes.push_back(in_nodes[0]);
-            nodes.push_back(in_nodes[1]);
-            for (auto& node : in_nodes) {
-                
+            for (auto& node: in_nodes)
+            {
+                nodes.emplace_back(node);
                 node->add_connected_element(id);
             }
             // CAUTION: copied from Izzuddin2DNonlinearBeam.hpp
             transformation.initialise(nodes);
             initial_length = transformation.get_L0(); // the initial length does not change and only needs to be calculated once.
+            update_gauss_points();
             calc_local_constitutive_mat();
             update_state();
         }

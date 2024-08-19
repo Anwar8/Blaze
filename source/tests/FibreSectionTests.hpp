@@ -271,6 +271,8 @@ TEST_F(FibreSectionPureBendingTests, NegativePlasticMoment)
 }
 
 
+
+
 class FibreSectionPureAxialTests : public ::testing::Test {
   public:
     ElasticPlasticMaterial steel = ElasticPlasticMaterial(YOUNGS_MODULUS_FIBRE, YIELD_STRENGTH_FIBRE, HARDENING_RATIO_FIBRE*YOUNGS_MODULUS_FIBRE);
@@ -410,5 +412,108 @@ TEST_F(FibreSectionPureAxialTests, IncrementalPostYieldCompressiveForce)
 
     EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
     EXPECT_NEAR(calculated_section_moment, 0.0, TOLERANCE_FIBRE);
+}
+
+
+class FibreSectionTangentConstitutiveMatrix : public ::testing::Test {
+  public:
+    
+    ElasticPlasticMaterial steel = ElasticPlasticMaterial(YOUNGS_MODULUS_FIBRE, YIELD_STRENGTH_FIBRE, HARDENING_RATIO_FIBRE*YOUNGS_MODULUS_FIBRE);
+    BeamColumnFiberSection I_section;
+    
+    real tf = 19.6e-3;
+    real tw = 11.4e-3;
+    real b = 192.8e-3;
+    real h = 467.2e-3;
+    real d = h - 2*tf;
+
+    real section_area = d*tw + 2*tf*b;
+    real moment_of_inertia = tw*pow(h - 2*tf, 3)/12 + 2*b*pow(tf,3)/12 + 2*(tf*b)*pow(0.5*h - 0.5*tf, 2);
+
+    real axial_yield_strain = YIELD_STRENGTH_FIBRE/YOUNGS_MODULUS_FIBRE;
+    real correct_EI = YOUNGS_MODULUS_FIBRE*moment_of_inertia;
+    real correct_EA = YOUNGS_MODULUS_FIBRE*section_area;
+    
+
+    void SetUp() override {
+        build_I_section(I_section, steel, 0.0, tf, b, tw, h, 10, 40);
+    }
+    void TearDown() override {
+}
+};
+
+/**
+ * @brief checks that \ref BeamColumnFiberSection correctly calculates the tangent constitutive matrix if the section is elastic.
+ * 
+ */
+TEST_F(FibreSectionTangentConstitutiveMatrix, CheckDtNoYield)
+{
+    mat D_t_calculated = make_xd_mat(2,2);
+    vec d_eps = make_xd_vec(2);
+    
+    d_eps(0) = 0.9*axial_yield_strain;
+    I_section.update_section_state(d_eps);
+    D_t_calculated = I_section.get_D_t();
+    
+    real calculated_EA = D_t_calculated(0,0);
+    real calculated_EI = D_t_calculated(1,1);
+
+    
+    real percent_error_00 = abs(correct_EA - calculated_EA)/abs(correct_EA);
+    real percent_error_11 = abs(correct_EI - calculated_EI)/abs(correct_EI);
+
+    EXPECT_NEAR(percent_error_00, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(percent_error_11, 0.0, TOLERANCE_SECTION_FORCES);
+}
+
+class FibreSectionTangentConstitutiveMatrixHardening : public ::testing::Test {
+  public:
+    real hardening_param_H = 0.01*YOUNGS_MODULUS_FIBRE;
+    ElasticPlasticMaterial hardening_steel = ElasticPlasticMaterial(YOUNGS_MODULUS_FIBRE, YIELD_STRENGTH_FIBRE, hardening_param_H);
+    BeamColumnFiberSection I_section;
+    real correct_E_t = YOUNGS_MODULUS_FIBRE * hardening_param_H/ (YOUNGS_MODULUS_FIBRE + hardening_param_H);
+    real tf = 19.6e-3;
+    real tw = 11.4e-3;
+    real b = 192.8e-3;
+    real h = 467.2e-3;
+    real d = h - 2*tf;
+
+    real section_area = d*tw + 2*tf*b;
+    real moment_of_inertia = tw*pow(h - 2*tf, 3)/12 + 2*b*pow(tf,3)/12 + 2*(tf*b)*pow(0.5*h - 0.5*tf, 2);
+
+    real axial_yield_strain = YIELD_STRENGTH_FIBRE/YOUNGS_MODULUS_FIBRE;
+    real correct_EI = correct_E_t*moment_of_inertia;
+    real correct_EA = correct_E_t*section_area;
+    
+
+    void SetUp() override {
+        build_I_section(I_section, hardening_steel, 0.0, tf, b, tw, h, 10, 40);
+    }
+    void TearDown() override {
+}
+};
+
+/**
+ * @brief checks that \ref BeamColumnFiberSection correctly calculates the tangent constitutive matrix if the section is plastic and with hardening.
+ * 
+ */
+TEST_F(FibreSectionTangentConstitutiveMatrixHardening, CheckDtPostYield)
+{
+    mat D_t_calculated = make_xd_mat(2,2);
+    vec d_eps = make_xd_vec(2);
+    
+    d_eps(0) = 1.1*axial_yield_strain;
+    I_section.update_section_state(d_eps);
+    D_t_calculated = I_section.get_D_t();
+    
+    real calculated_EA = D_t_calculated(0,0);
+    real calculated_EI = D_t_calculated(1,1);
+
+    
+    real percent_error_00 = abs(correct_EA - calculated_EA)/abs(correct_EA);
+    real percent_error_11 = abs(correct_EI - calculated_EI)/abs(correct_EI);
+
+    EXPECT_NEAR(percent_error_00, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(percent_error_11, 0.0, TOLERANCE_SECTION_FORCES);
 }
 #endif 

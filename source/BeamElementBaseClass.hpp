@@ -109,8 +109,8 @@ class BeamElementBaseClass {
          * @param in_nodes a container of shared pointers to node objects
          * @param sect the \ref BasicSection object that contains the material properties of the element.
          */
-        template<typename Container>
-        BeamElementBaseClass(int given_id, Container& in_nodes, BasicSection sect) {
+        template<typename Container, typename SectionType>
+        BeamElementBaseClass(int given_id, Container& in_nodes, SectionType sect) {
             initialise(given_id, in_nodes);
         }
         /**
