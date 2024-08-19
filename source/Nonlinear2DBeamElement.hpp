@@ -232,7 +232,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
         }
 
         /**
-         * @brief calculates strains based on (4.b) and (4.c) from Izzuddin. x is taken at midpoint of element.
+         * @brief calculates strains based on (4.b) and (4.c) from Izzuddin. This is done per Gauss point, which in this case is just at midpoint of element.
          * @details the relationship between the \ref local_d and \ref local_eps is nonlinear, and as such we 
          * cannot simply use \f$\boldsymbol{\sigma} = \boldsymbol{B}\boldsymbol{d}\f$ which was used in \ref Linear2DBeamElement.
          */
@@ -242,9 +242,11 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             real theta1 = local_d(1);
             real theta2 = local_d(2);
 
-            real x = 0.5*initial_length;
-            local_eps[0](0) = (delta/initial_length) + (2*theta1*theta1 - theta1*theta2 + 2*theta2*theta2)/30;
-            local_eps[0](1) = ((-4/initial_length) + 6*x/(initial_length*initial_length))*theta1 + ((-2/initial_length) + 6*x/(initial_length*initial_length))*theta2;
+            for (int i = 0; i < gauss_points_x.size(); ++i)
+            {
+                local_eps[i](0) = (delta/initial_length) + (2*theta1*theta1 - theta1*theta2 + 2*theta2*theta2)/30;
+                local_eps[i](1) = ((-4/initial_length) + 6*gauss_points_x[i]/(initial_length*initial_length))*theta1 + ((-2/initial_length) + 6*gauss_points_x[i]/(initial_length*initial_length))*theta2;
+            }
 
         }
 
@@ -253,7 +255,12 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @details despite being a nonlinear element, the stress calculation remains simply as \f$ \boldsymbol{\sigma} = \boldsymbol{D} \boldsymbol{\varepsilon}\f$
          * @warning requires \ref local_constitutive_mat and \ref local_eps to be calculated before this function is called.
          */
-        void calc_stresses()  {local_stresses[0] = local_constitutive_mat[0]*local_eps[0];}
+        void calc_stresses()  {
+            for (int i = 0; i < gauss_points_x.size(); ++i)
+            {
+                local_stresses[i] = local_constitutive_mat[i]*local_eps[i];
+            }
+        }
         
         /**
          * @brief  calculates \ref local_f based on (6.b) from Izzuddin noting we changed the order of the DoFs.
