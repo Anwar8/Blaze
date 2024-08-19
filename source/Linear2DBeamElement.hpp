@@ -83,7 +83,7 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
             elem_type = "2D_EulerBernouli_beam-column"; /**< string that represents the type of the element.*/
             ndofs = 3; /**< number of freedoms at each node. 3 for this element type.*/
             nnodes = 2; /**< number of nodes. 2 nodes for this element type.*/
-            set_gauss_points(); /**< set the gauss points (numbers and locations) for the element.*/
+            initialise_gauss_points(); /**< set the gauss points (numbers and locations) for the element.*/
             initialise_state_containers();
             section = sect;
             // -----------------------------------------------------
@@ -103,6 +103,7 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
             }
             calc_T();
             calc_length();
+            update_gauss_points();
             calc_local_constitutive_mat();
             calc_stiffnesses();
         }
@@ -116,7 +117,7 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
             local_d = make_xd_vec(6); /**< local nodal-displacements for all freedoms. 3 DOFs per node.*/
             local_f = make_xd_vec(6); /**< local nodal-forces corresponding to all freedoms. 3 element forces per node (Fx, Fy, and Mzz).*/
             element_global_resistance_forces = make_xd_vec(12); /**< transformed resistance forces of the element from \ref local_f. 6 per node since we have 3D global nodes, and two nodes giving us 12 components.*/
-            for (auto& gauss_point : gauss_points)
+            for (auto& gauss_point : gauss_points_x)
             {
                 local_eps.emplace_back(make_xd_vec(2)); /**< local strains. \f$ \boldsymbol{\varepsilon} = \begin{bmatrix} \varepsilon_{xx} & \kappa\end{bmatrix}^T\f$*/
                 local_stresses.emplace_back(make_xd_vec(2)); /**< local stresses.\f$ \boldsymbol{\sigma} = \begin{bmatrix} N & M \end{bmatrix}^T\f$*/
@@ -132,12 +133,29 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
 
         /**
          * @brief Set the gauss points std::vector.
-         * @details Sets \ref gauss_points to an appropriate size and set of values. To be called by constructor. 
+         * @details Sets \ref gauss_points_x to an appropriate size and set of values. To be called by constructor. 
          * Not actually needed for this beam-column element without material nonlinearity, but will become necessary for materially-nonlinear versions.
          * 
          */
-        void set_gauss_points() {
-            gauss_points = {0.5};
+        void initialise_gauss_points() {
+            gauss_points_x = {0.5};
+            gauss_points_w = {1.0};
+        }
+        /**
+         * @brief Updates Gauss points after the length of the element is known.
+         * @details Multiplies \ref gauss_points_x and \ref gauss_points_w by the length of the element which is now known.
+         * 
+         */
+        virtual void update_gauss_points()
+        {
+            for (auto& pt_x : gauss_points_x)
+            {
+                pt_x *= length;
+            }
+            for (auto& pt_w : gauss_points_x)
+            {
+                pt_w *= length;
+            }
         }
     //@}
 
@@ -154,32 +172,35 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
             length = orient.get_length();
         }
         /**
-         * @brief calculates the shape function of the beam-column element for location x.
-         * 
-         * @param x location at which shape function is evaluated.
+         * @brief calculates the shape function of the beam-column element for location of Gauss points.
          */
-        void calc_N(real x)
-        {
-            N[0](0,0) = 1 - (x/length);
-            N[0](0,3) = x / length;
-            N[0](1,1) = 1 - 3*std::pow(x/length,2) + 2*std::pow(x/length,3);
-            N[0](1,2) = x - 2*std::pow(x,2)/length + std::pow(x/length, 2)*x;
-            N[0](1,4) = 3*std::pow(x/length, 2) - 2*std::pow(x/length, 3);
-            N[0](1,5) = -x*(x/length) + x * std::pow(x/length,2);
+        void calc_N()
+        {            
+            for (int i = 0; i < gauss_points_x.size(); ++i)
+            {
+                N[i](0,0) = 1 - (gauss_points_x[i]/length);
+                N[i](0,3) = gauss_points_x[i] / length;
+                N[i](1,1) = 1 - 3*std::pow(gauss_points_x[i]/length,2) + 2*std::pow(gauss_points_x[i]/length,3);
+                N[i](1,2) = gauss_points_x[i] - 2*std::pow(gauss_points_x[i],2)/length + std::pow(gauss_points_x[i]/length, 2)*gauss_points_x[i];
+                N[i](1,4) = 3*std::pow(gauss_points_x[i]/length, 2) - 2*std::pow(gauss_points_x[i]/length, 3);
+                N[i](1,5) = -gauss_points_x[i]*(gauss_points_x[i]/length) + gauss_points_x[i] * std::pow(gauss_points_x[i]/length,2);
+            }
         }
         /**
-         * @brief call the shape function's derivative of the shape function operation to calculate at a specific point.
+         * @brief call the shape function's derivative of the shape function operation to calculate at Gauss points.
          * 
-         * @param x location along beam-column element at which to calculate the derivative of the shape function.
          */
-        void calc_B(real x) 
+        void calc_B() 
         {
-            B[0](0,0) = -1/length;
-            B[0](0,3) = 1/length;
-            B[0](1,1) = -6*std::pow(1/length,2) + 12*x*std::pow(1/length,3);
-            B[0](1,2) = - 4/length + 6*x*std::pow(1/length, 2);
-            B[0](1,4) = 6*std::pow(1/length, 2) - 12*x*std::pow(1/length, 3);
-            B[0](1,5) = -2/length + 6 * x* std::pow(1/length,2);
+            for (int i = 0; i < gauss_points_x.size(); ++i)
+            {
+                B[i](0,0) = -1/length;
+                B[i](0,3) = 1/length;
+                B[i](1,1) = -6*std::pow(1/length,2) + 12*gauss_points_x[i]*std::pow(1/length,3);
+                B[i](1,2) = - 4/length + 6*gauss_points_x[i]*std::pow(1/length, 2);
+                B[i](1,4) = 6*std::pow(1/length, 2) - 12*gauss_points_x[i]*std::pow(1/length, 3);
+                B[i](1,5) = -2/length + 6 * gauss_points_x[i]* std::pow(1/length,2);
+            }
         }
 
         /**
@@ -235,7 +256,7 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
             // need to retrieve local displacement from the global displacement first of all.
             calc_d_from_U();
             // calculating element strain and stress states depends on local displacement d, even though B calculation currently does not.
-            calc_B(length*0.5);
+            calc_B();
             calc_eps();
             calc_stresses();
             // stiffness calculation must come AFTER stress calculation as stiffness may depend on stress.

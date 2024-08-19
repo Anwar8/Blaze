@@ -42,7 +42,7 @@ class Basic2DBeamElement {
         std::string const elem_type = "beam-column"; /**< string that represents the type of the element.*/
         int const ndofs = 3; /**< number of freedoms at each node.*/
         int const nnodes = 2; /**< number of nodes.*/
-        const std::array<real, 2> gauss_points = {-0.57735, 0.57735}; /**< length-wise coordinates of the Gauss Points*/
+        const std::array<real, 2> gauss_points_x = {-0.57735, 0.57735}; /**< length-wise coordinates of the Gauss Points*/
         real length = 0.0; /**< the length for the beam-column element - to be calculated by the orientation object.*/
         //@}
 

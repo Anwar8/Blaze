@@ -83,7 +83,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             elem_type = "Nonlinear_2D_EulerBernouli_beam-column"; /**< string that represents the type of the element.*/
             ndofs = 3; /**< number of freedoms at each node. 3 for this element type.*/
             nnodes = 2; /**< number of nodes. 2 nodes for this element type.*/
-            set_gauss_points(); /**< set the gauss points (numbers and locations) for the element.*/
+            initialise_gauss_points(); /**< set the gauss points (numbers and locations) for the element.*/
             initialise_state_containers();
             section = sect;
             // -----------------------------------------------------
@@ -117,7 +117,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             local_d = make_xd_vec(3); /**< local deformational displacements \f$\boldsymbol{d} = [\Delta,    \theta_1,   \theta_2]^T\f$.*/
             local_f = make_xd_vec(3); /**< local nodal-forces corresponding to deformational displacements \f$ \boldsymbol{f} = [F, M_1, M_2]^T\f$.*/
             element_global_resistance_forces = make_xd_vec(12); /**< transformed resistance forces of the element from \ref local_f. 6 per node since we have 3D global nodes, and two nodes giving us 12 components.*/
-            for (auto& gauss_point : gauss_points)
+            for (auto& gauss_point : gauss_points_x)
             {
                 local_eps.emplace_back(make_xd_vec(2)); /**< local strains. \f$ \boldsymbol{\varepsilon} = \begin{bmatrix} \varepsilon_{xx} & \kappa\end{bmatrix}^T\f$*/
                 local_stresses.emplace_back(make_xd_vec(2)); /**< local stresses.\f$ \boldsymbol{\sigma} = \begin{bmatrix} N & M \end{bmatrix}^T\f$*/
@@ -135,12 +135,29 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
 
         /**
          * @brief Set the gauss points std::vector.
-         * @details Sets \ref gauss_points to an appropriate size and set of values. To be called by constructor. 
+         * @details Sets \ref gauss_points_x to an appropriate size and set of values. To be called by constructor. 
          * Not actually needed for this beam-column element without material nonlinearity, but will become necessary for materially-nonlinear versions.
          * 
          */
-        void set_gauss_points() {
-            gauss_points = {0.5};
+        void initialise_gauss_points() {
+            gauss_points_x = {0.5};
+            gauss_points_w = {1.0};
+        }
+        /**
+         * @brief Updates Gauss points after the length of the element is known.
+         * @details Multiplies \ref gauss_points_x and \ref gauss_points_w by the length of the element which is now known.
+         * 
+         */
+        virtual void update_gauss_points()
+        {
+            for (auto& pt_x : gauss_points_x)
+            {
+                pt_x *= initial_length;
+            }
+            for (auto& pt_w : gauss_points_x)
+            {
+                pt_w *= initial_length;
+            }
         }
     //@}
 
@@ -162,32 +179,34 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * \f$ v(x) = \left[x - \frac{2 x^2}{L_0} + \frac{x^3}{L_0 ^2} \right] \theta_1 + \left[- \frac{x^2}{L_0} + \frac{x^3}{L_0 ^2} \right] \theta_2\f$ 
          * \f$ \frac{d v(x)}{dx} = \left[1 - \frac{4 x}{L_0} + \frac{3 x^2}{L_0 ^2} \right] \theta_1 + \left[- \frac{2 x}{L_0} + \frac{3 x^2}{L_0 ^2} \right] \theta_2\f$ 
          * I assume I can easily find \f$ u(x)\f$ from my self-assumed \f$ u(x) = \frac{\Delta}{L_0} x \f$
-         * @param x location at which shape function is evaluated.
          */
-        void calc_N(real x)
+        void calc_N( )
         {
             // do nothing.
             std::cout << "WARNING: this function from Nonlinear2DBeamElement does not do anything at the moment." << std::endl;
         }
         /**
-         * @brief call the shape function's derivative of the shape function operation to calculate at a specific point.
+         * @brief call the shape function's derivative of the shape function operation to calculate at the Gauss points.
          * @details This shape function derivative corresponds to Izzudin's notes equation (5.b)
          * \f$\boldsymbol{B} = \frac{\partial \boldsymbol{\varepsilon}}{\partial \boldsymbol{d}^T} = \begin{bmatrix} \frac{1}{L_0} & \frac{2\theta_1}{15} - \frac{\theta_2}{30} & -\frac{\theta_1}{30} + \frac{2\theta_2}{15} \\
          * 0 & -\frac{4}{L_0} + \frac{6x}{L_0 ^2} & -\frac{2}{L_0} + \frac{6x}{L_0 ^2}\end{bmatrix} \f$ 
          * @param x location along beam-column element at which to calculate the derivative of the shape function.
          */
-        void calc_B(real x) 
+        void calc_B( ) 
         {
             real theta_1 = local_d(1);
             real theta_2 = local_d(2);
-            B[0](0,0) = -1/initial_length;
-            B[0](1,0) = 0;
+            for (int i = 0; i < gauss_points_x.size(); ++i)
+            {
+                B[i](0,0) = -1/initial_length;
+                B[i](1,0) = 0;
 
-            B[0](0,1) = 2*theta_1/15 - theta_2/30;
-            B[0](1,1) = -4/initial_length + 6*x/(initial_length*initial_length);
+                B[i](0,1) = 2*theta_1/15 - theta_2/30;
+                B[i](1,1) = -4/initial_length + 6*gauss_points_x[i]/(initial_length*initial_length);
 
-            B[0](0,2) = -theta_1/30 + 2*theta_2/15;
-            B[0](1,2) = -2/initial_length + 6*x/(initial_length*initial_length); 
+                B[i](0,2) = -theta_1/30 + 2*theta_2/15;
+                B[i](1,2) = -2/initial_length + 6*gauss_points_x[i]/(initial_length*initial_length);
+            } 
         }
 
         /**

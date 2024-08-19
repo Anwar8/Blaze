@@ -41,7 +41,8 @@ class BeamElementBaseClass {
         std::string elem_type = "pure-virtual-beam-column"; /**< string that represents the type of the element.*/
         int ndofs = -1; /**< number of freedoms at each node. Unknown in this virtual class. Set to -1 to force implementation in subclass.*/
         int nnodes = -1; /**< number of nodes. Set to -1 to force implementation in subclass.*/
-        std::vector<real> gauss_points; /**< length-wise coordinates of the Gauss Points. to be set by \ref set_gauss_points*/
+        std::vector<real> gauss_points_x; /**< length-wise coordinates of the Gauss Points. to be set by \ref initialise_gauss_points*/
+        std::vector<real> gauss_points_w; /**< Weight of the Gauss Points. to be set by \ref initialise_gauss_points*/
         real length = 0.0; /**< the length for the beam-column element - to be calculated by the orientation object.*/
         //@}
 
@@ -139,10 +140,17 @@ class BeamElementBaseClass {
 
         /**
          * @brief Set the gauss points std::vector.
-         * @details Sets \ref gauss_points to an appropriate size and set of values. To be called by constructor.
+         * @details Sets \ref gauss_points_x and \ref gauss_points_w to an appropriate size and initial set of values. To be called by constructor.
          * 
          */
-        virtual void set_gauss_points() = 0;
+        virtual void initialise_gauss_points() = 0;
+        
+        /**
+         * @brief Updates Gauss points after the length of the element is known.
+         * @details Multiplies \ref gauss_points_x and \ref gauss_points_w by the length of the element which is now known.
+         * 
+         */
+        virtual void update_gauss_points() = 0;
     //@}
     /**
      * @name element operator overloads
@@ -170,17 +178,15 @@ class BeamElementBaseClass {
          */
         virtual void calc_length() = 0;
         /**
-         * @brief calculates the shape function of the beam-column element for location x.
+         * @brief calculates the shape function of the beam-column element for location of Gauss points.
          * 
-         * @param x location at which shape function is evaluated.
          */
-        virtual void calc_N(real x) = 0;
+        virtual void calc_N() = 0;
         /**
-         * @brief call the shape function's derivative of the shape function operation to calculate at a specific point.
+         * @brief call the shape function's derivative of the shape function operation to calculate at location of Gauss points.
          * 
-         * @param x location along beam-column element at which to calculate the derivative of the shape function.
          */
-        virtual void calc_B(real x) = 0;
+        virtual void calc_B() = 0;
 
         /**
          * @brief calculates the transformation matrix from the orientation object.
