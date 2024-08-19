@@ -367,4 +367,48 @@ TEST_F(FibreSectionPureAxialTests, PostYieldCompressiveForce)
     EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
     EXPECT_NEAR(calculated_section_moment, 0.0, TOLERANCE_FIBRE);
 }
+
+/**
+ * @brief checks that \ref BeamColumnFiberSection correctly calculates the compressive axial force of a section as being elastic if the starting state is not updated.
+ * 
+ */
+TEST_F(FibreSectionPureAxialTests, IncrementalNoYieldCompressiveForce)
+{
+    vec d_eps = make_xd_vec(2);
+    d_eps(0) = -0.6*axial_yield_strain;
+    I_section.update_section_state(d_eps);
+    I_section.update_section_state(d_eps);
+    real calculated_section_force = I_section.get_axial_force();
+    real calculated_section_moment = I_section.get_moment_yy();
+    real non_yield_correct_force =0.6*correct_force;
+
+    real percent_error = abs(-non_yield_correct_force - calculated_section_force)/abs(-non_yield_correct_force);
+
+    EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(calculated_section_moment, 0.0, TOLERANCE_FIBRE);
+}
+
+/**
+ * @brief checks that \ref BeamColumnFiberSection correctly calculates the compressive axial force of a section beyond yield if applied in increments.
+ * 
+ */
+TEST_F(FibreSectionPureAxialTests, IncrementalPostYieldCompressiveForce)
+{
+    vec d_eps = make_xd_vec(2);
+    d_eps(0) = -0.6*axial_yield_strain;
+    I_section.update_section_state(d_eps);
+    I_section.update_section_starting_state();
+    d_eps(0) = -1.2*axial_yield_strain;
+    I_section.update_section_state(d_eps);
+    // I_section.increment_section_strains(-1.2*axial_yield_strain, 0.0);
+    // I_section.increment_fibre_strains();
+    // I_section.calc_section_forces();
+    real calculated_section_force = I_section.get_axial_force();
+    real calculated_section_moment = I_section.get_moment_yy();
+
+    real percent_error = abs(-correct_force - calculated_section_force)/abs(-correct_force);
+
+    EXPECT_NEAR(percent_error, 0.0, TOLERANCE_SECTION_FORCES);
+    EXPECT_NEAR(calculated_section_moment, 0.0, TOLERANCE_FIBRE);
+}
 #endif 

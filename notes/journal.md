@@ -26,6 +26,10 @@ The next and final step in implementing material nonlinearity is the development
 - We need to update `BeamElementBaseClass` to take a generic base section class that will then allow us to use the implementation of `Linear2DPlasticBeamElement` and `Nonlinear2DPlasticBeamElement` along with and elastic section to give elastic behaviour. This means we would not need both a plastic and elastic beam-column implementation, only a single beam-column implementation.
 - The same could possibly be done for geometric nonlinearity, but it might be a bit more involved as the calculation procedure is significantly different between the two despite the commonalities. It would take more work and will not return a much better software.
 
+**Issues that have arisen**
+- We need to update the Gauss points after calculating the initial length, or otherwise we may have to calcualte the length first which might not be easy as container initialisation requires a known number of Gauss points.
+- `BeamColumnFiberSection` requires a set of new commands to update current and starting states.
+
 
 #### 5 August
 I have finished implementing and testing the 1D material base class `Material1D` and the isotropic hardening implementation `ElasticPlasticMaterial`. I now need to do the following:

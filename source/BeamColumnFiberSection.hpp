@@ -169,7 +169,38 @@ class BeamColumnFiberSection {
             }
         }
 
+        /**
+         * @brief applies updates the section state by applying an a strain vector after calculating the section centroid and incrementing the section strains. 
+         * 
+         * @param epsilon a 2-row vector containing axial strain and curvature.
+         */
+        void update_section_state(vec& epsilon)
+        {
+            calc_area_weighted_E();
+            calc_section_centroid();
 
+            increment_section_strains(epsilon(0), epsilon(1));
+            increment_fibre_strains();
+            calc_section_forces();
+            calc_tan_contitutive_matrix();
+        }
+
+        /**
+         * @brief updates the section starting state as well as the fibre states.
+         * @details the strains are calculated at the element level for the displacement state not as an increment. Each section, however,
+         * calculates the increment in strains from a starting state of the section, and then applies them to the material of each fibre.
+         * This function allows for 'committing' the state - that is, updating the starting strain for which the strain increments are calcualted.
+         */
+        void update_section_starting_state()
+        {
+            starting_axial_strain = axial_strain;
+            starting_curvature = curvature;
+
+            for (auto& fibre: fibres)
+            {
+                fibre.material_ptr->update_starting_state();
+            }
+        }
         /**
          * @brief Get the total area of the section.
          * 
