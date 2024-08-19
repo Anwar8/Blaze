@@ -26,13 +26,23 @@ To run tests:
 cd bin
 ./Test_Blaze
 ```
+To run specific tests:
+```
+bash test_blaze.sh KEYWORD
+``` 
+where `KEYWORD` is replaced by:
+- nothing, to run all tests.
+- "mat" to run `ElasticPlasticMaterialTest`.
+- "fibre" to run `FibreSectionCentroidTests`, `MaterialFibreTests`, `FibreSectionPureBendingTests`, and `FibreSectionPureAxialTests`.
 
+You can also run `source aliases.sh` to add `build`, `update` and `test` aliases.
 
 ## Directories
-- `./doc` contains the html documentation generated using `Doxygen`.
+- `./doc` contains the html documentation generated using `Doxygen`. Not tracked, so will need to be generated fresh.
 - `./notes` additional `Markdown` files used for project management and record keeping.
 - `./bin` contains binary. Automatically cleared when building with `CMake`.
 - `./build` intermediate build directory. Auto-cleared by `CMake`.
+- `./POC` proof of concept folder containing python scripts for checking algorithms and implementation before implementation in `Blaze`.
 - `./source` source code and deprecated `Makefile` and `config.mk`.
 - `./source/mesh` contains `gmsh` code and `Makefile` for generating a `.msh` file.
 - `./source/tests` contains unit tests source code for `Blaze`.
