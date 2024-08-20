@@ -24,7 +24,12 @@ Today, I will likely complete implementing the `Nonlinear2DPlasticBeamElement`. 
 [ ] Build tests for the plastic beam-column element.
 
 **Problems and Issues Today**
-- finalised the calculation procedure for the nodal forces and stiffness without much issue. However, upon trying to add the option to global mesh to actually create a `Nonlinear2DPlasticBeamElement` I am running into issues with the copying of the section - each section must be copied along with its fibres. However, each fibre has a `unique_ptr` to a material that it controls - this cannot simply be copied. The question is, then, why did I use a `unique_ptr` in the first place? is it worth it, or should I get rid of it now?
+- finalised the calculation procedure for the nodal forces and stiffness without much issue. However, upon trying to add the option to global mesh to actually create a `Nonlinear2DPlasticBeamElement` I am running into issues with the copying of the section - each section must be copied along with its fibres. However, each fibre has a `unique_ptr` to a material that it controls - this cannot simply be copied. The question is, then, why did I use a `unique_ptr` in the first place? is it worth it, or should I get rid of it now? 
+
+This actually turned out to make sense, and I think I fixed that issue already - just don't recall how.
+
+
+- <span style="color:red;">The devil that is 'object slicing' has made it exceedingly difficult to create a uniform way in which to pass different types of sections to the different beam-column elements.</span> When I pass a `BasicSection`, only a `SectionBaseClass` is actually passed because the 'derived' bits (everything) of the `BasicSection` are being trimmed. This is also happening, after I fixed it in the constructor and initialiser, in the `std::vector` storing the sections in the elements because the base class of the beam does not know what kind of section the derived beams will use, and so it creates a `std::vector` of base classes.
 
 #### 19 August
 The next and final step in implementing material nonlinearity is the development of the element `Nonlinear2DPlasticBeamElement`. This, however, is simply a small modification of the existing `Nonlinear2DBeamElement`. That being said, it will require a modification of `BeamElementBaseClass` so that the relevant matrices/vectors that are calculated at the Gauss point are turned into `std::vectors`. This will, in turn, result in changing all beam-column elements. Steps are:
