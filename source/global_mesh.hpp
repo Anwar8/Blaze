@@ -21,6 +21,7 @@
 #include "Izzuddin2DNonlinearBeam.hpp"
 #include "BeamElementBaseClass.hpp"
 #include "basic_utilities.hpp"
+#include "BeamColumnFiberSection.hpp"
 
 /**
  * @brief std vector of pairs each of which has an id and a 3-item coords vector.
@@ -48,7 +49,7 @@ class GlobalMesh {
         std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes in the problem.*/
         #if (ELEM == 1 || ELEM == 2) 
             std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
-        #elif (ELEM == 3 || ELEM == 4)
+        #elif (ELEM == 3 || ELEM == 4 || ELEM == 5)
             std::vector<std::shared_ptr<BeamElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
         #else 
             std::cout << "Incorrect ELEM: " << ELEM << "; should be 1. OLD, 2. IZDN, or 3. LBE." << std::endl;
@@ -88,8 +89,8 @@ class GlobalMesh {
          * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> the node_map and elem_map of the line mesh. 
          * @warning assumes mapping takes place from node and element ids = 1. There is no checking for conflicting ids, and nothing to reduce bandwidth!
          */
-        template <typename CoordsContainer>
-        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer end_coords, BasicSection sect)
+        template <typename CoordsContainer, typename SectionType>
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer end_coords, SectionType sect)
         {
             section = sect;
 
@@ -142,7 +143,8 @@ class GlobalMesh {
          * @param sect a \ref BasicSection object that is used to initialise the beam-column elements.
          * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> a pair of node and element maps corresponding to a gmsh file.
          */
-        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> read_mesh_file(std::string const mesh_file, BasicSection sect) 
+        template <typename SectionType>
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> read_mesh_file(std::string const mesh_file, SectionType sect) 
         {
             section = sect;
             open_mesh_file(mesh_file);

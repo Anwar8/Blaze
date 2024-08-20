@@ -6,6 +6,7 @@
 #include "beam_element.hpp"
 #include "Linear2DBeamElement.hpp"
 #include "Nonlinear2DBeamElement.hpp"
+#include "Nonlinear2DPlasticBeamElement.hpp"
 
 void GlobalMesh::open_mesh_file(std::string const mesh_file) {
     gmsh::initialize();
@@ -94,8 +95,10 @@ void GlobalMesh::make_elements (ElemIdNodeIdPairVector elem_map) {
             elem_vector.push_back(std::make_shared<Linear2DBeamElement>(element_data.first, elem_nodes, section));
         #elif (ELEM == 4)
             elem_vector.push_back(std::make_shared<Nonlinear2DBeamElement>(element_data.first, elem_nodes, section));
+        #elif (ELEM == 5)
+            elem_vector.push_back(std::make_shared<Nonlinear2DPlasticBeamElement>(element_data.first, elem_nodes, section));
         #else 
-            std::cout << "Incorrect ELEM: " << ELEM << "; should be 1. OLD, 2. IZDN, 3. LBE, or 4. New2DNonlinear." << std::endl;
+            std::cout << "Incorrect ELEM: " << ELEM << "; should be 1. OLD, 2. IZDN, 3. LBE, 4. New2DNonlinear, or 5. PlasticNonlinear." << std::endl;
             exit(1);
         #endif
 

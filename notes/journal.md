@@ -16,6 +16,15 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Journal
 #### 20 August
+Today, I will likely complete implementing the `Nonlinear2DPlasticBeamElement`. Today's todo:
+[x] Finalise calculation procedure for local nodal forces and stiffness. 
+[x] Ensure the element procedure is sensible and calculations taking place in the correct order.
+[ ] Improve the constructor to allow for actually creating the section along with a check on the type.
+[ ] Add an option to the `Model` that allows choosing element type to construct.
+[ ] Build tests for the plastic beam-column element.
+
+**Problems and Issues Today**
+- finalised the calculation procedure for the nodal forces and stiffness without much issue. However, upon trying to add the option to global mesh to actually create a `Nonlinear2DPlasticBeamElement` I am running into issues with the copying of the section - each section must be copied along with its fibres. However, each fibre has a `unique_ptr` to a material that it controls - this cannot simply be copied. The question is, then, why did I use a `unique_ptr` in the first place? is it worth it, or should I get rid of it now?
 
 #### 19 August
 The next and final step in implementing material nonlinearity is the development of the element `Nonlinear2DPlasticBeamElement`. This, however, is simply a small modification of the existing `Nonlinear2DBeamElement`. That being said, it will require a modification of `BeamElementBaseClass` so that the relevant matrices/vectors that are calculated at the Gauss point are turned into `std::vectors`. This will, in turn, result in changing all beam-column elements. Steps are:
@@ -29,7 +38,7 @@ The next and final step in implementing material nonlinearity is the development
 - The same could possibly be done for geometric nonlinearity, but it might be a bit more involved as the calculation procedure is significantly different between the two despite the commonalities. It would take more work and will not return a much better software.
 
 **Issues that have arisen**
-- We need to update the Gauss points after calculating the initial length, or otherwise we may have to calcualte the length first which might not be easy as container initialisation requires a known number of Gauss points.
+- We need to update the Gauss points after calculating the initial length, or otherwise we may have to calculate the length first which might not be easy as container initialisation requires a known number of Gauss points.
 - `BeamColumnFiberSection` requires a set of new commands to update current and starting states.
 - The calculation of $\boldsymbol{D}_t$ has a bug when hardening is involved. This arises from the fibres not actually copying the material hardening parameter and instead setting the hardening parameter to zero.  <span style="color:orange;">This bug was due to an incorrect copy-constructor that was missing some parameters (the hardening parameter).</span>
 

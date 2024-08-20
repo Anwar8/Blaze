@@ -1,28 +1,29 @@
 /**
- * @file Nonlinear2DBeamElement.hpp
- * @brief definitions for the basic Euler-Bernouli nonlinear beam-column from Izzuddin's NLSA notes.
+ * @file Nonlinear2DPlasticBeamElement.hpp
+ * @brief definitions for the basic Euler-Bernouli nonlinear beam-column element with spreading plasticity from Izzuddin's NLSA notes.
  */
 
-#ifndef NONLINEAR_2D_BEAM_ELEMENT_HPP
-#define NONLINEAR_2D_BEAM_ELEMENT_HPP
+#ifndef NONLINEAR_2D_PLASTIC_BEAM_ELEMENT_HPP
+#define NONLINEAR_2D_PLASTIC_BEAM_ELEMENT_HPP
 
 #include "BeamElementCommonInterface.hpp"
 #include "BeamColumnFiberSection.hpp"
 
 /**
  * @brief a geometrically nonlinear 2D beam element with 6 total freedoms: 1 rotation and two displacements
- * 
+ * and the allowance for spreading plasticity.
  * @details
  * This beam-column element has fewer freedoms than required in a 3D domain, and so the
  * transformation matrix T must map the element from 6 freedoms to the required 12 in 3D
- * domains.
+ * domains. It can use nonlinear sections and used for spreading plasticity.
  * 
  * This is a geometrically nonlinear beam-column element. It is based on the Euler-Bernouli model
  * and has a cubic shape function, and is built based on Bassam Izzuddin's NLSA notes, and also
- * on Felippa's nonlinear finite element notes.
+ * on Felippa's nonlinear finite element notes. See "Materailly Nonlinear Finite Elements for One-Dimensional
+ * Structural Systems" for more details on the plasticity.
  * 
  */
-class Nonlinear2DBeamElement : public BeamElementCommonInterface {
+class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
     private:
     protected:
         /**
@@ -64,7 +65,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @param in_nodes a container of shared pointers to node objects.
          */
         template<typename Container, typename SectionType>
-        Nonlinear2DBeamElement(int given_id, Container& in_nodes, SectionType sect) {
+        Nonlinear2DPlasticBeamElement(int given_id, Container& in_nodes, SectionType sect) {
             initialise(given_id, in_nodes, sect);
         }
 
@@ -228,7 +229,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
         }
 
         /**
-         * @brief calculates local constitutive matrix from section information. For this lineaer element it is simply EA and EI along diagonals 1,1 and 2,2
+         * @brief calculates local constitutive matrix from section information - retrieves \f$ \boldsymbol{D}_t \f$ from section after updating section state.
          * 
          */
         void calc_local_constitutive_mat() {
@@ -263,9 +264,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
         }
 
         /**
-         * @brief calculates the local stresses from \f$\boldsymbol{\sigma}=\boldsymbol{D}{\boldsymbol{\varepsilon}}\f$.
-         * @details despite being a nonlinear element, the stress calculation remains simply as \f$ \boldsymbol{\sigma} = \boldsymbol{D} \boldsymbol{\varepsilon}\f$
-         * @warning requires \ref local_constitutive_mat and \ref local_eps to be calculated before this function is called.
+         * @brief calculates the local stresses from \f$\boldsymbol{\sigma}=\boldsymbol{D}_t{\boldsymbol{\varepsilon}}\f$.
+         * @details despite being a nonlinear element, the stress calculation remains simply as \f$ \boldsymbol{\sigma} = \boldsymbol{D}_t \boldsymbol{\varepsilon}\f$
          */
         void calc_stresses()  {
             for (int i = 0; i < gauss_points_x.size(); ++i)
@@ -278,7 +278,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @brief  calculates \ref local_f based on (6.b) from Izzuddin noting we changed the order of the DoFs, and that we are including nonlinearity.
          * @details
          * \f$ \boldsymbol{f} = \begin{bmatrix} F \\ M_1 \\ M_2 \end{bmatrix} 
-         * \sum_{i=1}^n w_{g,i} \left(\boldsymbol{B}^T \boldsymbol{\sigma}\right)|_{x=x_{g,i}}
+         * = \sum_{i=1}^n w_{g,i} \left(\boldsymbol{B}^T \boldsymbol{\sigma}\right)|_{x=x_{g,i}}
          * \f$
          */
         void calc_local_f() 
@@ -292,14 +292,12 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
 
             for (int i = 0; i < gauss_points_w.size(); ++i)
             {
-                local_f += gauss_points_w[i] * B[i] * local_stresses[i];
+                local_f += gauss_points_w[i] * B[i].transpose() * local_stresses[i];
             }
         }
                 
         /**
-         * @brief updates element nodal displacements, strains, stresses, element resistance forces.
-         * @warning this is a purely linear element so no re-evaluation of material strength or constitutive matrix.
-         * @warning This calculation is NOT done for Gauss points, but only for midpoint of element (which is preferred for output postprocessing).
+         * @brief updates element nodal displacements, strains, constitutive relationship, stresses, element resistance forces.
          */
         void update_state() 
         {
@@ -311,11 +309,9 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
 
             // calculating element strain, stress, and resistance forces local_f depends on local displacement d in a nonlinear way.
             calc_eps();
-
-            calc_local_constitutive_mat();
-
+            calc_local_constitutive_mat(); // need to update the constitutive matrix each iteration due to material nonlinearity.
             calc_stresses();
-            calc_local_f();
+            calc_local_f(); // numerical integration required to calculate local_f.
 
             // stiffness calculation must come AFTER stress calculation as stiffness may depend on stress.
             calc_stiffnesses();
@@ -333,40 +329,42 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
      */
     //@{
         /**
-         * @brief calculates the material stiffness matrix using (7.b) from Izzuddin's notes being careful to reorder the DoFs.
-         * 
+         * @brief calculates the material stiffness matrix using (5.e) from Izzuddin's notes being careful to reorder the DoFs.
+         * @details 
+         * \f$ \boldsymbol{k}_e = \sum_{i=1}^n w_{g,i} \left(\boldsymbol{B}^T \boldsymbol{D}_t \boldsymbol{B} \right)|_{x=x_{g,i}} \f$ 
          */
         void calc_mat_stiffness() {
-            real EA = local_constitutive_mat[0](0,0);
-            real EI = local_constitutive_mat[0](1,1);
-            
-            real theta1 = local_d(1);
-            real theta2 = local_d(2);
-            vec V = make_xd_vec(3);
-
-            V(0) = 1/initial_length;
-            V(1) = 2*theta1/15 - theta2/30;
-            V(2) = -theta1/30 + 2*theta2/15;
             local_mat_stiffness.setZero();
-    
-            local_mat_stiffness(1,1) = 4*EI/initial_length;
-            local_mat_stiffness(2,2) = 4*EI/initial_length;
-            local_mat_stiffness(1,2) = 2*EI/initial_length;
-            local_mat_stiffness(2,1) = 2*EI/initial_length;
-            local_mat_stiffness = local_mat_stiffness + EA*initial_length*V*V.transpose();
+
+            for (int i = 0; i < gauss_points_w.size(); ++i)
+            {
+                local_mat_stiffness += gauss_points_w[i]* (B[i].transpose() * local_constitutive_mat[i] * B[i]);
+            }
         }
 
         /**
-         * @brief calculates the geometric stiffness from Izzuddin's notes equation (7.d).
+         * @brief calculates the geometric stiffness from Izzuddin's notes equation (5.e) where we note the absence of L due to numerical integration.
+         * @details this part of the calculation is actually identical to before and does not need to be changed, but it was anyway to reflect selection
+         * of Gauss points and be consistent with the theory. That is:
+         * 
+         * \f$ w_{g,i} = L/2\f$ 
+         * 
+         * and so:
+         * 
+         * \f$ \boldsymbol{k}_g = \frac{\partial ^2 \varepsilon_c}{\partial \boldsymbol{d} \partial \boldsymbol{d}^T}= 2 * w_{g,i} * \frac{1}{30} \begin{bmatrix}0 & 0 & 0 \\ 0 & 4 & -1 \\ 0 & -1 & 4 \end{bmatrix}\f$
          * 
          */
         void calc_geom_stiffness() 
         {
+            local_geom_stiffness.setZero();
             real F = local_f(0);
-            local_geom_stiffness(1,1) = 4*F*initial_length/30;
-            local_geom_stiffness(2,2) = 4*F*initial_length/30;
-            local_geom_stiffness(1,2) = -F*initial_length/30;
-            local_geom_stiffness(2,1) = -F*initial_length/30;
+            for (int i = 0; i < gauss_points_w.size(); ++i)
+            {
+                local_geom_stiffness(1,1) += gauss_points_w[i]*4*F*initial_length/30;
+                local_geom_stiffness(2,2) += gauss_points_w[i]*4*F*initial_length/30;
+                local_geom_stiffness(1,2) += gauss_points_w[i]*-F*initial_length/30;
+                local_geom_stiffness(2,1) += gauss_points_w[i]*-F*initial_length/30;
+            }
         }
         /**
          * @brief calculates the direct external geometric stiffness contributions of the element.
