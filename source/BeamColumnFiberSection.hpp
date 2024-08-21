@@ -37,7 +37,10 @@ class BeamColumnFiberSection : public SectionBaseClass {
         mat  D_t = make_xd_mat(2,2); /**< the 2x2 tangent constitutive matrix of the section.*/
         
     public:
-        BeamColumnFiberSection() = default;
+        BeamColumnFiberSection() 
+        {
+            section_type = Fibre;
+        };
 
 
         /**

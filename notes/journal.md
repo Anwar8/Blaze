@@ -17,7 +17,7 @@ This journal contains the day-to-day project management and notes taken. It was 
 ## Journal
 #### 21 August 
 Corrected issue of object slicing for sections by a combination of using templates and defining the `std::vector` of sections as a `std::vector<std::unique_ptr<SectionBaseType>>` in stead. 
-[ ] Improve the constructor to allow for actually creating the section along with a check on the type.
+[x] Improve the constructor to allow for actually creating the section along with a check on the type.
 [x] Add an option to the `Model` that allows choosing element type to construct.
 
 #### 20 August

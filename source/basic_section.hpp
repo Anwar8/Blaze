@@ -22,7 +22,7 @@ class BasicSection : public SectionBaseClass {
     public:
         BasicSection() = default;
         BasicSection(real youngs_modulus, real area, real moment_of_inertia) 
-        : E(youngs_modulus), A(area), I(moment_of_inertia) {}
+        : E(youngs_modulus), A(area), I(moment_of_inertia) {section_type = Basic;}
         
         void set_E(real E) {this->E = E;}
         void set_I(real I) {this->I = I;}

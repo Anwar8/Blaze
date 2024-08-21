@@ -85,7 +85,13 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
             nnodes = 2; /**< number of nodes. 2 nodes for this element type.*/
             initialise_gauss_points(); /**< set the gauss points (numbers and locations) for the element.*/
             initialise_state_containers();
-            section.emplace_back(std::make_unique<SectionType>(sect));
+            if (sect.get_section_type() == Basic)
+            {
+                section.emplace_back(std::make_unique<SectionType>(sect));
+            } else {
+                std::cout << "Element of type " << elem_type << " only accepts section of type Basic = 1, but got section of type: " << sect.get_section_type() << std::endl;
+                exit(1);
+            }
             // -----------------------------------------------------
 
             if (std::size(in_nodes) != nnodes)

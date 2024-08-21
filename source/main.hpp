@@ -17,4 +17,10 @@ enum ElementType {
     NonlinearElastic = 1,
     NonlinearPlastic = 2
 };
+
+enum SectionType {
+    Base = 0,
+    Basic = 1,
+    Fibre = 2
+};
 #endif
