@@ -20,6 +20,9 @@ Corrected issue of object slicing for sections by a combination of using templat
 [x] Improve the constructor to allow for actually creating the section along with a check on the type.
 [x] Add an option to the `Model` that allows choosing element type to construct.
 
+Okay, it seems I still have NOT resolved the issue with the wrong section being passed due to, or not to, object slicing.
+What I am going to try and do now is make `SectionBaseClass` into a pure virtual class, which should prevent it from being initialised at all, and thus also prevent it from ruining my day.
+
 #### 20 August
 Today, I will likely complete implementing the `Nonlinear2DPlasticBeamElement`. Today's todo:
 [x] Finalise calculation procedure for local nodal forces and stiffness. 
