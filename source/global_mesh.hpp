@@ -47,16 +47,11 @@ class GlobalMesh {
         int ndofs = 0; /**< number of DOFs in the mesh.*/
         int nelems = 0; /**< number of elements in the mesh.*/
         std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes in the problem.*/
-        #if (ELEM == 1 || ELEM == 2) 
-            std::vector<std::shared_ptr<Basic2DBeamElement>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
-        #elif (ELEM == 3 || ELEM == 4 || ELEM == 5)
-            std::vector<std::shared_ptr<BeamElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
-        #else 
-            std::cout << "Incorrect ELEM: " << ELEM << "; should be 1. OLD, 2. IZDN, or 3. LBE." << std::endl;
-            exit(1);
-        #endif
+        std::vector<std::shared_ptr<BeamElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
+
         
         SectionBaseClass section; /**< a BasicSection object that is used by all elements in the mesh.*/
+        ElementType element_type;
         spmat K;
         spvec P;
         vec U; 
@@ -84,19 +79,21 @@ class GlobalMesh {
          * 
          * @tparam CoordsContainer a container that has the coordinates of the end points of the line. Needs compatible with STL iterators.
          * @param divisions number of divisions to break the line into.
-         * @param end_coords the coordinates of the end points of the line.
+         * @param pts_coords the coordinates of the end points of the line.
+         * @param elem_type an enum referring to the type of element that the mesh will include.
          * @param sect a \ref BasicSection object that is used to initialise the beam-column elements.
          * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> the node_map and elem_map of the line mesh. 
          * @warning assumes mapping takes place from node and element ids = 1. There is no checking for conflicting ids, and nothing to reduce bandwidth!
          */
         template <typename CoordsContainer, typename SectionType>
-        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer end_coords, SectionType sect)
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer pts_coords, ElementType elem_type, SectionType sect)
         {
+            element_type = elem_type;
             section = sect;
 
-            if (end_coords.size() != 2)
+            if (pts_coords.size() != 2)
             {
-                std::cout << "Error: end_coords must have 2 elements." << std::endl;
+                std::cout << "Error: pts_coords must have 2 elements." << std::endl;
                 exit(1);
             }
 
@@ -106,11 +103,11 @@ class GlobalMesh {
             elem_map.reserve(divisions);
 
 
-            coords delta_xyz = (end_coords[1] - end_coords[0])/divisions;
+            coords delta_xyz = (pts_coords[1] - pts_coords[0])/divisions;
 
             for (size_t i = 0; i < divisions + 1; ++i)
             {
-                node_map.push_back(std::make_pair(i + 1, end_coords[0] + i*delta_xyz));
+                node_map.push_back(std::make_pair(i + 1, pts_coords[0] + i*delta_xyz));
             }
 
             for (size_t i = 0; i < divisions; ++i)

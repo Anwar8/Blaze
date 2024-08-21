@@ -1,3 +1,7 @@
+#ifndef MAIN_HPP
+#define MAIN_HPP
+
+
 #define VERBOSE 0
 #define VERBOSE_STIFFNESSES 0
 #define VERBOSE_NLB 0
@@ -7,3 +11,10 @@
 
 
 #define PI 3.14159265358979323846
+
+enum ElementType {
+    LinearElastic = 0,
+    NonlinearElastic = 1,
+    NonlinearPlastic = 2
+};
+#endif

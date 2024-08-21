@@ -87,21 +87,22 @@ void GlobalMesh::make_elements (ElemIdNodeIdPairVector elem_map) {
             auto node = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(node_id, node_vector);
             elem_nodes.push_back(*node);
         }
-        #if (ELEM == 1)
-            elem_vector.push_back(std::make_shared<Basic2DBeamElement>(element_data.first, elem_nodes));
-        #elif (ELEM == 2)
-            elem_vector.push_back(std::make_shared<Izzuddin2DNonlinearBeam>(element_data.first, elem_nodes));
-        #elif (ELEM == 3)
-            elem_vector.push_back(std::make_shared<Linear2DBeamElement>(element_data.first, elem_nodes, section));
-        #elif (ELEM == 4)
-            elem_vector.push_back(std::make_shared<Nonlinear2DBeamElement>(element_data.first, elem_nodes, section));
-        #elif (ELEM == 5)
-            elem_vector.push_back(std::make_shared<Nonlinear2DPlasticBeamElement>(element_data.first, elem_nodes, section));
-        #else 
-            std::cout << "Incorrect ELEM: " << ELEM << "; should be 1. OLD, 2. IZDN, 3. LBE, 4. New2DNonlinear, or 5. PlasticNonlinear." << std::endl;
-            exit(1);
-        #endif
 
+        switch (element_type)
+        {
+        case LinearElastic:
+            elem_vector.push_back(std::make_shared<Linear2DBeamElement>(element_data.first, elem_nodes, section));
+            break;
+        case NonlinearElastic:
+            elem_vector.push_back(std::make_shared<Nonlinear2DBeamElement>(element_data.first, elem_nodes, section));
+            break;
+        case NonlinearPlastic:
+            elem_vector.push_back(std::make_shared<Nonlinear2DPlasticBeamElement>(element_data.first, elem_nodes, section));
+            break;
+        default:
+            std::cout << "Incorrect element_type: " << element_type << "; should be 0. LinearElastic, 1. NonlinearElastic, or 2. NonlinearPlastic." << std::endl;
+            exit(1);
+        }
     }   
 }
 void GlobalMesh::make_nodes (NodeIdCoordsPairsVector node_map) {
