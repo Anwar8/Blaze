@@ -9,12 +9,14 @@
 #include "maths_defaults.hpp"
 #include "MaterialFibre.hpp"
 #include "Material1D.hpp"
+#include "SectionBaseClass.hpp"
+
 /**
  * @brief cross-section containing fibres used to represent material nonlinearity of a beam-column element.
  * 
  */
 
-class BeamColumnFiberSection {
+class BeamColumnFiberSection : public SectionBaseClass {
     private:
         real section_area; /**<total area of the section - combined area of all fibres.*/ 
         real weighted_E; /**<an equivalent Young's modulus taken as the weighted mean of all fibres.*/
@@ -35,6 +37,9 @@ class BeamColumnFiberSection {
         mat  D_t = make_xd_mat(2,2); /**< the 2x2 tangent constitutive matrix of the section.*/
         
     public:
+        BeamColumnFiberSection() = default;
+
+
         /**
          * @brief populates the fibre vector of the section.
          * 

@@ -52,7 +52,7 @@ class BeamElementBaseClass {
          */
         //@{
         std::vector<std::shared_ptr<Node>> nodes; /**< a std::vector that holds the shared ptrs to the nodes.*/
-        BasicSection section; /**< the section for the beam-column element.*/
+        std::vector<SectionBaseClass> section; /**< the section for the beam-column element.*/
         BasicOrientation orient; /**< the orientation object for the beam-column element.*/
         NonlinearTransform transformation; /**< the nonlinear transformation used to account for geometric nonlinearity*/
         //@}
@@ -110,7 +110,7 @@ class BeamElementBaseClass {
          * @param sect the \ref BasicSection object that contains the material properties of the element.
          */
         template<typename Container, typename SectionType>
-        BeamElementBaseClass(int given_id, Container& in_nodes, SectionType sect) {
+        BeamElementBaseClass(int given_id, Container& in_nodes, SectionType& sect) {
             initialise(given_id, in_nodes);
         }
         /**
@@ -127,7 +127,7 @@ class BeamElementBaseClass {
          * @param in_nodes a container of shared pointers to node objects
          */
         template<typename Container>
-        void initialise(int given_id, Container& in_nodes, BasicSection section) {
+        void initialise(int given_id, Container& in_nodes, BasicSection& section) {
             std::cout << "This is a pseudo virtual function. Must define an overriding initialiser for your class." << std::endl;
             std::exit(1);  
         }

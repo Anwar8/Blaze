@@ -78,7 +78,6 @@ void print_container(T V)
   }
   std::cout << std::endl;
 }
-
 /** @} */ // end of Utility group
 
 #endif

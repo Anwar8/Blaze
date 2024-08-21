@@ -56,7 +56,7 @@ class GlobalMesh {
             exit(1);
         #endif
         
-        BasicSection section; /**< a BasicSection object that is used by all elements in the mesh.*/
+        SectionBaseClass section; /**< a BasicSection object that is used by all elements in the mesh.*/
         spmat K;
         spvec P;
         vec U; 

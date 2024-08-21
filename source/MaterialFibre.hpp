@@ -50,6 +50,27 @@ class MaterialFibre {
         }
 
         /**
+         * @brief a copy-constructor for the fibre that allows us to copy the material object pointed to by the unique_ptr.
+         * 
+         * @param other The MaterialFibre object to be copied.
+         */
+        template <typename MaterialType>
+        MaterialFibre(const MaterialFibre& other)
+        {
+            area = other.area;
+            y = other.y;
+            z = other.z;
+            material_ptr = std::make_unique<MaterialType>(*other.material_ptr);
+        }
+        
+        
+        // void increment_material_strain(real strain_increment);
+        // void get_material_stress();
+        // void get_material_Et();
+        // void update_material_starting_state();
+        // Material1D* get_ptr_to_material();
+
+        /**
          * @brief Get the area of the fibre.
          * 
          * @return The area of the fibre.
@@ -72,3 +93,5 @@ class MaterialFibre {
 };
 
 #endif 
+
+

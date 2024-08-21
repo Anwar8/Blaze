@@ -7,13 +7,14 @@
 #define BASIC_SECTION_HPP
 
 #include "maths_defaults.hpp"
+#include "SectionBaseClass.hpp"
 
 /**
  * @brief basic cross-section containing geometry and material information and functions to get E, A, and I
  * 
  */
 
-class BasicSection {
+class BasicSection : public SectionBaseClass {
     private:
         real E;
         real A;

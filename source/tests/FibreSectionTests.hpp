@@ -70,6 +70,25 @@ void build_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial& st
 
     section.add_fibres(&steel, areas, ys);
 }
+
+class MaterialFibreTests : public ::testing::Test {
+  public:
+    ElasticPlasticMaterial steel = ElasticPlasticMaterial(YOUNGS_MODULUS_FIBRE, YIELD_STRENGTH_FIBRE, HARDENING_RATIO_FIBRE*YOUNGS_MODULUS_FIBRE);
+    MaterialFibre fibre;
+    void SetUp() override {
+        fibre.initialise_fibre(&steel, 1.0, 0.5, 0.0);
+    }
+    void TearDown() override {
+
+}
+};
+
+TEST_F(MaterialFibreTests, AreaCorrect)
+{
+    real saved_area = fibre.get_area();
+    EXPECT_NEAR(saved_area, 1.0, TOLERANCE_FIBRE);
+}
+
 class FibreSectionCentroidTests : public ::testing::Test {
   public:
     ElasticPlasticMaterial steel = ElasticPlasticMaterial(YOUNGS_MODULUS_FIBRE, YIELD_STRENGTH_FIBRE, HARDENING_RATIO_FIBRE*YOUNGS_MODULUS_FIBRE);

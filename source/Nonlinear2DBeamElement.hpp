@@ -64,7 +64,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @param in_nodes a container of shared pointers to node objects.
          */
         template<typename Container>
-        Nonlinear2DBeamElement(int given_id, Container& in_nodes, BasicSection sect) {
+        Nonlinear2DBeamElement(int given_id, Container& in_nodes, SectionBaseClass& sect) {
             initialise(given_id, in_nodes, sect);
         }
 
@@ -77,7 +77,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @param sect the \ref BasicSection object that contains the material properties of the element.
          */
         template<typename Container, typename SectionType>
-        void initialise(int given_id, Container& in_nodes, SectionType sect) {
+        void initialise(int given_id, Container& in_nodes, SectionType& sect) {
             // initialise the fundamental aspects of the element
             // -----------------------------------------------------
             elem_type = "Nonlinear_2D_EulerBernouli_beam-column"; /**< string that represents the type of the element.*/
@@ -154,7 +154,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             {
                 pt_x *= initial_length;
             }
-            for (auto& pt_w : gauss_points_x)
+            for (auto& pt_w : gauss_points_w)
             {
                 pt_w *= initial_length;
             }
@@ -227,8 +227,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          */
         void calc_local_constitutive_mat() {
             // given all constitutive mat elements are zeroed we only need to calculate the non-zero diagonal members of this element.
-            local_constitutive_mat[0](0,0) = section.get_E()*section.get_A();
-            local_constitutive_mat[0](1,1) = section.get_E()*section.get_I();
+            local_constitutive_mat[0](0,0) = section[0].get_E()*section[0].get_A();
+            local_constitutive_mat[0](1,1) = section[0].get_E()*section[0].get_I();
         }
 
         /**

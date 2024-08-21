@@ -4,10 +4,50 @@
 #include <numeric>
 #include "main.hpp"
 #include "Model.hpp"
+#include "ElasticPlasticMaterial.hpp"
+#include "BeamColumnFiberSection.hpp"
+#include "basic_utilities.hpp"
 
+void build_an_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial& steel, real offset, real tf, real b, real tw, real h, int flange_divisions, int web_divisions)
+{
+    std::vector<real> areas;
+    std::vector<real> ys;
+    
+    real y = offset;
+    real area = 0.0;
+    // bottom flange
+    area = b*tf/(flange_divisions);
+    y -= 0.5*(tf/flange_divisions);
+    for (int i = 0; i < flange_divisions; ++i)
+    {
+        y += (tf/flange_divisions);
+        ys.push_back(y);
+        areas.push_back(area);
+    }
+    // web
+    area = (h - 2*tf)*tw / web_divisions;
+    y = offset + tf - 0.5*((h - 2*tf)/web_divisions);
+    for (int i = flange_divisions; i < flange_divisions + web_divisions; ++i)
+    {
+        y += ((h - 2*tf)/web_divisions);
+        ys.push_back(y);
+        areas.push_back(area);
+    }
+    // top flange
+    area = b*tf/(flange_divisions);
+    y = offset + (h - tf)  - 0.5*(tf/flange_divisions);
+    for (int i = flange_divisions + web_divisions; i < flange_divisions + web_divisions + flange_divisions; ++i)
+    {
+        y += (tf/flange_divisions);
+        ys.push_back(y);
+        areas.push_back(area);
+    }
+
+    section.add_fibres(&steel, areas, ys);
+}
 
 int main () {
-
+    
     // create mesh
     real beam_length = 5.0;
     Model model;
@@ -15,7 +55,20 @@ int main () {
     int num_divisions = 10;
     int num_elements = num_divisions;
     int num_nodes = num_elements + 1;
-    BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+    
+    // BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+    // material information
+    real youngs_modulus = 2e11;
+    real yield_strength = 455e6;
+    real hardening_ratio = 0.01;
+    ElasticPlasticMaterial steel = ElasticPlasticMaterial(youngs_modulus, yield_strength, hardening_ratio*youngs_modulus);
+    // section information
+    real tf = 19.6e-3;
+    real tw = 11.4e-3;
+    real b = 192.8e-3;
+    real h = 467.2e-3;
+    BeamColumnFiberSection sect;
+    build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 10, 40);
     model.create_line_mesh(num_divisions, end_coords, sect);
 
     std::vector<unsigned> restrained_nodes = std::vector<unsigned>(num_divisions - 1);

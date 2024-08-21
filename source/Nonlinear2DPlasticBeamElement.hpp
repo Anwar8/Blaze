@@ -39,7 +39,6 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
          * @brief basic objects needed by the beam-column elements. Section, shape function, transformation, etc.
          */
         //@{
-            std::vector<BeamColumnFiberSection> fibre_section; /**< The fibre section assigned to each Gauss point. */
         //@}
 
         /**
@@ -65,7 +64,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
          * @param in_nodes a container of shared pointers to node objects.
          */
         template<typename Container, typename SectionType>
-        Nonlinear2DPlasticBeamElement(int given_id, Container& in_nodes, SectionType sect) {
+        Nonlinear2DPlasticBeamElement(int given_id, Container& in_nodes, SectionType& sect) {
             initialise(given_id, in_nodes, sect);
         }
 
@@ -78,7 +77,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
          * @param sect the \ref BasicSection object that contains the material properties of the element.
          */
         template<typename Container, typename SectionType>
-        void initialise(int given_id, Container& in_nodes, SectionType sect) {
+        void initialise(int given_id, Container& in_nodes, SectionType& sect) {
             // initialise the fundamental aspects of the element
             // -----------------------------------------------------
             elem_type = "Nonlinear_2D_EulerBernouli_Plastic_beam-column"; /**< string that represents the type of the element.*/
@@ -88,7 +87,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
             initialise_state_containers();
             for (int i = 0; i < gauss_points_x.size(); ++i)
             {
-                fibre_section.push_back(sect);
+                section.push_back(sect);
             }
             
             // -----------------------------------------------------
@@ -161,7 +160,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
             {
                 pt_x *= initial_length;
             }
-            for (auto& pt_w : gauss_points_x)
+            for (auto& pt_w : gauss_points_w)
             {
                 pt_w *= initial_length;
             }
@@ -234,14 +233,14 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
          */
         void calc_local_constitutive_mat() {
             // given all constitutive mat elements are zeroed we only need to calculate the non-zero diagonal members of this element.
-            for (int i = 0; i < fibre_section.size(); ++i)
+            for (int i = 0; i < section.size(); ++i)
             {
-                fibre_section[i].update_section_state(local_eps[i]);
+                section[i].update_section_state(local_eps[i]);
             }
 
             for (int i = 0; i < gauss_points_x.size(); ++i)
             {
-                local_constitutive_mat[i] = fibre_section[i].get_D_t();
+                local_constitutive_mat[i] = section[i].get_D_t();
             }
         }
 
