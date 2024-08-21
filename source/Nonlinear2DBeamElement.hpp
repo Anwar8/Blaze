@@ -63,8 +63,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          * @param given_id unique identifier for the element; will be passed to the nodes.
          * @param in_nodes a container of shared pointers to node objects.
          */
-        template<typename Container>
-        Nonlinear2DBeamElement(int given_id, Container& in_nodes, SectionBaseClass& sect) {
+        template<typename Container, typename SectionType>
+        Nonlinear2DBeamElement(int given_id, Container& in_nodes, SectionType& sect) {
             initialise(given_id, in_nodes, sect);
         }
 
@@ -85,7 +85,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
             nnodes = 2; /**< number of nodes. 2 nodes for this element type.*/
             initialise_gauss_points(); /**< set the gauss points (numbers and locations) for the element.*/
             initialise_state_containers();
-            section = sect;
+            section.emplace_back(std::make_unique<SectionType>(sect));
             // -----------------------------------------------------
 
             if (std::size(in_nodes) != nnodes)
@@ -227,8 +227,8 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface {
          */
         void calc_local_constitutive_mat() {
             // given all constitutive mat elements are zeroed we only need to calculate the non-zero diagonal members of this element.
-            local_constitutive_mat[0](0,0) = section[0].get_E()*section[0].get_A();
-            local_constitutive_mat[0](1,1) = section[0].get_E()*section[0].get_I();
+            local_constitutive_mat[0](0,0) = section[0]->get_E()*section[0]->get_A();
+            local_constitutive_mat[0](1,1) = section[0]->get_E()*section[0]->get_I();
         }
 
         /**

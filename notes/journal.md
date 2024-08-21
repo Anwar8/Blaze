@@ -15,6 +15,9 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 21 August 
+Corrected issue of object slicing for sections by a combination of using templates and defining the `std::vector` of sections as a `std::vector<std::unique_ptr<SectionBaseType>>` in stead. 
+
 #### 20 August
 Today, I will likely complete implementing the `Nonlinear2DPlasticBeamElement`. Today's todo:
 [x] Finalise calculation procedure for local nodal forces and stiffness. 

@@ -87,7 +87,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
             initialise_state_containers();
             for (int i = 0; i < gauss_points_x.size(); ++i)
             {
-                section.push_back(sect);
+                section.emplace_back(std::make_unique<SectionType>(sect));
             }
             
             // -----------------------------------------------------
@@ -235,12 +235,12 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
             // given all constitutive mat elements are zeroed we only need to calculate the non-zero diagonal members of this element.
             for (int i = 0; i < section.size(); ++i)
             {
-                section[i].update_section_state(local_eps[i]);
+                section[i]->update_section_state(local_eps[i]);
             }
 
             for (int i = 0; i < gauss_points_x.size(); ++i)
             {
-                local_constitutive_mat[i] = section[i].get_D_t();
+                local_constitutive_mat[i] = section[i]->get_D_t();
             }
         }
 
