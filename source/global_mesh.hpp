@@ -50,7 +50,8 @@ class GlobalMesh {
         std::vector<std::shared_ptr<BeamElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
 
         
-        SectionBaseClass section; /**< a BasicSection object that is used by all elements in the mesh.*/
+        // SectionBaseClass section; /**< a BasicSection object that is used by all elements in the mesh.*/
+        std::unique_ptr<SectionBaseClass> section;
         ElementType element_type;
         spmat K;
         spvec P;
@@ -86,10 +87,11 @@ class GlobalMesh {
          * @warning assumes mapping takes place from node and element ids = 1. There is no checking for conflicting ids, and nothing to reduce bandwidth!
          */
         template <typename CoordsContainer, typename SectionType>
-        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer pts_coords, ElementType elem_type, SectionType sect)
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer pts_coords, ElementType elem_type, SectionType& sect)
         {
             element_type = elem_type;
-            section = sect;
+            // section = sect;
+            section =  std::make_unique<SectionType>(sect);
 
             if (pts_coords.size() != 2)
             {
@@ -143,7 +145,8 @@ class GlobalMesh {
         template <typename SectionType>
         std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> read_mesh_file(std::string const mesh_file, SectionType sect) 
         {
-            section = sect;
+            // section = sect;
+            section =  std::make_unique<SectionType>(sect);
             open_mesh_file(mesh_file);
             NodeIdCoordsPairsVector node_map = read_nodes();
             ElemIdNodeIdPairVector elem_map = read_elements();

@@ -50,7 +50,8 @@ class Model
             solution_procedure.solve(glob_mesh, assembler, solver, load_manager, scribe, logging_frequency);
         }
 
-        void create_line_mesh(int divisions, std::vector<coords> end_coords, ElementType elem_type, SectionBaseClass sect)
+        template <typename SectionType>
+        void create_line_mesh(int divisions, std::vector<coords> end_coords, ElementType elem_type, SectionType& sect)
         {
             std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> mesh_maps = glob_mesh.map_a_line_mesh(divisions, end_coords, elem_type, sect);
             glob_mesh.setup_mesh(mesh_maps.first, mesh_maps.second);

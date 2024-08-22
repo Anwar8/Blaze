@@ -15,6 +15,13 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 22 August
+I have made a hodge-podge of solution none of which work. The code currently cannot compile, and when it used to compile, it would not correctly use the right section. Here's what I think I need to do:
+- Skip the idea of having a common `SectionBaseClass` and replace it with the correct section class at least in the beam-column elements, with the fibre section becoming an additional attribute only for the `Nonlinear2DPlasticBeamElement`.
+- Remove all the unnecessary copy constructors and `std::unique_ptr` going back to a simpler implementation.
+- find an alternative way to add a section type to the `GlobalMesh`. Perhaps have both types of classes, and allow the `GlobalMesh` to choose which to use based on the enum for the beam-column element being used.
+- Take a damn break. I can no longer think, and I am currently just grinding thoughtlessly. A delay in inevitable.
+
 #### 21 August 
 Corrected issue of object slicing for sections by a combination of using templates and defining the `std::vector` of sections as a `std::vector<std::unique_ptr<SectionBaseType>>` in stead. 
 [x] Improve the constructor to allow for actually creating the section along with a check on the type.

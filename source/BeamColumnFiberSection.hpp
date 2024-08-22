@@ -42,6 +42,30 @@ class BeamColumnFiberSection : public SectionBaseClass {
             section_type = Fibre;
         };
 
+        /**
+         * @brief a copy-constructor for the fibre that allows us to copy the material object pointed to by the unique_ptr.
+         * 
+         * @param other The MaterialFibre object to be copied.
+         */
+        BeamColumnFiberSection(const BeamColumnFiberSection& other)
+        {
+            section_area = other.section_area;
+            weighted_E = other.weighted_E;
+            fibres.reserve(other.fibres.size());
+            for (const auto& fibre : other.fibres)
+            {
+                fibres.emplace_back(fibre);
+            }
+            moment_yy = other.moment_yy;
+            axial_force = other.axial_force;
+            axial_strain = other.axial_strain;
+            curvature = other.curvature;
+            starting_axial_strain = other.starting_axial_strain;
+            starting_curvature = other.starting_curvature;
+            y_bar = other.y_bar;
+            D_t = other.D_t;
+        }
+
 
         /**
          * @brief populates the fibre vector of the section.
