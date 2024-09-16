@@ -17,7 +17,7 @@
  */
 
 class BeamColumnFiberSection : public SectionBaseClass {
-    private:
+    protected:
         real section_area; /**<total area of the section - combined area of all fibres.*/ 
         real weighted_E; /**<an equivalent Young's modulus taken as the weighted mean of all fibres.*/
         
@@ -54,7 +54,8 @@ class BeamColumnFiberSection : public SectionBaseClass {
             fibres.reserve(other.fibres.size());
             for (const auto& fibre : other.fibres)
             {
-                fibres.emplace_back(fibre);
+                // this section is CURSED.
+                fibres.emplace_back(MaterialFibre(&*fibre.material_ptr, fibre.get_area(), fibre.get_y()));
             }
             moment_yy = other.moment_yy;
             axial_force = other.axial_force;

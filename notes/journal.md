@@ -3,18 +3,24 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Work plan
 ### WP1: Debugging of geometric nonlinearity - 2 weeks - due 15/06/2024 - COMPLETED
-### WP2: Implementation of 1D nonlinear material - 8 weeks - due 15/08/2024 - IN PROGRESS
+### WP2: Implementation of 1D nonlinear material - 8 weeks - due ~~15/08/2024~~ 23/09/2024 - IN PROGRESS
 - [x] 1D material base class: `Material1D`.
 - [x] Isotropic material implementation: `ElasticPlasticMaterial`.
 - [x] Implementation of `BeamColumnFiberSection`.
 - [ ] Implementation of `Nonlinear2DPlasticBeamElement` which accounts for spread of plasticity.
-### WP3: Thermal loading interface - 4 weeks - due 15/09/2024
-### WP4: Shared-memory parallelisation on Cirrus using Kokkos - 6 weeks - due 01/11/2024
+### ~~WP3: Thermal loading interface - 4 weeks - due 15/09/2024~~
+### WP4: Shared-memory parallelisation on Cirrus using Kokkos - ~~6~~ 5 weeks - due 01/11/2024
 ### WP5: Internode parallelisation with MPI - 12 weeks - due 01/02/2025
 ### WP6: Profiling, data collection, and analysis - 6 weeks - due 15/03/2025
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 16 September
+Okay, so I took 3 weeks off from working on this and it is now 16 September. Having spoken to Adam, I am now convinced that I need to reduce complexity so that I can actually focus on parallelisation. That, however, is a difficult feat in its own right if it is to be done thoroughly. 
+1. Reduce complexity of materially nonlinear beam-column element by hard-coding types rather than creating abstract classes, templates, and complex inheritance structures.
+2. Remove unnecessary code such as the deprecated `Izzuddin2DNonlinearBeam`.
+3. Restructure the code into directories that allow me to find files more easily. I have so many now that it is getting really hard to find necessary files.
+4. Remove WP3 completely, and have a new timeline.
 #### 22 August
 I have made a hodge-podge of solution none of which work. The code currently cannot compile, and when it used to compile, it would not correctly use the right section. Here's what I think I need to do:
 - Skip the idea of having a common `SectionBaseClass` and replace it with the correct section class at least in the beam-column elements, with the fibre section becoming an additional attribute only for the `Nonlinear2DPlasticBeamElement`.
