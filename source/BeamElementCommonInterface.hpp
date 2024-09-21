@@ -103,7 +103,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass>
         virtual void print_info() override {
             std::cout << "elem " << this->id << " of type " <<this->elem_type << " with " << this->ndofs << " dofs, and " << this->nnodes << " nodes:" << std::endl;
             for (auto& node_i: this->nodes) {
-                this->node_i->print_info();
+                node_i->print_info();
             }
             std::cout << "it is also of length " << this->length << std::endl;
         }
@@ -206,7 +206,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass>
             this->global_stiffness_triplets.reserve(this->elem_global_stiffness.rows() * this->elem_global_stiffness.cols());
             for (auto& kmap: this->stiffness_map)
             {
-                real val = elem_global_stiffness(kmap[0], kmap[1]);
+                real val = this->elem_global_stiffness(kmap[0], kmap[1]);
                 this->global_stiffness_triplets.push_back(spnz(kmap[2], kmap[3], val));
             }
         }

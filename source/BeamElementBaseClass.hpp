@@ -16,6 +16,7 @@
 #include "basic_orientation.hpp"
 #include "NonlinearTransform.hpp"
 #include "node.hpp"
+#include "ElementBaseClass.hpp"
 
 /**
  * @brief a 2D beam element base class with unknown total freedoms
@@ -30,7 +31,7 @@
  * 
  */
 template <typename BeamSectionClass>
-class BeamElementBaseClass {
+class BeamElementBaseClass : public ElementBaseClass {
     private:
     protected:
         /**
