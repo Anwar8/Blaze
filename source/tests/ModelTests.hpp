@@ -7,7 +7,7 @@
 #define LOAD_TOLERANCE 1e-6
 #define DISP_TOLERANCE 1e-6
 #define SOLUTION_TOLERANCE_PERCENT 0.02
-#define ELEMENT_TYPE LinearElastic
+#define ELEMENT_TYPE NonlinearElastic
 
 class MeshTests : public ::testing::Test {
   public:

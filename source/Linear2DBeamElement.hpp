@@ -88,8 +88,6 @@ class Linear2DBeamElement : public BeamElementCommonInterface<BasicSection> {
             if (sect.get_section_type() == Basic)
             {
                 section.emplace_back(std::make_unique<BasicSection>(sect));
-                std::cout << "sect is of type: " << sect.get_section_type() << " while section[0] is of type: " << section[0]->get_section_type() << std::endl;
-                std::cout << "sect.get_E() = " << sect.get_E() << ", while section[0]->get_E() = " << section[0]->get_E() << std::endl;
 
             } else {
                 std::cout << "Element of type " << elem_type << " only accepts section of type Basic = 1, but got section of type: " << sect.get_section_type() << std::endl;

@@ -49,6 +49,7 @@ class BeamColumnFiberSection : public SectionBaseClass {
          */
         BeamColumnFiberSection(const BeamColumnFiberSection& other)
         {
+            section_type = other.section_type;
             section_area = other.section_area;
             weighted_E = other.weighted_E;
             fibres.reserve(other.fibres.size());
@@ -302,5 +303,6 @@ class BeamColumnFiberSection : public SectionBaseClass {
          * @return The tangent constitutive matrix of the section.
          */
         const mat& get_D_t() const { return D_t; }
+    
 };
 #endif
