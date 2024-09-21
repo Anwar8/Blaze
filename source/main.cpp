@@ -69,8 +69,8 @@ int main () {
     real h = 467.2e-3;
     BeamColumnFiberSection sect;
     build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 10, 40);
+    sect.print_info();
     model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
-
     std::vector<unsigned> restrained_nodes = std::vector<unsigned>(num_divisions - 1);
     std::iota(restrained_nodes.begin(), restrained_nodes.end(), 2);
 

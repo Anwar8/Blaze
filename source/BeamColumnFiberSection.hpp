@@ -134,9 +134,9 @@ class BeamColumnFiberSection : public SectionBaseClass {
             for (auto& fibre : fibres)
             {
                 // std::cout << "fibre y = " << fibre.get_y() << " has area " << fibre.get_area() << " and has stress = " << fibre.material_ptr->get_stress() << std::endl;
-                real force = (fibre.material_ptr->get_stress())*fibre.get_area();
-                axial_force += force;
-                moment_yy += force*-(fibre.get_y() - y_bar);
+                fibre.calc_force();
+                axial_force += fibre.get_force();
+                moment_yy += fibre.get_force()*-(fibre.get_y() - y_bar);
             }
         }
 
@@ -303,6 +303,16 @@ class BeamColumnFiberSection : public SectionBaseClass {
          * @return The tangent constitutive matrix of the section.
          */
         const mat& get_D_t() const { return D_t; }
+
+        void print_info()
+        {
+            std::cout << "Section is of type " << section_type << ", and has A = " << section_area << ", composed of fibres: " << std::endl;
+            for (auto& fibre: fibres)
+            {
+                fibre.print_info();
+            }
+            std::cout << std::endl;
+        }
     
 };
 #endif

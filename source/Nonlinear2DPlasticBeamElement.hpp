@@ -91,6 +91,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
                 for (int i = 0; i < gauss_points_x.size(); ++i)
                 {
                     section.emplace_back(std::make_unique<BeamColumnFiberSection>(sect));
+                    section[i]->print_info();
                 }
             } else {
                 std::cout << "Element of type " << elem_type << " only accepts section of type Fibre = 2, but got section of type: " << sect.get_section_type() << std::endl;
@@ -244,6 +245,8 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             for (int i = 0; i < section.size(); ++i)
             {
                 section[i]->update_section_state(local_eps[i]);
+                std::cout << "element " << id << " updated its section state: " << std::endl;
+                section[i]->print_info();
             }
 
             for (int i = 0; i < gauss_points_x.size(); ++i)

@@ -18,6 +18,7 @@ class MaterialFibre {
     protected:
         real area; /**< the area of the fibre. */
         real y, z; /**<the x, y coordinates of fibre. */
+        real force; /**<the axial force in the fibre. */
 
     public:
         std::unique_ptr<ElasticPlasticMaterial> material_ptr; /**< a publicly-accessible unique pointer to material object that allows direct calls to fibre material bypassing intermediate interfacing.*/
@@ -88,6 +89,17 @@ class MaterialFibre {
          * @return The z-coordinate of the fibre.
          */
         real get_z() const { return z; }
+        
+        void calc_force() {
+            force = material_ptr->get_stress() * area;
+        }
+        real get_force() {return force;}
+
+        void print_info()
+        {
+            std::cout << "Fibre at (y,z) = (" << y << ", " << z << "), with A = " << area << ", and force = " << force << "." << std::endl;
+            std::cout << "Its material has E = " << material_ptr->get_E() << ", and fy = " << material_ptr->get_fy() << "." << std::endl;
+        }
 };
 
 #endif 
