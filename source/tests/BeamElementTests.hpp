@@ -23,7 +23,7 @@
 #define A 0.0125
 #define I 0.0004570000
 
-void common_beam_setup(std::vector<std::shared_ptr<Node>>& in_nodes, std::shared_ptr<BeamElementBaseClass>& my_beam, vec& U) 
+void common_beam_setup(std::vector<std::shared_ptr<Node>>& in_nodes, std::shared_ptr<BeamElementBaseClass<BasicSection>>& my_beam, vec& U) 
 {
     // Create the nodes
     in_nodes.push_back(std::make_shared<Node>(0.0, 0.0, 0.0));
@@ -71,7 +71,7 @@ class RigidBodyMotionTest : public ::testing::Test {
     // Declare variables to be used in the fixture
 public:
     std::vector<std::shared_ptr<Node>> in_nodes;
-    std::shared_ptr<BeamElementBaseClass> my_beam;
+    std::shared_ptr<BeamElementBaseClass<BasicSection>> my_beam;
     vec U;
     void SetUp() override {
       common_beam_setup(in_nodes, my_beam, U);
@@ -87,7 +87,7 @@ class BasicTransformationTest : public ::testing::Test {
     // Declare variables to be used in the fixture
   public:
     std::vector<std::shared_ptr<Node>> in_nodes;
-    std::shared_ptr<BeamElementBaseClass> my_beam;
+    std::shared_ptr<BeamElementBaseClass<BasicSection>> my_beam;
     vec U; // not needed for this test but I don't want to create another \ref common_beam_setup function.
     
   
@@ -104,7 +104,7 @@ class ConstantStrainStateTest : public ::testing::Test {
     // Declare variables to be used in the fixture
   public:
     std::vector<std::shared_ptr<Node>> in_nodes;
-    std::shared_ptr<BeamElementBaseClass> my_beam;
+    std::shared_ptr<BeamElementBaseClass<BasicSection>> my_beam;
     vec U;
     void SetUp() override {
         common_beam_setup(in_nodes, my_beam, U);
@@ -120,7 +120,7 @@ class ConstantStrainStateTest : public ::testing::Test {
 class ElementMappingTest : public ::testing::Test {
   public:
     std::vector<std::shared_ptr<Node>> in_nodes;
-    std::shared_ptr<BeamElementBaseClass> my_beam;
+    std::shared_ptr<BeamElementBaseClass<BasicSection>> my_beam;
     vec U;
     void SetUp() override {
       common_beam_setup(in_nodes, my_beam, U);
