@@ -91,13 +91,13 @@ void GlobalMesh::make_elements (ElemIdNodeIdPairVector elem_map) {
         switch (element_type)
         {
         case LinearElastic:
-            elem_vector.emplace_back(std::make_shared<Linear2DBeamElement>(element_data.first, elem_nodes, *section));
+            elem_vector.emplace_back(std::make_shared<Linear2DBeamElement>(element_data.first, elem_nodes, *basic_section));
             break;
         case NonlinearElastic:
-            elem_vector.emplace_back(std::make_shared<Nonlinear2DBeamElement>(element_data.first, elem_nodes, *section));
+            elem_vector.emplace_back(std::make_shared<Nonlinear2DBeamElement>(element_data.first, elem_nodes, *basic_section));
             break;
         case NonlinearPlastic:
-            elem_vector.emplace_back(std::make_shared<Nonlinear2DPlasticBeamElement>(element_data.first, elem_nodes, *section));
+            elem_vector.emplace_back(std::make_shared<Nonlinear2DPlasticBeamElement>(element_data.first, elem_nodes, *fiber_section));
             break;
         default:
             std::cout << "Incorrect element_type: " << element_type << "; should be 0. LinearElastic, 1. NonlinearElastic, or 2. NonlinearPlastic." << std::endl;

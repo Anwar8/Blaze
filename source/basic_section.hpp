@@ -24,6 +24,14 @@ class BasicSection : public SectionBaseClass {
         BasicSection() = default;
         BasicSection(real youngs_modulus, real area, real moment_of_inertia) 
         : E(youngs_modulus), A(area), I(moment_of_inertia), section_type(Basic) {}
+
+        BasicSection(const BasicSection& other)
+        {
+            E = other.E;
+            A = other.A;
+            I = other.I;
+            section_type = other.section_type;
+        }
         
         void set_E(real E) {this->E = E;}
         void set_I(real I) {this->I = I;}
@@ -33,7 +41,7 @@ class BasicSection : public SectionBaseClass {
         real get_A() {return A;}
         real get_I() {return I;}
 
-        virtual void update_section_state(vec eps) {};
+        virtual void update_section_state(vec& eps) {};
         mat get_D_t() {return make_xd_mat(2,2);}
 };
 #endif

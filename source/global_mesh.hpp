@@ -51,7 +51,9 @@ class GlobalMesh {
 
         
         // SectionBaseClass section; /**< a BasicSection object that is used by all elements in the mesh.*/
-        std::unique_ptr<SectionBaseClass> section;
+        std::unique_ptr<BasicSection> basic_section;
+        std::unique_ptr<BeamColumnFiberSection> fiber_section;
+
         ElementType element_type;
         spmat K;
         spvec P;
@@ -86,13 +88,9 @@ class GlobalMesh {
          * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> the node_map and elem_map of the line mesh. 
          * @warning assumes mapping takes place from node and element ids = 1. There is no checking for conflicting ids, and nothing to reduce bandwidth!
          */
-        template <typename CoordsContainer, typename SectionType>
-        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer pts_coords, ElementType elem_type, SectionType& sect)
+        template <typename CoordsContainer>
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer pts_coords)
         {
-            element_type = elem_type;
-            // section = sect;
-            section =  std::make_unique<SectionType>(sect);
-
             if (pts_coords.size() != 2)
             {
                 std::cout << "Error: pts_coords must have 2 elements." << std::endl;
@@ -118,6 +116,33 @@ class GlobalMesh {
             }     
             return std::make_pair(node_map, elem_map);
         }
+        /**
+         * @brief creates a line mesh map with a given number of divisions and end coordinates of the line. Does NOT take a gmsh mesh file. 
+         * @param elem_type an enum referring to the type of element that the mesh will include.
+         * @param sect a \ref BeamColumnFiberSection object that is used to initialise the beam-column elements.
+         * 
+        **/
+        void create_line_mesh(int divisions, std::vector<coords> end_coords, ElementType elem_type, BeamColumnFiberSection& sect)
+        {
+            element_type = elem_type;
+            fiber_section = std::make_unique<BeamColumnFiberSection>(sect);
+            std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> mesh_maps = map_a_line_mesh(divisions, end_coords);
+            setup_mesh(mesh_maps.first, mesh_maps.second);
+        }
+        /**
+         * @brief creates a line mesh map with a given number of divisions and end coordinates of the line. Does NOT take a gmsh mesh file. 
+         * @param elem_type an enum referring to the type of element that the mesh will include.
+         * @param sect a \ref BasicSection object that is used to initialise the beam-column elements.
+         * 
+        **/
+        void create_line_mesh(int divisions, std::vector<coords> end_coords, ElementType elem_type, BasicSection& sect)
+        {
+            element_type = elem_type;
+            basic_section = std::make_unique<BasicSection>(sect);
+            std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> mesh_maps = map_a_line_mesh(divisions, end_coords);
+            setup_mesh(mesh_maps.first, mesh_maps.second);
+        }
+
 
         /**
          * @brief creates element objects following the \ref ElemIdNodeIdPairVector object format and adds them to \ref elem_vector.
@@ -142,11 +167,10 @@ class GlobalMesh {
          * @param sect a \ref BasicSection object that is used to initialise the beam-column elements.
          * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> a pair of node and element maps corresponding to a gmsh file.
          */
-        template <typename SectionType>
-        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> read_mesh_file(std::string const mesh_file, SectionType sect) 
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> read_mesh_file(std::string const mesh_file, BasicSection sect) 
         {
             // section = sect;
-            section =  std::make_unique<SectionType>(sect);
+            basic_section =  std::make_unique<BasicSection>(sect);
             open_mesh_file(mesh_file);
             NodeIdCoordsPairsVector node_map = read_nodes();
             ElemIdNodeIdPairVector elem_map = read_elements();
