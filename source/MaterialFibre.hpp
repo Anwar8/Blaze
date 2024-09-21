@@ -8,27 +8,27 @@
 
 #include "maths_defaults.hpp"
 #include "Material1D.hpp"
+#include "ElasticPlasticMaterial.hpp"
 
 /**
  * @brief fibre object that contains a pointer to the material along with fibre area and coordinates.
  * 
  */
-
 class MaterialFibre {
     protected:
         real area; /**< the area of the fibre. */
         real y, z; /**<the x, y coordinates of fibre. */
 
     public:
-        std::unique_ptr<Material1D> material_ptr; /**< a publicly-accessible unique pointer to material object that allows direct calls to fibre material bypassing intermediate interfacing.*/
+        std::unique_ptr<ElasticPlasticMaterial> material_ptr; /**< a publicly-accessible unique pointer to material object that allows direct calls to fibre material bypassing intermediate interfacing.*/
 
         /**
          * @brief 
          * 
          */
         MaterialFibre() = default;
-        template <typename MaterialType>
-        MaterialFibre(MaterialType* mat, real area, real y, real z = 0)
+
+        MaterialFibre(ElasticPlasticMaterial* mat, real area, real y, real z = 0)
         {
             initialise_fibre(mat, area, y, z);
         }
@@ -39,11 +39,10 @@ class MaterialFibre {
          * @param area the area of the fibre.
          * @param y the y-coordinate of the fibre.
          * @param z the z-coordinate of the fibre.
-         */
-        template <typename MaterialType>
-        void initialise_fibre(MaterialType* mat, real area, real y, real z)
+         */  
+        void initialise_fibre(ElasticPlasticMaterial* mat, real area, real y, real z)
         {
-            material_ptr = std::make_unique<MaterialType>(*mat);
+            material_ptr = std::make_unique<ElasticPlasticMaterial>(*mat);
             this->area = area;
             this->y = y;
             this->z = z;
@@ -54,13 +53,12 @@ class MaterialFibre {
          * 
          * @param other The MaterialFibre object to be copied.
          */
-        template <typename MaterialType>
         MaterialFibre(const MaterialFibre& other)
         {
             area = other.area;
             y = other.y;
             z = other.z;
-            material_ptr = std::make_unique<MaterialType>(*other.material_ptr);
+            material_ptr = std::make_unique<ElasticPlasticMaterial>(*other.material_ptr);
         }
         
         

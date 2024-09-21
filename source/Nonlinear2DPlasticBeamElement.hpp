@@ -23,7 +23,7 @@
  * Structural Systems" for more details on the plasticity.
  * 
  */
-class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
+class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColumnFiberSection> {
     private:
     protected:
         /**
@@ -63,8 +63,8 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
          * @param given_id unique identifier for the element; will be passed to the nodes.
          * @param in_nodes a container of shared pointers to node objects.
          */
-        template<typename Container, typename SectionType>
-        Nonlinear2DPlasticBeamElement(int given_id, Container& in_nodes, SectionType& sect) {
+        template<typename Container>
+        Nonlinear2DPlasticBeamElement(int given_id, Container& in_nodes, BeamColumnFiberSection& sect) {
             initialise(given_id, in_nodes, sect);
         }
 
@@ -76,8 +76,8 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
          * @param in_nodes a container of shared pointers to node objects
          * @param sect the \ref BasicSection object that contains the material properties of the element.
          */
-        template<typename Container, typename SectionType>
-        void initialise(int given_id, Container& in_nodes, SectionType& sect) {
+        template<typename Container>
+        void initialise(int given_id, Container& in_nodes, BeamColumnFiberSection& sect) {
             // initialise the fundamental aspects of the element
             // -----------------------------------------------------
             elem_type = "Nonlinear_2D_EulerBernouli_Plastic_beam-column"; /**< string that represents the type of the element.*/
@@ -90,7 +90,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface {
             {
                 for (int i = 0; i < gauss_points_x.size(); ++i)
                 {
-                    section.emplace_back(std::make_unique<SectionType>(sect));
+                    section.emplace_back(std::make_unique<BeamColumnFiberSection>(sect));
                 }
             } else {
                 std::cout << "Element of type " << elem_type << " only accepts section of type Fibre = 2, but got section of type: " << sect.get_section_type() << std::endl;

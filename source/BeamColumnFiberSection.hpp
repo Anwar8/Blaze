@@ -9,13 +9,13 @@
 #include "maths_defaults.hpp"
 #include "MaterialFibre.hpp"
 #include "Material1D.hpp"
+#include "ElasticPlasticMaterial.hpp"
 #include "SectionBaseClass.hpp"
 
 /**
  * @brief cross-section containing fibres used to represent material nonlinearity of a beam-column element.
  * 
  */
-
 class BeamColumnFiberSection : public SectionBaseClass {
     protected:
         real section_area; /**<total area of the section - combined area of all fibres.*/ 
@@ -54,8 +54,7 @@ class BeamColumnFiberSection : public SectionBaseClass {
             fibres.reserve(other.fibres.size());
             for (const auto& fibre : other.fibres)
             {
-                // this section is CURSED.
-                fibres.emplace_back(MaterialFibre(&*fibre.material_ptr, fibre.get_area(), fibre.get_y()));
+                fibres.emplace_back(MaterialFibre(fibre));
             }
             moment_yy = other.moment_yy;
             axial_force = other.axial_force;

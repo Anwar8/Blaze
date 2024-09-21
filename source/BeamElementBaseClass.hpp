@@ -29,6 +29,7 @@
  * @todo 3. add functionality to apply non-uniform thermal loading interpolation (LOW PRIORITY)
  * 
  */
+template <typename BeamSectionClass>
 class BeamElementBaseClass {
     private:
     protected:
@@ -52,7 +53,7 @@ class BeamElementBaseClass {
          */
         //@{
         std::vector<std::shared_ptr<Node>> nodes; /**< a std::vector that holds the shared ptrs to the nodes.*/
-        std::vector<std::unique_ptr<SectionBaseClass>> section; /**< the section for the beam-column element.*/
+        std::vector<std::unique_ptr<BeamSectionClass>> section; /**< the section for the beam-column element.*/
         BasicOrientation orient; /**< the orientation object for the beam-column element.*/
         NonlinearTransform transformation; /**< the nonlinear transformation used to account for geometric nonlinearity*/
         //@}
@@ -109,8 +110,8 @@ class BeamElementBaseClass {
          * @param in_nodes a container of shared pointers to node objects
          * @param sect the \ref BasicSection object that contains the material properties of the element.
          */
-        template<typename Container, typename SectionType>
-        BeamElementBaseClass(int given_id, Container& in_nodes, SectionType& sect) {
+        template<typename Container>
+        BeamElementBaseClass(int given_id, Container& in_nodes, BeamSectionClass& sect) {
             initialise(given_id, in_nodes);
         }
         /**
@@ -126,8 +127,8 @@ class BeamElementBaseClass {
          * @param given_id unique identifier for the element; will be passed to the nodes
          * @param in_nodes a container of shared pointers to node objects
          */
-        template<typename Container, typename SectionType>
-        void initialise(int given_id, Container& in_nodes, SectionType& section) {
+        template<typename Container>
+        void initialise(int given_id, Container& in_nodes, BeamSectionClass& section) {
             std::cout << "This is a pseudo virtual function. Must define an overriding initialiser for your class." << std::endl;
             std::exit(1);  
         }

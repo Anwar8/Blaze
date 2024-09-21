@@ -23,7 +23,7 @@
  * correction as noted in Felippa's notes (11-18). 
  * 
  */
-class Linear2DBeamElement : public BeamElementCommonInterface {
+class Linear2DBeamElement : public BeamElementCommonInterface<BasicSection> {
     private:
     protected:
         /**
@@ -63,8 +63,8 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          * @param given_id unique identifier for the element; will be passed to the nodes.
          * @param in_nodes a container of shared pointers to node objects.
          */
-        template<typename Container, typename SectionType>
-        Linear2DBeamElement(int given_id, Container& in_nodes, SectionType& sect) {
+        template<typename Container>
+        Linear2DBeamElement(int given_id, Container& in_nodes, BasicSection& sect) {
             initialise(given_id, in_nodes, sect);
         }
 
@@ -76,8 +76,8 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
          * @param in_nodes a container of shared pointers to node objects
          * @param sect the \ref BasicSection object that contains the material properties of the element.
          */
-        template<typename Container, typename SectionType>
-        void initialise(int given_id, Container& in_nodes, SectionType& sect) {
+        template<typename Container>
+        void initialise(int given_id, Container& in_nodes, BasicSection& sect) {
             // initialise the fundamental aspects of the element
             // -----------------------------------------------------
             elem_type = "2D_EulerBernouli_beam-column"; /**< string that represents the type of the element.*/
@@ -87,7 +87,7 @@ class Linear2DBeamElement : public BeamElementCommonInterface {
             initialise_state_containers();
             if (sect.get_section_type() == Basic)
             {
-                section.emplace_back(std::make_unique<SectionType>(sect));
+                section.emplace_back(std::make_unique<BasicSection>(sect));
                 std::cout << "sect is of type: " << sect.get_section_type() << " while section[0] is of type: " << section[0]->get_section_type() << std::endl;
                 std::cout << "sect.get_E() = " << sect.get_E() << ", while section[0]->get_E() = " << section[0]->get_E() << std::endl;
 

@@ -15,7 +15,8 @@
  * That being said, it does not contain the common variables that are used by all beam-column elements, only implementations for some functions (particularly related to mapping across local and global DOFs). All variables are in \ref BeamElementBaseClass.
  * 
  */
-class BeamElementCommonInterface : public BeamElementBaseClass {
+template <typename BeamSectionClass>
+class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass> {
     protected:
         /**
          * @name basic_information
@@ -61,7 +62,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
      */
     virtual bool operator<(const BeamElementCommonInterface& other_elem) const
     { 
-        return id < other_elem.id; 
+        return this->id < other_elem.id; 
     } 
     //@}
     /**
@@ -81,13 +82,13 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
          * @brief runs all stiffness function calculations
          * 
          */
-        virtual void calc_stiffnesses()
+        virtual void calc_stiffnesses() override
         {
-            calc_mat_stiffness();
-            calc_geom_stiffness();
-            calc_tangent_stiffness();
-            calc_external_geom_stiffness();
-            calc_elem_global_stiffness();
+            this->calc_mat_stiffness();
+            this->calc_geom_stiffness();
+            this->calc_tangent_stiffness();
+            this->calc_external_geom_stiffness();
+            this->calc_elem_global_stiffness();
         }
     //@}
 
@@ -99,35 +100,35 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
         /**
          * @brief prints the most important information of the element to the output stream.
          */
-        virtual void print_info() {
-            std::cout << "elem " << id << " of type " <<elem_type << " with " << ndofs << " dofs, and " << nnodes << " nodes:" << std::endl;
-            for (auto& node_i: nodes) {
-                node_i->print_info();
+        virtual void print_info() override {
+            std::cout << "elem " << this->id << " of type " <<this->elem_type << " with " << this->ndofs << " dofs, and " << this->nnodes << " nodes:" << std::endl;
+            for (auto& node_i: this->nodes) {
+                this->node_i->print_info();
             }
-            std::cout << "it is also of length " << length << std::endl;
+            std::cout << "it is also of length " << this->length << std::endl;
         }
          /**
          * @brief prints the internal state of the element.
          * 
          */
         virtual void print_element_state(bool print_nodal_disp = false, bool print_strains = false, 
-                                            bool print_stresses = true, bool print_nodal_forces = false) 
+                                            bool print_stresses = true, bool print_nodal_forces = false) override
         {
             if (print_nodal_disp) 
             {
-                std::cout << "element " << id << " nodal displacements are:" << std::endl << local_d << std::endl;
+                std::cout << "element " << this->id << " nodal displacements are:" << std::endl << this->local_d << std::endl;
             }
             if (print_strains) 
             {
-                std::cout << "element " << id << " strains are:"  << std::endl << local_eps[0] << std::endl;
+                std::cout << "element " << this->id << " strains are:"  << std::endl << this->local_eps[0] << std::endl;
             }
             if (print_stresses) 
             {
-                std::cout << "element " << id << " stresses are:"  << std::endl << local_stresses[0] << std::endl;
+                std::cout << "element " << this->id << " stresses are:"  << std::endl << this->local_stresses[0] << std::endl;
             }
             if (print_nodal_forces) 
             {
-                std::cout << "element " << id << " nodal forces are:"  << std::endl << local_f << std::endl;
+                std::cout << "element " << this->id << " nodal forces are:"  << std::endl << this->local_f << std::endl;
             }
 
         }
@@ -141,17 +142,17 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
          * @brief Get the \ref global_ele_U from each node object connected to the element.
          * 
          */
-        virtual void get_U_from_nodes() 
+        virtual void get_U_from_nodes() override
         {
             std::array<real, 6> nodal_disp;
             int i = 0;
             // global_ele_U
-            for (auto& node: nodes)
+            for (auto& node: this->nodes)
             {
                 nodal_disp = node->get_nodal_displacements();
                 for (auto& dof: nodal_disp)
                 {
-                    global_ele_U(i) = dof;
+                    this->global_ele_U(i) = dof;
                     ++i;
                 }
             }
@@ -161,8 +162,8 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
          * @brief Populates the resistance forces triplets removing any inactive freedoms.
          * @todo I seem to be doing the active_dofs thing too often. Perhaps the element should also have a set that contains its active dofs?
          */
-        virtual void populate_resistance_force_triplets() {
-            global_R_triplets.clear();
+        virtual void populate_resistance_force_triplets() override {
+            this->global_R_triplets.clear();
             // the 12x1 full resistance vector from local nodal forces vector f
             std::set<int> node_active_dofs;
             int nz_i = 0;
@@ -170,19 +171,19 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
             int total_nodal_ndofs_completed = 0; // each node we finish with, we add 6 to this. 
             // This means we have to move to the next set of values corresponding to the next 
             // node in the full resistance vector.         
-            for (auto& node: nodes)
+            for (auto& node: this->nodes)
             {
                 int nodal_dof_index = 0;
                 node_active_dofs = node->get_active_dofs();
                 nz_i = node->get_nz_i();
                 for (auto& active_dof: node_active_dofs)
                 {
-                    force_value = element_global_resistance_forces(active_dof + total_nodal_ndofs_completed);
+                    force_value = this->element_global_resistance_forces(active_dof + total_nodal_ndofs_completed);
                     // since inactive nodes do not appear in R, we have to make sure to be careful about where we add our nodal forces.
                     // here, nz_i + nodal_dof_index simply starts at where the node freedoms start in the global index, and then
                     // iterates one by one. See how we ++ nodal_dof_index for each freedom we add, and how we restart from zero when
                     // we start work with the next node?
-                    global_R_triplets.push_back(spnz(nz_i + nodal_dof_index, 0, force_value));
+                    this->global_R_triplets.push_back(spnz(nz_i + nodal_dof_index, 0, force_value));
                     nodal_dof_index++;
                 }
                 //**< has to be 6 because each node has 6 dofs and our \ref element_global_resistance_forces also has 6 rows for each node!*
@@ -197,16 +198,16 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
          * matrix. So, this function will populate \ref global_stiffness_triplets with sparse matrix notation
          * 
          */
-        virtual void calc_global_stiffness_triplets() 
+        virtual void calc_global_stiffness_triplets() override
         {
-            global_stiffness_triplets.clear();
+            this->global_stiffness_triplets.clear();
             // we have the same number of contribution as stiffness components 
             // assuming all are non-zero, which is not correct but okay as it is "safe" although not very memory efficient.
-            global_stiffness_triplets.reserve(elem_global_stiffness.rows() * elem_global_stiffness.cols());
-            for (auto& kmap: stiffness_map)
+            this->global_stiffness_triplets.reserve(this->elem_global_stiffness.rows() * this->elem_global_stiffness.cols());
+            for (auto& kmap: this->stiffness_map)
             {
                 real val = elem_global_stiffness(kmap[0], kmap[1]);
-                global_stiffness_triplets.push_back(spnz(kmap[2], kmap[3], val));
+                this->global_stiffness_triplets.push_back(spnz(kmap[2], kmap[3], val));
             }
         }
 
@@ -221,25 +222,25 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
          *  3. zeroed contributions are not added to \ref global_stiffness_triplets
          * 
          */
-        virtual void map_stiffness()
+        virtual void map_stiffness() override
         {
              // local to global stiffness map: <<local_row, local_col, global_row, global_col>, ...>
-            stiffness_map.clear();
+            this->stiffness_map.clear();
             int stiffness_size = 0;
-            for (auto& node: nodes) 
+            for (auto& node: this->nodes) 
             {
                 stiffness_size += std::size(node->get_active_dofs());
             }
             stiffness_size *= stiffness_size;
            
-            stiffness_map.reserve(stiffness_size);
+            this->stiffness_map.reserve(stiffness_size);
             int i = 0;
-            for (auto& node_i: nodes)
+            for (auto& node_i: this->nodes)
             {
                 int j = 0;
                 std::set<int> active_dofs_i = node_i->get_active_dofs();
                 int nz_i_i = node_i->get_nz_i();
-                for (auto& node_j: nodes)
+                for (auto& node_j: this->nodes)
                 {
                     
                     std::set<int> active_dofs_j = node_j->get_active_dofs();
@@ -251,7 +252,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
                         int dof_j_index = 0;
                         for (auto& dof_j: active_dofs_j)
                         {
-                            stiffness_map.push_back({6*i+dof_i, 6*j+dof_j, nz_i_i + dof_i_index, nz_i_j+dof_j_index});
+                            this->stiffness_map.push_back({6*i+dof_i, 6*j+dof_j, nz_i_i + dof_i_index, nz_i_j+dof_j_index});
                             ++dof_j_index;
                         }
                         ++dof_i_index;
@@ -273,13 +274,13 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
          * 
          * @param global_U_vec a vector that the object's \ref global_ele_U will be replaced by.
          */
-        virtual void set_global_U(vec global_U_vec) {global_ele_U = global_U_vec;}
+        virtual void set_global_U(vec global_U_vec) override {this->global_ele_U = global_U_vec;}
         /**
          * @brief Set \ref local_d to some displacement vector.
          * 
          * @param new_disp the new displacement the \ref local_d would be replaced by.
          */
-        virtual void set_d(vec new_disp) {local_d = new_disp;}
+        virtual void set_d(vec new_disp) override {this->local_d = new_disp;}
         
     //@}
     /**
@@ -287,39 +288,39 @@ class BeamElementCommonInterface : public BeamElementBaseClass {
      * @brief functions that retrieve protected variables
      */
     //@{
-        virtual int get_ndofs() const {return ndofs;}
-        virtual int get_nnodes() const {return nnodes;}
-        virtual std::string get_elem_type() const {return elem_type;}
-        virtual unsigned get_id() const {return id;}
+        virtual int get_ndofs() const override {return this->ndofs;}
+        virtual int get_nnodes() const override {return this->nnodes;}
+        virtual std::string get_elem_type() const override {return this->elem_type;}
+        virtual unsigned get_id() const override {return this->id;}
 
-        virtual vec get_global_ele_U() const {return global_ele_U;}
-        virtual vec get_local_d() const {return local_d;}
-        virtual vec get_local_f() const {return local_f;}
-        virtual vec get_element_resistance_forces() const {return element_global_resistance_forces;}   
-        virtual std::vector<spnz> get_global_resistance_force_triplets() {return global_R_triplets;}        
-        virtual vec get_eps() const {return local_eps[0];}
-        virtual vec get_local_stresses() const {return local_stresses[0];}
-        virtual mat get_local_constitutive_mat() const {return local_constitutive_mat[0];}
-        virtual mat get_local_mat_stiffness() const {return local_mat_stiffness;}
-        virtual mat get_local_geom_stiffness() const {return local_geom_stiffness;}
-        virtual mat get_local_tangent_stiffness() const {return local_tangent_stiffness;}
-        virtual mat get_elem_global_stiffness() const {return elem_global_stiffness;}
-        virtual std::vector<spnz> get_global_stiffness_triplets() {return global_stiffness_triplets;}
+        virtual vec get_global_ele_U() const override {return this->global_ele_U;}
+        virtual vec get_local_d() const override {return this->local_d;}
+        virtual vec get_local_f() const override {return this->local_f;}
+        virtual vec get_element_resistance_forces() const override {return this->element_global_resistance_forces;}   
+        virtual std::vector<spnz> get_global_resistance_force_triplets() override {return this->global_R_triplets;}        
+        virtual vec get_eps() const override {return this->local_eps[0];}
+        virtual vec get_local_stresses() const override {return this->local_stresses[0];}
+        virtual mat get_local_constitutive_mat() const override {return this->local_constitutive_mat[0];}
+        virtual mat get_local_mat_stiffness() const override {return this->local_mat_stiffness;}
+        virtual mat get_local_geom_stiffness() const override {return this->local_geom_stiffness;}
+        virtual mat get_local_tangent_stiffness() const override {return this->local_tangent_stiffness;}
+        virtual mat get_elem_global_stiffness() const override {return this->elem_global_stiffness;}
+        virtual std::vector<spnz> get_global_stiffness_triplets() override {return this->global_stiffness_triplets;}
         
-        virtual mat get_N() const {return N[0];}
-        virtual mat get_B() const {return B[0];}
-        virtual mat get_T() {return orient.get_T();}
-        virtual real get_L() {return orient.get_length();}
+        virtual mat get_N() const override {return this->N[0];}
+        virtual mat get_B() const override {return this->B[0];}
+        virtual mat get_T() override {return this->orient.get_T();}
+        virtual real get_L() override {return this->orient.get_length();}
 
-        virtual int const get_nth_node_id(int n) const 
+        virtual int const get_nth_node_id(int n) const override 
         {
-            if (n > nnodes - 1 || n < 0)
+            if (n > this->nnodes - 1 || n < 0)
             {
-                std::cout << "Error: Requested invalid node " << n << " from element " << id << std::endl;
-                std::cout << "Element has " << nnodes << " nodes." << std::endl;
+                std::cout << "Error: Requested invalid node " << n << " from element " << this->id << std::endl;
+                std::cout << "Element has " << this->nnodes << " nodes." << std::endl;
                 std::exit(1);
             }
-            return nodes[n]->get_id();
+            return this->nodes[n]->get_id();
         }
     //@}
 };
