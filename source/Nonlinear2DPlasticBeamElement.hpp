@@ -91,7 +91,9 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
                 for (int i = 0; i < gauss_points_x.size(); ++i)
                 {
                     section.emplace_back(std::make_unique<BeamColumnFiberSection>(sect));
-                    section[i]->print_info();
+                    #if ELEMENT_VERBOSE
+                        section[i]->print_info();
+                    #endif
                 }
             } else {
                 std::cout << "Element of type " << elem_type << " only accepts section of type Fibre = 2, but got section of type: " << sect.get_section_type() << std::endl;
@@ -187,6 +189,10 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
          */
         void calc_length() {
             length = transformation.get_L();
+            
+            #if ELEMENT_VERBOSE
+                    std::cout << "calc_length: element " << id << " length is: " << length << "." << std::endl;
+            #endif
         }
         /**
          * @brief The shape functions for the element are not needed for this element, and are not used. I might want to revisit this later.
@@ -221,6 +227,11 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
 
                 B[i](0,2) = -theta_1/30 + 2*theta_2/15;
                 B[i](1,2) = -2/initial_length + 6*gauss_points_x[i]/(initial_length*initial_length);
+
+                #if ELEMENT_VERBOSE
+                    std::cout << "calc_B: element " << id << " B at Gauss point = " << i << " is:" << std::endl;
+                    std::cout << B[i] << std::endl;
+                #endif
             } 
         }
 
@@ -245,14 +256,22 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             for (int i = 0; i < section.size(); ++i)
             {
                 section[i]->update_section_state(local_eps[i]);
-                std::cout << "element " << id << " updated its section state: " << std::endl;
-                section[i]->print_info();
+                #if ELEMENT_VERBOSE
+                    std::cout << "calc_local_constitutive_mat: element " << id << " updated its section at Gauss point = " << i << ":" << std::endl;
+                    section[i]->print_info();
+                #endif
+                
             }
 
             for (int i = 0; i < gauss_points_x.size(); ++i)
             {
                 local_constitutive_mat[i] = section[i]->get_D_t();
+                #if ELEMENT_VERBOSE
+                    std::cout << "calc_local_constitutive_mat: element " << id << " Constitutive matrix at Gauss point = " << i << " is:" << std::endl;
+                    std::cout << local_constitutive_mat[i] << std::endl;
+                #endif
             }
+           
         }
 
         /**
@@ -270,6 +289,10 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             {
                 local_eps[i](0) = (delta/initial_length) + (2*theta1*theta1 - theta1*theta2 + 2*theta2*theta2)/30;
                 local_eps[i](1) = ((-4/initial_length) + 6*gauss_points_x[i]/(initial_length*initial_length))*theta1 + ((-2/initial_length) + 6*gauss_points_x[i]/(initial_length*initial_length))*theta2;
+                #if ELEMENT_VERBOSE
+                    std::cout << "calc_eps: element " << id << " local_eps at Gauss point = " << i << " is:" << std::endl;
+                    std::cout << local_eps[i] << std::endl;
+                #endif
             }
         }
 
@@ -281,6 +304,10 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             for (int i = 0; i < gauss_points_x.size(); ++i)
             {
                 local_stresses[i] = local_constitutive_mat[i]*local_eps[i];
+                #if ELEMENT_VERBOSE
+                    std::cout << "calc_stresses: element " << id << " local_stresses at Gauss point = " << i << " is:" << std::endl;
+                    std::cout << local_stresses[i] << std::endl;
+                #endif
             }
         }
         
@@ -304,6 +331,10 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             {
                 local_f += gauss_points_w[i] * B[i].transpose() * local_stresses[i];
             }
+            #if ELEMENT_VERBOSE
+                    std::cout << "calc_local_f: element " << id << " local_f is:" << std::endl;
+                    std::cout << local_f << std::endl;
+            #endif
         }
                 
         /**
@@ -318,6 +349,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             calc_d_from_U();
 
             // calculating element strain, stress, and resistance forces local_f depends on local displacement d in a nonlinear way.
+            calc_B();
             calc_eps();
             calc_local_constitutive_mat(); // need to update the constitutive matrix each iteration due to material nonlinearity.
             calc_stresses();
@@ -350,6 +382,10 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             {
                 local_mat_stiffness += gauss_points_w[i]* (B[i].transpose() * local_constitutive_mat[i] * B[i]);
             }
+            #if ELEMENT_VERBOSE
+                    std::cout << "calc_mat_stiffness: element " << id << " local_mat_stiffness is:" << std::endl;
+                    std::cout << local_mat_stiffness << std::endl;
+            #endif
         }
 
         /**
@@ -375,6 +411,10 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
                 local_geom_stiffness(1,2) += gauss_points_w[i]*-F*initial_length/30;
                 local_geom_stiffness(2,1) += gauss_points_w[i]*-F*initial_length/30;
             }
+            #if ELEMENT_VERBOSE
+                std::cout << "calc_geom_stiffness: element " << id << " local_geom_stiffness is:" << std::endl;
+                std::cout << local_geom_stiffness << std::endl;
+            #endif
         }
         /**
          * @brief calculates the direct external geometric stiffness contributions of the element.
@@ -440,7 +480,11 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             d2theta_du2(8,8) = g1;
 
             external_geom_stiffness = d2delta_du2*local_f(0) + d2theta_du2*local_f(1) + d2theta_du2*local_f(2);
-
+            
+            #if ELEMENT_VERBOSE
+                std::cout << "calc_external_geom_stiffness: element " << id << " external_geom_stiffness is:" << std::endl;
+                std::cout << external_geom_stiffness << std::endl;
+            #endif
         }
         /**
          * @brief sums the \ref local_mat_stiffness and \ref local_geom_stiffness to create the tangent stiffness.
@@ -448,6 +492,10 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
          */
         void calc_tangent_stiffness() {
             local_tangent_stiffness = local_mat_stiffness + local_geom_stiffness;
+            #if ELEMENT_VERBOSE
+                std::cout << "calc_tangent_stiffness: element " << id << " local_tangent_stiffness is:" << std::endl;
+                std::cout << local_tangent_stiffness << std::endl;
+            #endif
         }
 
         /**
@@ -457,6 +505,10 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
         void calc_elem_global_stiffness()
         {
             elem_global_stiffness = transformation.get_nl_T().transpose()*local_tangent_stiffness*transformation.get_nl_T() + external_geom_stiffness;
+            #if ELEMENT_VERBOSE
+                std::cout << "calc_elem_global_stiffness: element " << id << " elem_global_stiffness is:" << std::endl;
+                std::cout << elem_global_stiffness << std::endl;
+            #endif
         }
     //@}
 
@@ -482,6 +534,12 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
         void calc_d_from_U() 
         {
             transformation.calc_deformational_displacements(local_d);
+            #if ELEMENT_VERBOSE
+                std::cout << "calc_d_from_U: element " << id << " global_ele_U is:" << std::endl;
+                std::cout << global_ele_U << std::endl;
+                std::cout << "and local_d is:" << std::endl;
+                std::cout << local_d << std::endl;
+            #endif
         }
 
         /**
@@ -489,6 +547,10 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
          */
         void calc_element_global_resistance_forces() {
             element_global_resistance_forces = transformation.get_nl_T().transpose()*local_f;
+            #if ELEMENT_VERBOSE
+                std::cout << "calc_element_global_resistance_forces: element " << id << " element_global_resistance_forces is:" << std::endl;
+                std::cout << element_global_resistance_forces << std::endl;
+            #endif
         }
     //@}
     /**

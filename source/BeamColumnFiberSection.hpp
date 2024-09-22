@@ -307,11 +307,13 @@ class BeamColumnFiberSection : public SectionBaseClass {
         void print_info()
         {
             std::cout << "Section is of type " << section_type << ", and has A = " << section_area << ", composed of fibres: " << std::endl;
-            for (auto& fibre: fibres)
-            {
-                fibre.print_info();
-            }
+            // for (auto& fibre: fibres)
+            // {
+            //     fibre.print_info();
+            // }
+            std::cout << "Tangent stiffness D_t = " << std::endl << D_t << std::endl;
             std::cout << std::endl;
+            
         }
     
 };

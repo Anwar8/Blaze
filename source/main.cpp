@@ -52,7 +52,7 @@ int main () {
     real beam_length = 5.0;
     Model model;
     std::vector<coords> end_coords = {coords(0, 0, 0), coords(beam_length, 0, 0)};
-    int num_divisions = 10;
+    int num_divisions = 4;
     int num_elements = num_divisions;
     int num_nodes = num_elements + 1;
     
@@ -92,16 +92,18 @@ int main () {
     model.restraints.push_back(out_of_plane_restraint);
 
     // create loads
-    real y_load = -1e3;
+    real moment = 10e4;
+    real w = moment*8/(beam_length*beam_length);
+    real y_load = -w*beam_length/(num_nodes - 2);
     // buckling load is 2.58e7 N
-    real buckling_load = PI*PI * (2.06e11)*(0.0004570000) / (beam_length*beam_length);
-    real x_load = -1.5*buckling_load;
+    // real buckling_load = PI*PI * (2.06e11)*(0.0004570000) / (beam_length*beam_length);
+    // real x_load = -1.5*buckling_load;
 
-    model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes}, std::set<int>{0}, std::vector<real>{x_load}, model.glob_mesh);
+    // model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes}, std::set<int>{0}, std::vector<real>{x_load}, model.glob_mesh);
     model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes/2 + 1}, std::set<int>{2}, std::vector<real>{y_load}, model.glob_mesh);
 
     // create a scribe and track certain DoFs
-    model.scribe.track_nodes_by_id(std::set<unsigned>{(unsigned)num_nodes}, std::set<int>{0}, model.glob_mesh); 
+    // model.scribe.track_nodes_by_id(std::set<unsigned>{(unsigned)num_nodes}, std::set<int>{0}, model.glob_mesh); 
     model.scribe.track_nodes_by_id(std::set<unsigned>{(unsigned)num_nodes/2 + 1}, std::set<int>{2}, model.glob_mesh); 
     
     // initialise restraints and loads
@@ -109,11 +111,11 @@ int main () {
     model.glob_mesh.check_nodal_loads();
 
     // initialise solution parameters
-    real max_LF = 1;
-    int nsteps = 1000;
+    real max_LF = 0.02;
+    int nsteps = 2;
     real tolerance = 1e-4;
-    int max_iterations = 100;
+    int max_iterations = 2;
     model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
-    model.solve(-1);
+    model.solve(1);
     model.scribe.read_all_records();
 }

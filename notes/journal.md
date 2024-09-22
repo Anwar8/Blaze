@@ -15,6 +15,9 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 22 September
+I have succeeded in making `broken_plastic` compile again with the expected behaviour for the elastic beam-column elements. However, while the plastic beam-column element runs, it does not produce reasonable results. I noticed that the `update_state` function did not call `calc_B`, which resulted in everything coming out to 0. I fixed that, and now I get values that are way too high. I will need to systematically test what is happening with this element. The question is, however, is this worth it now, or should I move on to the focus on parallelisation with `Kokkos`? I really want to get the plasticity working, and I know I am very close. I also expect that material plasticity will play a very important role in the parallelisation of `Blaze`, so I will continue and try to get it to work as expected and hoped. I have already added very thorough logging to `Nonlinear2DPlasticBeamElement`, so this should help in debugging. I will need to build a test suite that subjects a single element to constant stress states and evaluates whether the section is registering the correct forces. Likewise, it could be worthwhile doing this at the "model" level where a problem is created and solved.
+
 #### 16 September
 Okay, so I took 3 weeks off from working on this and it is now 16 September. Having spoken to Adam, I am now convinced that I need to reduce complexity so that I can actually focus on parallelisation. That, however, is a difficult feat in its own right if it is to be done thoroughly. 
 1. Reduce complexity of materially nonlinear beam-column element by hard-coding types rather than creating abstract classes, templates, and complex inheritance structures.
