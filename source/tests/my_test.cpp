@@ -5,6 +5,7 @@
 #include "NodalLoadTests.hpp"
 #include "ScribeTest.hpp"
 #include "ModelTests.hpp"
+#include "PlasticBeamElementTests.hpp"
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);

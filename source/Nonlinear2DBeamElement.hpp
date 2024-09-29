@@ -305,6 +305,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface<BasicSection> {
             transformation.update_state(global_ele_U);
             // need to retrieve local displacement from the global displacements, which in our case actually uses the transformation object as the relationship is nonlinear!
             calc_d_from_U();
+            calc_length();
 
             // calculating element strain, stress, and resistance forces local_f depends on local displacement d in a nonlinear way.
             calc_eps();

@@ -92,6 +92,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
                 {
                     section.emplace_back(std::make_unique<BeamColumnFiberSection>(sect));
                     #if ELEMENT_VERBOSE
+                        std::cout << "initialise: element " << id << " updated its section at Gauss point = " << i << ":" << std::endl;
                         section[i]->print_info();
                     #endif
                 }
@@ -119,7 +120,6 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             transformation.initialise(nodes);
             initial_length = transformation.get_L0(); // the initial length does not change and only needs to be calculated once.
             update_gauss_points();
-            calc_local_constitutive_mat();
             update_state();
         }
 
@@ -303,7 +303,8 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
         void calc_stresses()  {
             for (int i = 0; i < gauss_points_x.size(); ++i)
             {
-                local_stresses[i] = local_constitutive_mat[i]*local_eps[i];
+                local_stresses[i](0) = section[i]->get_axial_force();
+                local_stresses[i](1) = section[i]->get_moment_yy();
                 #if ELEMENT_VERBOSE
                     std::cout << "calc_stresses: element " << id << " local_stresses at Gauss point = " << i << " is:" << std::endl;
                     std::cout << local_stresses[i] << std::endl;
@@ -317,6 +318,8 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
          * \f$ \boldsymbol{f} = \begin{bmatrix} F \\ M_1 \\ M_2 \end{bmatrix} 
          * = \sum_{i=1}^n w_{g,i} \left(\boldsymbol{B}^T \boldsymbol{\sigma}\right)|_{x=x_{g,i}}
          * \f$
+         * 
+         * @attention the direction of the local force F is 'away' from the nodes, and the moments are CCW. That is, under tension, F is negative, and under compression it is positive.
          */
         void calc_local_f() 
         {
@@ -347,6 +350,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             transformation.update_state(global_ele_U);
             // need to retrieve local displacement from the global displacements, which in our case actually uses the transformation object as the relationship is nonlinear!
             calc_d_from_U();
+            calc_length();
 
             // calculating element strain, stress, and resistance forces local_f depends on local displacement d in a nonlinear way.
             calc_B();
@@ -567,6 +571,8 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
      * @details all getter functions are inherited from \ref BeamElementCommonInterface.
      */
     //@{
+        virtual real get_L0() {return this->initial_length;}
+        virtual real get_L() {return this->length;}
     //@}
 };
 
