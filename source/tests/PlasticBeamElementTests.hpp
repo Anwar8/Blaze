@@ -85,15 +85,18 @@ void common_plastic_beam_setup(std::vector<std::shared_ptr<Node>>& in_nodes, Bea
 //     in_nodes[0]->set_nodal_displacement(2, 1.0); // node 1 U2
 //     in_nodes[1]->set_nodal_displacement(2, 1.0); // node 2 U2
 // }
-void nonlinear_rotate_ccw(std::vector<std::shared_ptr<Node>>& in_nodes) 
+std::pair<real, real> rotate_ccw(std::vector<std::shared_ptr<Node>>& in_nodes, real theta) 
 {
-    real extension = std::sqrt(std::pow(PLASTIC_BEAM_LENGTH,2) + std::pow(2.0,2)) - PLASTIC_BEAM_LENGTH; // equation 8.2 from Izzuddin's Nonlinear FEM notes
-    in_nodes[0]->set_nodal_displacement(0, extension/2); // node 1 U1
-    in_nodes[0]->set_nodal_displacement(2, -1.0); // node 1 U2
-    in_nodes[0]->set_nodal_displacement(5, 2.0/PLASTIC_BEAM_LENGTH); // node 1 U33
-    in_nodes[1]->set_nodal_displacement(0, -extension/2); // node 2 U2
-    in_nodes[1]->set_nodal_displacement(2, 1.0); // node 2 U2
-    in_nodes[1]->set_nodal_displacement(5, 2.0/PLASTIC_BEAM_LENGTH); // node 2 U33
+    real delta_x = PLASTIC_BEAM_LENGTH/2.0 - std::cos(theta)*(PLASTIC_BEAM_LENGTH/2.0);
+    real delta_y = std::sin(theta)*(PLASTIC_BEAM_LENGTH/2.0);
+
+    in_nodes[0]->set_nodal_displacement(0, delta_x); // node 1 U1
+    in_nodes[0]->set_nodal_displacement(2, -delta_y); // node 1 U2
+    in_nodes[0]->set_nodal_displacement(5, theta); // node 1 U33
+    in_nodes[1]->set_nodal_displacement(0, -delta_x); // node 2 U2
+    in_nodes[1]->set_nodal_displacement(2, delta_y); // node 2 U2
+    in_nodes[1]->set_nodal_displacement(5, theta); // node 2 U33
+    return std::pair<real, real> (delta_x, delta_y);
 }
 
 void constant_compression(std::vector<std::shared_ptr<Node>>& in_nodes, real delta) 
@@ -257,12 +260,13 @@ TEST_F(PlasticBeamTests, RigidMoveUpCheckResistanceForces) {
 
 
 TEST_F(PlasticBeamTests, RigidRotateCCWCheckLocald) {
-  nonlinear_rotate_ccw(in_nodes);
+  real theta = 1.0;
+  real correct_extension = 0;
+  std::pair<real, real> deltas = rotate_ccw(in_nodes, theta);
+  real correct_thetas = theta - std::atan(2*deltas.second/(PLASTIC_BEAM_LENGTH - 2*deltas.first));
   my_beam->update_state();
 
-  real correct_thetas = 2.0/PLASTIC_BEAM_LENGTH;
-  real correct_extension = std::sqrt(std::pow(PLASTIC_BEAM_LENGTH,2) + std::pow(2.0,2)) - PLASTIC_BEAM_LENGTH; // equation 8.2 from Izzuddin's Nonlinear FEM notes
-
+  
   // Calculate norms and perform assertions
   vec local_d = my_beam->get_local_d();
 
@@ -272,7 +276,7 @@ TEST_F(PlasticBeamTests, RigidRotateCCWCheckLocald) {
 }
 
 TEST_F(PlasticBeamTests, RigidRotateCCWCheckEps) {
-  nonlinear_rotate_ccw(in_nodes);
+  std::pair<real, real> deltas = rotate_ccw(in_nodes, 1.0);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -281,7 +285,7 @@ TEST_F(PlasticBeamTests, RigidRotateCCWCheckEps) {
 }
 
 TEST_F(PlasticBeamTests, RigidRotateCCWCheckStress) {
-  nonlinear_rotate_ccw(in_nodes);
+  std::pair<real, real> deltas = rotate_ccw(in_nodes, 1.0);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -290,7 +294,7 @@ TEST_F(PlasticBeamTests, RigidRotateCCWCheckStress) {
 }
 
 TEST_F(PlasticBeamTests, RigidRotateCCWCheckLocalf) {
-  nonlinear_rotate_ccw(in_nodes);
+  std::pair<real, real> deltas = rotate_ccw(in_nodes, 1.0);
   my_beam->update_state();
 
   // Calculate norms and perform assertions
@@ -299,12 +303,18 @@ TEST_F(PlasticBeamTests, RigidRotateCCWCheckLocalf) {
   }
 
 TEST_F(PlasticBeamTests, RigidRotateCCWResistanceForces) {
-  nonlinear_rotate_ccw(in_nodes);
+  std::pair<real, real> deltas = rotate_ccw(in_nodes, 1.0);
   my_beam->update_state();
 
-  // Calculate norms and perform assertions
-  real resistance_forces_norm = my_beam->get_element_resistance_forces().lpNorm<1>();
-  EXPECT_NEAR(resistance_forces_norm, 0.0, PLASTIC_BEAM_TOLERANCE);
+  vec R = my_beam->get_element_resistance_forces();
+  
+  EXPECT_NEAR(R(0), 0.0, PLASTIC_BEAM_TOLERANCE); // axial
+  EXPECT_NEAR(R(2), 0.0, PLASTIC_BEAM_TOLERANCE); // vertical
+  EXPECT_NEAR(R(5), 0.0, PLASTIC_BEAM_TOLERANCE); // moment
+
+  EXPECT_NEAR(R(6), 0.0, PLASTIC_BEAM_TOLERANCE); // axial
+  EXPECT_NEAR(R(8), 0.0, PLASTIC_BEAM_TOLERANCE); // vertical
+  EXPECT_NEAR(R(11), 0.0, PLASTIC_BEAM_TOLERANCE); // moment
 }
 
 TEST_F(PlasticBeamTests, ConstantCompressionLength) {
@@ -362,7 +372,8 @@ TEST_F(PlasticBeamTests, ConstantCompressionGlobalNodalForces) {
   real R_norm = R.lpNorm<1>();
   EXPECT_NEAR(R(0), -((delta/PLASTIC_BEAM_LENGTH)*PLASTIC_YOUNGS_MODULUS_BEAM_TEST*correct_area), PLASTIC_BEAM_TOLERANCE);
   EXPECT_NEAR(R(6), ((delta/PLASTIC_BEAM_LENGTH)*PLASTIC_YOUNGS_MODULUS_BEAM_TEST*correct_area), PLASTIC_BEAM_TOLERANCE);
-  EXPECT_NEAR(R_norm, ((delta/PLASTIC_BEAM_LENGTH)*PLASTIC_YOUNGS_MODULUS_BEAM_TEST*correct_area)*2.0, PLASTIC_BEAM_TOLERANCE);
+  // the following test ensures only axial are the only forces via checking the norm.
+  EXPECT_NEAR(R_norm, ((delta/PLASTIC_BEAM_LENGTH)*PLASTIC_YOUNGS_MODULUS_BEAM_TEST*correct_area)*2.0, PLASTIC_BEAM_TOLERANCE); 
 }
 
 TEST_F(PlasticBeamTests, ConstantTensionLength) {
