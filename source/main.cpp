@@ -67,9 +67,9 @@ int main () {
     real tw = 11.4e-3;
     real b = 192.8e-3;
     real h = 467.2e-3;
+    real moment_of_inertia = tw*pow(h - 2*tf, 3)/12 + 2*b*pow(tf,3)/12 + 2*(tf*b)*pow(0.5*h - 0.5*tf, 2); // m^4 
     BeamColumnFiberSection sect;
     build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 10, 40);
-    sect.print_info();
     model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
     std::vector<unsigned> restrained_nodes = std::vector<unsigned>(num_divisions - 1);
     std::iota(restrained_nodes.begin(), restrained_nodes.end(), 2);
@@ -92,9 +92,10 @@ int main () {
     model.restraints.push_back(out_of_plane_restraint);
 
     // create loads
-    real moment = 10e4;
+    real moment = 1.0e4;
     real w = moment*8/(beam_length*beam_length);
     real y_load = -w*beam_length/(num_nodes - 2);
+    real expected_deflection = -5 * w * std::pow(beam_length, 4)/(384*youngs_modulus*moment_of_inertia);
     // buckling load is 2.58e7 N
     // real buckling_load = PI*PI * (2.06e11)*(0.0004570000) / (beam_length*beam_length);
     // real x_load = -1.5*buckling_load;
@@ -111,11 +112,12 @@ int main () {
     model.glob_mesh.check_nodal_loads();
 
     // initialise solution parameters
-    real max_LF = 0.02;
-    int nsteps = 2;
-    real tolerance = 1e-4;
-    int max_iterations = 2;
+    real max_LF = 1;
+    int nsteps = 20;
+    real tolerance = 1e-2;
+    int max_iterations = 10;
     model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
     model.solve(1);
     model.scribe.read_all_records();
+    std::cout << "Expected deflection is: " << expected_deflection << std::endl;
 }

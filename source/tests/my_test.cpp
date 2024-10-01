@@ -6,6 +6,7 @@
 #include "ScribeTest.hpp"
 #include "ModelTests.hpp"
 #include "PlasticBeamElementTests.hpp"
+#include "PlasticModelTests.hpp"
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);

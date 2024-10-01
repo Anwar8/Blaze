@@ -7,7 +7,8 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [x] 1D material base class: `Material1D`.
 - [x] Isotropic material implementation: `ElasticPlasticMaterial`.
 - [x] Implementation of `BeamColumnFiberSection`.
-- [ ] Implementation of `Nonlinear2DPlasticBeamElement` which accounts for spread of plasticity.
+- [x] Implementation of `Nonlinear2DPlasticBeamElement` which accounts for spread of plasticity.
+- [ ] Tests for the plastic beam-column element
 ### ~~WP3: Thermal loading interface - 4 weeks - due 15/09/2024~~
 ### WP4: Shared-memory parallelisation on Cirrus using Kokkos - ~~6~~ 5 weeks - due 01/11/2024
 ### WP5: Internode parallelisation with MPI - 12 weeks - due 01/02/2025
@@ -15,6 +16,13 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 1 October 
+I noticed that something important that I was missing is a command to update the starting state of the section! Right now, `BeamColumnFiberSection` does not have a command to *commit* its state, nor does `Nonlinear2DPlasticBeamElement`. This means that each iteration, the starting state of all material fibres is the initial state! This needs to be added to the solution-procedure as well.
+
+I found another problem today. I built a new set of model-level tests for the `Nonlinear2DPlasticBeamElement`, but I am getting a segmentation fault when they run. Something is happening during the utilisation of the plastic sections. I also found that a lot of unwanted tests are running because I am including other test files so I can use their helper functions. I should isolate these helper functions on their own in a helper function file. So, from this, I have three todos:
+[ ] Isolate test-helpers into their own file.
+[ ] Add functionality to `UpdateMaterialStartingState` that is called by `solve` after each successful iteration, and before moving into the next load step.
+[ ] Figure out why `ModelTestsPlastic` is running into a segmentation fault (same for good ol' regular `Blaze` binary as well).
 #### 29 September
 So I am almost done with the `Nonlinear2DPlasticBeamElement` and the associated tests. I noticed something quite interesting about the way I am doing my calculation. I am using the fibre section to calculate the forces, and to also calculate $\boldsymbol{D}_t$. However, when calculating the section stresses using $\boldsymbol{\sigma} = \boldsymbol{D}_t \boldsymbol{\varepsilon}$, I am overlooking the fact that if the section has yielded, then the tangent Young's modulus would be equal to 0. This means that the section stresses would be zero, and the stiffness would also be zero. In stead, I should use the section forces from the `BeamColumnFiberSection` object at the Gauss point, and retrieve the forces from there. In this way, I can get the actual section forces which are not captured by the elastic relationship $\boldsymbol{\sigma} = \boldsymbol{D}_t \boldsymbol{\varepsilon}$. I have done that now. 
 
