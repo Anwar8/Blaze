@@ -70,7 +70,10 @@ class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass>
      * @brief functions that are used to calculate element properties such as stress, shape, length, and strain
      */
     //@{
-        // all element property calculation functions are element-specific.
+        /**
+         * @brief updates the starting state of the section after solution convergence. Please see Bhatti's Advanced Topics in Finite Element Analysis of Structures for more on this. Does nothing for all Elastic elements.
+         */
+        virtual void update_section_starting_state() override {};
     //@}
 
     /**

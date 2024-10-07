@@ -199,10 +199,15 @@ class BeamElementBaseClass : public ElementBaseClass {
         virtual void calc_T(real sec_offset = 0.0, coords origin_x = {1.0, 0.0, 0.0}) = 0;
 
         /**
-         * @brief calculates local constitutive matrix from section information.
+         * @brief calculates local constitutive matrix from section information. 
          * 
          */
         virtual void calc_local_constitutive_mat() = 0;
+        
+        /**
+         * @brief updates the starting state of the section after solution convergence. Please see Bhatti's Advanced Topics in Finite Element Analysis of Structures for more on this.
+         */
+        virtual void update_section_starting_state() = 0;
 
         /**
          * @brief calcualtes the local strains from the relationship \f$\boldsymbol{\sigma} = \boldsymbol{B}\boldsymbol{d}\f$.

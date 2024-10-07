@@ -12,6 +12,7 @@ class ElementBaseClass
         virtual void map_stiffness() = 0;
         virtual void calc_global_stiffness_triplets() = 0;
         virtual void update_state() = 0;
+        virtual void update_section_starting_state() = 0;
         virtual void print_info() = 0;
         virtual void print_element_state(bool print_stresses = true, bool print_strains = false,
                                  bool print_nodal_disp = false, bool print_nodal_forces = false) = 0;

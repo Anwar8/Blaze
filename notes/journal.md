@@ -18,10 +18,12 @@ This journal contains the day-to-day project management and notes taken. It was 
 ## Journal
 #### 7 October
 - [x] Isolate test-helpers into their own file.
-- [ ] Add functionality to `update_material_starting_state` that is called by `solve` after each successful iteration, and before moving into the next load step.
+- [x] Add functionality to `update_material_starting_state` that is called by `solve` after each successful iteration, and before moving into the next load step.
 - [ ] Figure out why `ModelTestsPlastic` is running into a segmentation fault (same for good ol' regular `Blaze` binary as well).
+  - [ ] Figure out why `main` produces incorrect results regardless of element type being used.
 - [ ] I also need a test to check that individual `Nonlinear2DPlasticBeamElement` are able to capture pure bending correctly.
 
+Right now, I have added the function `update_element_sections_starting_states` to the `GlobalMesh` object, and it is called being called as expected. I am not sure if it work correctly, but my best way to test it is to test a model. This leads to the third item on the todo list: finding out why `ModelTestsPlastic` is running into a segmentation fault. During my initial testing, I found that `main.cpp` is not working correctly as the results predicted by the model are incorrect regardless of the finite element type being used.
 
 #### 1 October 
 I noticed that something important that I was missing is a command to update the starting state of the section! Right now, `BeamColumnFiberSection` does not have a command to *commit* its state, nor does `Nonlinear2DPlasticBeamElement`. This means that each iteration, the starting state of all material fibres is the initial state! This needs to be added to the solution-procedure as well.

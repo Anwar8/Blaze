@@ -276,6 +276,18 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
         }
 
         /**
+         * @brief updates the starting state of the section after solution convergence. Please see Bhatti's Advanced Topics in Finite Element Analysis of Structures for more on this. Does nothing for all Elastic elements.
+         * 
+         */
+        virtual void update_section_starting_state()
+        {
+            for (auto& fibre_section: section)
+            {
+                fibre_section->update_section_starting_state();
+            }
+        }
+
+        /**
          * @brief calculates strains based on (4.b) and (4.c) from Izzuddin. This is done per Gauss point, which in this case is just at midpoint of element.
          * @details the relationship between the \ref local_d and \ref local_eps is nonlinear, and as such we 
          * cannot simply use \f$\boldsymbol{\sigma} = \boldsymbol{B}\boldsymbol{d}\f$ which was used in \ref Linear2DBeamElement.

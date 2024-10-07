@@ -68,9 +68,15 @@ int main () {
     real b = 192.8e-3;
     real h = 467.2e-3;
     real moment_of_inertia = tw*pow(h - 2*tf, 3)/12 + 2*b*pow(tf,3)/12 + 2*(tf*b)*pow(0.5*h - 0.5*tf, 2); // m^4 
-    BeamColumnFiberSection sect;
-    build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 10, 40);
-    model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
+    real section_area = 2*tf*b + (h - 2*tf)*tw;
+    std::cout << "(A,I) = (" << section_area << ", " << moment_of_inertia << ")." << std::endl; 
+    // BeamColumnFiberSection sect;
+    // build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 10, 40);
+    // model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
+
+    BasicSection basic_sect(youngs_modulus, section_area, moment_of_inertia);
+    model.create_line_mesh(num_divisions, end_coords, LinearElastic, basic_sect);
+
     std::vector<unsigned> restrained_nodes = std::vector<unsigned>(num_divisions - 1);
     std::iota(restrained_nodes.begin(), restrained_nodes.end(), 2);
 

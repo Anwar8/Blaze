@@ -100,6 +100,7 @@ class SolutionProcedure
                     glob_mesh.print_elements_states(true, true, true, true);
                 }              
                 step++;
+                glob_mesh.update_element_sections_starting_states();
                 scribe.write_to_records();
                 if (step%logging_frequency == 0 && logging_frequency > 0)
                 {

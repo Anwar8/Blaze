@@ -296,6 +296,14 @@ class GlobalMesh {
                 elem->update_state();
             }
         }
+
+        void update_element_sections_starting_states()
+        {
+            for (auto& elem: elem_vector)
+            {
+                elem->update_section_starting_state();
+            }
+        }
         /**
          * @brief prints the selected state of each element.
          * 
