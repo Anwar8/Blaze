@@ -152,7 +152,7 @@ class FibreSectionPureBendingTests : public ::testing::Test {
  */
 TEST_F(FibreSectionPureBendingTests, ElasticMoment)
 {
-    I_section.increment_section_strains(0.0, kappa_elastic);
+    I_section.set_section_strains(0.0, kappa_elastic);
     I_section.increment_fibre_strains();
     I_section.calc_section_forces();
     real calculated_section_moment = I_section.get_moment_yy();
@@ -171,7 +171,7 @@ TEST_F(FibreSectionPureBendingTests, ElasticMoment)
  */
 TEST_F(FibreSectionPureBendingTests, PlasticMoment)
 {
-    I_section.increment_section_strains(0.0, kappa_plastic);
+    I_section.set_section_strains(0.0, kappa_plastic);
     I_section.increment_fibre_strains();
     I_section.calc_section_forces();
     real calculated_section_moment = I_section.get_moment_yy();
@@ -191,7 +191,7 @@ TEST_F(FibreSectionPureBendingTests, PlasticMoment)
  */
 TEST_F(FibreSectionPureBendingTests, NegativeElasticMoment)
 {
-    I_section.increment_section_strains(0.0, -kappa_elastic);
+    I_section.set_section_strains(0.0, -kappa_elastic);
     I_section.increment_fibre_strains();
     I_section.calc_section_forces();
     real calculated_section_moment = I_section.get_moment_yy();
@@ -210,7 +210,7 @@ TEST_F(FibreSectionPureBendingTests, NegativeElasticMoment)
  */
 TEST_F(FibreSectionPureBendingTests, NegativePlasticMoment)
 {
-    I_section.increment_section_strains(0.0, -kappa_plastic);
+    I_section.set_section_strains(0.0, -kappa_plastic);
     I_section.increment_fibre_strains();
     I_section.calc_section_forces();
     real calculated_section_moment = I_section.get_moment_yy();
@@ -255,7 +255,7 @@ class FibreSectionPureAxialTests : public ::testing::Test {
  */
 TEST_F(FibreSectionPureAxialTests, YieldTensileForce)
 {
-    I_section.increment_section_strains(axial_yield_strain, 0.0);
+    I_section.set_section_strains(axial_yield_strain, 0.0);
     I_section.increment_fibre_strains();
     I_section.calc_section_forces();
     real calculated_section_force = I_section.get_axial_force();
@@ -273,7 +273,7 @@ TEST_F(FibreSectionPureAxialTests, YieldTensileForce)
  */
 TEST_F(FibreSectionPureAxialTests, YieldCompressiveForce)
 {
-    I_section.increment_section_strains(-axial_yield_strain, 0.0);
+    I_section.set_section_strains(-axial_yield_strain, 0.0);
     I_section.increment_fibre_strains();
     I_section.calc_section_forces();
     real calculated_section_force = I_section.get_axial_force();
@@ -292,7 +292,7 @@ TEST_F(FibreSectionPureAxialTests, YieldCompressiveForce)
  */
 TEST_F(FibreSectionPureAxialTests, PostYieldTensileForce)
 {
-    I_section.increment_section_strains(1.2*axial_yield_strain, 0.0);
+    I_section.set_section_strains(1.2*axial_yield_strain, 0.0);
     I_section.increment_fibre_strains();
     I_section.calc_section_forces();
     real calculated_section_force = I_section.get_axial_force();
@@ -310,7 +310,7 @@ TEST_F(FibreSectionPureAxialTests, PostYieldTensileForce)
  */
 TEST_F(FibreSectionPureAxialTests, PostYieldCompressiveForce)
 {
-    I_section.increment_section_strains(-1.2*axial_yield_strain, 0.0);
+    I_section.set_section_strains(-1.2*axial_yield_strain, 0.0);
     I_section.increment_fibre_strains();
     I_section.calc_section_forces();
     real calculated_section_force = I_section.get_axial_force();
@@ -354,7 +354,7 @@ TEST_F(FibreSectionPureAxialTests, IncrementalPostYieldCompressiveForce)
     I_section.update_section_starting_state();
     d_eps(0) = -1.2*axial_yield_strain;
     I_section.update_section_state(d_eps);
-    // I_section.increment_section_strains(-1.2*axial_yield_strain, 0.0);
+    // I_section.set_section_strains(-1.2*axial_yield_strain, 0.0);
     // I_section.increment_fibre_strains();
     // I_section.calc_section_forces();
     real calculated_section_force = I_section.get_axial_force();

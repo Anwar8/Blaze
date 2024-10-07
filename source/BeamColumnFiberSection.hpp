@@ -99,7 +99,7 @@ class BeamColumnFiberSection : public SectionBaseClass {
          * @param new_axial_strain 
          * @param new_curvature 
          */
-        void increment_section_strains(real new_axial_strain, real new_curvature)
+        void set_section_strains(real new_axial_strain, real new_curvature)
         {
             axial_strain = new_axial_strain;
             curvature = new_curvature;
@@ -198,7 +198,7 @@ class BeamColumnFiberSection : public SectionBaseClass {
                 D_t(0,0) = D_t(0,0) + A_i * E_t_i;
                 D_t(1,1) = D_t(1,1) + A_i * E_t_i * pow(y_i - y_bar, 2); 
                 D_t(1,0) = D_t(1,0) - A_i * E_t_i * (y_i - y_bar); 
-                D_t(0,1) = D_t(1,0);
+                D_t(0,1) = D_t(0,1) - A_i * E_t_i * (y_i - y_bar); 
             }
         }
 
@@ -212,7 +212,7 @@ class BeamColumnFiberSection : public SectionBaseClass {
             calc_area_weighted_E();
             calc_section_centroid();
 
-            increment_section_strains(epsilon(0), epsilon(1));
+            set_section_strains(epsilon(0), epsilon(1));
             increment_fibre_strains();
             calc_section_forces();
             calc_tan_contitutive_matrix();

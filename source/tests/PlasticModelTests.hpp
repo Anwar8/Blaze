@@ -33,17 +33,23 @@ TEST_F(MeshTestsPlastic, NumOfNodes)
 class CantileverBeamPlastic : public ::testing::Test {
   public:
     Model model;
-    int divisions = 10;
-    real y_load = -1e5;
+    CommonSectionDefinitions common;
+
+    real beam_length = 10.0;
+    real max_stress = YIELD_STRENGTH/2;
+    real correct_moment = common.moment_of_inertia * max_stress/(common.h/2);
+    real y_load = -correct_moment/beam_length;
+    
+    int divisions = 3;
+    
     unsigned tracked_node_id = divisions + 1;
     int tracked_dof = 2;
-    real beam_length = 10.0;
+    
 
-    CommonSectionDefinitions common;
 
     void SetUp() override {
         common.initialise_section();
-        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {beam_length, 0.0, 0.0}}, LinearElastic, common.I_section);
+        model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {beam_length, 0.0, 0.0}}, PLASTIC_ELEMENT_TYPE, common.I_section);
 
         NodalRestraint end_restraint;
         end_restraint.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5});
@@ -52,7 +58,8 @@ class CantileverBeamPlastic : public ::testing::Test {
         
         NodalRestraint out_of_plane_restraint; 
         out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
-        out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+        // out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+        out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
         model.restraints.push_back(out_of_plane_restraint);
 
         model.load_manager.create_a_nodal_load_by_id({(unsigned)(divisions+1)}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);

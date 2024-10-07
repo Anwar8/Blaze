@@ -25,6 +25,14 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 Right now, I have added the function `update_element_sections_starting_states` to the `GlobalMesh` object, and it is called being called as expected. I am not sure if it work correctly, but my best way to test it is to test a model. This leads to the third item on the todo list: finding out why `ModelTestsPlastic` is running into a segmentation fault. During my initial testing, I found that `main.cpp` is not working correctly as the results predicted by the model are incorrect regardless of the finite element type being used.
 
+**It is 9:30 PM now**
+
+I found that the wrong element type was passed to the test thus resulting in a quick segmentation fault in the test. Main was giving incorrect results because the problem that was being solved was incorrectly setup. I changed to a cantilever beam and that works for the Elastic elements. 
+- [x] Figure out why `ModelTestsPlastic` is running into a segmentation fault (same for good ol' regular `Blaze` binary as well).
+  - [x] Figure out why `main` produces incorrect results regardless of element type being used.
+With that being said, I am now running into an error where the out-of-balance keeps growing at higher iterations for my Plastic beam-column thus preventing convergence and resulting in NaN numbers in the stiffness matrix at very high out-of-balance. This happens with any model-level problem. I have figured out that a load 3500 (LF*0.35 initially, but now I reduced the load) is achievable for the state of `main.cpp` that is currently comitted - the final deflection achieved is  -0.00011352 which is very close to the correct value of -0.000115826. The beam is still elastic at this point, so I am not sure what is happening. I am completely at my wits' end with this. I need to start writing, and hopefully by doing that, I will be able to find what the problem is.
+
+
 #### 1 October 
 I noticed that something important that I was missing is a command to update the starting state of the section! Right now, `BeamColumnFiberSection` does not have a command to *commit* its state, nor does `Nonlinear2DPlasticBeamElement`. This means that each iteration, the starting state of all material fibres is the initial state! This needs to be added to the solution-procedure as well.
 

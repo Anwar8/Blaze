@@ -238,6 +238,24 @@ TEST_F(PlasticBeamTests, ConstantCompressionLocalNodalForces) {
   EXPECT_NEAR(local_f(2), 0.0, BASIC_TOLERANCE);
 }
 
+TEST_F(PlasticBeamTests, ConstantCompressionStiffness) {
+  real force = 0.9*YIELD_STRENGTH*common.correct_area;
+  real delta = 0.9*PLASTIC_BEAM_LENGTH*YIELD_STRENGTH/YOUNGS_MODULUS;
+
+  constant_compression(in_nodes, delta);
+  my_beam->update_state();
+  mat local_k_t = my_beam->get_local_tangent_stiffness();
+  real k_t_00 = YOUNGS_MODULUS*common.correct_area/PLASTIC_BEAM_LENGTH;
+  real k_t_11 = (4*YOUNGS_MODULUS*common.moment_of_inertia/PLASTIC_BEAM_LENGTH) + 4*force*PLASTIC_BEAM_LENGTH/30;
+  real k_t_22 = (4*YOUNGS_MODULUS*common.moment_of_inertia/PLASTIC_BEAM_LENGTH) + 4*force*PLASTIC_BEAM_LENGTH/30;
+  real k_t_21 = (2*YOUNGS_MODULUS*common.moment_of_inertia/PLASTIC_BEAM_LENGTH) + -1*force*PLASTIC_BEAM_LENGTH/30;
+  EXPECT_NEAR(local_k_t(0,0), k_t_00, BASIC_TOLERANCE);
+  EXPECT_NEAR(local_k_t(1,1), k_t_11, BASIC_TOLERANCE);
+  EXPECT_NEAR(local_k_t(2,2), k_t_22, BASIC_TOLERANCE);
+  EXPECT_NEAR(local_k_t(2,1), k_t_21, BASIC_TOLERANCE);
+  EXPECT_NEAR(local_k_t(1,2), k_t_21, BASIC_TOLERANCE);
+}
+
 TEST_F(PlasticBeamTests, ConstantCompressionGlobalNodalForces) {
   real delta = PLASTIC_BEAM_LENGTH*YIELD_STRENGTH/YOUNGS_MODULUS;
   constant_compression(in_nodes, delta);

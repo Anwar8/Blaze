@@ -107,8 +107,8 @@ struct CommonSectionDefinitions {
     real b = 192.8e-3;
     real h = 467.2e-3;
     real d = h - 2*tf;
-    int flange_divisions = 10;
-    int web_divisions = 40;
+    int flange_divisions = 4;
+    int web_divisions = 10;
     real correct_area = tf*b*2 + (h - 2*tf)*tw; // m2
     real moment_of_inertia = tw*pow(h - 2*tf, 3)/12 + 2*b*pow(tf,3)/12 + 2*(tf*b)*pow(0.5*h - 0.5*tf, 2);
     real section_modulus = moment_of_inertia/(h/2);
