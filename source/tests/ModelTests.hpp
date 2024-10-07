@@ -1,12 +1,8 @@
 #ifndef MODEL_TESTS_HPP
 #define MODEL_TESTS_HPP
-#include "gtest/gtest.h"
-#include "../Model.hpp"
-#include "../main.hpp"
-#include <numeric>
-#define LOAD_TOLERANCE 1e-6
-#define DISP_TOLERANCE 1e-6
-#define SOLUTION_TOLERANCE_PERCENT 0.02
+
+#include "TestHelpers.hpp"
+
 #define ELEMENT_TYPE NonlinearElastic
 
 class MeshTests : public ::testing::Test {
@@ -127,7 +123,7 @@ TEST_F(LoadTests, LoadedNodeLoadsByDoF)
     model.load_manager.increment_loads(1.0);
     
     std::array<real, 6> loads = node->get_loads();
-    EXPECT_NEAR(loads[1], y_load, LOAD_TOLERANCE);
+    EXPECT_NEAR(loads[1], y_load, BASIC_TOLERANCE);
 }
 
 TEST_F(LoadTests, LoadedNodeLoadsByUnloadedDoF)
@@ -137,7 +133,7 @@ TEST_F(LoadTests, LoadedNodeLoadsByUnloadedDoF)
     model.load_manager.increment_loads(1.0);
     
     std::array<real, 6> loads = node->get_loads();
-    EXPECT_NEAR(loads[0], 0.0, LOAD_TOLERANCE);
+    EXPECT_NEAR(loads[0], 0.0, BASIC_TOLERANCE);
 }
 
 TEST_F(LoadTests, LoadedNodeTotalLoads)
@@ -147,7 +143,7 @@ TEST_F(LoadTests, LoadedNodeTotalLoads)
     model.load_manager.increment_loads(1.0);
     
     std::array<real, 6> loads = node->get_loads();
-    EXPECT_NEAR(std::accumulate(loads.begin(), loads.end(), 0), y_load, LOAD_TOLERANCE);
+    EXPECT_NEAR(std::accumulate(loads.begin(), loads.end(), 0), y_load, BASIC_TOLERANCE);
 }
 
 TEST_F(LoadTests, UnloadedNodeTotalLoads)
@@ -157,7 +153,7 @@ TEST_F(LoadTests, UnloadedNodeTotalLoads)
     model.load_manager.increment_loads(1.0);
     
     std::array<real, 6> loads = node->get_loads();
-    EXPECT_NEAR(std::accumulate(loads.begin(), loads.end(), 0), 0.0, LOAD_TOLERANCE);
+    EXPECT_NEAR(std::accumulate(loads.begin(), loads.end(), 0), 0.0, BASIC_TOLERANCE);
 }
 
 class ScribeTests : public ::testing::Test {
@@ -212,7 +208,7 @@ TEST_F(ScribeTests, CheckTrackedNodeDisp)
     std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data();
 
 
-    EXPECT_NEAR(recorded_data[tracked_dof].back(), 1.0, DISP_TOLERANCE);
+    EXPECT_NEAR(recorded_data[tracked_dof].back(), 1.0, BASIC_TOLERANCE);
 }
 
 TEST_F(ScribeTests, CheckTrackedNodeDispTwice)
@@ -231,8 +227,8 @@ TEST_F(ScribeTests, CheckTrackedNodeDispTwice)
     std::vector<real> disp_data = recorded_data[tracked_dof];
 
 
-    EXPECT_NEAR(disp_data[0], 1.0, DISP_TOLERANCE);
-    EXPECT_NEAR(disp_data[1], 2.0, DISP_TOLERANCE);
+    EXPECT_NEAR(disp_data[0], 1.0, BASIC_TOLERANCE);
+    EXPECT_NEAR(disp_data[1], 2.0, BASIC_TOLERANCE);
 }
 
 
@@ -286,7 +282,7 @@ TEST_F(CantileverBeam, CheckResult)
     std::vector<real> disp_data = recorded_data[tracked_dof];
     // $\delta = \frac{PL^3}{3EI} = \frac{1e5 (3)^3}{3(2.06e11)(0.0004570000)} = 0.009560026343183701$
     real correct_disp = y_load*std::powf(beam_length, 3)/(3*(2.06e11)*(0.0004570000));
-    real tolerance = std::abs(SOLUTION_TOLERANCE_PERCENT*correct_disp);
+    real tolerance = std::abs(PERCENT_TOLERANCE*correct_disp);
     EXPECT_NEAR(disp_data.back(), correct_disp, tolerance);
 }
 
@@ -344,7 +340,7 @@ TEST_F(SimplySupported, CheckResult)
     std::vector<real> disp_data = recorded_data[tracked_dof];
     // $\delta = \frac{PL^3}{48EI} $
     real correct_disp = y_load*std::powf(beam_length, 3)/(48*(2.06e11)*(0.0004570000));
-    real tolerance = std::abs(SOLUTION_TOLERANCE_PERCENT*correct_disp);
+    real tolerance = std::abs(PERCENT_TOLERANCE*correct_disp);
     EXPECT_NEAR(disp_data.back(), correct_disp, tolerance);
 }
 
@@ -407,7 +403,7 @@ TEST_F(SimplySupportedUdl, CheckResult)
     std::vector<real> disp_data = recorded_data[tracked_dof];
     // $\delta = \frac{5 w L^4}{384 EI} $
     real correct_disp = 5*y_udl*std::powf(beam_length, 4)/(384*(2.06e11)*(0.0004570000));
-    real tolerance = std::abs(SOLUTION_TOLERANCE_PERCENT*correct_disp);
+    real tolerance = std::abs(PERCENT_TOLERANCE*correct_disp);
     EXPECT_NEAR(disp_data.back(), correct_disp, tolerance);
 }
 

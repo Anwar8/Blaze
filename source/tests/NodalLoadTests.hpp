@@ -1,9 +1,7 @@
 #ifndef NODAL_LOAD_TESTS_HPP
 #define NODAL_LOAD_TESTS_HPP
 
-#include "gtest/gtest.h"
-#include "../NodalLoad.hpp"
-#define NODAL_LOAD_TOL 1e-6
+#include "TestHelpers.hpp"
 
 void setup_nodal_load(NodalLoad& nodal_load, std::vector<std::shared_ptr<Node>> in_nodes, std::vector<int> dofs, std::vector<real> loads)
 {
@@ -71,7 +69,7 @@ TEST_F(NodalLoadTest, LoadOrderCorrect)
     int i = 0;
     for (auto& dof: dofs)
     {
-         EXPECT_NEAR(load_object_loads[dof], loads[i], NODAL_LOAD_TOL);
+         EXPECT_NEAR(load_object_loads[dof], loads[i], BASIC_TOLERANCE);
          ++i;
     }
 }
@@ -86,7 +84,7 @@ TEST_F(NodalLoadTest, ConstructBySetLoadOrderCorrect)
     int i = 0;
     for (auto& dof: dofs)
     {
-         EXPECT_NEAR(load_object_loads[dof], loads[i], NODAL_LOAD_TOL);
+         EXPECT_NEAR(load_object_loads[dof], loads[i], BASIC_TOLERANCE);
          ++i;
     }
 }

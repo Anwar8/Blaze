@@ -16,13 +16,20 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 7 October
+- [x] Isolate test-helpers into their own file.
+- [ ] Add functionality to `update_material_starting_state` that is called by `solve` after each successful iteration, and before moving into the next load step.
+- [ ] Figure out why `ModelTestsPlastic` is running into a segmentation fault (same for good ol' regular `Blaze` binary as well).
+- [ ] I also need a test to check that individual `Nonlinear2DPlasticBeamElement` are able to capture pure bending correctly.
+
+
 #### 1 October 
 I noticed that something important that I was missing is a command to update the starting state of the section! Right now, `BeamColumnFiberSection` does not have a command to *commit* its state, nor does `Nonlinear2DPlasticBeamElement`. This means that each iteration, the starting state of all material fibres is the initial state! This needs to be added to the solution-procedure as well.
 
 I found another problem today. I built a new set of model-level tests for the `Nonlinear2DPlasticBeamElement`, but I am getting a segmentation fault when they run. Something is happening during the utilisation of the plastic sections. I also found that a lot of unwanted tests are running because I am including other test files so I can use their helper functions. I should isolate these helper functions on their own in a helper function file. So, from this, I have three todos:
 
 - [ ] Isolate test-helpers into their own file.
-- [ ] Add functionality to `UpdateMaterialStartingState` that is called by `solve` after each successful iteration, and before moving into the next load step.
+- [ ] Add functionality to `update_material_starting_state` that is called by `solve` after each successful iteration, and before moving into the next load step.
 - [ ] Figure out why `ModelTestsPlastic` is running into a segmentation fault (same for good ol' regular `Blaze` binary as well).
 - [ ] I also need a test to check that individual `Nonlinear2DPlasticBeamElement` are able to capture pure bending correctly.
 #### 29 September

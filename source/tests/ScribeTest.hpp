@@ -1,9 +1,7 @@
 #ifndef SCRIBE_TEST_HPP
 #define SCRIBE_TEST_HPP
 
-#include "gtest/gtest.h"
-#include "../Scribe.hpp"
-#define SCRIBE_TOLERANCE 1e-6
+#include "TestHelpers.hpp"
 
 class ScribeOnlyTests : public ::testing::Test {
   public:
@@ -69,7 +67,7 @@ TEST_F(ScribeOnlyTests, CheckTrackedNodeDataValue)
     std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data();
     std::vector<real> tracked_dof_vector = recorded_data[tracked_dof];
     real last_disp = tracked_dof_vector.back();
-    EXPECT_NEAR(last_disp, 1.0, SCRIBE_TOLERANCE);
+    EXPECT_NEAR(last_disp, 1.0, BASIC_TOLERANCE);
 }
 
 TEST_F(ScribeOnlyTests, CheckTrackedNodeDataValueTwice)
@@ -84,8 +82,8 @@ TEST_F(ScribeOnlyTests, CheckTrackedNodeDataValueTwice)
     std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data();
     std::vector<real> tracked_dof_vector = recorded_data[tracked_dof];
     
-    EXPECT_NEAR(tracked_dof_vector[0], 1.0, SCRIBE_TOLERANCE);
-    EXPECT_NEAR(tracked_dof_vector[1], 2.0, SCRIBE_TOLERANCE);
+    EXPECT_NEAR(tracked_dof_vector[0], 1.0, BASIC_TOLERANCE);
+    EXPECT_NEAR(tracked_dof_vector[1], 2.0, BASIC_TOLERANCE);
 }
 
 #endif 

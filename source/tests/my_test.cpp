@@ -1,4 +1,3 @@
-#include "gtest/gtest.h"
 #include "ElasticPlasticMaterialTests.hpp"
 #include "FibreSectionTests.hpp"
 #include "BeamElementTests.hpp"
@@ -7,6 +6,8 @@
 #include "ModelTests.hpp"
 #include "PlasticBeamElementTests.hpp"
 #include "PlasticModelTests.hpp"
+
+#include "gtest/gtest.h"
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);

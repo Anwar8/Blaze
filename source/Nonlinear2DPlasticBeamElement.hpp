@@ -6,6 +6,7 @@
 #ifndef NONLINEAR_2D_PLASTIC_BEAM_ELEMENT_HPP
 #define NONLINEAR_2D_PLASTIC_BEAM_ELEMENT_HPP
 
+#include <memory>
 #include "BeamElementCommonInterface.hpp"
 #include "BeamColumnFiberSection.hpp"
 

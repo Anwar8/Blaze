@@ -1,6 +1,11 @@
 cd bin
 if [ -z $1 ]; then
     ./TestBlaze
+elif [ $1 = "beam" ]; then
+	./TestBlaze --gtest_filter="RigidBodyMotionTest.*"
+    ./TestBlaze --gtest_filter="BasicTransformationTest.*"
+    ./TestBlaze --gtest_filter="ConstantStrainStateTest.*"
+    ./TestBlaze --gtest_filter="ElementMappingTest.*"
 elif [ $1 = "mat" ]; then
 	./TestBlaze --gtest_filter="ElasticPlasticMaterialTest.*"
 elif [ $1 = "fibre" ]; then
