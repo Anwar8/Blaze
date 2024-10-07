@@ -18,7 +18,10 @@ elif [ $1 = "fibre" ]; then
 elif [ $1 = "plastic" ]; then
 	./TestBlaze --gtest_filter="PlasticBeamTests.*"
 elif [ $1 = "modelp" ]; then
-    ./TestBlaze --getest_filter="PlasticModelTests.*"
+	./TestBlaze --gtest_filter="MeshTestsPlastic.*"
+    ./TestBlaze --gtest_filter="CantileverBeamPlastic.*"
+    ./TestBlaze --gtest_filter="SimplySupportedPlastic.*"
+    ./TestBlaze --gtest_filter="SimplySupportedUdlPlastic.*"
 else
     echo "Unknown input: $1. Expected \"mat\" or nothing."
 fi

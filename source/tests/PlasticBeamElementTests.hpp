@@ -6,9 +6,7 @@
 #ifndef PLASTIC_BEAM_ELEMENT_TESTS_HPP
 #define PLASTIC_BEAM_ELEMENT_TESTS_HPP
 
-#include "gtest/gtest.h"
-
-
+#include "TestHelpers.hpp"
 
 class PlasticBeamTests : public ::testing::Test {
   public:
