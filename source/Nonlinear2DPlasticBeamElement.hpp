@@ -171,7 +171,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             for (auto& pt_x : gauss_points_x)
             {
                 pt_x *= initial_length;
-            }
+            }       
             for (auto& pt_w : gauss_points_w)
             {
                 pt_w *= initial_length;
@@ -318,7 +318,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             {
                 local_stresses[i](0) = section[i]->get_axial_force();
                 local_stresses[i](1) = section[i]->get_moment_yy();
-                #if ELEMENT_VERBOSE
+                #if 1
                     std::cout << "calc_stresses: element " << id << " local_stresses at Gauss point = " << i << " is:" << std::endl;
                     std::cout << local_stresses[i] << std::endl;
                 #endif
@@ -336,10 +336,6 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
          */
         void calc_local_f() 
         {
-            real F = local_f(0);
-            real delta = local_d(0);
-            real theta1 = local_d(1);
-            real theta2 = local_d(2);
 
             local_f.setZero();
 
@@ -420,13 +416,14 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
         void calc_geom_stiffness() 
         {
             local_geom_stiffness.setZero();
-            real F = local_f(0);
+            
             for (int i = 0; i < gauss_points_w.size(); ++i)
             {
-                local_geom_stiffness(1,1) += gauss_points_w[i]*4*F*initial_length/30;
-                local_geom_stiffness(2,2) += gauss_points_w[i]*4*F*initial_length/30;
-                local_geom_stiffness(1,2) += gauss_points_w[i]*-F*initial_length/30;
-                local_geom_stiffness(2,1) += gauss_points_w[i]*-F*initial_length/30;
+                
+                local_geom_stiffness(1,1) += gauss_points_w[i]*4*local_stresses[i](0)*initial_length/30;
+                local_geom_stiffness(2,2) += gauss_points_w[i]*4*local_stresses[i](0)*initial_length/30;
+                local_geom_stiffness(1,2) += gauss_points_w[i]*-local_stresses[i](0)*initial_length/30;
+                local_geom_stiffness(2,1) += gauss_points_w[i]*-local_stresses[i](0)*initial_length/30;
             }
             #if ELEMENT_VERBOSE
                 std::cout << "calc_geom_stiffness: element " << id << " local_geom_stiffness is:" << std::endl;

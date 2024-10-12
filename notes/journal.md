@@ -16,6 +16,13 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 12 October
+Okay, so the problem does appear to arise due to the direction convention used for the plastic nonlinear elements. 
+
+The way I am debugging this is by applying an axial force and tracking the element stress state because axial force is a lot easier to follow than moment. What I am finding by looking at the different vectors is that the resistance vector is coming out, for the first iteration, as positive 33.33, while the multiplication of K and U is returning -33.33. At the same time, the force vector applied has a negative sign of -33.33. Given that $\boldsymbol{G} = \boldsymbol{R} - \boldsymbol{P}$, I am getting an out of balance that is positive 66.66. What we can see is that there should not be an out-of-balance as the elements are resisting the axial forces, but the stiffness is returning the opposite. This means that out of balance keeps growing as we have seen, and it does so indefinitely!
+
+Something seems to be the matter with the sign of the forces. I will need to investigate! It appears that this arises due to the negative sign in the sections - equations 18 and 19 from Izzuddin's nonlinear material material elements.
+
 #### 7 October
 - [x] Isolate test-helpers into their own file.
 - [x] Add functionality to `update_material_starting_state` that is called by `solve` after each successful iteration, and before moving into the next load step.
