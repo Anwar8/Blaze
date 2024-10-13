@@ -220,7 +220,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             real theta_2 = local_d(2);
             for (int i = 0; i < gauss_points_x.size(); ++i)
             {
-                B[i](0,0) = -1/initial_length;
+                B[i](0,0) = 1/initial_length;
                 B[i](1,0) = 0;
 
                 B[i](0,1) = 2*theta_1/15 - theta_2/30;
