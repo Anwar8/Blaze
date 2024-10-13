@@ -33,7 +33,10 @@ As:
 $$\boldsymbol{B} = \frac{\partial \boldsymbol{\varepsilon}}{\partial \boldsymbol{d}^T} = \begin{bmatrix} \frac{-1}{L_0} & \frac{2\theta_1}{15} - \frac{\theta_2}{30} & -\frac{\theta_1}{30} + \frac{2\theta_2}{15} \\ 0 & -\frac{4}{L_0} + \frac{6x}{L_0 ^2} & -\frac{2}{L_0} + \frac{6x}{L_0 ^2}\end{bmatrix} $$ 
 In the function `calc_B` in both `Nonlinear2DBeamElement` and `Nonlinear2DPlasticBeamElement`. $\boldsymbol{B}$ is not used in `Nonlinear2DBeamElement` so it did not matter, but it is needed in `Nonlinear2DPlasticBeamElement` so everything broke.
 
-There are still some bugs in the tests: `SimplySupportedUdlPlastic` and `CantileverBeamPlastic`. `PlasticBeamTests::ConstantCompressionStiffness` fails too, but is ill-posed to begin with.
+There are still some bugs in the tests: `SimplySupportedUdlPlastic` and `CantileverBeamPlastic`. `PlasticBeamTests::ConstantCompressionStiffness` fails too, but is ill-posed to begin with. 
+<span style="color:yellow;"> Turns out there was no issue with the model-level tests; I just had reintroduced the negative sign bug to simply take a screenshot to document the bug I had faced.</span> I also removed the ill-posed test `PlasticBeamTests::ConstantCompressionStiffness`. 
+
+Now the main pain point is that `VSCode` is no longer playing nice with intellisense and I am getting a lot of incorrect error messages from the static analyser. I have been dealing with this for a couple of days, and I have not found a consistent way to resolve it. Last time, restarting helped. 
 
   
 #### 12 October

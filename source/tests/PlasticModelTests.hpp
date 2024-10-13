@@ -194,7 +194,7 @@ class SimplySupportedUdlPlastic : public ::testing::Test {
         model.initialise_restraints_n_loads();
         model.glob_mesh.check_nodal_loads();
 
-        model.initialise_solution_parameters(1.0, 100, 1e-3, 30);
+        model.initialise_solution_parameters(1.0, 100, 1e-3, 10);
         model.solve(-1);
     }
     void TearDown() override {

@@ -402,7 +402,7 @@ TEST_F(SimplySupportedUdl, CheckResult)
     std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
     std::vector<real> disp_data = recorded_data[tracked_dof];
     // $\delta = \frac{5 w L^4}{384 EI} $
-    real correct_disp = 5*y_udl*std::powf(beam_length, 4)/(384*(2.06e11)*(0.0004570000));
+    real correct_disp = 5*y_udl*std::powf(beam_length, 4)/(384*(YOUNGS_MODULUS)*(SECTION_I));
     real tolerance = std::abs(PERCENT_TOLERANCE*correct_disp);
     EXPECT_NEAR(disp_data.back(), correct_disp, tolerance);
 }
