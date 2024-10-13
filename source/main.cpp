@@ -1,8 +1,12 @@
 #include <array>
+#include <set>
+#include <vector>
+#include <initializer_list>
 #include <iostream>
 #include <memory>
 #include <numeric>
 #include "main.hpp"
+#include "maths_defaults.hpp"
 #include "Model.hpp"
 #include "ElasticPlasticMaterial.hpp"
 #include "BeamColumnFiberSection.hpp"
@@ -59,7 +63,7 @@ int main () {
     // BasicSection sect(2.06e11, 0.0125, 0.0004570000);
     // material information
     real youngs_modulus = 2e11;
-    real yield_strength = 455e6;
+    real yield_strength = 455e18;
     real hardening_ratio = 0.01;
     ElasticPlasticMaterial steel = ElasticPlasticMaterial(youngs_modulus, yield_strength, hardening_ratio*youngs_modulus);
     // section information
@@ -94,7 +98,7 @@ int main () {
     model.restraints.push_back(out_of_plane_restraint);
 
     // create loads
-    real moment = 0.35*1.0e4;
+    real moment = 1.0e4;
     real y_load = -moment/beam_length;
 
     // $\delta = \frac{PL^3}{3EI} = \frac{1e5 (3)^3}{3(2.06e11)(0.0004570000)} = 0.009560026343183701$
@@ -115,7 +119,7 @@ int main () {
     // initialise solution parameters
     real max_LF = 1;
     int nsteps = 100;
-    real tolerance = 100;
+    real tolerance = 1e-2;
     int max_iterations = 10;
     model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
     model.solve(-1);

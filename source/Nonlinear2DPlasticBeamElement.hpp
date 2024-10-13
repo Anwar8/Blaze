@@ -318,7 +318,7 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
             {
                 local_stresses[i](0) = section[i]->get_axial_force();
                 local_stresses[i](1) = section[i]->get_moment_yy();
-                #if 1
+                #if ELEMENT_VERBOSE
                     std::cout << "calc_stresses: element " << id << " local_stresses at Gauss point = " << i << " is:" << std::endl;
                     std::cout << local_stresses[i] << std::endl;
                 #endif

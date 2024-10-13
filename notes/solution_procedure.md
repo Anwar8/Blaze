@@ -32,5 +32,8 @@
 
     <div style="border:1px solid black; padding: 10px;">
     
-     - Retrieve nodal displacements from the `Node` objects of the elements and store them in the `global_ele_U` vector of size 12 where we have 6 DoFs for the element $\left[ U^1_{1} \ U^1_{2} \ U^1_{33} \ U^2_{1} \ U^2_{2} \ U^2_{33}\right]^T$, and 6 extra DoFs $\left[ U^1_{11} \ U^1_{22} \ U^1_{3} \ U^2_{11} \ U^2_{22} \ U^2_{3}\right] for global compatibility 
-     - </div>
+     - Retrieve nodal displacements from the `Node` objects of the elements and store them in the `global_ele_U` vector of size 12 where we have 6 DoFs for the element $\left[ U^1_{1} \ U^1_{2} \ U^1_{33} \ U^2_{1} \ U^2_{2} \ U^2_{33}\right]^T$, and 6 extra DoFs $\left[ U^1_{11} \ U^1_{22} \ U^1_{3} \ U^2_{11} \ U^2_{22} \ U^2_{3}\right]$ for global compatibility.
+     - Calculate $\boldsymbol{d} = \left[ \Delta \ \theta_1\  \theta_2 \right]^T$ from the nonlinear corotational transformation object.
+     - Retrieves the updated element length from the nonlinear transformation object.
+     - For each Gauss Point, calculate the $\boldsymbol{B}$ matrix: $\boldsymbol{B} = \frac{\partial \boldsymbol{\varepsilon}}{\partial \boldsymbol{d}^T} = \begin{bmatrix} \frac{1}{L_0} & \frac{2\theta_1}{15} - \frac{\theta_2}{30} & -\frac{\theta_1}{30} + \frac{2\theta_2}{15} \\ 0 & -\frac{4}{L_0} + \frac{6x}{L_0 ^2} & -\frac{2}{L_0} + \frac{6x}{L_0 ^2}\end{bmatrix}$ 
+     - For each Gauss Point, calculate the strain vector $\boldsymbol{\varepsilon} = \begin{bmatrix} \frac{\Delta}{L_0} + \left(\frac{2\theta_1^2 - \theta_1 \theta_2 + 2 \theta_2^2}{30}\right) \\ \left(- \frac{4}{L_0} + \frac{6x}{L_0^2} \right)\theta_1 + \left(- \frac{2}{L_0} + \frac{6x}{L_0^2} \right)\theta_2 \end{bmatrix}$ </div>

@@ -16,6 +16,26 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 13 October
+Ran the model again but this time with the GNA element without plasticity, and it gave, for the second iteration: $\boldsymbol{KU} = \boldsymbol{P} = \boldsymbol{R} = -33.33$. This indicates that the direction of the forces retrieved from the section is incorrect.
+
+It appears direction of element stresses $\boldsymbol{\sigma} = \left[ F \ M\right]^T$ is not a problem:
+- Elastic element section stresses are negative: -33.33
+- Plastic element section stresses are ALSO negative: -33.33
+
+The direction of the element resistance forces $\boldsymbol{f} = \left[F\ M_1\ M_2\right]$is the problem as shown below:
+- Elastic element resistance froces are: $\left[ -33.3333\ 0\ 0\right]^T$
+- Plastic element resistance forces are: $\left[33.3333\ -2.28055e-15\ 2.28055e-15\right]^T$
+
+I managed to find the problem. I had written:
+$$\boldsymbol{B} = \frac{\partial \boldsymbol{\varepsilon}}{\partial \boldsymbol{d}^T} = \begin{bmatrix} \frac{1}{L_0} & \frac{2\theta_1}{15} - \frac{\theta_2}{30} & -\frac{\theta_1}{30} + \frac{2\theta_2}{15} \\ 0 & -\frac{4}{L_0} + \frac{6x}{L_0 ^2} & -\frac{2}{L_0} + \frac{6x}{L_0 ^2}\end{bmatrix} $$ 
+As: 
+$$\boldsymbol{B} = \frac{\partial \boldsymbol{\varepsilon}}{\partial \boldsymbol{d}^T} = \begin{bmatrix} \frac{-1}{L_0} & \frac{2\theta_1}{15} - \frac{\theta_2}{30} & -\frac{\theta_1}{30} + \frac{2\theta_2}{15} \\ 0 & -\frac{4}{L_0} + \frac{6x}{L_0 ^2} & -\frac{2}{L_0} + \frac{6x}{L_0 ^2}\end{bmatrix} $$ 
+In the function `calc_B` in both `Nonlinear2DBeamElement` and `Nonlinear2DPlasticBeamElement`. $\boldsymbol{B}$ is not used in `Nonlinear2DBeamElement` so it did not matter, but it is needed in `Nonlinear2DPlasticBeamElement` so everything broke.
+
+There are still some bugs in the tests: `SimplySupportedUdlPlastic` and `CantileverBeamPlastic`. `PlasticBeamTests::ConstantCompressionStiffness` fails too, but is ill-posed to begin with.
+
+  
 #### 12 October
 Okay, so the problem does appear to arise due to the direction convention used for the plastic nonlinear elements. 
 

@@ -206,7 +206,7 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface<BasicSection> {
             real theta_2 = local_d(2);
             for (int i = 0; i < gauss_points_x.size(); ++i)
             {
-                B[i](0,0) = -1/initial_length;
+                B[i](0,0) = 1/initial_length;
                 B[i](1,0) = 0;
 
                 B[i](0,1) = 2*theta_1/15 - theta_2/30;
@@ -268,6 +268,10 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface<BasicSection> {
             {
                 local_stresses[i] = local_constitutive_mat[i]*local_eps[i];
             }
+            #if ELEMENT_VERBOSE
+                std::cout << "calc_stresses: element " << id << " local_stresses at Gauss point = " << 0 << " is:" << std::endl;
+                std::cout << local_stresses[0] << std::endl;
+            #endif
         }
         
         /**
@@ -291,6 +295,11 @@ class Nonlinear2DBeamElement : public BeamElementCommonInterface<BasicSection> {
             local_f(0) = EA*((delta/initial_length) + (2*theta1*theta1 - theta1*theta2 + 2*theta2*theta2)/30);
             local_f(1) = ((4*EI/initial_length) + (2*F*initial_length/15))*theta1 + ((2*EI/initial_length) - F*initial_length/30)*theta2;
             local_f(2) = ((2*EI/initial_length) - F*initial_length/30)*theta1 + ((4*EI/initial_length) + (2*F*initial_length/15))*theta2;
+
+            #if ELEMENT_VERBOSE
+                    std::cout << "calc_local_f: element " << id << " local_f is:" << std::endl;
+                    std::cout << local_f << std::endl;
+            #endif
 
         }
                 
