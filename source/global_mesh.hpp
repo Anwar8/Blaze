@@ -19,8 +19,6 @@
 #endif
 #include "maths_defaults.hpp"
 #include "node.hpp"
-#include "beam_element.hpp"
-#include "Izzuddin2DNonlinearBeam.hpp"
 #include "BeamElementBaseClass.hpp"
 #include "basic_utilities.hpp"
 #include "BeamColumnFiberSection.hpp"

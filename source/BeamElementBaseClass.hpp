@@ -12,7 +12,6 @@
 #include "main.hpp"
 #include "maths_defaults.hpp"
 #include "basic_section.hpp"
-#include "basic_shape_function.hpp"
 #include "basic_orientation.hpp"
 #include "NonlinearTransform.hpp"
 #include "node.hpp"

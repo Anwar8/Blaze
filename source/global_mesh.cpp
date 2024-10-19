@@ -2,8 +2,6 @@
 #include <string>
 #include "global_mesh.hpp"
 #include "basic_utilities.hpp"
-#include "Izzuddin2DNonlinearBeam.hpp"
-#include "beam_element.hpp"
 #include "Linear2DBeamElement.hpp"
 #include "Nonlinear2DBeamElement.hpp"
 #include "Nonlinear2DPlasticBeamElement.hpp"

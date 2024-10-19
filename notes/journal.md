@@ -16,6 +16,9 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 20 October
+So the test `SimplySupportedUdlPlastic.CheckResult` returns an error where the stiffness matrix contains `NaN` values in the diagonal when run for the first, but not the second time. I do not know what it is caused by. 
+
 #### 19 October
 Today, I managed to compile with `gcc 12.3.0` on Cirrus, `gcc 11.3` on Archer2, and with `gcc 13.2.0` and `gcc 14.2.0` on my Mac. Note, however, that an OS update to my Mac now requires I use the following console command to use `gcc` successfully. 
 ```console
