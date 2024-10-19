@@ -7,6 +7,7 @@
 #define BASIC_ORIENTATION
 #include "maths_defaults.hpp"
 #include "node.hpp"
+#include <memory>
 
 /**
  * @brief 
