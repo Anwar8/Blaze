@@ -161,7 +161,7 @@ void move_vertically(std::vector<std::shared_ptr<Node>>& in_nodes, real delta = 
     in_nodes[1]->set_nodal_displacement(2, delta); // node 2 U2
 }
 
-std::pair<real, real> rotate_ccw(std::vector<std::shared_ptr<Node>>& in_nodes, real theta = 2.0/ELASTIC_BEAM_LENGTH) 
+std::pair<real, real> rotate_ccw(std::vector<std::shared_ptr<Node>>& in_nodes, real theta) 
 {
     real delta_x = PLASTIC_BEAM_LENGTH/2.0 - std::cos(theta)*(PLASTIC_BEAM_LENGTH/2.0);
     real delta_y = std::sin(theta)*(PLASTIC_BEAM_LENGTH/2.0);

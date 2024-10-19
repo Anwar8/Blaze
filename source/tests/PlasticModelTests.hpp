@@ -87,7 +87,7 @@ TEST_F(CantileverBeamPlastic, CheckResult)
     std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
     std::vector<real> disp_data = recorded_data[tracked_dof];
     // $\delta = \frac{PL^3}{3EI} = \frac{1e5 (3)^3}{3(2.06e11)(0.0004570000)} = 0.009560026343183701$
-    real correct_disp = y_load*std::powf(beam_length, 3)/(3*(YOUNGS_MODULUS)*(common.moment_of_inertia));
+    real correct_disp = y_load*std::pow(beam_length, 3)/(3*(YOUNGS_MODULUS)*(common.moment_of_inertia));
     real tolerance = std::abs(PERCENT_TOLERANCE*correct_disp);
     EXPECT_NEAR(disp_data.back(), correct_disp, tolerance);
 }
@@ -147,7 +147,7 @@ TEST_F(SimplySupportedPlastic, CheckResult)
     std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
     std::vector<real> disp_data = recorded_data[tracked_dof];
     // $\delta = \frac{PL^3}{48EI} $
-    real correct_disp = y_load*std::powf(beam_length, 3)/(48*(YOUNGS_MODULUS)*(common.moment_of_inertia));
+    real correct_disp = y_load*std::pow(beam_length, 3)/(48*(YOUNGS_MODULUS)*(common.moment_of_inertia));
     real tolerance = std::abs(PERCENT_TOLERANCE*correct_disp);
     EXPECT_NEAR(disp_data.back(), correct_disp, tolerance);
 }
@@ -211,7 +211,7 @@ TEST_F(SimplySupportedUdlPlastic, CheckResult)
     std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
     std::vector<real> disp_data = recorded_data[tracked_dof];
     // $\delta = \frac{5 w L^4}{384 EI} $
-    real correct_disp = 5*y_udl*std::powf(beam_length, 4)/(384*(YOUNGS_MODULUS)*(common.moment_of_inertia));
+    real correct_disp = 5*y_udl*std::pow(beam_length, 4)/(384*(YOUNGS_MODULUS)*(common.moment_of_inertia));
     real tolerance = std::abs(PERCENT_TOLERANCE*correct_disp);
     EXPECT_NEAR(disp_data.back(), correct_disp, tolerance);
 }
