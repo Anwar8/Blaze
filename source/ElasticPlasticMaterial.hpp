@@ -53,6 +53,7 @@ public:
     }
 
     /**
+     * 
      * @brief increments the total strain and calculates the yield function, flow, and hardening.
      * @details this is based on Bhatti's Isotropic hardening algorithm (2006, Pp. 396 - 397)
      * @param d_eps the increment in total strain.

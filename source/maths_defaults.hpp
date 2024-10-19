@@ -59,8 +59,10 @@ using spmat = Eigen::SparseMatrix<real>;
  * @param rows Number of rows in vector.
  * @return vec Dense vector allocated.
  */
-vec make_xd_vec(int rows);
-
+inline vec make_xd_vec(int rows)
+{
+    return vec::Zero(rows);
+}
 /**
  * @brief Allocates a dense matrix with dynamically-allocated rows and columns.
  * 
@@ -68,15 +70,20 @@ vec make_xd_vec(int rows);
  * @param columns Number of columns in matrix.
  * @return mat Dense matrix allocated.
  */
-mat make_xd_mat(int rows, int columns);
-
+inline mat make_xd_mat(int rows, int columns)
+{
+    return mat::Zero(rows, columns);
+}
 /**
  * @brief Allocates a sparse vector with given number of rows.
  * 
  * @param rows Number of rows to allocate to sparse vector.
  * @return spvec Sparse vector allocated.
  */
-spvec make_spd_vec(int rows);
+inline spvec make_spd_vec(int rows)
+{
+    return spvec(rows);
+}
 /**
  * @brief Allocates a sparse matrix with given number of rows and columns.
  * 
@@ -84,8 +91,10 @@ spvec make_spd_vec(int rows);
  * @param columns Number of columns to allocate to sparse matrix.
  * @return spmat Sparse matrix allocated.
  */
-spmat make_spd_mat(int rows, int columns);
-
+inline spmat make_spd_mat(int rows, int columns)
+{
+    return spmat(rows, columns);
+}
 /**
  * @brief return the l2 norm of a vector.
  * 
@@ -94,7 +103,7 @@ spmat make_spd_mat(int rows, int columns);
  * @return realx2 l2_norm twice the normal precision norm value.
  */
 template <typename eigen_container>
-realx2 calc_l2_norm(eigen_container& V)
+inline realx2 calc_l2_norm(eigen_container& V)
 {
     realx2 l2_norm = V.squaredNorm();
     return l2_norm;

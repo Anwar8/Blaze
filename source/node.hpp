@@ -7,7 +7,9 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 #include <set>
+#include "basic_utilities.hpp"
 #include "maths_defaults.hpp"
+#include "main.hpp"
 
 
 /**
@@ -43,7 +45,7 @@ class Node {
          * @brief Construct a new Node object with 0 mass and 0 across coordinates.
          * 
          */
-        Node();
+        Node() : coordinates(0.0 , 0.0, 0.0), mass(0.0) {}
 
         /**
          * @brief Construct a new Node object with 0 mass and specified x, y, and z coordinates.
@@ -54,7 +56,7 @@ class Node {
          * @param y_pos y coordinate.
          * @param z_pos z coordinate.
          */
-        Node(real x_pos, real y_pos, real z_pos);
+        Node(real x_pos, real y_pos, real z_pos) : coordinates(x_pos, y_pos, z_pos), mass(0.0) {}
 
         /**
          * @brief Construct a new Node object with 0 mass, and an id and coordinates.
@@ -62,7 +64,7 @@ class Node {
          * @param i id number.
          * @param xyz nodal x, y, and z coordinates.
          */
-        Node(int i, coords xyz);
+        Node(int i, coords xyz) : id(i), coordinates(xyz), mass(0.0) {}
 
         /**
          * @brief overloads the less than operator to compare nodes by their node ID, allowing easy sorting of node STL containers via \ref std::sort.
@@ -73,8 +75,16 @@ class Node {
             return id < other_node.id; 
         } 
 
-        void print_info();
-
+        void print_info()
+        {
+            std::cout << "Node " << id << ": xyz = (" << coordinates[0] << ", " << coordinates[1] << ", " << coordinates[2] <<  "), and mass = " << mass << std::endl;
+            std::cout << "There are " << std::size(connected_elements) << " connected elements. They are: ";
+            print_container<std::set<int>>(connected_elements);
+            std::cout << "Node has following loads:" << std::endl;
+            print_container(nodal_loads);
+            std::cout << "Node has following displacement:" << std::endl;
+            print_container(nodal_displacements);
+        }
         /**
          * @name SettersGetters
          * @brief functions to set and get private class members.
@@ -87,7 +97,7 @@ class Node {
          * 
          * @return coords const coordinates of the node.
          */
-        coords const get_coords() const;
+        coords const get_coords() const {return coordinates;}
         int const get_ndof()  {return ndof;}
         void add_connected_element(int element_id) {connected_elements.insert(element_id);}
         unsigned const get_id() const {return id;}
@@ -132,7 +142,18 @@ class Node {
          * 
          * @param dof DoF to fix.
          */
-        void fix_dof(int dof);
+        void fix_dof(int dof)
+        {
+            if (valid_dof(dof))
+            {
+                inactive_dofs.insert(dof);
+                active_dofs.erase(dof);
+                calc_ndof();
+            } else {
+                std::cout << "ERROR: Cannot fix DoF " << dof << ". Only DoFs 0 through 5 allowed." << std::endl;
+                std::exit(1);
+            }
+        }
 
         /**
          * @brief activates a DoF.
@@ -146,7 +167,17 @@ class Node {
          * 
          * @param dof degree of freedom to activate (to free).
          */
-        void free_dof(int dof);
+        void free_dof(int dof) {
+            if (valid_dof(dof))
+            {
+                inactive_dofs.erase(dof);
+                active_dofs.insert(dof);
+                calc_ndof();
+            } else {
+                std::cout << "ERROR: Cannot free DoF " << dof << ". Only DoFs 0 through 5 allowed." << std::endl;
+                std::exit(1);
+            }
+        }
 
         /**
          * @brief templated function to fix multiple DoFs using \ref fix_dof.
@@ -174,9 +205,24 @@ class Node {
             }
         }
         
-        void fix_all_dofs();
-        void free_all_dofs();
-        void print_inactive_dofs();
+        void fix_all_dofs()
+        {
+            inactive_dofs.insert({0, 1, 2, 3, 4, 5});
+            active_dofs.clear();
+            calc_ndof();
+        }
+        void free_all_dofs()
+        {
+            inactive_dofs.clear();
+            active_dofs.insert({0, 1, 2, 3, 4, 5});
+            calc_ndof();
+        }
+
+        void print_inactive_dofs() 
+        {
+            std::cout << "Node " << id << " has " << std::size(inactive_dofs) << " inactive DoFs: ";
+            print_container(inactive_dofs);
+        }
 
         //@}
         /**
@@ -190,14 +236,50 @@ class Node {
          * @param nodal_load nodal load to be added.
          * @param dof the DoF to which the nodal load will be added.
          */
-        void add_nodal_load(real nodal_load, int dof);
+        void add_nodal_load(real nodal_load, int dof) 
+        {
+            if (valid_dof(dof))
+            {
+                nodal_loads[dof] = nodal_load;
+                loaded_dofs.insert(dof);
+
+                if (VERBOSE)
+                {
+                std::cout << "node " << id << " loaded dofs are:" << std::endl;
+                print_container(loaded_dofs);
+                std::cout << "node " << id << " loads are:" << std::endl;
+                print_container(nodal_loads);
+                }
+            } else {
+                std::cout << "ERROR: Cannot add load to DoF " << dof << ". Only DoFs 0 through 5 can be loaded." << std::endl;
+                std::exit(1);
+            }
+        }
         /**
          * @brief increments the nodal at DoF dof by dP.
          * 
          * @param nodal_load nodal load increment to be added to node loads.
          * @param dof the DoF to which the nodal load will be added.
          */
-        void increment_nodal_load(real dP, int dof);
+        void increment_nodal_load(real dP, int dof) 
+        {
+            if (valid_dof(dof))
+            {
+                if (loaded_dofs.count(dof)) {
+                if (VERBOSE_NLB)
+                {
+                    std::cout << "Incrementing load at DoF " << dof << " of node " << id << " by " << dP << "." << std::endl;
+                }
+                nodal_loads[dof] += dP;
+                } else {
+                std::cout << "ERROR: Cannot increment load at DoF " << dof << "as this DoF is not already loaded." << std::endl;
+                std::exit(1);
+                }
+            } else {
+                std::cout << "ERROR: Cannot increment load to DoF " << dof << ". Only DoFs 0 through 5 can be loaded." << std::endl;
+                std::exit(1);
+            }
+        }
 
         /**
          * @brief checks if the nodal loads are applied to inactive DoFs, and prints a warning if so.
@@ -207,7 +289,7 @@ class Node {
         {
             for (auto& dof : loaded_dofs)
             {
-                if (inactive_dofs.contains(dof))
+                if (inactive_dofs.count(dof))
                 {
                     std::cout << "WARNING: node "<< id << " DoF " << dof << " is inactive. A nodal load was added but will not be applied." << std::endl;
                 }
@@ -223,7 +305,25 @@ class Node {
          * 
          * @warning requires C++20 or won't compile due to the use of the container.contains function introduced in the C++20 standard.
          */
-        void compute_global_load_triplets();
+        void compute_global_load_triplets()
+        {
+            global_nodal_loads_triplets.clear();
+            int dof_index = 0;
+            for (auto& active_dof: active_dofs) {
+            if (VERBOSE)
+            {
+                std::cout << "node " << id << " checking active dof: " << active_dof << " with index " << dof_index << std::endl;
+            }
+            if (loaded_dofs.count(active_dof)) {
+                if (VERBOSE)
+                {
+                std::cout << "pushing triplet val " << nodal_loads[active_dof] << " to P vector index " << nz_i + dof_index << std::endl;
+                }
+                global_nodal_loads_triplets.push_back(spnz(nz_i + dof_index, 0, nodal_loads[active_dof]));
+            }
+            dof_index++;
+            }
+        }
         /**
          * @brief returns the \ref global_nodal_loads_triplets vector.
          * 
