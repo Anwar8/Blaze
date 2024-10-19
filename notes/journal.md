@@ -8,7 +8,7 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [x] Isotropic material implementation: `ElasticPlasticMaterial`.
 - [x] Implementation of `BeamColumnFiberSection`.
 - [x] Implementation of `Nonlinear2DPlasticBeamElement` which accounts for spread of plasticity.
-- [ ] Tests for the plastic beam-column element
+- [x] Tests for the plastic beam-column element
 ### ~~WP3: Thermal loading interface - 4 weeks - due 15/09/2024~~
 ### WP4: Shared-memory parallelisation on Cirrus using Kokkos - ~~6~~ 5 weeks - due 01/11/2024
 ### WP5: Internode parallelisation with MPI - 12 weeks - due 01/02/2025
@@ -16,6 +16,37 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 19 October
+Today, I managed to compile with `gcc 12.3.0` on Cirrus, `gcc 11.3` on Archer2, and with `gcc 13.2.0` and `gcc 14.2.0` on my Mac. Note, however, that an OS update to my Mac now requires I use the following console command to use `gcc` successfully. 
+```console
+export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk
+```
+To change the compiler used by `CMake`, need to export the corresponding environment variables:
+```console
+export CC=gcc-14
+export CXX=g++-14
+export CF=gfortran
+```
+This was also useful for compiling on Archer2. It is important to also note that compiling on Cirrus and Archer2 requires installing Eigen3; I could not get the module to work on its own with `CMake`. I should ask @JamesPerry about this. The commands to install `Eigen3` were from the [Archer2 User Documentation](https://docs.archer2.ac.uk/software-libraries/eigen/). I also changed the `build.sh` command to release in stead of Debug just to check if it will still compile and thankfully it does.
+
+```console
+wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+tar xvf eigen-3.4.0.tar.gz
+cmake eigen-3.4.0/ -DCMAKE_INSTALL_PREFIX=/path/to/install/location
+make install
+```
+Another issue I faced is that I was unable to compile the tests with any `gcc` on my Mac. I found [this answer](https://stackoverflow.com/questions/17267306/gtest-undefined-symbols-for-architecture-x86-64-error-with-clang-and-stdvec) on StackOverflow: 
+
+"If you compile gtest with the Apple g++ and installed gcc with e.g. homebrew, linking to gtest will cause this error.
+
+So compile gtest and your project with the same compiler."
+
+and I think it is mostly likely correct.
+
+In addition to all of this, I managed to setup an Archer2 account and linked it to GitHub with ssh, and to login to Archer2 with VSCode. I was facing an issue where I did not notice that VSCode was actually requesting that I enter my ssh passphrase, which is done in the location where the search and command bar is usually located. Took me quite some time to figure it out!! I don't quite like it, though, as it makes navigation a bit difficult. I am sure it will come handy, however, when I have some code that needs writing or modifying while I run my tests. 
+
+In conclusion, today has been quite productive and I am quite happy with myself. Tomorrow, though, I need to setup my goals for `Blaze` and a new plan for moving forward. Perhaps I should build a very large model, as well, and time it. Leaving this, however, for tomorrow. Good night.
+
 #### 13 October
 Ran the model again but this time with the GNA element without plasticity, and it gave, for the second iteration: $\boldsymbol{KU} = \boldsymbol{P} = \boldsymbol{R} = -33.33$. This indicates that the direction of the forces retrieved from the section is incorrect.
 
