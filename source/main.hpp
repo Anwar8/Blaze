@@ -1,7 +1,7 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
-
+#define GMSH_AVAIL 0
 #define VERBOSE 0
 #define VERBOSE_STIFFNESSES 0
 #define VERBOSE_NLB 0

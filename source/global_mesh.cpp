@@ -8,6 +8,7 @@
 #include "Nonlinear2DBeamElement.hpp"
 #include "Nonlinear2DPlasticBeamElement.hpp"
 
+#if GMSH_AVAIL
 void GlobalMesh::open_mesh_file(std::string const mesh_file) {
     gmsh::initialize();
     gmsh::open(mesh_file);
@@ -75,7 +76,13 @@ ElemIdNodeIdPairVector GlobalMesh::read_elements()
         }
     }
     return elem_map;
+
+    void GlobalMesh::close_mesh_file()
+    {
+    gmsh::finalize();
+    }
 }
+#endif
 void GlobalMesh::make_elements (ElemIdNodeIdPairVector elem_map) {
     std::vector<std::shared_ptr<Node>> elem_nodes;
     elem_nodes.reserve(2);
@@ -112,10 +119,6 @@ void GlobalMesh::make_nodes (NodeIdCoordsPairsVector node_map) {
     }
 }
 
-void GlobalMesh::close_mesh_file()
-{
-    gmsh::finalize();
-}
 
 void GlobalMesh::setup_mesh(NodeIdCoordsPairsVector node_map, ElemIdNodeIdPairVector elem_map) 
 {

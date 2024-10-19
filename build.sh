@@ -1,8 +1,23 @@
 rm -r build
 rm -r bin
-mkdir build bin bin/mesh
-cp  source/mesh/test.msh bin/mesh
-cmake -B build -S . -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Debug
+
+if [ -z $1 ]; then
+    mkdir build bin
+    cmake -B build -S . -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Debug
+elif [ $1 = "mesh" ]; then
+    mkdir build bin bin/mesh
+    cp  source/mesh/test.msh bin/mesh
+    cmake -B build -S . -DINCLUDE_GMSH=ON -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Debug 
+elif [ $1 = "tests" ]; then
+    mkdir build bin
+    cmake -B build -S . -DBUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Debug 
+elif [ $1 = "all" ]; then
+    mkdir build bin bin/mesh
+    cp  source/mesh/test.msh bin/mesh
+    cmake -B build -S . -DINCLUDE_GMSH=ON  -DBUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Debug 
+else
+    echo "Unknown input: $1. Expected \"mesh\", \"tests\" \"all\", or nothing."
+fi
 cd build
 make install
 cd ../bin

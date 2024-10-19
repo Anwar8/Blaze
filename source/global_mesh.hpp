@@ -14,7 +14,9 @@
 #include<Eigen/SparseLU>
 #include<Eigen/SparseCholesky>
 #include "main.hpp"
-#include "gmsh.h"
+#if GMSH_AVAIL
+    #include "gmsh.h"
+#endif
 #include "maths_defaults.hpp"
 #include "node.hpp"
 #include "beam_element.hpp"
@@ -61,6 +63,7 @@ class GlobalMesh {
 
     public:
         friend class Assembler;
+        #if GMSH_AVAIL
         void open_mesh_file(std::string const mesh_file);
         /**
          * @brief uses gmsh API to read the nodes and populate a map with ids and coordinates.
@@ -69,6 +72,23 @@ class GlobalMesh {
          */
         NodeIdCoordsPairsVector read_nodes();
 
+        /**
+         * @brief reads the mesh file (gmsh format) and populates the node and element maps.
+         * @param mesh_file a string that is the gmsh mesh file name and includes directory.
+         * @param sect a \ref BasicSection object that is used to initialise the beam-column elements.
+         * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> a pair of node and element maps corresponding to a gmsh file.
+         */
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> read_mesh_file(std::string const mesh_file, BasicSection sect) 
+        {
+            // section = sect;
+            basic_section =  std::make_unique<BasicSection>(sect);
+            open_mesh_file(mesh_file);
+            NodeIdCoordsPairsVector node_map = read_nodes();
+            ElemIdNodeIdPairVector elem_map = read_elements();
+            close_mesh_file();
+            return std::make_pair(node_map, elem_map);
+        }
+        #endif
 
         /**
          * @brief reads the elements from the mesh file and populates the map linking element id with its node ids.
@@ -161,22 +181,7 @@ class GlobalMesh {
         void make_elements (ElemIdNodeIdPairVector elem_map);
         void close_mesh_file();
 
-        /**
-         * @brief reads the mesh file (gmsh format) and populates the node and element maps.
-         * @param mesh_file a string that is the gmsh mesh file name and includes directory.
-         * @param sect a \ref BasicSection object that is used to initialise the beam-column elements.
-         * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> a pair of node and element maps corresponding to a gmsh file.
-         */
-        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> read_mesh_file(std::string const mesh_file, BasicSection sect) 
-        {
-            // section = sect;
-            basic_section =  std::make_unique<BasicSection>(sect);
-            open_mesh_file(mesh_file);
-            NodeIdCoordsPairsVector node_map = read_nodes();
-            ElemIdNodeIdPairVector elem_map = read_elements();
-            close_mesh_file();
-            return std::make_pair(node_map, elem_map);
-        }
+
         
         /**
          * @brief populates the global_mesh members: \ref nnodes, \ref nelems, \ref node_vector, and \ref elem_vector based on mesh (node and element) maps.
