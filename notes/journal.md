@@ -23,7 +23,7 @@ I have now moved all my function definitions into header files - my only `cpp` f
 
 ##### [CMake Tutorial](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)
 I learned something very important: I can use `CMake` to create a version of a header file where the definitions in the header file come from `CMake`. For example, in my `CMakeLists.txt` I would have:
-```console
+```cmake
 project(Tutorial VERSION 1.0)
 ...
 set(PINA_COLLADA "\"I like pina colladas!\"")
@@ -31,18 +31,41 @@ set(PINA_COLLADA "\"I like pina colladas!\"")
 configure_file(TutorialConfig.h.in ../TutorialConfig.h)
 ```
 While in a header file called `TutorialConfig.h.in` I would have:
-```console
+```cpp
 #define Tutorial_VERSION_MAJOR @Tutorial_VERSION_MAJOR@
 #define Tutorial_VERSION_MINOR @Tutorial_VERSION_MINOR@
 #define PINA_COLLADA @PINA_COLLADA@
 ``` 
 Where the variable enclosed in `@` is the name of the variable define in `CMakeLists.txt`. This generates a file called `TutorialConfig.h` that has:
-```console
+```cpp
 #define Tutorial_VERSION_MAJOR 1
 #define Tutorial_VERSION_MINOR 0
 #define PINA_COLLADA "I like pina colladas!"
 ```
 and copies everything not defined by `CMake` from the original `TutorialConfig.h.in`. A very important note is that this generation is configured by the command `configure_file` where the first input path is given **relative** to `${PROJECT_SOURCE_DIR}`, while the second input (output of the configuration command) is relative to `${PROJECT_BINARY_DIR}`.
+
+##### Step 2 of CMake Tutorial
+In this second step of the tutorial, I learned how to create multiple directories, create libraries at these directories, and then link them together conditionally based on definitions in `CMakeLists.txt` in a more efficient way than creating a new header file.
+
+
+**Building with multiple subdirectories**
+1. At the subdirectory where my subdirectory source files are, I create a new `CMakeLists.txt` file with the command `add_library(LibraryName [type] <library_source_files>)`. The optional argument `[type]` can be one of the following options:
+   1. `STATIC`: "An archive of object files for use when linking other targets."
+   2. `SHARED`: "A dynamic library that may be linked by other targets and loaded at runtime."
+   3. `MODULE`: "A plugin that may not be linked by other targets, but may be dynamically loaded at runtime using dlopen-like functionality."
+2. I add the subdirectory to my main `CMakeLists.txt` with the command `add_subdirectory(SubdirectoryName [binary_dir])` where `[binary_dir]` is an optional input that tells `CMake` where to place the output files for that subdirectory. By default, this will be the same as the `SubdirectoryName` or better known as `source_dir`.
+3. We built a library, so we should link our executable with it. This is done via `target_link_libraries(TargetName INTERFACE/PUBLIC/PRIVATE LibraryName)`. Where the following keywords define [scope](https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#target-command-scope):
+   1. `INTERFACE`: "Populates only properties for using a target."
+   2. `PUBLIC`: "Populates both properties for building and properties for using a target."
+   3. `PRIVATE`: "Populates only properties for building a target."
+4. We need to tell `CMake` where to find the header files. This is done via `target_include_directories(TargetName INTERFACE/PUBLIC/PRIVATE <include_directories>)`.
+
+**Building specific variations and libraries**
+1. Create an `option` in the subdirectory `CMakeLists.txt` where the option will be used. This is done via `option(OPTION_NAME "option description" [ON/OFF])` where `[ON/OFF]` are the optional default value.
+2. Use an if-statement with `if(OPTION_NAME) ... endif(OPTION_NAME)` and create a compile definition that will be, in a way, injected into the program via `target_compile_definitions(TargetName INTERFACE/PUBLIC/PRIVATE OPTION_NAME[=VALUE])` where `[=VALUE]` is an optional value to assign to the variable defined in the program.
+3. Use the definition in the program by calling `#ifdef`, `#ifndef`, or `#if` directives. This can also include wrapping the `#include` directives.
+4. Follow steps 1 and 3 from **Building with multiple subdirectories** above to add the newly built library and link it. 
+
 
 **Quick Note:** To make a shell file executable on my Mac, I need to call `chmod +x ./*.sh `. This is important because having `bash` as a command in all my shell files is causing some issues on Cirrus and Archer2 where after running `build`, for example, I am getting some error messages after the operation stating that the input (which I just simply typed in my terminal) cannot be understood. Not a big deal as it does not do much damage (as far as I know), but is worth noting.
 
