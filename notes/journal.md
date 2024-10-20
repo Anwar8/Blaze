@@ -17,8 +17,36 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Journal
 #### 20 October
-So the test `SimplySupportedUdlPlastic.CheckResult` returns an error where the stiffness matrix contains `NaN` values in the diagonal when run for the first, but not the second time. I do not know what it is caused by. 
+So the test `SimplySupportedUdlPlastic.CheckResult` returns an error where the stiffness matrix contains `NaN` values in the diagonal when run for the first, but not the second time. I do not know what it is caused by. Sometimes it persists for a couple of times, and some times it goes away rather quickly. I have not faced this with the main executable. 
 
+I have now moved all my function definitions into header files - my only `cpp` file is `main.cpp`. Of course, I had to create empty `.cpp` files that simply include their respective headers so that I can see the incremental building and more easily locate where errors are encountered. I have to do something with my `CMake` file so that I can choose to directly just build `main.cpp` without having to build individual empty `cpp.o` objects that are then linked. This will help with performance optimisation since all definitions will be in one file. I also want to reorganise my folder structure so that I can more easily navigate my project - that is, I want to move elements to an element directory, and perhaps `Scribe`, `LoadManager`, `materials`, and what I can think of into separate directories that make the project easier to navigate. I will need a better understanding how to do this without breaking my project, though, and I also need to find out how to properly build `Kokkos` and `GoogleTest` on Cirrus and Archer2. For this, I will need a **much** better understanding of `CMake`. 
+
+##### [CMake Tutorial](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)
+I learned something very important: I can use `CMake` to create a version of a header file where the definitions in the header file come from `CMake`. For example, in my `CMakeLists.txt` I would have:
+```console
+project(Tutorial VERSION 1.0)
+...
+set(PINA_COLLADA "\"I like pina colladas!\"")
+...
+configure_file(TutorialConfig.h.in ../TutorialConfig.h)
+```
+While in a header file called `TutorialConfig.h.in` I would have:
+```console
+#define Tutorial_VERSION_MAJOR @Tutorial_VERSION_MAJOR@
+#define Tutorial_VERSION_MINOR @Tutorial_VERSION_MINOR@
+#define PINA_COLLADA @PINA_COLLADA@
+``` 
+Where the variable enclosed in `@` is the name of the variable define in `CMakeLists.txt`. This generates a file called `TutorialConfig.h` that has:
+```console
+#define Tutorial_VERSION_MAJOR 1
+#define Tutorial_VERSION_MINOR 0
+#define PINA_COLLADA "I like pina colladas!"
+```
+and copies everything not defined by `CMake` from the original `TutorialConfig.h.in`. A very important note is that this generation is configured by the command `configure_file` where the first input path is given **relative** to `${PROJECT_SOURCE_DIR}`, while the second input (output of the configuration command) is relative to `${PROJECT_BINARY_DIR}`.
+
+**Quick Note:** To make a shell file executable on my Mac, I need to call `chmod +x ./*.sh `. This is important because having `bash` as a command in all my shell files is causing some issues on Cirrus and Archer2 where after running `build`, for example, I am getting some error messages after the operation stating that the input (which I just simply typed in my terminal) cannot be understood. Not a big deal as it does not do much damage (as far as I know), but is worth noting.
+
+**Another Quick Note:** I should really consider trying my work with a higher precision floating point number - perhaps one of the 128 bit float that Adam uses in `Sparky`.
 #### 19 October
 Today, I managed to compile with `gcc 12.3.0` on Cirrus, `gcc 11.3` on Archer2, and with `gcc 13.2.0` and `gcc 14.2.0` on my Mac. Note, however, that an OS update to my Mac now requires I use the following console command to use `gcc` successfully. 
 ```console
