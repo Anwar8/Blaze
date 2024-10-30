@@ -1,0 +1,5 @@
+find_package(Eigen3 REQUIRED)
+file(GLOB CORE_SRC "*.cpp")
+add_library(BlazeCore STATIC ${CORE_SRC})
+target_include_directories(BlazeCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(BlazeCore Eigen3::Eigen)

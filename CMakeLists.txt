@@ -18,11 +18,13 @@ if(INCLUDE_GMSH)
     find_path(GMSH_INC "Gmsh.h" PATH_SUFFIXES include */include gmsh include/gmsh)
 endif(INCLUDE_GMSH)
 
-# Getting internal packages and source files
-## collecting all source files into SOURCES
-file(GLOB SOURCES "source/*.cpp")
-list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/source/main.cpp)
+add_subdirectory(source)
+target_link_libraries(BlazeModel PUBLIC )
+
 ## defining the internal library BLAZE_LIB which contains the object files for all source files
+# --------------------------------------------------------------------------------------------------------------
+### BLAZE_LIB will need to link to the libraries in the subdirectories: BlazeCore BlazeMaterials BlazeElements BlazeUtils; in fact, everything here will need to link to BlazeUtils for the maths
+# --------------------------------------------------------------------------------------------------------------
 add_library(BLAZE_LIB STATIC ${SOURCES})
 if(INCLUDE_GMSH)
     target_include_directories(BLAZE_LIB PUBLIC "source" ${GMSH_INC})
@@ -58,6 +60,8 @@ if(BUILD_TESTS)
     endif(INCLUDE_GMSH)
     add_test(AllTests TestBlaze) 
 endif(BUILD_TESTS)
+
+
 # Install directives - what to install?
 if(BUILD_TESTS)
     install(TARGETS Blaze TestBlaze)

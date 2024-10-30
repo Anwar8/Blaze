@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 3.16)
+
+# Project and language definitions
+project(Blaze LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_executable( Blaze "source/main.cpp" )
+
+find_package(Eigen3 REQUIRED)
+
+# Add include directorie
+target_include_directories(Blaze PUBLIC "source/"
+                                        "source/core"
+                                        "source/elements"
+                                        "source/managers"
+                                        "source/managers/boundary_conditions"
+                                        "source/managers/history"
+                                        "source/managers/loads"
+                                        "source/materials"
+                                        "source/materials/sections"
+                                        "source/utils")
+target_link_libraries(Blaze Eigen3::Eigen)
+install(TARGETS Blaze)

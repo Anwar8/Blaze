@@ -49,7 +49,7 @@ In this second step of the tutorial, I learned how to create multiple directorie
 
 
 **Building with multiple subdirectories**
-1. At the subdirectory where my subdirectory source files are, I create a new `CMakeLists.txt` file with the command `add_library(LibraryName [type] <library_source_files>)`. The optional argument `[type]` can be one of the following options:
+1. At the subdirectory where my subdirectory source files are, I create a new `CMakeLists.txt` file with the command `add_library(LibraryName [type] <library_source_files>)`. The optional argument `[type]` can be one of the [following options](https://cmake.org/cmake/help/latest/command/add_library.html#add-library):
    1. `STATIC`: "An archive of object files for use when linking other targets."
    2. `SHARED`: "A dynamic library that may be linked by other targets and loaded at runtime."
    3. `MODULE`: "A plugin that may not be linked by other targets, but may be dynamically loaded at runtime using dlopen-like functionality."
@@ -70,6 +70,17 @@ In this second step of the tutorial, I learned how to create multiple directorie
 **Quick Note:** To make a shell file executable on my Mac, I need to call `chmod +x ./*.sh `. This is important because having `bash` as a command in all my shell files is causing some issues on Cirrus and Archer2 where after running `build`, for example, I am getting some error messages after the operation stating that the input (which I just simply typed in my terminal) cannot be understood. Not a big deal as it does not do much damage (as far as I know), but is worth noting.
 
 **Another Quick Note:** I should really consider trying my work with a higher precision floating point number - perhaps one of the 128 bit float that Adam uses in `Sparky`.
+
+#### What improvements do I need to make the the build system of `Blaze`?
+- Configure whether it links to `Eigen3` or some other mathematics library like `Sparky`.
+- Link to `Eigen3` module without having to build from source if running on Archer2 or Cirrus. 
+- Link to the correct version of `GoogleTest` based on which compiler is used. `GoogleTest` needs to be compiled with the same compiler as `Blaze`.
+- Build and/or link to `Kokkos`.
+- Decide whether or not to build a library, or simply build `main` with only header files included.
+- Be able to choose level of optimisation to use when building release.
+- Configure whether or not to include timers.
+- Configure the level of debugging to include (the various `VERBOSE` flags). *unimportant*
+  
 #### 19 October
 Today, I managed to compile with `gcc 12.3.0` on Cirrus, `gcc 11.3` on Archer2, and with `gcc 13.2.0` and `gcc 14.2.0` on my Mac. Note, however, that an OS update to my Mac now requires I use the following console command to use `gcc` successfully. 
 ```console
