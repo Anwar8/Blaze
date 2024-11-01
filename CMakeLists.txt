@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # options for the build:
 option(INCLUDE_GMSH "gmsh exists and Blaze will use it" OFF)
 option(BUILD_TESTS "Build test programs" OFF)
+option(BUILD_STATIC_LIBS "Only builds main executable without intermediate libraries" OFF)
 
 # # Getting external packages
 # ## Eigen for numerical methods

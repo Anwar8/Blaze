@@ -16,6 +16,15 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 2 November
+New build system now works correctly. Following still needed:
+- [x] Fast build option where only includes are performed and no incremental library builds necessary.
+- [ ] Testing build options.
+- [ ] Build-options and configuration file embedded into build-system allowing configuration of `Blaze` debug flags from the build system.
+- [ ] Correction of how Eigen3 is included into build system.
+- [ ] Correctly identifying whether `PUBLIC` or `PRIVATE` flags necessary for building the different libraries of `Blaze`.
+- [ ] Documentation of the different libraries of `Blaze`, and perhaps include that in `Doxygen`.
+- [x] Fix how VSCode handles includes. DONE: simply added `"${workspaceFolder}/source/**"` to the `includePath` in `c_cpp_properties.json`.
 #### 31 October
 New build system now works correctly. Following still needed:
 - [ ] Fast build option where only includes are performed and no incremental library builds necessary.
