@@ -5,8 +5,9 @@
 #include <iostream>
 #include <memory>
 #include <numeric>
-#include "main.hpp"
+#include "blaze_config.hpp"
 #include "maths_defaults.hpp"
+#include "ElementTypes.hpp"
 #include "Model.hpp"
 #include "ElasticPlasticMaterial.hpp"
 #include "BeamColumnFiberSection.hpp"

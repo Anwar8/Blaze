@@ -1,0 +1,11 @@
+#ifndef BLAZE_CONFIG_HPP
+#define BLAZE_CONFIG_HPP
+
+#define INCLUDE_GMSH 0
+#define VERBOSE 0
+#define VERBOSE_STIFFNESSES 0
+#define VERBOSE_NLB 0
+#define LF_VERBOSE 0
+#define ELEMENT_VERBOSE 0
+
+#endif

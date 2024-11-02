@@ -5,6 +5,7 @@
 
 #ifndef MODEL_HPP
 #define MODEL_HPP
+#include "ElementTypes.hpp"
 #include "global_mesh.hpp"
 #include "assembler.hpp"
 #include "basic_solver.hpp"

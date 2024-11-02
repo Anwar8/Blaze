@@ -9,13 +9,15 @@
 #include <string>
 #include <array>
 #include <memory>
-#include "main.hpp"
+#include "blaze_config.hpp"
+#include "SectionTypes.hpp"
 #include "maths_defaults.hpp"
 #include "basic_section.hpp"
 #include "basic_orientation.hpp"
 #include "NonlinearTransform.hpp"
 #include "node.hpp"
 #include "ElementBaseClass.hpp"
+
 
 /**
  * @brief a 2D beam element base class with unknown total freedoms

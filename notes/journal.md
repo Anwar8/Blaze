@@ -20,13 +20,15 @@ This journal contains the day-to-day project management and notes taken. It was 
 New build system now works correctly. Following still needed:
 - [x] Fast build option where only includes are performed and no incremental library builds necessary.
 - [x] Testing build options.
-- [ ] Build-options and configuration file embedded into build-system allowing configuration of `Blaze` debug flags from the build system.
-- [ ] Correction of how Eigen3 is included into build system.
+- [x] Build-options and configuration file embedded into build-system allowing configuration of `Blaze` debug flags from the build system.
+- [ ] Correction of how Eigen3 is included into build system. <span style="color:green;"> Actioned by sending support request via Safe.</span>
 - [x] Correctly identifying whether `PUBLIC` or `PRIVATE` flags necessary for building the different libraries of `Blaze`.
-- [ ] Documentation of the different libraries of `Blaze`, and perhaps include that in `Doxygen`.
+- [x] Documentation of the different libraries of `Blaze`, and perhaps include that in `Doxygen`.
 - [x] Fix how VSCode handles includes. DONE: simply added `"${workspaceFolder}/source/**"` to the `includePath` in `c_cpp_properties.json`.
 
 Most of the header files in `Blaze`, except maybe the interfaces (base classes), are expected to be called within the `main` program. As such, the 6 or so libraries of `Blaze` are all `PUBLIC` rather than `PRIVATE`. The latter applies if the libraries are only needed to be built as part of some other libraries, but not necessarily called by other parts of the program like `main`. I hope I am right, but even if I am wrong it is not a big deal!
+
+Now `Doxygen` will also include the `README.md` file, and the `Blaze_libraries.md` documentation of the different libraries of `Blaze`. Very useful.
 
 
 #### 31 October

@@ -425,7 +425,7 @@ class MacNealSlenderBeam : public ::testing::Test {
 
     std::vector<unsigned> restrained_nodes = std::vector<unsigned>(divisions);
 
-    real M_max = -20*PI;
+    real M_max = -20*M_PI;
 
     void SetUp() override {
         BasicSection sect(youngs_modulus, area, moment_of_inertia);

@@ -7,6 +7,7 @@
 #define BEAM_COLUMN_FIBER_SECTION_HPP
 
 #include "maths_defaults.hpp"
+#include "SectionTypes.hpp"
 #include "MaterialFibre.hpp"
 #include "Material1D.hpp"
 #include "ElasticPlasticMaterial.hpp"

@@ -2,7 +2,8 @@
 #define SECTION_BASE_CLASS
 
 #include "maths_defaults.hpp"
-#include "main.hpp"
+#include "SectionTypes.hpp"
+#include "blaze_config.hpp"
 /**
  * @file SectionBaseClass.hpp
  *

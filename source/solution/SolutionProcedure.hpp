@@ -8,7 +8,7 @@
 
 #include "maths_defaults.hpp"
 #include "basic_utilities.hpp"
-#include "main.hpp"
+#include "blaze_config.hpp"
 #include "global_mesh.hpp"
 #include "assembler.hpp"
 #include "basic_solver.hpp"

@@ -6,10 +6,52 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # options for the build:
-option(INCLUDE_GMSH "gmsh exists and Blaze will use it" OFF)
+
 option(BUILD_TESTS "Build test programs" OFF)
 option(BUILD_STATIC_LIBS "Only builds main executable without intermediate libraries" OFF)
 
+option(INCLUDE_GMSH "gmsh exists and Blaze will use it" OFF)
+option(VERBOSE "Blaze operate in verbose mode for debugging" OFF)
+option(VERBOSE_STIFFNESSES "Blaze will post stiffness matrix to output stream" OFF)
+option(VERBOSE_NLB "Blaze will output U and dU whenever they are solved for by the basic solver" OFF)
+option(LF_VERBOSE "Blaze will print LF and iteration every time it enters a new one" OFF)
+option(ELEMENT_VERBOSE "Blaze will print most values and data structures produced by nonlinear plasatic element" OFF)
+if(INCLUDE_GMSH)
+    set(INCLUDE_GMSH 1)
+else(INCLUDE_GMSH)
+    set(INCLUDE_GMSH 0)
+endif(INCLUDE_GMSH)
+
+if(VERBOSE)
+    set(VERBOSE 1)
+else(VERBOSE)
+    set(VERBOSE 0)
+endif(VERBOSE)
+
+if(VERBOSE_STIFFNESSES)
+    set(VERBOSE_STIFFNESSES 1)
+else(VERBOSE_STIFFNESSES)
+    set(VERBOSE_STIFFNESSES 0)
+endif(VERBOSE_STIFFNESSES)
+
+if(VERBOSE_NLB)
+    set(VERBOSE_NLB 1)
+else(VERBOSE_NLB)
+    set(VERBOSE_NLB 0)
+endif(VERBOSE_NLB)
+
+if(LF_VERBOSE)
+    set(LF_VERBOSE 1)
+else(LF_VERBOSE)
+    set(LF_VERBOSE 0)
+endif(LF_VERBOSE)
+
+if(ELEMENT_VERBOSE)
+    set(ELEMENT_VERBOSE 1)
+else(ELEMENT_VERBOSE)
+    set(ELEMENT_VERBOSE 0)
+endif(ELEMENT_VERBOSE)
+configure_file(blaze_config.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/source/blaze_config.hpp)
 # # Getting external packages
 # ## Eigen for numerical methods
 # find_package(Eigen3 REQUIRED)

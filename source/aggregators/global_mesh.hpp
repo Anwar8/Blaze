@@ -13,8 +13,9 @@
 #include <string>
 #include<Eigen/SparseLU>
 #include<Eigen/SparseCholesky>
-#include "main.hpp"
-#if GMSH_AVAIL
+#include "ElementTypes.hpp"
+#include "blaze_config.hpp"
+#if INCLUDE_GMSH
     #include "gmsh.h"
 #endif
 #include "maths_defaults.hpp"
@@ -64,7 +65,7 @@ class GlobalMesh {
 
     public:
         friend class Assembler;
-        #if GMSH_AVAIL
+        #if INCLUDE_GMSH
         void open_mesh_file(std::string const mesh_file)
         {
             gmsh::initialize();

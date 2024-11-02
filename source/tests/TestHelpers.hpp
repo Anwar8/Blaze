@@ -8,9 +8,11 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
+#include <cmath>
 #include "gtest/gtest.h"
 
-#include "main.hpp"
+#include "blaze_config.hpp"
+#include "ElementTypes.hpp"
 
 #include "maths_defaults.hpp"
 #include "node.hpp"

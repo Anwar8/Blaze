@@ -9,7 +9,7 @@
 #include <set>
 #include "basic_utilities.hpp"
 #include "maths_defaults.hpp"
-#include "main.hpp"
+#include "blaze_config.hpp"
 
 
 /**

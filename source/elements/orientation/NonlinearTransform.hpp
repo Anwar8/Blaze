@@ -8,7 +8,7 @@
 #define NONLINEAR_TRANSFORM_HPP
 #include "ElementConfiguration.hpp"
 #include "node.hpp"
-#include "main.hpp"
+#include "blaze_config.hpp"
 /**
  * @brief NonlinearTransform object is responsible for creating the geometerically-nonlinear transformation matrix for beam-column analysis.
  * 
