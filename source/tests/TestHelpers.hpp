@@ -10,25 +10,25 @@
 #include <numeric>
 #include "gtest/gtest.h"
 
-#include "../main.hpp"
+#include "main.hpp"
 
-#include "../maths_defaults.hpp"
-#include "../node.hpp"
+#include "maths_defaults.hpp"
+#include "node.hpp"
 
-#include "../BeamElementBaseClass.hpp"
-#include "../BeamElementCommonInterface.hpp"
-#include "../Linear2DBeamElement.hpp"
-#include "../Nonlinear2DBeamElement.hpp"
+#include "BeamElementBaseClass.hpp"
+#include "BeamElementCommonInterface.hpp"
+#include "Linear2DBeamElement.hpp"
+#include "Nonlinear2DBeamElement.hpp"
 
 
-#include "../ElasticPlasticMaterial.hpp"
-#include "../MaterialFibre.hpp"
-#include "../BeamColumnFiberSection.hpp"
-#include "../Nonlinear2DPlasticBeamElement.hpp"
+#include "ElasticPlasticMaterial.hpp"
+#include "MaterialFibre.hpp"
+#include "BeamColumnFiberSection.hpp"
+#include "Nonlinear2DPlasticBeamElement.hpp"
 
-#include "../NodalLoad.hpp"
-#include "../Scribe.hpp"
-#include "../Model.hpp"
+#include "NodalLoad.hpp"
+#include "Scribe.hpp"
+#include "Model.hpp"
 //@}
 /**
  * @name basic definitions
