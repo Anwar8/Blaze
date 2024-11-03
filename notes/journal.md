@@ -1,6 +1,10 @@
 # Journal of Work
 This journal contains the day-to-day project management and notes taken. It was also used as an indirect form of communication with the MSc supervisor so they are always up to date with my progress.
 
+<figure style="text-align:center;">
+  <img src="Blaze logo_white.png" alt="Blaze Logo" style="width:50%">
+</figure>
+
 ## Work plan
 ### WP1: Debugging of geometric nonlinearity - 2 weeks - due 15/06/2024 - COMPLETED
 ### WP2: Implementation of 1D nonlinear material - 8 weeks - due ~~15/08/2024~~ 23/09/2024 - IN PROGRESS
@@ -16,12 +20,21 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 3 November
+- [x] A time-manager class that allows tracing the runtime of the different `Blaze` functions for performance analysis.
+- [ ] A large-scale problem that I can use for performance-analysis of `Blaze`.
+- [ ] Inclusion of `Kokkos` into `Blaze` for shared-memory parallelisation.
+- [ ] Development of a class architecture for `MPI` parallelisation of `Blaze` on distributed memory systems.
+
+I have added the `TimeKeeper` and `ExecutionTimer` classes under `managers/performance_analysis`. These two classes build just fine and produce very useful information for characterising the performacne of `Blaze`.
+I will need to do some performance analysis on the serial version of `Blaze` before I go onto parallelisation. It might also be worthwhile to parallelise with `OpenMP` first given how quick and easy it would be, and that would also give me another datapoint to compare against `Kokkos` later. Although `TimeKeeper` and `ExecutionTimer` have been written, documented, and used to time `solution_procedure`, they are not currently being tested at all. I will need more elaborate measures to track not only the time of solution, but also the quality. Some mesh discretisations result in divergence under the same convergence criteria. I might need to test other solvers as well. In addition to timing the `solution_procedure`, I could time the beam-column elements I am interested in testing, and also time the different *build styles* of `Blaze` where we would build the static library vs building using the *include-only* configuration. The latter will likely result in better optimisation. Other things that `Blaze` might benefit from include an Eigen-solver for linear buckling analysis, and a dynamic solver for transient problems. I clearly have lots to think about, and unending sea of work to do. Exciting, nonetheless.
+
 #### 2 November
 New build system now works correctly. Following still needed:
 - [x] Fast build option where only includes are performed and no incremental library builds necessary.
 - [x] Testing build options.
 - [x] Build-options and configuration file embedded into build-system allowing configuration of `Blaze` debug flags from the build system.
-- [ ] Correction of how Eigen3 is included into build system. <span style="color:green;"> Actioned by sending support request via Safe.</span>
+- [ ] Correction of how Eigen3 is included into build system. <span style="color:green;"> **Actioned by sending support request via Safe.**</span>
 - [x] Correctly identifying whether `PUBLIC` or `PRIVATE` flags necessary for building the different libraries of `Blaze`.
 - [x] Documentation of the different libraries of `Blaze`, and perhaps include that in `Doxygen`.
 - [x] Fix how VSCode handles includes. DONE: simply added `"${workspaceFolder}/source/**"` to the `includePath` in `c_cpp_properties.json`.
@@ -30,6 +43,13 @@ Most of the header files in `Blaze`, except maybe the interfaces (base classes),
 
 Now `Doxygen` will also include the `README.md` file, and the `Blaze_libraries.md` documentation of the different libraries of `Blaze`. Very useful.
 
+**Test continues to fail for plastic beam-column - need to figure out why**
+
+### Tasks for next step
+- [ ] A time-manager class that allows tracing the runtime of the different `Blaze` functions for performance analysis.
+- [ ] A large-scale problem that I can use for performance-analysis of `Blaze`.
+- [ ] Inclusion of `Kokkos` into `Blaze` for shared-memory parallelisation.
+- [ ] Development of a class architecture for `MPI` parallelisation of `Blaze` on distributed memory systems.  
 
 #### 31 October
 New build system now works correctly. Following still needed:

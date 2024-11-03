@@ -6,14 +6,15 @@
 #ifndef SCRIBE_HPP
 #define SCRIBE_HPP
 
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <iomanip>
+
 #include "maths_defaults.hpp"
 #include "node.hpp"
 #include "global_mesh.hpp"
 #include "Record.hpp"
-
-#include <vector>
-#include <set>
-#include <algorithm>
 
 
 /**
@@ -154,8 +155,9 @@ class Scribe
          * @brief reads the contents of all records in the \ref records_library to the output stream.
          * 
          */
-        void read_all_records()
+        void read_all_records(int precision = 8)
         {
+            std::cout << std::setprecision(precision);
             for (auto& record: record_library)
             {
                 record.read_record();

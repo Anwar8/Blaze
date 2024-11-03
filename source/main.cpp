@@ -54,10 +54,10 @@ void build_an_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial&
 int main () {
     
     // create mesh
-    real beam_length = 3.0;
+    real beam_length = 36.0;
     Model model;
     std::vector<coords> end_coords = {coords(0, 0, 0), coords(beam_length, 0, 0)};
-    int num_divisions = 10;
+    int num_divisions = 1800;
     int num_elements = num_divisions;
     int num_nodes = num_elements + 1;
     
@@ -75,16 +75,16 @@ int main () {
     real moment_of_inertia = tw*pow(h - 2*tf, 3)/12 + 2*b*pow(tf,3)/12 + 2*(tf*b)*pow(0.5*h - 0.5*tf, 2); // m^4 
     real section_area = 2*tf*b + (h - 2*tf)*tw;
     std::cout << "(A,I) = (" << section_area << ", " << moment_of_inertia << ")." << std::endl; 
-    BeamColumnFiberSection sect;
-    build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 10, 40);
-    model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
+    // BeamColumnFiberSection sect;
+    // build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 2, 4);
+    // model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
 
-    // BasicSection basic_sect(youngs_modulus, section_area, moment_of_inertia);
-    // model.create_line_mesh(num_divisions, end_coords, NonlinearElastic, basic_sect);
+    BasicSection basic_sect(youngs_modulus, section_area, moment_of_inertia);
+    model.create_line_mesh(num_divisions, end_coords, NonlinearElastic, basic_sect);
 
     std::vector<unsigned> restrained_nodes = std::vector<unsigned>(num_divisions);
     std::iota(restrained_nodes.begin(), restrained_nodes.end(), 2);
-    print_container(restrained_nodes);
+    // print_container(restrained_nodes);
     // create restraints
     NodalRestraint fixed_end;
     fixed_end.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5}); // pinned support
@@ -119,7 +119,7 @@ int main () {
 
     // initialise solution parameters
     real max_LF = 1;
-    int nsteps = 100;
+    int nsteps = 1000;
     real tolerance = 1e-2;
     int max_iterations = 10;
     model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
