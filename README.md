@@ -1,5 +1,9 @@
 # Blaze
 
+<figure style="text-align:center;">
+  <img src="notes/Blaze logo_blue.png" alt="Blaze Logo" style="width:50%">
+</figure>
+
 ## Summary
 `Blaze` is a finite element method (FEM) program developed specifically for structures in fire. It is explicitly designed from the ground up for scalability on high performance computing (HPC) facilities. The codebase is written in C++ and provides an interface for user customisation.
 
