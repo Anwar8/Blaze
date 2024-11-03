@@ -39,15 +39,15 @@ class SolutionProcedure
             tolerance = convergence_tolerance;
             max_iter = max_num_of_iterations;
 
-            time_keeper.add_timers<std::vector<std::string>>({"all",
-                                                              "U_to_nodes_mapping", 
-                                                              "element_state_update", 
-                                                              "element_global_response",
-                                                              "assembly",
-                                                              "convergence_check",
-                                                              "dU_calculation",
-                                                              "material_state_update",
-                                                              "result_recording"});
+            time_keeper.add_timers({"all",
+                                    "U_to_nodes_mapping", 
+                                    "element_state_update", 
+                                    "element_global_response",
+                                    "assembly",
+                                    "convergence_check",
+                                    "dU_calculation",
+                                    "material_state_update",
+                                    "result_recording"});
         }
 
         void solve(GlobalMesh& glob_mesh, Assembler& assembler, BasicSolver& solver, LoadManager& load_manager, Scribe& scribe, int logging_frequency)
@@ -145,15 +145,15 @@ class SolutionProcedure
             std::cout << std::endl << "---<Analysis complete. LF = " << load_factor << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
             #endif
             time_keeper.stop_timer("all");
-            time_keeper.read_timers<std::vector<std::string>>({"U_to_nodes_mapping", 
-                                                              "element_state_update", 
-                                                              "element_global_response",
-                                                              "assembly",
-                                                              "convergence_check",
-                                                              "dU_calculation",
-                                                              "material_state_update",
-                                                              "result_recording",
-                                                              "all"}, "all");
+            time_keeper.read_timers({"U_to_nodes_mapping", 
+                                    "element_state_update", 
+                                    "element_global_response",
+                                    "assembly",
+                                    "convergence_check",
+                                    "dU_calculation",
+                                    "material_state_update",
+                                    "result_recording",
+                                    "all"}, "all");
         }
 };
 
