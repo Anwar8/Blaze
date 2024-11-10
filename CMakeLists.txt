@@ -83,7 +83,11 @@ add_executable(Blaze)
 target_sources(Blaze PRIVATE "source/main.cpp")
 
 target_include_directories(Blaze PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/source)
-target_link_libraries(Blaze PUBLIC BlazeModel)
+
+find_package(OpenMP REQUIRED)
+
+target_link_libraries(Blaze PUBLIC BlazeModel OpenMP::OpenMP_CXX)
+# target_link_libraries(Blaze PUBLIC BlazeModel)
 
 # if(INCLUDE_GMSH)
 #     target_include_directories(Blaze PUBLIC "source" ${GMSH_INC})

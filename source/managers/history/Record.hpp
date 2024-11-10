@@ -10,7 +10,7 @@
 #include <set>
 #include <utility>
 #include <map>
-
+#include <memory>
 
 
 class Record {

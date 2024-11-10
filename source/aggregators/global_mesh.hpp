@@ -461,6 +461,7 @@ class GlobalMesh {
          */
         void update_elements_states()
         {
+            #pragma omp parallel for
             for (auto& elem: elem_vector)
             {
                 elem->update_state();

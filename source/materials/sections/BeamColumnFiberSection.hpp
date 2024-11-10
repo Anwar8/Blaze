@@ -5,6 +5,7 @@
  */
 #ifndef BEAM_COLUMN_FIBER_SECTION_HPP
 #define BEAM_COLUMN_FIBER_SECTION_HPP
+#include <memory>
 
 #include "maths_defaults.hpp"
 #include "SectionTypes.hpp"

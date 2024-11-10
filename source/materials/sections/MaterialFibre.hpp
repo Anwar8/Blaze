@@ -5,7 +5,7 @@
  */
 #ifndef MATERIAL_FIBRE_HPP
 #define MATERIAL_FIBRE_HPP
-
+#include <memory>
 #include "maths_defaults.hpp"
 #include "Material1D.hpp"
 #include "ElasticPlasticMaterial.hpp"

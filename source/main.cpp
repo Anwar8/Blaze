@@ -3,6 +3,7 @@
 #include <vector>
 #include <initializer_list>
 #include <iostream>
+#include <iomanip>
 #include <memory>
 #include <numeric>
 #include "blaze_config.hpp"
@@ -54,10 +55,10 @@ void build_an_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial&
 int main () {
     
     // create mesh
-    real beam_length = 36.0;
+    real beam_length = 72.0*10;
     Model model;
     std::vector<coords> end_coords = {coords(0, 0, 0), coords(beam_length, 0, 0)};
-    int num_divisions = 1800;
+    int num_divisions = 3600;
     int num_elements = num_divisions;
     int num_nodes = num_elements + 1;
     
@@ -75,12 +76,12 @@ int main () {
     real moment_of_inertia = tw*pow(h - 2*tf, 3)/12 + 2*b*pow(tf,3)/12 + 2*(tf*b)*pow(0.5*h - 0.5*tf, 2); // m^4 
     real section_area = 2*tf*b + (h - 2*tf)*tw;
     std::cout << "(A,I) = (" << section_area << ", " << moment_of_inertia << ")." << std::endl; 
-    // BeamColumnFiberSection sect;
-    // build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 2, 4);
-    // model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
+    BeamColumnFiberSection sect;
+    build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 10, 20);
+    model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
 
-    BasicSection basic_sect(youngs_modulus, section_area, moment_of_inertia);
-    model.create_line_mesh(num_divisions, end_coords, NonlinearElastic, basic_sect);
+    // BasicSection basic_sect(youngs_modulus, section_area, moment_of_inertia);
+    // model.create_line_mesh(num_divisions, end_coords, NonlinearElastic, basic_sect);
 
     std::vector<unsigned> restrained_nodes = std::vector<unsigned>(num_divisions);
     std::iota(restrained_nodes.begin(), restrained_nodes.end(), 2);
@@ -124,6 +125,10 @@ int main () {
     int max_iterations = 10;
     model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
     model.solve(-1);
-    model.scribe.read_all_records();
+    // model.scribe.read_all_records();
+    auto recorded_data = model.scribe.get_record_id_iterator((unsigned)num_nodes)->get_recorded_data()[2];
+    
+    std::cout << std::setprecision(10); 
+    std::cout << "Computed deflection is: " << recorded_data.back() << std::endl;
     std::cout << "Expected deflection is: " << expected_deflection << std::endl;
 }

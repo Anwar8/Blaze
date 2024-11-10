@@ -13,7 +13,7 @@ elif [ $1 = "tests" ]; then
     cmake -B build -S . -DBUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Release 
 elif [ $1 = "debug" ]; then
     mkdir build bin
-    cmake -B build -S . -DBUILD_STATIC_LIBS=ON -DBUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=DEBUG 
+    cmake -B build -S . -DBUILD_STATIC_LIBS=ON -DBUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Release
 elif [ $1 = "all" ]; then
     mkdir build bin bin/mesh
     cp  source/mesh/test.msh bin/mesh
