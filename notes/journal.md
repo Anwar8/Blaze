@@ -20,6 +20,16 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+#### 12 November
+The `2DFrame` class will have the following:
+- A function that will return the vertix number for a particular column line and floor.
+- A function that will return the vertice numbers of a particular bay and floor - relies on the previous function and just gives it two column lines.
+- A function that will return the node numbers of particular bay and floor *excluding the vertices*.
+- Loop over all bays for a given floor, and append both the vertices and nodes for each into an **ordered set**.
+  - The ordered set does not allow repeats and will order the node numbers thus giving a nice, ordered set.
+- Build the elements for one "beam" at a time - using the previous ordered set to create the connectivity, and to easily create the nodes by simply incrementing the $x$ position by $dx$.
+- Do something similar for the columns being careful not to double-creat the vertice nodes which can be done by a set operation to exclude the vertices from the nodes of a column.
+- Should find a way to specify different sections for beams and columns.
 #### 3 November
 - [x] A time-manager class that allows tracing the runtime of the different `Blaze` functions for performance analysis.
 - [ ] A large-scale problem that I can use for performance-analysis of `Blaze`.
