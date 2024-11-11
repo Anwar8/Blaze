@@ -55,10 +55,10 @@ void build_an_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial&
 int main () {
     
     // create mesh
-    real beam_length = 72.0*10;
+    real beam_length = 10;
     Model model;
     std::vector<coords> end_coords = {coords(0, 0, 0), coords(beam_length, 0, 0)};
-    int num_divisions = 3600;
+    int num_divisions = 100;
     int num_elements = num_divisions;
     int num_nodes = num_elements + 1;
     

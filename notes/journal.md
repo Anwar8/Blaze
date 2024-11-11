@@ -30,6 +30,14 @@ The `2DFrame` class will have the following:
 - Build the elements for one "beam" at a time - using the previous ordered set to create the connectivity, and to easily create the nodes by simply incrementing the $x$ position by $dx$.
 - Do something similar for the columns being careful not to double-creat the vertice nodes which can be done by a set operation to exclude the vertices from the nodes of a column.
 - Should find a way to specify different sections for beams and columns.
+
+The following variabels need to be passed to `CMake` on `Cirrus`:
+```console
+-DEigen3_DIR=/work/y07/shared/cirrus-software/eigen/eigen-3.4.0/cmake -DEIGEN3_INCLUDE_DIR=/work/y07/shared/cirrus-software/eigen/3.4.0/include/
+```
+Something interesting happened today. Running `Blaze` on `Cirrus` results in a much slower runtime. 3600 element did not complete in any resonable time, nor did 360! 100 elements take between 49 s to 55 s to run (login node)!! On my Macbook, this time was 0.78 s!!!
+
+
 #### 3 November
 - [x] A time-manager class that allows tracing the runtime of the different `Blaze` functions for performance analysis.
 - [ ] A large-scale problem that I can use for performance-analysis of `Blaze`.

@@ -1,5 +1,5 @@
 if(BUILD_STATIC_LIBS)
-add_library(BlazeModel STATIC "model.cpp")
+add_library(BlazeModel STATIC "Model.cpp")
 else(BUILD_STATIC_LIBS)
 add_library(BlazeModel INTERFACE)
 endif(BUILD_STATIC_LIBS)
