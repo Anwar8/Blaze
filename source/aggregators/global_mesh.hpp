@@ -26,6 +26,7 @@
 #include "Nonlinear2DPlasticBeamElement.hpp"
 #include "basic_utilities.hpp"
 #include "BeamColumnFiberSection.hpp"
+#include "FrameMesh.hpp"
 
 /**
  * @brief std vector of pairs each of which has an id and a 3-item coords vector.
@@ -53,6 +54,7 @@ class GlobalMesh {
         std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes in the problem.*/
         std::vector<std::shared_ptr<ElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
 
+        FrameMesh frame;
         
         // SectionBaseClass section; /**< a BasicSection object that is used by all elements in the mesh.*/
         std::unique_ptr<BasicSection> basic_section;
@@ -168,6 +170,23 @@ class GlobalMesh {
         }
         #endif
 
+        void create_frame_mesh(int nbays, int nfloors, real bay_length, real floor_height, int beam_divisions, int column_divisions, ElementType elem_type, BeamColumnFiberSection& sect)
+        {
+            frame = FrameMesh(nbays, nfloors, bay_length, floor_height, beam_divisions, column_divisions);
+            element_type = elem_type;
+            fiber_section = std::make_unique<BeamColumnFiberSection>(sect);
+
+            NodeIdCoordsPairsVector node_map = frame.get_node_coords_pairs();
+            ElemIdNodeIdPairVector elem_map = frame.map_elements_to_nodes();
+            std::cout << "-----------------------------------------------------" << std::endl;
+            read_node_map(node_map);
+            std::cout << "-----------------------------------------------------" << std::endl;
+            read_element_map(elem_map);
+            std::cout << "-----------------------------------------------------" << std::endl;
+            setup_mesh(node_map, elem_map);
+        }
+
+        FrameMesh get_frame() {return frame;}
 
         /**
          * @brief creates a line mesh map with a given number of divisions and end coordinates of the line. Does NOT take a gmsh mesh file.

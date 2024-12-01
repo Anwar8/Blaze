@@ -55,6 +55,15 @@ class LoadManager
             nodal_load.assign_dofs_loads(loaded_dofs, loads);
             nodal_loads.push_back(nodal_load);
         }
+
+        template <typename DofContainer, typename LoadContainer>
+        void create_a_nodal_load_by_id(std::vector<size_t> loaded_node_ids, DofContainer loaded_dofs, LoadContainer loads, GlobalMesh& glob_mesh)
+        {
+            NodalLoad nodal_load;
+            nodal_load.assign_nodes_by_id(loaded_node_ids, glob_mesh);
+            nodal_load.assign_dofs_loads(loaded_dofs, loads);
+            nodal_loads.push_back(nodal_load);
+        }
         
         /**
          * @brief initialise all load objects managed by this manager.

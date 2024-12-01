@@ -61,6 +61,11 @@ class Model
             glob_mesh.create_line_mesh(divisions, end_coords, elem_type, sect);
         }
 
+        void create_frame_mesh(int nbays, int nfloors, real bay_length, real floor_height, int beam_divisions, int column_divisions, ElementType elem_type, BeamColumnFiberSection& sect)
+        {
+            glob_mesh.create_frame_mesh(nbays, nfloors, bay_length, floor_height, beam_divisions, column_divisions, elem_type, sect);
+        }
+
         void read_all_records()
         {
             scribe.read_all_records();

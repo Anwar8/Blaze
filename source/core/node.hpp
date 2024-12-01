@@ -84,6 +84,7 @@ class Node {
             print_container(nodal_loads);
             std::cout << "Node has following displacement:" << std::endl;
             print_container(nodal_displacements);
+            print_inactive_dofs();
         }
         /**
          * @name SettersGetters

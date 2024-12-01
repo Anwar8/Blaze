@@ -78,57 +78,84 @@ int main () {
     std::cout << "(A,I) = (" << section_area << ", " << moment_of_inertia << ")." << std::endl; 
     BeamColumnFiberSection sect;
     build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 10, 20);
-    model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
+    // model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
 
-    // BasicSection basic_sect(youngs_modulus, section_area, moment_of_inertia);
-    // model.create_line_mesh(num_divisions, end_coords, NonlinearElastic, basic_sect);
 
-    std::vector<unsigned> restrained_nodes = std::vector<unsigned>(num_divisions);
-    std::iota(restrained_nodes.begin(), restrained_nodes.end(), 2);
-    // print_container(restrained_nodes);
-    // create restraints
-    NodalRestraint fixed_end;
-    fixed_end.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5}); // pinned support
-    fixed_end.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+    model.create_frame_mesh(2, 2, 4, 3, 8, 6, NonlinearPlastic, sect);
+    FrameMesh the_frame = model.glob_mesh.get_frame();
+    
+
+    NodalRestraint column_bases;
+    column_bases.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5}); // fixed support
+    column_bases.assign_nodes_by_id(the_frame.get_column_bases(), model.glob_mesh);
 
     NodalRestraint out_of_plane_restraint;  
     out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
-    out_of_plane_restraint.assign_nodes_by_id(restrained_nodes, model.glob_mesh);
+    out_of_plane_restraint.assign_nodes_by_id(the_frame.get_out_of_plane_nodes(), model.glob_mesh);
 
-    model.restraints.push_back(fixed_end);
-    // model.restraints.push_back(roller_support);
+    model.restraints.push_back(column_bases);
     model.restraints.push_back(out_of_plane_restraint);
 
-    // create loads
-    real moment = 1.0e4;
-    real y_load = -moment/beam_length;
+    std::set<size_t> loaded_nodes = the_frame.get_beam_line_node_ids(1, true); 
+    std::vector<unsigned> loaded_nodes_v = std::vector<unsigned>(loaded_nodes.begin(), loaded_nodes.end());
+    std::cout << "loaded nodes are: " << std::endl;    
+    print_container(loaded_nodes_v);
+    model.load_manager.create_a_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{-1000}, model.glob_mesh);
 
-    // $\delta = \frac{PL^3}{3EI} = \frac{1e5 (3)^3}{3(2.06e11)(0.0004570000)} = 0.009560026343183701$
-    real expected_deflection = y_load * std::pow(beam_length, 3)/(3*youngs_modulus*moment_of_inertia);
-
-    // model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes}, std::set<int>{0}, std::vector<real>{x_load}, model.glob_mesh);
-    // model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes/2 + 1}, std::set<int>{2}, std::vector<real>{y_load}, model.glob_mesh);
-    model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes}, std::set<int>{2}, std::vector<real>{y_load}, model.glob_mesh);
-
-    // create a scribe and track certain DoFs
-    // model.scribe.track_nodes_by_id(std::set<unsigned>{(unsigned)num_nodes}, std::set<int>{0}, model.glob_mesh); 
-    model.scribe.track_nodes_by_id(std::set<unsigned>{(unsigned)num_nodes}, std::set<int>{2}, model.glob_mesh); 
-    
-    // initialise restraints and loads
     model.initialise_restraints_n_loads();
+    // model.glob_mesh.print_info();
+    // BasicSection basic_sect(youngs_modulus, section_area, moment_of_inertia);
+    // model.create_line_mesh(num_divisions, end_coords, NonlinearElastic, basic_sect);
+
+
+
+
+    // std::vector<unsigned> restrained_nodes = std::vector<unsigned>(num_divisions);
+    // std::iota(restrained_nodes.begin(), restrained_nodes.end(), 2);
+    // // print_container(restrained_nodes);
+    // // create restraints
+    // NodalRestraint fixed_end;
+    // fixed_end.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5}); // fixed support
+    // fixed_end.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+
+    // NodalRestraint out_of_plane_restraint;  
+    // out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
+    // out_of_plane_restraint.assign_nodes_by_id(restrained_nodes, model.glob_mesh);
+
+    // model.restraints.push_back(fixed_end);
+    // // model.restraints.push_back(roller_support);
+    // model.restraints.push_back(out_of_plane_restraint);
+
+    // // create loads
+    // real moment = 1.0e4;
+    // real y_load = -moment/beam_length;
+
+    // // $\delta = \frac{PL^3}{3EI} = \frac{1e5 (3)^3}{3(2.06e11)(0.0004570000)} = 0.009560026343183701$
+    // real expected_deflection = y_load * std::pow(beam_length, 3)/(3*youngs_modulus*moment_of_inertia);
+
+    // // model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes}, std::set<int>{0}, std::vector<real>{x_load}, model.glob_mesh);
+    // // model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes/2 + 1}, std::set<int>{2}, std::vector<real>{y_load}, model.glob_mesh);
+    // model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes}, std::set<int>{2}, std::vector<real>{y_load}, model.glob_mesh);
+
+    // // create a scribe and track certain DoFs
+    // // model.scribe.track_nodes_by_id(std::set<unsigned>{(unsigned)num_nodes}, std::set<int>{0}, model.glob_mesh); 
+    // model.scribe.track_nodes_by_id(std::set<unsigned>{(unsigned)num_nodes}, std::set<int>{2}, model.glob_mesh); 
+    
+    // // initialise restraints and loads
+    // model.initialise_restraints_n_loads();
     model.glob_mesh.check_nodal_loads();
 
-    // initialise solution parameters
+    // // initialise solution parameters
     real max_LF = 1;
     int nsteps = 1000;
     real tolerance = 1e-2;
     int max_iterations = 10;
     model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
     model.solve(-1);
-    // model.scribe.read_all_records();
-    auto recorded_data = model.scribe.get_record_id_iterator((unsigned)num_nodes)->get_recorded_data()[2];
+    // // model.scribe.read_all_records();
+    // auto recorded_data = model.scribe.get_record_id_iterator((unsigned)num_nodes)->get_recorded_data()[2];
     
-    std::cout << std::setprecision(10); 
-    std::cout << "Computed deflection is: " << recorded_data.back() << std::endl;
-    std::cout << "Expected deflection is: " << expected_deflection << std::endl;
+    // std::cout << std::setprecision(10); 
+    // std::cout << "Computed deflection is: " << recorded_data.back() << std::endl;
+    // std::cout << "Expected deflection is: " << expected_deflection << std::endl;
 }
