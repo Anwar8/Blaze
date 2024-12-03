@@ -97,9 +97,9 @@ class FrameMesh {
         }
 
         /**
-         * @brief Gets the vertex IDs at a specific floor.
+         * @brief Gets the vertex IDs for all vertices at a specific floor and all bays.
          * 
-         * @param floor The floor index.
+         * @param floor The floor at which to get the vertices - can be from 0 to \ref nfloors.
          * @return std::set<size_t> A set of vertex IDs at the specified floor.
          */
         std::set<size_t> get_vertices_ids_at_floor(int floor)
@@ -137,7 +137,8 @@ class FrameMesh {
 
         /**
          * @brief returns the column node ids at a given floor for a certain column_line including vertices. 
-         * 
+         * @param column_line the column line which the column we want is at. Ranges from 0 to \ref nbays.
+         * @param floor floor at which the column starts. Ranges from 0 to < \ref nfloors.
          * @return std::set<size_t> nodes a std::set of node ids for a column.
          */
         std::set<size_t> get_column_node_ids(int column_line, int floor)
@@ -160,9 +161,11 @@ class FrameMesh {
         }
 
         /**
-         * @brief Gets the column bases.
-         * 
-         * @return std::set<size_t> A set of node IDs representing the column bases.
+         * @brief Returns the node ids for a given beam either including or excluding the vertices.
+         * @param bay bay in which the beam is. Ranges from 1 to \ref nbays.
+         * @param floor floor at which the beam is. Ranges from 1 to \ref nfloors.
+         * @param include_vertices boolean to include or exclude vertices of the beam.
+         * @return std::set<size_t> A set of node IDs representing the nodes of the beam.
          */
         std::set<size_t> get_beam_node_ids(int bay, int floor, bool include_vertices = false)
         {
@@ -192,10 +195,10 @@ class FrameMesh {
         }
 
         /**
-         * @brief Gets the beam line node IDs for a specific floor.
+         * @brief Gets the column line node IDs for a specific floor.
          * 
-         * @param floor The floor index.
-         * @return std::set<size_t> A set of node IDs for the beam line at the specified floor.
+         * @param column_line The column_line index. Ranges from 0 to \ref nbays.
+         * @return std::set<size_t> A set of node IDs for the column line at the specified floor.
          */
         std::set<size_t> get_column_line_node_ids(int column_line)
         {
@@ -218,10 +221,11 @@ class FrameMesh {
         }
 
         /**
-         * @brief Gets the column line node IDs for a specific column line.
+         * @brief Gets the beam line node IDs for a specific floor. 
          * 
-         * @param column_line The column line index.
-         * @return std::set<size_t> A set of node IDs for the column line at the specified column line.
+         * @param floor the floor at which the beam is located. Ranges from 1 to \ref nfloors.
+         * @param include_vertices boolean to include or exclude vertices of the beam.
+         * @return std::set<size_t> A set of node IDs for the beam line at the specified beam line.
          */
         std::set<size_t> get_beam_line_node_ids(int floor, bool include_vertices = false)
         {
@@ -249,7 +253,7 @@ class FrameMesh {
          * 
          * @return std::vector<std::pair<size_t, coords>> A vector of pairs mapping node IDs to their coordinates for column nodes.
          */
-        std::vector<std::pair<size_t, coords>> create_colum_node_coords_pairs()
+        std::vector<std::pair<size_t, coords>> create_column_node_coords_pairs()
         {
             std::vector<std::pair<size_t, coords>> nodes_id_coords_pairs;
             for (int column_line_i = 0; column_line_i <= nbays; ++column_line_i)
@@ -271,7 +275,7 @@ class FrameMesh {
          * @brief Creates node coordinate pairs for beam nodes.
          * 
          * This function generates a vector of pairs, where each pair consists of a node ID and its corresponding coordinates.
-         * The nodes are created for each beam line in the frame, excluding the vertices.
+         * The nodes are created for each beam line in the frame, *excluding* the vertices as these are created by \ref create_column_node_coords_pairs.
          * 
          * @return std::vector<std::pair<size_t, coords>> A vector of pairs mapping node IDs to their coordinates for beam nodes.
          */
@@ -298,9 +302,9 @@ class FrameMesh {
             return nodes_id_coords_pairs;
         }
         /**
-         * @brief Gets the node coordinate pairs for the entire frame.
+         * @brief Gets the node coordinate pairs for the entire frame sorted by ID.
          * 
-         * This function combines the node coordinate pairs for both column and beam nodes, sorts them by node ID, and returns the result.
+         * @details This function combines the node coordinate pairs for both column and beam nodes, sorts them by node ID, and returns the result.
          * 
          * @return std::vector<std::pair<size_t, coords>> A sorted vector of pairs mapping node IDs to their coordinates for the entire frame.
          */
@@ -308,7 +312,7 @@ class FrameMesh {
         {
            std::vector<std::pair<size_t, coords>> node_map, beam_node_map;
 
-           node_map = create_colum_node_coords_pairs();
+           node_map = create_column_node_coords_pairs();
            beam_node_map = create_beam_node_coords_pairs();
 
            node_map.insert(node_map.end(), beam_node_map.begin(), beam_node_map.end());
@@ -324,7 +328,7 @@ class FrameMesh {
         /**
          * @brief Maps elements to nodes.
          * 
-         * This function generates a vector of pairs, where each pair consists of an element ID and a vector of node IDs that define the element.
+         * @details This function generates a vector of pairs, where each pair consists of an element ID and a vector of node IDs that the element connects to.
          * The elements are created for each bay and floor in the frame.
          * 
          * @return std::vector<std::pair<size_t, std::vector<size_t>>> A vector of pairs mapping element IDs to their corresponding node IDs.
@@ -364,9 +368,9 @@ class FrameMesh {
         }
 
         /**
-         * @brief Gets the out-of-plane nodes.
+         * @brief Gets the IDs of the frame that will need to be restrained out-of-plane, which is all except bases.
          * 
-         * @return std::set<size_t> A set of node IDs representing the out-of-plane nodes.
+         * @return std::set<size_t> A set of node IDs representing the nodes that will need out-of-plane restrain.
          */
         std::set<size_t> get_out_of_plane_nodes()
         {
@@ -391,6 +395,11 @@ class FrameMesh {
             return out_of_plane_nodes;
         }
 
+        /**
+         * @brief Get the node IDs that correspond to the bases of the column that will be fixed.
+         * 
+         * @return std::set<size_t> nodes at the base of the column that will be fixed.
+         */
         std::set<size_t> get_column_bases()
         {
             return get_vertices_ids_at_floor(0);   
@@ -398,6 +407,11 @@ class FrameMesh {
 
 };
 
+/**
+ * @brief prints out each element ID and its corresponding node IDs to the standard output stream.
+ * 
+ * @param element_map std::vector<std::pair<size_t, std::vector<size_t>>> that contains element ID followed by node IDs for this element.
+ */
 void inline read_element_map(std::vector<std::pair<size_t, std::vector<size_t>>> element_map)
 {
     for (auto& pair : element_map)
@@ -406,6 +420,11 @@ void inline read_element_map(std::vector<std::pair<size_t, std::vector<size_t>>>
     }
 }
 
+/**
+ * @brief prints out the node IDs and their xyz coordinates to the standard output stream.
+ * 
+ * @param node_map std::vector<std::pair<size_t, coords>> containing node IDs followed by coordinates of the node.
+ */
 void inline read_node_map(std::vector<std::pair<size_t, coords>> node_map)
 {
     for (auto& pair : node_map)
