@@ -20,6 +20,66 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP7: Thesis writing - 08 weeks - due 15/05/2025
 
 ## Journal
+### 3 December
+It has been quite a while since I have last written here. While some of this is due to interruptions in my life, it also just has to do with the fact that I have simply not written here since I have been focused on writing code that took effort but did not need much thought. The `FrameMesh` class has been added to the `Aggregators` library. It has been documented, and is built based on the proof of concept under the `POC` directory. There are no unit tests associated with it becuase they would require a lot of work and effort, but do not offer any technical benefit. `FrameMesh` allows building portal frames as shown in the figures below. Note that the nodal numbering was attempted in a way to make the differences in ID between nodes of one elements small. This should help keep the bandwidth of the stiffness matrix limited, as far as I know at least. There is only one section type for the beams and columns, which while not ideal, changes nothing for the performance analysis.
+
+In this figure, the *vertices* are in red, while the beam nodes are in blue, and the column nodes are in green. There are functions in `FrameMesh` that allow for extracting these numbers and for defining the coordinates of each node.
+<figure>
+  <img src="frame.png" alt="Portal Frame Nodes" style="width:40%">
+  <figcaption> ID numbers of the nodes in a portal frame </figcaption>
+</figure>
+
+In addition to creating the nodes, there are functions to map the nodes to elements, which are shown below as well. These features have already been added to the `GlobalMesh` and `Model` classes to allow very easy creation of portal frames. Additionally, the `FrameMesh` class allows for easily getting the node IDs for beams that would be loaded, column baes, and getting the node IDs for nodes that will require out-of-plane restraint. See the `FrameMesh` class for details as it is now fully documented. 
+<figure>
+  <img src="frame_elements.png" alt="Portal Frame Nodes and Elements" style="width:40%">
+  <figcaption> ID numbers of the nodes in a portal frame along with element IDs </figcaption>
+</figure>
+
+In addition to having built the `FrameMesh` class, I have also ran a few trials to evaluate the runtime, especially on `Archer2` and `Cirrus`. I have found out why running on `Cirrus` was taking forever - it is because of the `Eigen` module. This issue persists on `Archer2`. If I were to build `Blaze` linking to the module, then the performance of the entire program, not just the functions related to `Eigen`, is completely destroyed. However, if I were to *make* my own `Eigen` by following the `Archer2` documentation: 
+```console
+wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+tar xvf eigen-3.4.0.tar.gz
+cmake eigen-3.4.0/ -DCMAKE_INSTALL_PREFIX=/path/to/install/location
+make install
+```
+where I would install `Eigen` under the directory `eigen` located just before the `Blaze` directory. That is:
+```console
+cd ..
+wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+tar xvf eigen-3.4.0.tar.gz
+rm eigen-3.4.0.tar.gz
+mkdir eigen
+cd eigen-3.4.0
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=../../eigen
+make install
+```
+And then I would use `CMake` as usual, and it will manage to find `Eigen` without problems. 
+I have run the following problem: 10 bays, and 5 floors. 3.5 m floor height, and 5 m beam length. Element size at 0.1 m, for 50 beam-column elements per beam and 35 per column. Top floor nodes loaded with -1000 N each in the y direction. Load is applied over 100 steps, with a tolerance of 10e-2, and 10 maximum iterations. This resulted in the following data, which corresponded to only one run:
+| Timer Name                  | My Mac (s) | Cirrus (s) | Archer 2 (s) | My Mac (%) | Cirrus (%) | Archer 2 (%) |
+|-----------------------------|------------|------------|--------------|------------|------------|--------------|
+| U_to_nodes_mapping          | 0.17741060 | 0.34582329 | 0.50094271   | 1.99       | 1.80       | 2.92         |
+| element_state_update        | 4.48823738 | 9.18213558 | 8.88480496   | 50.41      | 47.89      | 51.85        |
+| element_global_response     | 0.47258306 | 1.18095469 | 1.03989220   | 5.31       | 6.16       | 6.07         |
+| assembly                    | 0.80698061 | 1.52394438 | 1.32624269   | 9.06       | 7.95       | 7.74         |
+| convergence_check           | 0.01368833 | 0.02285123 | 0.02309489   | 0.15       | 0.12       | 0.13         |
+| dU_calculation              | 2.54351377 | 5.76609898 | 4.36792111   | 28.57      | 30.07      | 25.49        |
+| material_state_update       | 0.40053082 | 1.14883661 | 0.99075556   | 4.50       | 5.99       | 5.78         |
+| result_recording            | 0.00000095 | 0.00005174 | 0.00003219   | 0.00       | 0.00       | 0.00         |
+| all                         | 8.90420794 | 19.17318392| 17.13679385  | 100.00     | 100.00     | 100.00       |
+
+From this data, it can be seen that `Cirrus` and `Archer 2` perform worse than my M1 macbook air by a factor of about 2, with `Archer 2` coming slightly ahead of `Cirrus`. The numbers in the table above corresponded to a single run simply because it is not currently worthwhile to try and get averages of performance or anything. I did run multiple times, and the results are within 1 or 2 seconds everytime, while the percentages do not change. I have also made sure that the load factor is incremented correctly and that this corresponds to a solution being calculated; there is no benchmark to check this solution, however. What is also quite important to note is that the performance percentages are not very different between the different machines. Well, there are some differences in percentages between my Mac and the HPC systems, but across `Cirrus` and `Archer 2` the proportions are about the same.
+
+**Now What?**
+So what is the next step? Well, first of all I need to streamline the first four steps in the solution process:
+1. U to nodes mapping
+2. Element state update
+3. Element global response 
+4. Assembly
+
+These were selected because I recall I had done them in a rather inefficient way. I will start there by looking at the file `solution_procedure.md`. 
+
 #### 12 November
 The `2DFrame` class will have the following:
 - A function that will return the vertix number for a particular column line and floor.

@@ -106,46 +106,6 @@ int main () {
     model.load_manager.create_a_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{-1000}, model.glob_mesh);
 
     model.initialise_restraints_n_loads();
-    // model.glob_mesh.print_info();
-    // BasicSection basic_sect(youngs_modulus, section_area, moment_of_inertia);
-    // model.create_line_mesh(num_divisions, end_coords, NonlinearElastic, basic_sect);
-
-
-
-
-    // std::vector<unsigned> restrained_nodes = std::vector<unsigned>(num_divisions);
-    // std::iota(restrained_nodes.begin(), restrained_nodes.end(), 2);
-    // // print_container(restrained_nodes);
-    // // create restraints
-    // NodalRestraint fixed_end;
-    // fixed_end.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5}); // fixed support
-    // fixed_end.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
-
-    // NodalRestraint out_of_plane_restraint;  
-    // out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
-    // out_of_plane_restraint.assign_nodes_by_id(restrained_nodes, model.glob_mesh);
-
-    // model.restraints.push_back(fixed_end);
-    // // model.restraints.push_back(roller_support);
-    // model.restraints.push_back(out_of_plane_restraint);
-
-    // // create loads
-    // real moment = 1.0e4;
-    // real y_load = -moment/beam_length;
-
-    // // $\delta = \frac{PL^3}{3EI} = \frac{1e5 (3)^3}{3(2.06e11)(0.0004570000)} = 0.009560026343183701$
-    // real expected_deflection = y_load * std::pow(beam_length, 3)/(3*youngs_modulus*moment_of_inertia);
-
-    // // model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes}, std::set<int>{0}, std::vector<real>{x_load}, model.glob_mesh);
-    // // model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes/2 + 1}, std::set<int>{2}, std::vector<real>{y_load}, model.glob_mesh);
-    // model.load_manager.create_a_nodal_load_by_id({(unsigned)num_nodes}, std::set<int>{2}, std::vector<real>{y_load}, model.glob_mesh);
-
-    // // create a scribe and track certain DoFs
-    // // model.scribe.track_nodes_by_id(std::set<unsigned>{(unsigned)num_nodes}, std::set<int>{0}, model.glob_mesh); 
-    // model.scribe.track_nodes_by_id(std::set<unsigned>{(unsigned)num_nodes}, std::set<int>{2}, model.glob_mesh); 
-    
-    // // initialise restraints and loads
-    // model.initialise_restraints_n_loads();
     model.glob_mesh.check_nodal_loads();
 
     // // initialise solution parameters
