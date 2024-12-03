@@ -55,12 +55,7 @@ void build_an_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial&
 int main () {
     
     // create mesh
-    real beam_length = 10;
     Model model;
-    std::vector<coords> end_coords = {coords(0, 0, 0), coords(beam_length, 0, 0)};
-    int num_divisions = 100;
-    int num_elements = num_divisions;
-    int num_nodes = num_elements + 1;
     
     // BasicSection sect(2.06e11, 0.0125, 0.0004570000);
     // material information
@@ -80,8 +75,16 @@ int main () {
     build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 10, 20);
     // model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
 
+    int nbays, nfloors, beam_divisions, column_divisions;
+    real floor_height, beam_length;
 
-    model.create_frame_mesh(2, 2, 4, 3, 8, 6, NonlinearPlastic, sect);
+    nbays = 10;
+    nfloors = 5; 
+    beam_divisions = 50;
+    column_divisions = 35;
+    floor_height = 3.5;
+    beam_length = 5.0;
+    model.create_frame_mesh(nbays, nfloors, beam_length, floor_height, beam_divisions, column_divisions, NonlinearPlastic, sect);
     FrameMesh the_frame = model.glob_mesh.get_frame();
     
 
@@ -96,7 +99,7 @@ int main () {
     model.restraints.push_back(column_bases);
     model.restraints.push_back(out_of_plane_restraint);
 
-    std::set<size_t> loaded_nodes = the_frame.get_beam_line_node_ids(1, true); 
+    std::set<size_t> loaded_nodes = the_frame.get_beam_line_node_ids(nfloors, true); 
     std::vector<unsigned> loaded_nodes_v = std::vector<unsigned>(loaded_nodes.begin(), loaded_nodes.end());
     std::cout << "loaded nodes are: " << std::endl;    
     print_container(loaded_nodes_v);
@@ -147,11 +150,11 @@ int main () {
 
     // // initialise solution parameters
     real max_LF = 1;
-    int nsteps = 1000;
+    int nsteps = 100;
     real tolerance = 1e-2;
     int max_iterations = 10;
     model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
-    model.solve(-1);
+    model.solve(1);
     // // model.scribe.read_all_records();
     // auto recorded_data = model.scribe.get_record_id_iterator((unsigned)num_nodes)->get_recorded_data()[2];
     
