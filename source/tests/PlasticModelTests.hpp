@@ -62,7 +62,7 @@ class CantileverBeamPlastic : public ::testing::Test {
         out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
         model.restraints.push_back(out_of_plane_restraint);
 
-        model.load_manager.create_a_nodal_load_by_id({(unsigned)(divisions+1)}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
+        model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{(unsigned)(divisions+1)}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
 
         model.scribe.track_nodes_by_id(std::set<unsigned>{tracked_node_id}, std::set<int>{tracked_dof}, model.glob_mesh);
 
@@ -123,7 +123,7 @@ class SimplySupportedPlastic : public ::testing::Test {
         out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10}, model.glob_mesh);
         model.restraints.push_back(out_of_plane_restraint);
 
-        model.load_manager.create_a_nodal_load_by_id({mid_node}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
+        model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{mid_node}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
 
         model.scribe.track_nodes_by_id(std::set<unsigned>{mid_node}, std::set<int>{tracked_dof}, model.glob_mesh);
 

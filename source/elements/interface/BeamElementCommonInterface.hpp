@@ -206,7 +206,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass>
             this->global_stiffness_triplets.clear();
             // we have the same number of contribution as stiffness components 
             // assuming all are non-zero, which is not correct but okay as it is "safe" although not very memory efficient.
-            this->global_stiffness_triplets.reserve(this->elem_global_stiffness.rows() * this->elem_global_stiffness.cols());
+            this->global_stiffness_triplets.reserve(this->stiffness_map.size());
             for (auto& kmap: this->stiffness_map)
             {
                 real val = this->elem_global_stiffness(kmap[0], kmap[1]);

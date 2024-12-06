@@ -7,19 +7,39 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Work plan
 ### WP1: Debugging of geometric nonlinearity - 2 weeks - due 15/06/2024 - COMPLETED
-### WP2: Implementation of 1D nonlinear material - 8 weeks - due ~~15/08/2024~~ 23/09/2024 - IN PROGRESS
-- [x] 1D material base class: `Material1D`.
-- [x] Isotropic material implementation: `ElasticPlasticMaterial`.
-- [x] Implementation of `BeamColumnFiberSection`.
-- [x] Implementation of `Nonlinear2DPlasticBeamElement` which accounts for spread of plasticity.
-- [x] Tests for the plastic beam-column element
-### ~~WP3: Thermal loading interface - 4 weeks - due 15/09/2024~~
-### WP4: Shared-memory parallelisation on Cirrus using Kokkos - ~~6~~ 5 weeks - due 01/11/2024
-### WP5: Internode parallelisation with MPI - 12 weeks - due 01/02/2025
-### WP6: Profiling, data collection, and analysis - 6 weeks - due 15/03/2025
-### WP7: Thesis writing - 08 weeks - due 15/05/2025
+### WP2: Implementation of 1D nonlinear material - 8 weeks - due 23/09/2024 - COMPLETED
+### WP3: Shared-memory parallelisation on Cirrus using Kokkos - 6 weeks - due 15/01/2024
+### WP4: Internode parallelisation with MPI - 8 weeks - due 15/03/2025
+### WP5: Profiling, data collection, and analysis - 3 weeks - due 07/04/2025
+### WP6: Thesis writing - 05 weeks - due 15/05/2025
+
+## Known Bugs
+- [ ] Unable to factorise matrix - this happens for the Plastic Cantilever test where it takes multiple runs to correctly proceed.
+- [ ] "could not find item with id 1 in vector." Occurs occasionally, and prevents running the model. As with the matrix factorisation, this resolves after running a couple of times.
+
 
 ## Journal
+### 6 December
+
+
+### 4 December
+Following up on the **Now What?** section, I have done the things listed there and this resulted in the following change in performance on my Mac:
+| Timer Name                  | Original (s) | Modified (s) | Original (%) | Modified (%) |
+|-----------------------------|--------------|--------------|--------------|--------------|
+| U_to_nodes_mapping          | 0.17741060   | 0.17961621   | 1.99         | 2.09         |
+| element_state_update        | 4.48823738   | 4.40222812   | 50.41        | 51.23        |
+| element_global_response     | 0.47258306   | 0.00668526   | 5.31         | 0.08         |
+| assembly                    | 0.80698061   | 0.93933296   | 9.06         | 10.93        |
+| convergence_check           | 0.01368833   | 0.01499748   | 0.15         | 0.17         |
+| dU_calculation              | 2.54351377   | 2.65354967   | 28.57        | 30.88        |
+| material_state_update       | 0.40053082   | 0.39606977   | 4.50         | 4.61         |
+| result_recording            | 0.00000095   | 0.00001144   | 0.00         | 0.00         |
+| all                         | 8.90420794   | 8.59389591   | 100.00       | 100.00       |
+
+As can be seen from the table, the workload for `element_global_reponse` has reduced drastically to only 0.08% of the total as compared to 5.31%. As can also be seen, the overall time reduced by about 0.4 s from 8.9 s to 8.59 s, which corresponds closely to the reduction in `element_global_reponse` from 0.477 s to 0.007 s. That being said, `element_global_reponse` needs to be renamed to `global_load_calculation` or something similar. I suspect this will include an assembly step in the future, so I will await to see how this will be done and changed before renaming it.
+
+
+
 ### 3 December
 It has been quite a while since I have last written here. While some of this is due to interruptions in my life, it also just has to do with the fact that I have simply not written here since I have been focused on writing code that took effort but did not need much thought. The `FrameMesh` class has been added to the `Aggregators` library. It has been documented, and is built based on the proof of concept under the `POC` directory. There are no unit tests associated with it becuase they would require a lot of work and effort, but do not offer any technical benefit. `FrameMesh` allows building portal frames as shown in the figures below. Note that the nodal numbering was attempted in a way to make the differences in ID between nodes of one elements small. This should help keep the bandwidth of the stiffness matrix limited, as far as I know at least. There is only one section type for the beams and columns, which while not ideal, changes nothing for the performance analysis.
 
@@ -79,6 +99,16 @@ So what is the next step? Well, first of all I need to streamline the first four
 4. Assembly
 
 These were selected because I recall I had done them in a rather inefficient way. I will start there by looking at the file `solution_procedure.md`. 
+
+- `Assembler::map_U_to_nodes(GlobalMesh& glob_mesh)`: this function has to go over every node, and then from the node find the index at which the DoFs of this node start in the $\boldsymbol{U}$ vector, and how many they are so it can create a loop. It then also needs to know what are the active DoFs of this node, so that it can use a function to add these DoFs. We can speed this up by:
+  1. Vectorise the transfer of the nodes from $\boldsymbol{U}$ since we know the DoFs will be continguous, but this will require some masking at the node so it can properly map this vector to where it belongs in its active DoFs. 
+  2. Another idea is to link the nodal displacement container directly to $\boldsymbol{U}$ so that when $\boldsymbol{U}$ is filled, the nodal displacement container is also directly filled and we no longer need this function to beging with.
+  3. Although the order of the nodes and the way the active DoFs do not change during the solution procedure, we are making a call to find the starting location, active DoFs, and their number every time. This can be done once and stored, and then each iteration can just use that *map* to find the loop parameters. I do not see this making a major improvement, though, as we only reduced some function calls but still need to read a map and copy the nodal data.
+  4. Added an `OpenMP` parallel-for directive here.
+- `GlobalMesh::update_elements_states()`: loops over all elements and asks them to update their state. Not much can be done about this to speed it up, actually, at least not at the `SolutionProcedure` level. Fixing this will require element-level optimisation.
+- `GlobalMesh::calc_global_contributions()` loops over the elements and calls `calc_global_stiffness_triplets()`, then loops over the nodes and calls `compute_global_load_triplets()`. The following was done:
+  1. The call `calc_global_stiffness_triplets()` for each element is wasted here - it should be moved to `GlobalMesh::update_elements_states()`, and it was. 
+  2. Create `GlobalMesh::calc_nodal_contributions_to_P` to loop over the nodes and get them calculate their global load triplets, move it to before the iterations since $\boldsymbol{P}$ does not change during the iterations. This might become a problem when introducing fire if fire would change $\boldsymbol{P}$, but get to that bridge when we get to it, and perhaps separate thermal load from dead load to begin with. 
 
 #### 12 November
 The `2DFrame` class will have the following:

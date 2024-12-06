@@ -62,7 +62,10 @@ class SolutionProcedure
                 load_manager.increment_loads(dLF);
                 bool converged = false;
                 int iter = 1;
-                
+            
+                time_keeper.start_timer("element_global_response");
+                glob_mesh.calc_nodal_contributions_to_P(); // calculates the global stiffness and load contributions from the elements and nodes, respectively. Does not assemble them.
+                time_keeper.stop_timer("element_global_response");
                 
                 // begin nonlinear iterations:
                 while ((iter <= max_iter) && !(converged))
@@ -86,9 +89,7 @@ class SolutionProcedure
                     time_keeper.start_timer("element_state_update");
                     glob_mesh.update_elements_states(); // calculates internal state of strain, stress, and nodal responses. 
                     time_keeper.stop_timer("element_state_update");
-                    time_keeper.start_timer("element_global_response");
-                    glob_mesh.calc_global_contributions(); // calculates the global stiffness and load contributions from the elements and nodes, respectively. Does not assemble them.
-                    time_keeper.stop_timer("element_global_response");
+                    
                     time_keeper.start_timer("assembly");
                     assembler.assemble_global_contributions(glob_mesh); // assembles the stiffness and load contributions into the global stiffness matrix and load vector.                    
                     assembler.map_elements_f_to_R(glob_mesh);

@@ -447,12 +447,28 @@ class GlobalMesh {
             {
                 std::cout << "Calc_global_contirbutions: There are " << ndofs << " active DoFs in the mesh." << std::endl;
             }
-            for (auto& elem: elem_vector) 
-            {   
-                // elem->update_state(); // Should not update state if we are calling update_state explicitly on its own!
-                // elem->map_stiffness();
-                elem->calc_global_stiffness_triplets();
-            }
+            // for (auto& elem: elem_vector) 
+            // {   
+            //     // elem->update_state(); // Should not update state if we are calling update_state explicitly on its own!
+            //     // elem->map_stiffness();
+            //     elem->calc_global_stiffness_triplets();
+            // }
+            // for (auto& node: node_vector)
+            // {
+            //     if (VERBOSE)
+            //     {
+            //         std::cout << "Computing global load triplets for node " << node->get_id() << std::endl;
+            //     }
+            //     node->compute_global_load_triplets();
+            // }
+        }
+
+        /**
+         * @brief makes each node calculate how much it will contribute to \f$\boldsymbol{P}\f$ by calling \ref Node::compute_global_load_triplets().
+         * 
+         */
+        void calc_nodal_contributions_to_P()
+        {
             for (auto& node: node_vector)
             {
                 if (VERBOSE)
@@ -460,7 +476,7 @@ class GlobalMesh {
                     std::cout << "Computing global load triplets for node " << node->get_id() << std::endl;
                 }
                 node->compute_global_load_triplets();
-            }
+            }   
         }
 
         /**
@@ -484,6 +500,7 @@ class GlobalMesh {
             for (auto& elem: elem_vector)
             {
                 elem->update_state();
+                elem->calc_global_stiffness_triplets();
             }
         }
 

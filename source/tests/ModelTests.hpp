@@ -93,7 +93,7 @@ class LoadTests : public ::testing::Test {
         BasicSection sect(2.06e11, 0.0125, 0.0004570000);
         model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}}, ELEMENT_TYPE, sect);
         
-        model.load_manager.create_a_nodal_load_by_id({(unsigned)(divisions+1)}, std::set<int>{1}, std::vector<real>{y_load}, model.glob_mesh);
+        model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{(unsigned)(divisions+1)}, std::set<int>{1}, std::vector<real>{y_load}, model.glob_mesh);
         model.initialise_restraints_n_loads();
         
     }
@@ -185,7 +185,7 @@ TEST_F(ScribeTests, CheckTrackedDofs)
     std::vector<Record> records_library = model.scribe.get_record_library();
     std::set<int> dofs = records_library[0].get_tracked_dofs();
     EXPECT_EQ(dofs.size(), 1);
-    EXPECT_TRUE(dofs.contains(tracked_dof));
+    EXPECT_TRUE(dofs.count(tracked_dof));
 }
 
 TEST_F(ScribeTests, CheckTrackedNodeId)
@@ -256,7 +256,7 @@ class CantileverBeam : public ::testing::Test {
         out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
         model.restraints.push_back(out_of_plane_restraint);
 
-        model.load_manager.create_a_nodal_load_by_id({(unsigned)(divisions+1)}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
+        model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{(unsigned)(divisions+1)}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
 
         model.scribe.track_nodes_by_id(std::set<unsigned>{tracked_node_id}, std::set<int>{tracked_dof}, model.glob_mesh);
 
@@ -315,7 +315,7 @@ class SimplySupported : public ::testing::Test {
         out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10}, model.glob_mesh);
         model.restraints.push_back(out_of_plane_restraint);
 
-        model.load_manager.create_a_nodal_load_by_id({mid_node}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
+        model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{mid_node}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
 
         model.scribe.track_nodes_by_id(std::set<unsigned>{mid_node}, std::set<int>{tracked_dof}, model.glob_mesh);
 
@@ -455,7 +455,7 @@ class MacNealSlenderBeam : public ::testing::Test {
 
 void load_and_run(Model& model, unsigned loaded_node, int loaded_dof, real load, int steps)
 {
-    model.load_manager.create_a_nodal_load_by_id({loaded_node}, std::set<int>{loaded_dof}, std::vector<real>{load}, model.glob_mesh);
+    model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{loaded_node}, std::set<int>{loaded_dof}, std::vector<real>{load}, model.glob_mesh);
     model.initialise_restraints_n_loads();
     model.glob_mesh.check_nodal_loads();
 

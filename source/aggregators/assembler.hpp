@@ -116,6 +116,7 @@ class Assembler {
          */
         void map_U_to_nodes(GlobalMesh& glob_mesh)
         {
+            #pragma omp parallel for
             for (auto& node: glob_mesh.node_vector)
             {
                 int nzi = node->get_nz_i(); // where the node displacements start in the U vector.
