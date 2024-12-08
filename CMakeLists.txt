@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_TESTS "Build test programs" OFF)
 option(BUILD_STATIC_LIBS "Build intermediate libraries and link them to executable statically" OFF)
+option(OMP "Build with OpenMP support" OFF)
 
 option(INCLUDE_GMSH "gmsh exists and Blaze will use it" OFF)
 option(VERBOSE "Blaze operate in verbose mode for debugging" OFF)
@@ -90,11 +91,12 @@ add_executable(Blaze)
 target_sources(Blaze PRIVATE "source/main.cpp")
 
 target_include_directories(Blaze PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/source)
-
-# find_package(OpenMP REQUIRED)
-
-# target_link_libraries(Blaze PUBLIC BlazeModel OpenMP::OpenMP_CXX)
+if(OMP)
+find_package(OpenMP REQUIRED)
+target_link_libraries(Blaze PUBLIC BlazeModel OpenMP::OpenMP_CXX)
+else(OMP)
 target_link_libraries(Blaze PUBLIC BlazeModel)
+endif(OMP)
 
 # if(INCLUDE_GMSH)
 #     target_include_directories(Blaze PUBLIC "source" ${GMSH_INC})

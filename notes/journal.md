@@ -20,7 +20,7 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Journal
 ### 8 December
-All solution streamlining items from 6 December were implemented, in addition to combining the calculation of the stiffness contribution and the resistance force contributions. This resulted in nearly halving the assembly time from 0.93 s to 0.58 s, and thus reduced the proportion of the assembly from 10.93% in the last update, to 7.09% in this one. Other than the element state update, I am confident that the solution procedure is now implemented in a streamlined way. At the very least, it is not a clearly silly implementation anymore.
+All solution streamlining items from 6 December were implemented, in addition to combining the calculation of the stiffness contribution and the resistance force contributions. This resulted in nearly halving the assembly time from 0.93 s to 0.58 s, and thus reduced the proportion of the assembly from 10.93% in the last update, to 7.09% in this one. Other than the element state update, I am confident that the solution procedure is now implemented in a streamlined way. At the very least, it is not a clearly silly implementation anymore. All times below are the median of 3 runs.
 | Timer Name                  | Original (s) | 4 Dec (s)    | 8 Dec (s)    | Original (%) | 4 Dec (%)    | 8 Dec (%)    |
 |-----------------------------|--------------|--------------|--------------|--------------|--------------|--------------|
 | U_to_nodes_mapping          | 0.17741060   | 0.17961621   | 0.17762160   | 1.99         | 2.09         | 2.16         |
@@ -47,6 +47,32 @@ I have also added `OpenMP` parallel for-loops pragmas in 3 places: mapping displ
 | material_state_update       | 0.38895583   | 0.38600421   | 4.73         | 5.03         |
 | result_recording            | 0.00001287   | 0.00001049   | 0.00         | 0.00         |
 | all                         | 8.21813107   | 7.67104411   | 100.00       | 100.00       |
+
+Now, running with very simple `OpenMP` resulted in the following change in performance on my Mac:
+| Timer Name                  | Serial (s)   | 1 thread (s) | 2 threads (s) | 3 threads (s) | 4 threads (s) | 5 threads (s) | 6 threads (s) |
+|-----------------------------|--------------|--------------|---------------|---------------|---------------|---------------|---------------|
+| U_to_nodes_mapping          | 0.23869801   | 0.24094439   | 0.14099669    | 0.10458899    | 0.08529949    | 0.09684801    | 0.08928013    |
+| element_state_update        | 4.02224493   | 4.16897321   | 2.34216547    | 1.78291416    | 1.52907467    | 1.68174362    | 1.54701853    |
+| element_global_response     | 0.00586247   | 0.00615382   | 0.00636268    | 0.00614691    | 0.00619173    | 0.00643182    | 0.00616169    |
+| assembly                    | 0.59288311   | 0.59401011   | 0.59843707    | 0.59329438    | 0.61001730    | 0.59858918    | 0.61685324    |
+| convergence_check           | 0.01441932   | 0.01422381   | 0.01437068    | 0.01404953    | 0.01449251    | 0.01484466    | 0.01489782    |
+| dU_calculation              | 2.40936303   | 2.41919684   | 2.42342472    | 2.41524863    | 2.45679283    | 2.45992088    | 2.46733403    |
+| material_state_update       | 0.38600421   | 0.39710569   | 0.31511736    | 0.30846882    | 0.30860162    | 0.31389737    | 0.31257939    |
+| result_recording            | 0.00001049   | 0.00001407   | 0.00001526    | 0.00001001    | 0.00001931    | 0.00001907    | 0.00001740    |
+| all                         | 7.67104411   | 7.84207821   | 5.84252691    | 5.22638988    | 5.01214504    | 5.17397404    | 5.05578804    |
+
+And as percentage of total time:
+| Timer Name                  | Serial (%)   | 1 thread (%) | 2 threads (%) | 3 threads (%) | 4 threads (%) | 5 threads (%) | 6 threads (%) |
+|-----------------------------|--------------|--------------|---------------|---------------|---------------|---------------|---------------|
+| U_to_nodes_mapping          | 3.11         | 3.07         | 2.41          | 2.00          | 1.70          | 1.87          | 1.77          |
+| element_state_update        | 52.43        | 53.16        | 40.09         | 34.11         | 30.51         | 32.50         | 30.60         |
+| element_global_response     | 0.08         | 0.08         | 0.11          | 0.12          | 0.12          | 0.12          | 0.12          |
+| assembly                    | 7.73         | 7.57         | 10.24         | 11.35         | 12.17         | 11.57         | 12.20         |
+| convergence_check           | 0.19         | 0.18         | 0.25          | 0.27          | 0.29          | 0.29          | 0.29          |
+| dU_calculation              | 31.41        | 30.85        | 41.48         | 46.21         | 49.02         | 47.54         | 48.80         |
+| material_state_update       | 5.03         | 5.06         | 5.39          | 5.90          | 6.16          | 6.07          | 6.18          |
+| result_recording            | 0.00         | 0.00         | 0.00          | 0.00          | 0.00          | 0.00          | 0.00          |
+| all                         | 100.00       | 100.00       | 100.00        | 100.00        | 100.00        | 100.00        | 100.00        |
 
 ### 6 December
 During assembly, it is important correctly size the vector that will take on the element contributions to the stiffness matrix. This reservation of `std::vector` size should be an upper limit, but setting it to a very large size will have performance and memory costs. The notebook `element_contribution_count.ipynb` in `POC` counts the number of nonzero contributions of `Nonlinear2DPlasticBeamElement`. The number of contirbutions depends on the orientation of the element as the global contributions include the transformed tangent matrix: $\boldsymbol{T}^T \boldsymbol{k}_t \boldsymbol{T}$. For a horizontal or vertical element, there are 28 nonzero elements, and 36 if the element is neither horizontal nor vertical. This means that the size of the vector of tuples that build the sparse matrix should be 36 * number of elements, as an upper limit. 

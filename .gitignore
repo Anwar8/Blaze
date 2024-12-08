@@ -11,3 +11,5 @@ source/mesh/mesh_analysis
 .DS_Store
 .vscode/
 source/.DS_Store
+data
+data/*.csv
