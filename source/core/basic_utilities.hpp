@@ -19,13 +19,7 @@
 /**
  * @brief Get iterator for a node or element by searching for their id.
  * 
- * @details searches by checking if the id of the element corrsponds closely to its location
- * in the vector. if not, it goes either up or down to keep checking.
- * this "search" is inefficient compared to other search algorithms such as std::find_if
- * or std::lower_bound for the general case, but is more efficient considering the average case we 
- * actually care about: a sorted vector of nodes/elems that is almost always continguous.
- * 
- * @attention there might be a potential infinite loop in this search.
+ * @details searches by relying on std::find_if from <algorithm>
  * 
  * @todo create test cases that searches when there is no node or element with the given id
  * in the searched container.
