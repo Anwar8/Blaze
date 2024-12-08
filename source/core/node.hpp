@@ -330,6 +330,15 @@ class Node {
          * 
          */
         std::vector<spnz> get_load_triplets() {return global_nodal_loads_triplets;}
+
+        /**
+         * @brief inserts the contents of \ref global_nodal_loads_triplets into the end of global_load_triplets_vector used to construct \f$\boldsymbol{P}\f$. Used to reduce copying during assembly, still basically a getter function.
+         * 
+         * @param global_load_triplets_vector The container for the triplets that are used for assembling the global load vector \f$ \boldsymbol{P}\f$ from nodal loads.
+         */
+        void insert_load_triplets(std::vector<spnz>& global_load_triplets_vector) {
+            global_load_triplets_vector.insert(global_load_triplets_vector.end(), this->global_nodal_loads_triplets.begin(), this->global_nodal_loads_triplets.end());   
+        }
         //@}
         
         /**

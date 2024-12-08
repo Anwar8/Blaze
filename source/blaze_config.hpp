@@ -3,6 +3,7 @@
 
 #define INCLUDE_GMSH 0
 #define VERBOSE 0
+#define VERBOSE_SLN 0
 #define VERBOSE_STIFFNESSES 0
 #define VERBOSE_NLB 0
 #define LF_VERBOSE 0

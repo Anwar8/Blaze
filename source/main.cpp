@@ -77,7 +77,6 @@ int main () {
 
     int nbays, nfloors, beam_divisions, column_divisions;
     real floor_height, beam_length;
-
     nbays = 10;
     nfloors = 5; 
     beam_divisions = 50;
@@ -101,8 +100,8 @@ int main () {
 
     std::set<size_t> loaded_nodes = the_frame.get_beam_line_node_ids(nfloors, true); 
     std::vector<unsigned> loaded_nodes_v = std::vector<unsigned>(loaded_nodes.begin(), loaded_nodes.end());
-    std::cout << "loaded nodes are: " << std::endl;    
-    print_container(loaded_nodes_v);
+    // std::cout << "loaded nodes are: " << std::endl;    
+    // print_container(loaded_nodes_v);
     model.load_manager.create_a_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{-1000}, model.glob_mesh);
 
     model.initialise_restraints_n_loads();

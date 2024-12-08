@@ -62,11 +62,21 @@ class SolutionProcedure
                 load_manager.increment_loads(dLF);
                 bool converged = false;
                 int iter = 1;
-            
+
+                #if VERBOSE_SLN
+                    std::cout << std::endl << "Entering glob_mesh.calc_nodal_contributions_to_P()" << std::endl;
+                #endif
                 time_keeper.start_timer("element_global_response");
                 glob_mesh.calc_nodal_contributions_to_P(); // calculates the global stiffness and load contributions from the elements and nodes, respectively. Does not assemble them.
                 time_keeper.stop_timer("element_global_response");
                 
+                #if VERBOSE_SLN
+                    std::cout << std::endl << "Entering assembler.assemble_global_P(glob_mesh)" << std::endl;
+                #endif
+                time_keeper.start_timer("assembly");
+                assembler.assemble_global_P(glob_mesh);
+                time_keeper.stop_timer("assembly");
+
                 // begin nonlinear iterations:
                 while ((iter <= max_iter) && !(converged))
                 {   
@@ -79,6 +89,9 @@ class SolutionProcedure
                      * For the first iteration: initial mapping where none of the nodes have any displacement \f$\boldsymbol{U} = \boldsymbol{0}\f$ , and so each element \f$\boldsymbol{d} = \boldsymbol{0}\f$
                      * For each iteration after that, \f$\boldsymbol{U} = \boldsymbol{U} +  d\boldsymbol{U}\f$, and so \f$ \boldsymbol{d}\f$ maps from \f$\boldsymbol{U}\f$
                      */
+                    #if VERBOSE_SLN
+                    std::cout << std::endl << "Entering assembler.map_U_to_nodes(glob_mesh)" << std::endl;
+                    #endif
                     time_keeper.start_timer("U_to_nodes_mapping");
                     assembler.map_U_to_nodes(glob_mesh);
                     time_keeper.stop_timer("U_to_nodes_mapping"); 
@@ -86,23 +99,40 @@ class SolutionProcedure
                     {
                         glob_mesh.print_info();
                     }
+                    #if VERBOSE_SLN
+                    std::cout << std::endl << "Entering glob_mesh.update_elements_states();" << std::endl;
+                    #endif
                     time_keeper.start_timer("element_state_update");
                     glob_mesh.update_elements_states(); // calculates internal state of strain, stress, and nodal responses. 
                     time_keeper.stop_timer("element_state_update");
-                    
+                    #if VERBOSE_SLN
+                    std::cout << std::endl << "Entering assembler.assemble_global_K_R(glob_mesh);" << std::endl;
+                    #endif
                     time_keeper.start_timer("assembly");
-                    assembler.assemble_global_contributions(glob_mesh); // assembles the stiffness and load contributions into the global stiffness matrix and load vector.                    
-                    assembler.map_elements_f_to_R(glob_mesh);
+                    assembler.assemble_global_K_R(glob_mesh); // assembles the stiffness and load contributions into the global stiffness matrix and load vector.                    
                     time_keeper.stop_timer("assembly");
-
+                    
+                    #if VERBOSE_SLN
+                    std::cout << std::endl << "Entering assembler.calculate_out_of_balance();" << std::endl;
+                    #endif
                     time_keeper.start_timer("convergence_check");
                     assembler.calculate_out_of_balance();
+
+                    #if VERBOSE_SLN
+                    std::cout << std::endl << "Entering assembler.check_convergence(tolerance);" << std::endl;
+                    #endif
                     converged = assembler.check_convergence(tolerance);
                     time_keeper.stop_timer("convergence_check");
                     time_keeper.start_timer("dU_calculation");
                     if (!converged)
                     {
+                        #if VERBOSE_SLN
+                        std::cout << std::endl << "Entering solver.solve_for_deltaU(assembler);" << std::endl;
+                        #endif
                         solver.solve_for_deltaU(assembler);
+                        #if VERBOSE_SLN
+                        std::cout << std::endl << "Entering assembler.increment_U();" << std::endl;
+                        #endif
                         assembler.increment_U();
                     }
                     time_keeper.stop_timer("dU_calculation");

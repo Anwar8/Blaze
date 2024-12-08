@@ -300,7 +300,17 @@ class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass>
         virtual vec get_local_d() const override {return this->local_d;}
         virtual vec get_local_f() const override {return this->local_f;}
         virtual vec get_element_resistance_forces() const override {return this->element_global_resistance_forces;}   
-        virtual std::vector<spnz> get_global_resistance_force_triplets() override {return this->global_R_triplets;}        
+        virtual std::vector<spnz> get_global_resistance_force_triplets() override {return this->global_R_triplets;}  
+        /**
+         * @brief inserts the contents of \ref element_global_resistance_forces into the end of global resistance triplets vector \ref Assembler::R_global_triplets. 
+         * Used to reduce copying during assembly, still basically a getter function.
+         * 
+         * @param R_global_triplets The container for the triplets that are used for assembling the global resistance vector \f$ \boldsymbol{R}\f$ from element contributions.
+         */ 
+        virtual void insert_global_resistance_force_triplets(std::vector<spnz>& global_resistance_triplets_vector) override 
+        {
+            global_resistance_triplets_vector.insert(global_resistance_triplets_vector.end(), this->global_R_triplets.begin(), this->global_R_triplets.end());            
+        }      
         virtual vec get_eps() const override {return this->local_eps[0];}
         virtual vec get_local_stresses() const override {return this->local_stresses[0];}
         virtual mat get_local_constitutive_mat() const override {return this->local_constitutive_mat[0];}
@@ -309,7 +319,14 @@ class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass>
         virtual mat get_local_tangent_stiffness() const override {return this->local_tangent_stiffness;}
         virtual mat get_elem_global_stiffness() const override {return this->elem_global_stiffness;}
         virtual std::vector<spnz> get_global_stiffness_triplets() override {return this->global_stiffness_triplets;}
-        
+        /**
+         * @brief inserts the contents of \ref global_stiffness_triplets into the end of global_triplets_vector. Used to reduce copying during assembly, still basically a getter function.
+         * 
+         * @param global_triplets_vector The container for the triplets that are used for assembling the global stiffness matrix \f$ \boldsymbol{K}\f$ from element contributions.
+         */
+        virtual void insert_global_stiffness_triplets(std::vector<spnz>& global_triplets_vector) override {
+            global_triplets_vector.insert(global_triplets_vector.end(), this->global_stiffness_triplets.begin(), this->global_stiffness_triplets.end());
+        }
         virtual mat get_N() const override {return this->N[0];}
         virtual mat get_B() const override {return this->B[0];}
         virtual mat get_T() override {return this->orient.get_T();}

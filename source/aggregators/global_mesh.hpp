@@ -178,11 +178,14 @@ class GlobalMesh {
 
             NodeIdCoordsPairsVector node_map = frame.get_node_coords_pairs();
             ElemIdNodeIdPairVector elem_map = frame.map_elements_to_nodes();
-            std::cout << "-----------------------------------------------------" << std::endl;
-            read_node_map(node_map);
-            std::cout << "-----------------------------------------------------" << std::endl;
-            read_element_map(elem_map);
-            std::cout << "-----------------------------------------------------" << std::endl;
+            if (VERBOSE)
+            {
+                std::cout << "-----------------------------------------------------" << std::endl;
+                read_node_map(node_map);
+                std::cout << "-----------------------------------------------------" << std::endl;
+                read_element_map(elem_map);
+                std::cout << "-----------------------------------------------------" << std::endl;
+            }
             setup_mesh(node_map, elem_map);
         }
 
@@ -506,6 +509,7 @@ class GlobalMesh {
 
         void update_element_sections_starting_states()
         {
+            #pragma omp parallel for
             for (auto& elem: elem_vector)
             {
                 elem->update_section_starting_state();

@@ -19,7 +19,43 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 
 ## Journal
+### 8 December
+All solution streamlining items from 6 December were implemented, in addition to combining the calculation of the stiffness contribution and the resistance force contributions. This resulted in nearly halving the assembly time from 0.93 s to 0.58 s, and thus reduced the proportion of the assembly from 10.93% in the last update, to 7.09% in this one. Other than the element state update, I am confident that the solution procedure is now implemented in a streamlined way. At the very least, it is not a clearly silly implementation anymore.
+| Timer Name                  | Original (s) | 4 Dec (s)    | 8 Dec (s)    | Original (%) | 4 Dec (%)    | 8 Dec (%)    |
+|-----------------------------|--------------|--------------|--------------|--------------|--------------|--------------|
+| U_to_nodes_mapping          | 0.17741060   | 0.17961621   | 0.17762160   | 1.99         | 2.09         | 2.16         |
+| element_state_update        | 4.48823738   | 4.40222812   | 4.48953032   | 50.41        | 51.23        | 54.63        |
+| element_global_response     | 0.47258306   | 0.00668526   | 0.00613523   | 5.31         | 0.08         | 0.07         |
+| assembly                    | 0.80698061   | 0.93933296   | 0.58301473   | 9.06         | 10.93        | 7.09         |
+| convergence_check           | 0.01368833   | 0.01499748   | 0.01306963   | 0.15         | 0.17         | 0.16         |
+| dU_calculation              | 2.54351377   | 2.65354967   | 2.55872560   | 28.57        | 30.88        | 31.14        |
+| material_state_update       | 0.40053082   | 0.39606977   | 0.38895583   | 4.50         | 4.61         | 4.73         |
+| result_recording            | 0.00000095   | 0.00001144   | 0.00001287   | 0.00         | 0.00         | 0.00         |
+| all                         | 8.90420794   | 8.59389591   | 8.21813107   | 100.00       | 100.00       | 100.00       |
+
+I have also updated the `debug` build command in `build.sh`. This now builds a debug version of the code, and turns on verbosity for the load factor, iterations, and solution procedure thus outputing to the stream which part of the solution procedure each iteration has currently entered.
+
+I have also added `OpenMP` parallel for-loops pragmas in 3 places: mapping displacements between nodes and $\boldsymbol{U}$ vector, element state updating, and updating material state. Of course, before attempting to see how that changes performance, I had to check whether the program compiles with `gcc-14` at all. Not only did it compile, but it also performed better than when it was compiled with `Clang`:
+| Timer Name                  | Clang (s)    | g++-14 (s)   | Clang (%)    | g++-14 (%)   |
+|-----------------------------|--------------|--------------|--------------|--------------|
+| U_to_nodes_mapping          | 0.17762160   | 0.23869801   | 2.16         | 3.11         |
+| element_state_update        | 4.48953032   | 4.02224493   | 54.63        | 52.43        |
+| element_global_response     | 0.00613523   | 0.00586247   | 0.07         | 0.08         |
+| assembly                    | 0.58301473   | 0.59288311   | 7.09         | 7.73         |
+| convergence_check           | 0.01306963   | 0.01441932   | 0.16         | 0.19         |
+| dU_calculation              | 2.55872560   | 2.40936303   | 31.14        | 31.41        |
+| material_state_update       | 0.38895583   | 0.38600421   | 4.73         | 5.03         |
+| result_recording            | 0.00001287   | 0.00001049   | 0.00         | 0.00         |
+| all                         | 8.21813107   | 7.67104411   | 100.00       | 100.00       |
+
 ### 6 December
+During assembly, it is important correctly size the vector that will take on the element contributions to the stiffness matrix. This reservation of `std::vector` size should be an upper limit, but setting it to a very large size will have performance and memory costs. The notebook `element_contribution_count.ipynb` in `POC` counts the number of nonzero contributions of `Nonlinear2DPlasticBeamElement`. The number of contirbutions depends on the orientation of the element as the global contributions include the transformed tangent matrix: $\boldsymbol{T}^T \boldsymbol{k}_t \boldsymbol{T}$. For a horizontal or vertical element, there are 28 nonzero elements, and 36 if the element is neither horizontal nor vertical. This means that the size of the vector of tuples that build the sparse matrix should be 36 * number of elements, as an upper limit. 
+
+The function `Assembler::assemble_global_contributions(GlobalMesh& glob_mesh)` assembles both stiffness matrix $\boldsymbol{K}$ and force vector $\boldsymbol{P}$, and does so by declaring, allocating, and filling 4 `std::vectors` to collect the triplets each iteration. 
+1. There is no need to assemble $\boldsymbol{P}$ each iteration, but only each load step.
+2. The vector for the contributions of the stiffness matrix should be reserved once, and reused without having to re-reserve elements each iteration. 
+3. The number of copies must be reduced by not copying the contributions to a temporary vector and then into the global vector. In stead, a new function `insert_global_stiffness_triplets(std::vector<spnz>& global_triplets_vector)` is used to directly insert the contributions into the global contributions triplets vector.
+4. It could be done so that the insertion into the contributions triplets vector be done as part of the element updating, so that we do not compute the contributions and then collect them, but in stead directly place them into the global vector of triplets. This will require passing the global vector of triplets to the element update function, which in turn would make it difficult to parallelise element updating as there could be race-conditions when writing to the global stiffness triplets vector. 
 
 
 ### 4 December

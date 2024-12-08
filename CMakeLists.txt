@@ -12,6 +12,7 @@ option(BUILD_STATIC_LIBS "Build intermediate libraries and link them to executab
 
 option(INCLUDE_GMSH "gmsh exists and Blaze will use it" OFF)
 option(VERBOSE "Blaze operate in verbose mode for debugging" OFF)
+option(VERBOSE_SLN "Blaze operate in verbose solution mode for debugging" OFF)
 option(VERBOSE_STIFFNESSES "Blaze will post stiffness matrix to output stream" OFF)
 option(VERBOSE_NLB "Blaze will output U and dU whenever they are solved for by the basic solver" OFF)
 option(LF_VERBOSE "Blaze will print LF and iteration every time it enters a new one" OFF)
@@ -27,6 +28,12 @@ if(VERBOSE)
 else(VERBOSE)
     set(VERBOSE 0)
 endif(VERBOSE)
+
+if(VERBOSE_SLN)
+    set(VERBOSE_SLN 1)
+else(VERBOSE_SLN)
+    set(VERBOSE_SLN 0)
+endif(VERBOSE_SLN)
 
 if(VERBOSE_STIFFNESSES)
     set(VERBOSE_STIFFNESSES 1)
