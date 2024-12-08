@@ -8,6 +8,7 @@
 #define BASIC_UTILITIES
 #include <string>
 #include <iostream>
+#include <algorithm>
 /**
  * @defgroup Utility 
  * 
@@ -38,23 +39,11 @@
 template <typename Iterator, typename Container>
 Iterator get_id_iterator(int id, Container& a_vec)
 {
-    auto itr = std::begin(a_vec) + (id - 1);
-    int check_id = ((*itr)->get_id());
-    if (check_id > id)
-    {
-        while (check_id != id && (itr > std::begin(a_vec)))
-        {
-            --itr;
-            check_id = ((*itr) -> get_id());
-        }
-    } else if (check_id < id) {
-        while (check_id != id && (itr < std::end(a_vec)))
-        {
-            ++itr;
-            check_id = ((*itr) -> get_id());
-        }
-    }
-    if (check_id == id)
+    Iterator itr = std::find_if(a_vec.begin(), a_vec.end(), 
+        [id](const auto item) {
+            return item->get_id() == id;
+        });
+    if (itr != a_vec.end())
     {
         return itr;
     } else 
