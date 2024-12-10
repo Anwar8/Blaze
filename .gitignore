@@ -13,3 +13,7 @@ source/mesh/mesh_analysis
 source/.DS_Store
 data
 data/*.csv
+kokkos
+kokkos/*
+lib
+lib/*

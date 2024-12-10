@@ -15,7 +15,7 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Known Bugs
 - [ ] Unable to factorise matrix - this happens for the Plastic Cantilever test where it takes multiple runs to correctly proceed.
-- [ ] "could not find item with id 1 in vector." Occurs occasionally, and prevents running the model. As with the matrix factorisation, this resolves after running a couple of times.
+- [ ] "could not find item with id 1 in vector." Occurs occasionally, and prevents running the model. As with the matrix factorisation, this resolves after running a couple of times. **Potentially fixed on 8 December by rewriting `get_id_iterator` in `basic_utilities.hpp`**
 
 
 ## Journal
@@ -74,7 +74,7 @@ And as percentage of total time:
 | result_recording            | 0.00         | 0.00         | 0.00          | 0.00          | 0.00          | 0.00          | 0.00          |
 | all                         | 100.00       | 100.00       | 100.00        | 100.00        | 100.00        | 100.00        | 100.00        |
 
-Finally, I have updated `get_id_iterator` in `basic_utilities` by using `std::find_if` from the standard template library.
+Finally, I have updated `get_id_iterator` in `basic_utilities` by using `std::find_if` from the standard template library. This actually appears to have some effect on performance as well. This, hopefully, will fix one of the known bugs.
 
 ### 6 December
 During assembly, it is important correctly size the vector that will take on the element contributions to the stiffness matrix. This reservation of `std::vector` size should be an upper limit, but setting it to a very large size will have performance and memory costs. The notebook `element_contribution_count.ipynb` in `POC` counts the number of nonzero contributions of `Nonlinear2DPlasticBeamElement`. The number of contirbutions depends on the orientation of the element as the global contributions include the transformed tangent matrix: $\boldsymbol{T}^T \boldsymbol{k}_t \boldsymbol{T}$. For a horizontal or vertical element, there are 28 nonzero elements, and 36 if the element is neither horizontal nor vertical. This means that the size of the vector of tuples that build the sparse matrix should be 36 * number of elements, as an upper limit. 

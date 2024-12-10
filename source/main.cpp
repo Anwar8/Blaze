@@ -14,6 +14,8 @@
 #include "BeamColumnFiberSection.hpp"
 #include "basic_utilities.hpp"
 
+#include <Kokkos_Core.hpp>
+
 void build_an_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial& steel, real offset, real tf, real b, real tw, real h, int flange_divisions, int web_divisions)
 {
     std::vector<real> areas;
@@ -52,7 +54,7 @@ void build_an_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial&
     section.add_fibres(&steel, areas, ys);
 }
 
-int main () {
+int main (int argc, char* argv[]) {
     
     // create mesh
     Model model;
@@ -113,7 +115,10 @@ int main () {
     real tolerance = 1e-2;
     int max_iterations = 10;
     model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
+
+    Kokkos::initialize(argc, argv);
     model.solve(1);
+    Kokkos::finalize();
     // // model.scribe.read_all_records();
     // auto recorded_data = model.scribe.get_record_id_iterator((unsigned)num_nodes)->get_recorded_data()[2];
     

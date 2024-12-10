@@ -13,6 +13,7 @@
 #include <string>
 #include<Eigen/SparseLU>
 #include<Eigen/SparseCholesky>
+#include <Kokkos_Core.hpp>
 #include "ElementTypes.hpp"
 #include "blaze_config.hpp"
 #if INCLUDE_GMSH
@@ -499,12 +500,20 @@ class GlobalMesh {
          */
         void update_elements_states()
         {
-            #pragma omp parallel for
-            for (auto& elem: elem_vector)
-            {
-                elem->update_state();
-                elem->calc_global_stiffness_triplets();
-            }
+            #ifdef KOKKOS
+                  Kokkos::parallel_for( "GlobalMesh::update_elements_states", elem_vector.size(), KOKKOS_LAMBDA ( int i ) {
+                        elem_vector[ i ]->update_state();
+                        elem_vector[ i ]->calc_global_stiffness_triplets();
+                    });
+            #else
+                #pragma omp parallel for
+                for (auto& elem: elem_vector)
+                {
+                    elem->update_state();
+                    elem->calc_global_stiffness_triplets();
+                }
+            #endif
+
         }
 
         void update_element_sections_starting_states()
