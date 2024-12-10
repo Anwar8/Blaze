@@ -19,6 +19,9 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 
 ## Journal
+### 11 December 
+Huge day - built `Blaze` with `Kokkos` support. Not only did I integrate with the `Kokkos` build-system, but I also built the serial, `OpenMP`, and `C++ Threads` backends, and ran the code with them. The performance is very similar to `OpenMP`. To run the `C++ Threads` backend, need to define the environment variable `KOKKOS_NUM_THREADS` and set it to the number of threads. Performance with the `C++ Threads` infinitesimally better than `OpenMP` backend. The source code for `Kokkos` should be retrieved from the release section of the `Kokkos` github page. I am thrilled with today's accomplishment. Also, I am sure I had done quite some work yesterday - I might not have updated the journal, though. Better check my commits on the repo. 
+
 ### 8 December
 All solution streamlining items from 6 December were implemented, in addition to combining the calculation of the stiffness contribution and the resistance force contributions. This resulted in nearly halving the assembly time from 0.93 s to 0.58 s, and thus reduced the proportion of the assembly from 10.93% in the last update, to 7.09% in this one. Other than the element state update, I am confident that the solution procedure is now implemented in a streamlined way. At the very least, it is not a clearly silly implementation anymore. All times below are the median of 3 runs.
 | Timer Name                  | Original (s) | 4 Dec (s)    | 8 Dec (s)    | Original (%) | 4 Dec (%)    | 8 Dec (%)    |
