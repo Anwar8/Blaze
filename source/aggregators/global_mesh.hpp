@@ -13,7 +13,9 @@
 #include <string>
 #include<Eigen/SparseLU>
 #include<Eigen/SparseCholesky>
-#include <Kokkos_Core.hpp>
+#ifdef KOKKOS
+    #include <Kokkos_Core.hpp>
+#endif
 #include "ElementTypes.hpp"
 #include "blaze_config.hpp"
 #if INCLUDE_GMSH
@@ -501,9 +503,9 @@ class GlobalMesh {
         void update_elements_states()
         {
             #ifdef KOKKOS
-                  Kokkos::parallel_for( "GlobalMesh::update_elements_states", elem_vector.size(), KOKKOS_LAMBDA ( int i ) {
-                        elem_vector[ i ]->update_state();
-                        elem_vector[ i ]->calc_global_stiffness_triplets();
+                  Kokkos::parallel_for( "GlobalMesh::update_elements_states", elem_vector.size(), KOKKOS_LAMBDA (int i) {
+                        elem_vector[i]->update_state();
+                        elem_vector[i]->calc_global_stiffness_triplets();
                     });
             #else
                 #pragma omp parallel for
@@ -518,11 +520,17 @@ class GlobalMesh {
 
         void update_element_sections_starting_states()
         {
-            #pragma omp parallel for
-            for (auto& elem: elem_vector)
-            {
-                elem->update_section_starting_state();
-            }
+            #ifdef KOKKOS
+                Kokkos::parallel_for( "GlobalMesh::update_element_sections_starting_states", elem_vector.size(), KOKKOS_LAMBDA (int i) {
+                    elem_vector[i]->update_section_starting_state();
+                });
+            #else
+                #pragma omp parallel for
+                for (auto& elem: elem_vector)
+                {
+                    elem->update_section_starting_state();
+                }
+            #endif
         }
         /**
          * @brief prints the selected state of each element.

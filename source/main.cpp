@@ -13,9 +13,9 @@
 #include "ElasticPlasticMaterial.hpp"
 #include "BeamColumnFiberSection.hpp"
 #include "basic_utilities.hpp"
-
-#include <Kokkos_Core.hpp>
-
+#ifdef KOKKOS
+    #include <Kokkos_Core.hpp>
+#endif
 void build_an_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial& steel, real offset, real tf, real b, real tw, real h, int flange_divisions, int web_divisions)
 {
     std::vector<real> areas;
@@ -87,6 +87,7 @@ int main (int argc, char* argv[]) {
     beam_length = 5.0;
     model.create_frame_mesh(nbays, nfloors, beam_length, floor_height, beam_divisions, column_divisions, NonlinearPlastic, sect);
     FrameMesh the_frame = model.glob_mesh.get_frame();
+    the_frame.read_frame_size();
     
 
     NodalRestraint column_bases;
@@ -106,6 +107,11 @@ int main (int argc, char* argv[]) {
     // print_container(loaded_nodes_v);
     model.load_manager.create_a_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{-1000}, model.glob_mesh);
 
+    // std::set<size_t> extra_loaded_nodes = the_frame.get_beam_node_ids(12, 2, false);
+    // std::vector<unsigned> extra_loaded_nodes_v = std::vector<unsigned>(extra_loaded_nodes.begin(), extra_loaded_nodes.end());
+    // model.load_manager.create_a_nodal_load_by_id(extra_loaded_nodes_v, std::set<int>{2}, std::vector<real>{-500000}, model.glob_mesh);
+
+
     model.initialise_restraints_n_loads();
     model.glob_mesh.check_nodal_loads();
 
@@ -115,10 +121,13 @@ int main (int argc, char* argv[]) {
     real tolerance = 1e-2;
     int max_iterations = 10;
     model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
-
-    Kokkos::initialize(argc, argv);
+    #ifdef KOKKOS
+        Kokkos::initialize(argc, argv);
+    #endif
     model.solve(1);
-    Kokkos::finalize();
+    #ifdef KOKKOS
+        Kokkos::finalize();
+    #endif
     // // model.scribe.read_all_records();
     // auto recorded_data = model.scribe.get_record_id_iterator((unsigned)num_nodes)->get_recorded_data()[2];
     

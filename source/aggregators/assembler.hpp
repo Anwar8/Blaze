@@ -7,6 +7,9 @@
 #define ASSEMBLER
 
 #include "global_mesh.hpp"
+#ifdef KOKKOS
+    #include <Kokkos_Core.hpp>
+#endif
 /**
  * @brief helps assemble the global matrices.
  * 
@@ -134,19 +137,33 @@ class Assembler {
          */
         void map_U_to_nodes(GlobalMesh& glob_mesh)
         {
-            #pragma omp parallel for
-            for (auto& node: glob_mesh.node_vector)
-            {
-                int nzi = node->get_nz_i(); // where the node displacements start in the U vector.
-                int num_node_dofs = node->get_ndof(); // how many there are to loop over.
-                std::set<int> node_active_dofs = node->get_active_dofs();
-                int i = 0;
-                
-                for (auto& dof: node_active_dofs) {
-                    node->set_nodal_displacement(dof, U.coeff(i + nzi,0));
-                    ++i;
+            std::vector<std::shared_ptr<Node>>* nodes = &glob_mesh.node_vector;
+            #ifdef KOKKOS
+                Kokkos::parallel_for( "Assembler::map_U_to_nodes", glob_mesh.node_vector.size(), KOKKOS_LAMBDA (int i) {
+                    int nzi = (*nodes)[i]->get_nz_i(); // where the node displacements start in the U vector.
+                    int num_node_dofs = (*nodes)[i]->get_ndof(); // how many there are to loop over.
+                    std::set<int> node_active_dofs = (*nodes)[i]->get_active_dofs();
+                    int j = 0;
+                    for (auto& dof: node_active_dofs) {
+                        (*nodes)[i]->set_nodal_displacement(dof, U.coeff(j + nzi,0));
+                        ++j;
+                    }
+                });
+            #else
+                #pragma omp parallel for
+                for (auto& node: glob_mesh.node_vector)
+                {
+                    int nzi = node->get_nz_i(); // where the node displacements start in the U vector.
+                    int num_node_dofs = node->get_ndof(); // how many there are to loop over.
+                    std::set<int> node_active_dofs = node->get_active_dofs();
+                    int i = 0;
+                    
+                    for (auto& dof: node_active_dofs) {
+                        node->set_nodal_displacement(dof, U.coeff(i + nzi,0));
+                        ++i;
+                    }
                 }
-            }
+            #endif
         }
 
         /**

@@ -21,6 +21,12 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Upon compiling, the following warning is raised: *warning: implicit capture of 'this' via '[=]' is deprecated in C++20*. This happens because `KOKKOS_LAMBDA` is called within an object, and thus tries to capture that object by copy, I believe. Need ot check the `Kokkos` slack channel to figure how to deal with it.
 
 ## Journal
+### 17 December
+Parallelised what were formerly `OpenMP` sections with `Kokkos`. It is possible to parallelise assembly as well, but after the earlier work on streamlining it, it is no longer worth it as even for very large models with 25,000 elements it is only 5% of the runtime. Spoke to Dr Perry today. Here are the tasks now:
+1. Create a release for the current, shared-memory parallelised version of `Blaze`.
+2. Profile this version and create speedup and parallel efficiency plots.
+3. Move on to distributed memory parallelisation - consider `Tpetra` for distributed sparse linear algebra.
+
 ### 11 December 
 Huge day - built `Blaze` with `Kokkos` support. Not only did I integrate with the `Kokkos` build-system, but I also built the serial, `OpenMP`, and `C++ Threads` backends, and ran the code with them. The performance is very similar to `OpenMP`. To run the `C++ Threads` backend, need to define the environment variable `KOKKOS_NUM_THREADS` and set it to the number of threads. Performance with the `C++ Threads` infinitesimally better than `OpenMP` backend. The source code for `Kokkos` should be retrieved from the release section of the `Kokkos` github page. I am thrilled with today's accomplishment. Also, I am sure I had done quite some work yesterday - I might not have updated the journal, though. Better check my commits on the repo. Ah, yes, I remember - I rewatched some of the `Kokkos` tutorials and reminded myself of it. 
 

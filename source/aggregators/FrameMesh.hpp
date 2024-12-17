@@ -29,6 +29,7 @@ class FrameMesh {
         int nodes_per_column = 0; /**<Number of nodes per column excluding vertices.*/
         int nodes_per_beam = 0; /**<Number of nodes per beam excluding vertices.*/
         int num_nodes = 0; /**<Total number of nodes in model.*/
+        int num_elements = 0; /**<Total number of elements in model.*/
         real dx = 0.0; /**<Length of each element for the beams.*/
         real dy = 0.0; /**<Length of each element for the columns.*/
 
@@ -73,6 +74,7 @@ class FrameMesh {
             dx = bay_length/beam_divisions;
             dy = floor_height/column_divisions;
             num_nodes = nodes_per_column_line * (nbays + 1) + nodes_per_full_bay*(nbays);
+            num_elements = (nodes_per_column_line - 1) * (nbays + 1) + ( nodes_per_full_bay - 1)*(nbays);
         }
 
         /**
@@ -403,6 +405,15 @@ class FrameMesh {
         std::set<size_t> get_column_bases()
         {
             return get_vertices_ids_at_floor(0);   
+        }
+
+        /**
+         * @brief prints the \ref num_nodes and \ref num_elements to the standard output stream.
+         * 
+         */
+        void read_frame_size()
+        {
+            std::cout << "Frame has " << num_nodes << " nodes and " << num_elements << " elements." << std::endl; 
         }
 
 };
