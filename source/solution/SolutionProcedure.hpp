@@ -29,6 +29,16 @@ class SolutionProcedure
 
         TimeKeeper time_keeper;
     public:
+        void log_timers(std::vector<std::string> timers_names)
+        {
+            time_keeper.log_timers(timers_names);
+        }
+        
+        void read_timers(std::vector<std::string> timers_names, std::string reference_timer = "")
+        {
+            time_keeper.read_timers(timers_names, reference_timer);
+        }
+
         void initialise_solution_parameters(real max_load_factor, int num_steps, real convergence_tolerance, int max_num_of_iterations)
         {
             load_factor = 0;
@@ -176,15 +186,6 @@ class SolutionProcedure
             std::cout << std::endl << "---<Analysis complete. LF = " << load_factor << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
             #endif
             time_keeper.stop_timer("all");
-            time_keeper.read_timers({"U_to_nodes_mapping", 
-                                    "element_state_update", 
-                                    "element_global_response",
-                                    "assembly",
-                                    "convergence_check",
-                                    "dU_calculation",
-                                    "material_state_update",
-                                    "result_recording",
-                                    "all"}, "all");
         }
 };
 

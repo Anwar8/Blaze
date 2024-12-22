@@ -16,11 +16,21 @@ This journal contains the day-to-day project management and notes taken. It was 
 ## Known Bugs
 - [ ] Unable to factorise matrix - this happens for the Plastic Cantilever test where it takes multiple runs to correctly proceed.
 - [ ] "could not find item with id 1 in vector." Occurs occasionally, and prevents running the model. As with the matrix factorisation, this resolves after running a couple of times. **Potentially fixed on 8 December by rewriting `get_id_iterator` in `basic_utilities.hpp`**
+- [ ] Number of used threads cannot be output with `read_parallelism_information` when using the `C++ Threads` backend for `Kokkos`. This returns a 0. 
 
 ## Known Warnings
 - [ ] Upon compiling, the following warning is raised: *warning: implicit capture of 'this' via '[=]' is deprecated in C++20*. This happens because `KOKKOS_LAMBDA` is called within an object, and thus tries to capture that object by copy, I believe. Need ot check the `Kokkos` slack channel to figure how to deal with it.
+- [ ] A warning is raised when attempting to access the number of threads used by `Kokkos` with the `OpenMP` backend: `Kokkos::OpenMP OpenMP instance constructor : ERROR OpenMP is not initialized`.
+- [ ] Although my mac has enough cores, I am, sometimes, getting the warning: `Kokkos::OpenMP::initialize WARNING: You are likely oversubscribing your CPU cores. process threads available :   2,  requested thread :   4`.
+
+## Expected Issues: *A worry for another day*
+- [ ] Did not test building with static libraries option turned on.
+- [ ] Build system for `BlazeCore` and `BlazeAggregators` are messy due to having many if-statemnts due to dependency on `Kokkos` and `OpenMP`.
 
 ## Journal
+### 22 December
+I have, today, created all the functions that I believe are necessary to profile `Blaze` on `Cirrus` and `Archer2`. These functions will allow to run the program, and then use `tail` and `head` shell commands to get the problem size, how it was parallelised, and what the timing results were. I have also updated the `main` program to allow for changing the problem size by providing the number of bays and floors to the executable. I am now ready to profile the code.
+
 ### 17 December
 Parallelised what were formerly `OpenMP` sections with `Kokkos`. It is possible to parallelise assembly as well, but after the earlier work on streamlining it, it is no longer worth it as even for very large models with 25,000 elements it is only 5% of the runtime. Spoke to Dr Perry today. Here are the tasks now:
 1. Create a release for the current, shared-memory parallelised version of `Blaze`.

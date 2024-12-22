@@ -415,6 +415,15 @@ class FrameMesh {
         {
             std::cout << "Frame has " << num_nodes << " nodes and " << num_elements << " elements." << std::endl; 
         }
+        
+        /**
+         * @brief returns the \ref num_nodes and \ref num_elements to the standard output stream.
+         * 
+         */
+        std::pair<int, int> get_frame_size()
+        {
+            return std::make_pair(num_nodes, num_elements);
+        }
 
 };
 

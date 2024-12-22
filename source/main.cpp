@@ -72,23 +72,39 @@ int main (int argc, char* argv[]) {
     real h = 467.2e-3;
     real moment_of_inertia = tw*pow(h - 2*tf, 3)/12 + 2*b*pow(tf,3)/12 + 2*(tf*b)*pow(0.5*h - 0.5*tf, 2); // m^4 
     real section_area = 2*tf*b + (h - 2*tf)*tw;
-    std::cout << "(A,I) = (" << section_area << ", " << moment_of_inertia << ")." << std::endl; 
     BeamColumnFiberSection sect;
     build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 10, 20);
     // model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
 
     int nbays, nfloors, beam_divisions, column_divisions;
     real floor_height, beam_length;
-    nbays = 10;
-    nfloors = 5; 
+    std::cout << "THERE ARE " << argc << " ARGUMENTS!!" << std::endl;
+    if (argc == 3)
+    {
+        nbays = std::stoi(argv[1]);
+        nfloors = std::stoi(argv[2]);
+    }
+    else
+    {
+        nbays = 10;
+        nfloors = 5; 
+    }  
     beam_divisions = 50;
     column_divisions = 35;
     floor_height = 3.5;
     beam_length = 5.0;
     model.create_frame_mesh(nbays, nfloors, beam_length, floor_height, beam_divisions, column_divisions, NonlinearPlastic, sect);
     FrameMesh the_frame = model.glob_mesh.get_frame();
-    the_frame.read_frame_size();
-    
+    // the_frame.read_frame_size();
+    std::pair<int,int> frame_size = the_frame.get_frame_size();
+    std::cout << "SECTION:Model_Size" << std::endl;
+    std::cout << "nbays,nfloors,beam_divisions,column_divisions,floor_height,beam_length,num_nodes,num_elements" << std::endl;
+    std::cout << nbays << "," 
+    << nfloors << "," << beam_divisions << "," << column_divisions << "," << floor_height << "," << beam_length << "," << frame_size.first << "," << frame_size.second << std::endl;
+    std::cout << "END_SECTION:Model_Size" << std::endl;
+    std::cout << "SECTION:Parallelism" << std::endl;
+    read_parallelism_information();
+    std::cout << "END_SECTION:Parallelism" << std::endl;
 
     NodalRestraint column_bases;
     column_bases.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5}); // fixed support
@@ -125,6 +141,17 @@ int main (int argc, char* argv[]) {
         Kokkos::initialize(argc, argv);
     #endif
     model.solve(1);
+    std::cout << "SECTION:Timing" << std::endl;
+    model.log_timers({"U_to_nodes_mapping", 
+                    "element_state_update", 
+                    "element_global_response",
+                    "assembly",
+                    "convergence_check",
+                    "dU_calculation",
+                    "material_state_update",
+                    "result_recording",
+                    "all"});
+    std::cout << "END_SECTION:Timing" << std::endl;
     #ifdef KOKKOS
         Kokkos::finalize();
     #endif

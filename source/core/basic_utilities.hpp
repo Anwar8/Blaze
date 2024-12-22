@@ -9,6 +9,14 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+
+#ifdef KOKKOS
+    #include <Kokkos_Core.hpp>
+#endif
+#ifdef OMP
+    #include <omp.h>
+#endif
+
 /**
  * @defgroup Utility 
  * 
@@ -63,4 +71,24 @@ void print_container(T V)
 }
 /** @} */ // end of Utility group
 
+/**
+ * @brief prints to the output stream the form of parallelism the program was built with, and the number of threads.
+ * 
+ */
+void read_parallelism_information()
+{
+    #if defined(OMP) && !defined(KOKKOS)
+    #pragma omp parallel
+    {
+    #pragma omp master
+        std::cout <<  "parallelism,num_threads" << std::endl << "OMP," << omp_get_num_threads() << std::endl;
+    }
+    #elif !defined(OMP) && !defined(KOKKOS)
+            std::cout <<  "parallelism,num_threads" << std::endl << "serial," << 1 << std::endl;
+    #endif 
+
+    #ifdef KOKKOS
+        std::cout << "parallelism,num_threads" << std::endl << "Kokkos," << Kokkos::DefaultExecutionSpace().concurrency() << std::endl;
+    #endif
+}
 #endif

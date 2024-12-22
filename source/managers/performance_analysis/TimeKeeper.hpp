@@ -122,5 +122,36 @@ class TimeKeeper
             }    
         }
 
+        /**
+         * @brief prints a comma-separated list table with durations recorded by all requested timers
+         * @param timers_names the names of the timers which durations are to be printed.
+         */
+        void log_timers(std::vector<std::string> timers_names)
+        {
+            std::cout << std::setprecision(8);
+            // Read timers names requested
+            for (int i; i < timers_names.size(); ++i)
+            {
+                if (i == (timers_names.size() - 1))
+                {
+                    std::cout << timers_names[i] << std::endl;
+                } else {
+                    std::cout << timers_names[i] << ",";    
+                }
+            } 
+
+            // Read the recorded times
+            for (int i; i < timers_names.size(); ++i)
+            {
+                if (i == (timers_names.size() - 1))
+                {
+                    std::cout << timers_map[timers_names[i]].get_duration() << std::endl;
+                } else {
+                    std::cout << timers_map[timers_names[i]].get_duration() << ",";
+                }
+            }
+
+        }
+
 };
 #endif

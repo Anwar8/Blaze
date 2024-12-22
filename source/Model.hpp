@@ -70,6 +70,16 @@ class Model
         {
             scribe.read_all_records();
         }
+
+        void log_timers(std::vector<std::string> timers_names)
+        {
+            solution_procedure.log_timers(timers_names);
+        }
+
+        void read_timers(std::vector<std::string> timers_names, std::string reference_timer = "")
+        {
+            solution_procedure.read_timers(timers_names, reference_timer);
+        }
 };
 
 #endif 
