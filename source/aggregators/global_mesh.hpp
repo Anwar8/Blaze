@@ -38,7 +38,7 @@
 using NodeIdCoordsPairsVector = std::vector<std::pair<size_t, coords>>;
 
 /**
- * @brief std vector of pairs each of which has an id and a vector of node ids related to the element id.
+ * @brief std vector of pairs each of which has an element id and a vector of node ids related to the element id.
  * 
  */
 using ElemIdNodeIdPairVector = std::vector<std::pair<size_t, std::vector<size_t>>>;

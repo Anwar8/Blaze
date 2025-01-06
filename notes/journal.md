@@ -28,6 +28,31 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Build system for `BlazeCore` and `BlazeAggregators` are messy due to having many if-statemnts due to dependency on `Kokkos` and `OpenMP`.
 
 ## Journal
+### 6 January
+So, Domain Setup is a very important aspect of the `MPI` parallel version of `Blaze`. At first, I had assumed I would simply use element numbers to break down the mesh, and then refer to Bhatti's FEM principles textbook to get the *location vector* of each element, and thus create bounds for the domain of the global array. However, the issue with this approach is that the mesh I have is *unstructured*. That is, the element numbering, while has some logic and is related to the position, is not sufficient for domain decomposition as this can result in highly fragmented domains. I went back to Advanced Message Passing Programming to revisit the material on **Unstructured Meshes**, and I now realise I will have to implement some graph-based algorithms such as `Spectral Partitioning` to do this decomposition more sensibly. This involves the following basic steps:
+1. Represent the mesh as a *node-based Dual Graph*.
+2. Create a sparse $n \times n$ *Laplacian* matrix $L$ with:
+   1.  Along the diagonal, for each graph-node put the number of neighbours this graph-node has.
+   2.  For each position $ij$ put $-1$ if graph-nodes $i$ and $j$ are equal, and nothing (zero) if they are not.
+3. Compute the Eigen values of the Laplacian, and use the Eigen vector corresponding to the second lowest Eigen value to decompose the mesh.
+
+Fortunately, I already have the building blocks for graphs in `GlobalMesh` as each element knows which nodes are connected to it, and each node knows to which elements it connects. 
+
+**Idea:** It might be a good idea to replicate one element and node across neighbouring ranks, and then discard the parts of the element contribution to the global stiffness that are meant to be within the domain of anoter rank. This allows us to reduce the communication necessary to only the displacements on the shared nodes in stead of having to send stiffness contributions along the network.
+
+There is also the option of using a greedy algorithm where I traverse the graph from one corner, and add up the "weights" of the elements to come up with an equal distribution. Of course, while doing this via a node-based dual graph, this allows me to ensure that my elements are linked. This allows overcoming the issue of unconnected but equally-sized domains that would arise by naive parsing of the node and element containers.
+
+Luckily, I had implemented a prototype of the `Frame` object in `Python`. This will allow me to use some `Python` packages for graph partitioning so that I do not have to write my own algorithms for this. If I were to do this from Python, however, this means I will have to write a new mesh reader into `Blaze` that would read the partitioned mesh output from `Python`.
+
+### 3 January 
+It is a big task to parallelise `Blaze` with `MPI` primarily because I don't know how to start, in a way. I have decided to use [`Tpetra`](https://trilinos.github.io/tpetra.html) for the linear algebra so once each rank finishes its assembly process, the linear algebra calculation is done via `Tpetra` and I do not have to worry about it. Therefore, the first step in parallelisation with `MPI` is to decompose the domain, create the nodes and elements, and then I can run the element state updating. I will not worry about the linear algebra for now (will not start with `Tpetra`), and will first focus on setting up the domain decomposition and stopping just at that point. That is, the first milestone is successful domain decomposition.
+
+Before I start programming, however, let us start with the program architecture. The parallelisation will be broken down into three steps:
+## Domain Setup
+## Domain Parallel Updating
+## Collective Convergence Checking
+Basically, an `MPI_Allreduce` with the reduction operation being an `MPI_MAX`. 
+
 ### 22 December
 I have, today, created all the functions that I believe are necessary to profile `Blaze` on `Cirrus` and `Archer2`. These functions will allow to run the program, and then use `tail` and `head` shell commands to get the problem size, how it was parallelised, and what the timing results were. I have also updated the `main` program to allow for changing the problem size by providing the number of bays and floors to the executable. I am now ready to profile the code.
 
