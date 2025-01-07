@@ -28,6 +28,19 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Build system for `BlazeCore` and `BlazeAggregators` are messy due to having many if-statemnts due to dependency on `Kokkos` and `OpenMP`.
 
 ## Journal
+### 7 January
+I implemented spectral paritioning in `mesh_decomposition.ipynb` in `POC`. Was it worth it? No...
+The reason it is not really worth it is because it will simply bisect the mesh at the beam in the middle of the middle bay. However, the division becomes more interesting if the number of bays is even as a zig-zag pattern is created where a lower floor is given to one domain, while an upper floor given to another. I, unfortunately, was unable to recreate this pattern again although I definitely observed it. The figures below show the mesh partitions obtained:
+
+<figure>
+  <img src="odd_bays_bisection.png" alt="Odd Bays Bisection" style="width:45%; display:inline-block;">
+  <img src="even_bays_bisection.png" alt="Even Bay Bisection" style="width:45%; display:inline-block;">
+  <figcaption>Mesh partitions for odd and even number of bays</figcaption>
+</figure>
+I now realise that these divisions are too simple to require utilising spectral decomposition. A simple bay-wise and floor-wise division would suffice. There is another issue, as well. My nodes were set to be the graph vertices, while my elements were defined as the edges. It should have been that the elements would have been the vertices, and the nodes would govern their connectivity (i.e. the nodes dictate the edges). I should redo the graph creation approach to fix this. Spectral decomposition can be useful for when I need to balance the load, as it allows for accepting weights at the edges (which in this case would work fine for my current dual graph). 
+
+Anyway, I think I will need to quickly move on to actually implementing the `MPI` version of `Blaze`, and I can revisit this stuff later. For now, just simply and stupidly use the geometry to partition the domain.
+
 ### 6 January
 So, Domain Setup is a very important aspect of the `MPI` parallel version of `Blaze`. At first, I had assumed I would simply use element numbers to break down the mesh, and then refer to Bhatti's FEM principles textbook to get the *location vector* of each element, and thus create bounds for the domain of the global array. However, the issue with this approach is that the mesh I have is *unstructured*. That is, the element numbering, while has some logic and is related to the position, is not sufficient for domain decomposition as this can result in highly fragmented domains. I went back to Advanced Message Passing Programming to revisit the material on **Unstructured Meshes**, and I now realise I will have to implement some graph-based algorithms such as `Spectral Partitioning` to do this decomposition more sensibly. This involves the following basic steps:
 1. Represent the mesh as a *node-based Dual Graph*.
