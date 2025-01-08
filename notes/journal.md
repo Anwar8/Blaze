@@ -8,7 +8,7 @@ This journal contains the day-to-day project management and notes taken. It was 
 ## Work plan
 ### WP1: Debugging of geometric nonlinearity - 2 weeks - due 15/06/2024 - COMPLETED
 ### WP2: Implementation of 1D nonlinear material - 8 weeks - due 23/09/2024 - COMPLETED
-### WP3: Shared-memory parallelisation on Cirrus using Kokkos - 6 weeks - due 15/01/2024
+### WP3: Shared-memory parallelisation on Cirrus using Kokkos - 6 weeks - due 15/01/2024 - COMPLETED AHEAD OF SCHEDULE; SIMPLIFIED GREATLY
 ### WP4: Internode parallelisation with MPI - 8 weeks - due 15/03/2025
 ### WP5: Profiling, data collection, and analysis - 3 weeks - due 07/04/2025
 ### WP6: Thesis writing - 05 weeks - due 15/05/2025
@@ -27,7 +27,15 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Did not test building with static libraries option turned on.
 - [ ] Build system for `BlazeCore` and `BlazeAggregators` are messy due to having many if-statemnts due to dependency on `Kokkos` and `OpenMP`.
 
+## Desired updates:
+- [ ] Element mapping should be done with position vectors; this will greatly simplify assembly, and possibly domain disribution.
 ## Journal
+### 8 January
+Created a new file called `MPIWrappers` that contains wrapper functions for `MPI` calls to allow the parallel and serial program to be compiled from the same source. I am now noticing that even the naive way of dividing the domain will have some issues as not only is the mesh affected, but also anything that depends on the mesh. That is, all `manager` classes such as `LoadManager`, `Scribe`, and the `NodalRestraint` class for applying boundary conditions. The model should know which of these boundaries actually applies to its domain. Right now, as shown in `main.cpp`, some of these, such as restraints, are applied by direct access to these public objects: `model.restraints.push_back(column_bases);`. This will need to be changed so that a function will add these, and will exclude some based on rank. 
+
+Tomorrow, when I get back to work on this, the first thing I need to do is to write a step-by-step of how the `Model` object is used to solve an FEM problem. This is done by simply writing out what is done in `main.cpp`  
+
+
 ### 7 January
 I implemented spectral paritioning in `mesh_decomposition.ipynb` in `POC`. Was it worth it? No...
 The reason it is not really worth it is because it will simply bisect the mesh at the beam in the middle of the middle bay. However, the division becomes more interesting if the number of bays is even as a zig-zag pattern is created where a lower floor is given to one domain, while an upper floor given to another. I, unfortunately, was unable to recreate this pattern again although I definitely observed it. The figures below show the mesh partitions obtained:
