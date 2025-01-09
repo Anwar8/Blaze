@@ -30,6 +30,25 @@ This journal contains the day-to-day project management and notes taken. It was 
 ## Desired updates:
 - [ ] Element mapping should be done with position vectors; this will greatly simplify assembly, and possibly domain disribution.
 ## Journal
+### 9 January
+`Model`:
+1. `Material` is created.
+2. `Section` is created with `Material` passed to it.
+3. `model.create_frame_mesh(nbays, nfloors, beam_length, floor_height, beam_divisions, column_divisions, NonlinearPlastic, sect);` is called to create the mesh.
+4. `NodalRestraint` object created for each type of BC, and each assigned all nodes that it needs to apply. 
+5. Add the BCs to the `Model` by direct access to the `restraints` class attribute, which is a `std::vector<NodalRestraint>`, and appending to it: ` model.restraints.push_back(column_bases);`
+6. Add a nodal load by directly accessing the `LoadManager` object: `model.load_manager.create_a_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{-1000}, model.glob_mesh);`. *Why is the BC not handled in the same way with a `BCManager`?*
+7. The loads and boundary conditions are initiliased via `model.initialise_restraints_n_loads();`. This is a very, very important function as it reduces the number of DoFs in the model by applying the boundary conditions, applies loads to the nodes, creates initial global matrices, as well as maps the elements stiffnesses to their global locations. **This is an essential function for the domain decomposition**.
+8. Run a check on whether any nodes are loaded AND restrained via `model.glob_mesh.check_nodal_loads();`.
+9. Initialise the solution parameters in the `SolutionProcedure` via `model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);`
+10. Solve via `model.solve();
+
+The most important parts for `MPI` parallelisation are 3, 4, 5, 6, and 7. 
+
+During step 3, we already know the size of the domain as we would create `NodeIdCoordsPairsVector node_map` and `ElemIdNodeIdPairVector elem_map` by using a `FrameMesh` object. If a number of ranks is passed to the `FrameMesh` object from the start, it can divide the domain from the getgo and issue a subset of `node_map` and `elem_map`. It can also return a *global* number of elements and nodes to distinguish between the global domain and the decomposed domain. Alternatively, it could give a domain decomposition map as well as the maps in their original, complete form. An alternative is to pass a decomposition, either as a simple number of ranks or a map, to `setup_mesh(node_map, elem_map);` in `create_frame_mesh` so that that function would take care of the decomposition. That is likely the better approach as it prevents limiting the domain decomposition to a particular mesher. Actually, I am certain that the domain decomposition **must** be handled by `setup_mesh` as it does all the important operations of sizing the node and element containers, setting up the global number of nodes and elements, and counting the DoFs.  
+
+A lot more thinking and planning and architecting was done on paper than here in journal. Refer to yellow notebook for notes dated 9 January 2025. 
+
 ### 8 January
 Created a new file called `MPIWrappers` that contains wrapper functions for `MPI` calls to allow the parallel and serial program to be compiled from the same source. I am now noticing that even the naive way of dividing the domain will have some issues as not only is the mesh affected, but also anything that depends on the mesh. That is, all `manager` classes such as `LoadManager`, `Scribe`, and the `NodalRestraint` class for applying boundary conditions. The model should know which of these boundaries actually applies to its domain. Right now, as shown in `main.cpp`, some of these, such as restraints, are applied by direct access to these public objects: `model.restraints.push_back(column_bases);`. This will need to be changed so that a function will add these, and will exclude some based on rank. 
 
