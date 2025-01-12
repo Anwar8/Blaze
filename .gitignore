@@ -17,3 +17,4 @@ kokkos
 kokkos/*
 lib
 lib/*
+POC/__pycache__/

@@ -2,7 +2,7 @@
 This journal contains the day-to-day project management and notes taken. It was also used as an indirect form of communication with the MSc supervisor so they are always up to date with my progress.
 
 <figure style="text-align:center;">
-  <img src="Blaze logo_white.png" alt="Blaze Logo" style="width:50%">
+  <img src="images/Blaze logo_white.png" alt="Blaze Logo" style="width:50%">
 </figure>
 
 ## Work plan
@@ -29,7 +29,17 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Desired updates:
 - [ ] Element mapping should be done with position vectors; this will greatly simplify assembly, and possibly domain disribution.
+- [ ] Change how BCs are handled by delegating their control to a BC manager class `BCManager`.
+
 ## Journal
+### 12 January
+See `mesh_decomposition_2.ipynb` for naive decomposition strategy applied to the nodes. See also `notes/images/parititioning` for results of naive partitioning of different sized frames, and for bisection using spectral partitioning vs naive partitioning. Naive paritioning is *really* naive and results in disconnected domains at times - this is indeed an unstructured mesh problem.
+
+**Proposed partitioning algorithm:**
+1. Divide node numbers unto ranks naively as shown in `mesh_decomposition_2.ipynb`, creating a `node-rank_map` object.
+2. For each node, retrieve elements connected to it, and add the elements to a list of elements that will be created on this rank.
+3. Loop over the subset of `ElemIdNodeIdPairVector` to be created in this rank, and check whether their nodes are in the current rank by referring to the `node-rank_map`. If a node is not in the current rank's domain, then this node id is added to a list associated with the element that contains which of its rows need to be deactivated during mapping. Alternatively/additionally, add these inter-rank elemnets to a list of *special* elements that will have contribution across ranks for special handling by the mapper rather than adding a  list to every single while only a handful of elements are replicated across domains.
+
 ### 9 January
 `Model`:
 1. `Material` is created.
@@ -60,11 +70,12 @@ I implemented spectral paritioning in `mesh_decomposition.ipynb` in `POC`. Was i
 The reason it is not really worth it is because it will simply bisect the mesh at the beam in the middle of the middle bay. However, the division becomes more interesting if the number of bays is even as a zig-zag pattern is created where a lower floor is given to one domain, while an upper floor given to another. I, unfortunately, was unable to recreate this pattern again although I definitely observed it. The figures below show the mesh partitions obtained:
 
 <figure>
-  <img src="odd_bays_bisection.png" alt="Odd Bays Bisection" style="width:45%; display:inline-block;">
-  <img src="even_bays_bisection.png" alt="Even Bay Bisection" style="width:45%; display:inline-block;">
+  <img src="images/odd_bays_bisection.png" alt="Odd Bays Bisection" style="width:45%; display:inline-block;">
+  <img src="images/even_bays_bisection.png" alt="Even Bay Bisection" style="width:45%; display:inline-block;">
   <figcaption>Mesh partitions for odd and even number of bays</figcaption>
 </figure>
-I now realise that these divisions are too simple to require utilising spectral decomposition. A simple bay-wise and floor-wise division would suffice. There is another issue, as well. My nodes were set to be the graph vertices, while my elements were defined as the edges. It should have been that the elements would have been the vertices, and the nodes would govern their connectivity (i.e. the nodes dictate the edges). I should redo the graph creation approach to fix this. Spectral decomposition can be useful for when I need to balance the load, as it allows for accepting weights at the edges (which in this case would work fine for my current dual graph). 
+
+I now realise that these divisions are too simple to require utilising spectral decomposition. A simple bay-wise and floor-wise division would suffice. There is another issue, as well. My nodes were set to be the graph vertices, while my elements were defined as the edges. It should have been that the elements would have been the vertices, and the nodes would govern their connectivity (i.e. the nodes dictate the edges). ~~I should redo the graph creation approach to fix this~~ (12 Januarry - The node-wise distribution is correct as nodes govern the size of the global matrices and allow to more easily duplicate necessary elements to ensure consistent global meshes). Spectral decomposition can be useful for when I need to balance the load, as it allows for accepting weights at the edges (which in this case would work fine for my current dual graph). 
 
 Anyway, I think I will need to quickly move on to actually implementing the `MPI` version of `Blaze`, and I can revisit this stuff later. For now, just simply and stupidly use the geometry to partition the domain.
 
@@ -195,13 +206,13 @@ It has been quite a while since I have last written here. While some of this is 
 
 In this figure, the *vertices* are in red, while the beam nodes are in blue, and the column nodes are in green. There are functions in `FrameMesh` that allow for extracting these numbers and for defining the coordinates of each node.
 <figure>
-  <img src="frame.png" alt="Portal Frame Nodes" style="width:40%">
+  <img src="images/frame.png" alt="Portal Frame Nodes" style="width:40%">
   <figcaption> ID numbers of the nodes in a portal frame </figcaption>
 </figure>
 
 In addition to creating the nodes, there are functions to map the nodes to elements, which are shown below as well. These features have already been added to the `GlobalMesh` and `Model` classes to allow very easy creation of portal frames. Additionally, the `FrameMesh` class allows for easily getting the node IDs for beams that would be loaded, column baes, and getting the node IDs for nodes that will require out-of-plane restraint. See the `FrameMesh` class for details as it is now fully documented. 
 <figure>
-  <img src="frame_elements.png" alt="Portal Frame Nodes and Elements" style="width:40%">
+  <img src="images/frame_elements.png" alt="Portal Frame Nodes and Elements" style="width:40%">
   <figcaption> ID numbers of the nodes in a portal frame along with element IDs </figcaption>
 </figure>
 
@@ -562,7 +573,7 @@ After implementing a nonlinear element test(s), I have to start working on the m
 #### 14 July
 After some work, I have finished adding the `Nonlinear2DBeamElement` class that implements a nonlinear beam-column element based on Izzuddin and Felippa's notes. I believe that the solution procedure in `SolutionProcedure` and the way that $d\boldsymbol{U}$ is being calculated is incorrect as right now I am getting an oscillating response as shown in the figure below. 
 <figure>
-  <img src="oscilLating_response.png" alt="Incorrect and oscillating response" style="width:30%">
+  <img src="images/oscilLating_response.png" alt="Incorrect and oscillating response" style="width:30%">
   <figcaption> Change of end displacement during the predictor-corrector processes </figcaption>
 </figure>
 
