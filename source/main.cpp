@@ -13,6 +13,7 @@
 #include "ElasticPlasticMaterial.hpp"
 #include "BeamColumnFiberSection.hpp"
 #include "basic_utilities.hpp"
+#include "MPIWrappers.hpp"
 #ifdef KOKKOS
     #include <Kokkos_Core.hpp>
 #endif
@@ -56,6 +57,7 @@ void build_an_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial&
 
 int main (int argc, char* argv[]) {
     
+    initialise_MPI(argc, argv);
     // create mesh
     Model model;
     
@@ -155,6 +157,8 @@ int main (int argc, char* argv[]) {
     #ifdef KOKKOS
         Kokkos::finalize();
     #endif
+    
+    finalise_MPI();
     // // model.scribe.read_all_records();
     // auto recorded_data = model.scribe.get_record_id_iterator((unsigned)num_nodes)->get_recorded_data()[2];
     
