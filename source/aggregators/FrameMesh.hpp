@@ -312,19 +312,19 @@ class FrameMesh {
          */
         std::vector<std::pair<size_t, coords>> get_node_coords_pairs()
         {
-           std::vector<std::pair<size_t, coords>> node_map, beam_node_map;
+           std::vector<std::pair<size_t, coords>> nodes_coords_vector, beam_nodes_coords_vector;
 
-           node_map = create_column_node_coords_pairs();
-           beam_node_map = create_beam_node_coords_pairs();
+           nodes_coords_vector = create_column_node_coords_pairs();
+           beam_nodes_coords_vector = create_beam_node_coords_pairs();
 
-           node_map.insert(node_map.end(), beam_node_map.begin(), beam_node_map.end());
-           std::sort(node_map.begin(), node_map.end(), 
+           nodes_coords_vector.insert(nodes_coords_vector.end(), beam_nodes_coords_vector.begin(), beam_nodes_coords_vector.end());
+           std::sort(nodes_coords_vector.begin(), nodes_coords_vector.end(), 
                                                       [](const auto& a, const auto& b) 
                                                       {
                                                         return a.first < b.first;
                                                       }
                                                     );
-           return node_map;
+           return nodes_coords_vector;
         }
 
         /**
@@ -443,11 +443,11 @@ void inline read_element_map(std::vector<std::pair<size_t, std::vector<size_t>>>
 /**
  * @brief prints out the node IDs and their xyz coordinates to the standard output stream.
  * 
- * @param node_map std::vector<std::pair<size_t, coords>> containing node IDs followed by coordinates of the node.
+ * @param nodes_coords_vector std::vector<std::pair<size_t, coords>> containing node IDs followed by coordinates of the node.
  */
-void inline read_node_map(std::vector<std::pair<size_t, coords>> node_map)
+void inline read_nodes_coords_vector(std::vector<std::pair<size_t, coords>> nodes_coords_vector)
 {
-    for (auto& pair : node_map)
+    for (auto& pair : nodes_coords_vector)
     {
         std::cout << "Node " << pair.first << ", xyz = (" << pair.second(0) << ", " << pair.second(1) << ", " << pair.second(2) << ")" << std::endl;
     }

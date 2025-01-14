@@ -32,6 +32,8 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Change how BCs are handled by delegating their control to a BC manager class `BCManager`.
 
 ## Journal
+### 14 January
+Created the functions `populate_node_rank_maps` and the, now still incomplete, `setup_distributed_mesh`. `populate_node_rank_maps` covers bullet point 1 from the **Proposed partitioning algorithm** on 12 January. `setup_distributed_mesh` starts to cover point 3, but is nowhere near ready. Point 2 still needs work.
 ### 12 January
 See `mesh_decomposition_2.ipynb` for naive decomposition strategy applied to the nodes. See also `notes/images/parititioning` for results of naive partitioning of different sized frames, and for bisection using spectral partitioning vs naive partitioning. Naive paritioning is *really* naive and results in disconnected domains at times - this is indeed an unstructured mesh problem.
 
@@ -55,7 +57,7 @@ See `mesh_decomposition_2.ipynb` for naive decomposition strategy applied to the
 
 The most important parts for `MPI` parallelisation are 3, 4, 5, 6, and 7. 
 
-During step 3, we already know the size of the domain as we would create `NodeIdCoordsPairsVector node_map` and `ElemIdNodeIdPairVector elem_map` by using a `FrameMesh` object. If a number of ranks is passed to the `FrameMesh` object from the start, it can divide the domain from the getgo and issue a subset of `node_map` and `elem_map`. It can also return a *global* number of elements and nodes to distinguish between the global domain and the decomposed domain. Alternatively, it could give a domain decomposition map as well as the maps in their original, complete form. An alternative is to pass a decomposition, either as a simple number of ranks or a map, to `setup_mesh(node_map, elem_map);` in `create_frame_mesh` so that that function would take care of the decomposition. That is likely the better approach as it prevents limiting the domain decomposition to a particular mesher. Actually, I am certain that the domain decomposition **must** be handled by `setup_mesh` as it does all the important operations of sizing the node and element containers, setting up the global number of nodes and elements, and counting the DoFs.  
+During step 3, we already know the size of the domain as we would create `NodeIdCoordsPairsVector nodes_coords_vector` and `ElemIdNodeIdPairVector elem_map` by using a `FrameMesh` object. If a number of ranks is passed to the `FrameMesh` object from the start, it can divide the domain from the getgo and issue a subset of `nodes_coords_vector` and `elem_map`. It can also return a *global* number of elements and nodes to distinguish between the global domain and the decomposed domain. Alternatively, it could give a domain decomposition map as well as the maps in their original, complete form. An alternative is to pass a decomposition, either as a simple number of ranks or a map, to `setup_mesh(nodes_coords_vector, elem_map);` in `create_frame_mesh` so that that function would take care of the decomposition. That is likely the better approach as it prevents limiting the domain decomposition to a particular mesher. Actually, I am certain that the domain decomposition **must** be handled by `setup_mesh` as it does all the important operations of sizing the node and element containers, setting up the global number of nodes and elements, and counting the DoFs.  
 
 A lot more thinking and planning and architecting was done on paper than here in journal. Refer to yellow notebook for notes dated 9 January 2025. 
 

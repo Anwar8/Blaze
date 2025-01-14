@@ -11,6 +11,8 @@
 #include <vector>
 #include <tuple>
 #include <string>
+#include <map>
+#include <set>
 #include<Eigen/SparseLU>
 #include<Eigen/SparseCholesky>
 #ifdef KOKKOS
@@ -54,6 +56,9 @@ class GlobalMesh {
         int nnodes = 0; /**< number of nodes in the mesh.*/
         int ndofs = 0; /**< number of DOFs in the mesh.*/
         int nelems = 0; /**< number of elements in the mesh.*/
+        int rank_nnodes = 0; /**< number of nodes on current rank.*/
+        int rank_ndofs = 0; /**< number of DOFs on current rank.*/
+        int rank_nelems = 0; /**< number of elements on current rank.*/
         std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes in the problem.*/
         std::vector<std::shared_ptr<ElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
 
@@ -89,16 +94,16 @@ class GlobalMesh {
 
             gmsh::model::mesh::getNodes(nodeTags, coord_vec, parametricCoords);
             
-            NodeIdCoordsPairsVector node_map;
-            node_map.reserve(nodeTags.size());
+            NodeIdCoordsPairsVector nodes_coords_vector;
+            nodes_coords_vector.reserve(nodeTags.size());
 
             auto itr = coord_vec.begin();
             for (auto& tag : nodeTags)
             {
-                node_map.push_back(std::make_pair(tag, coords(*itr, *(itr+1), *(itr+2))));
+                nodes_coords_vector.push_back(std::make_pair(tag, coords(*itr, *(itr+1), *(itr+2))));
                 itr += 3;
             }
-            return node_map;    
+            return nodes_coords_vector;    
         }
 
         /**
@@ -112,10 +117,10 @@ class GlobalMesh {
             // section = sect;
             basic_section =  std::make_unique<BasicSection>(sect);
             open_mesh_file(mesh_file);
-            NodeIdCoordsPairsVector node_map = read_nodes();
+            NodeIdCoordsPairsVector nodes_coords_vector = read_nodes();
             ElemIdNodeIdPairVector elem_map = read_elements();
             close_mesh_file();
-            return std::make_pair(node_map, elem_map);
+            return std::make_pair(nodes_coords_vector, elem_map);
         }
         
         /**
@@ -179,17 +184,17 @@ class GlobalMesh {
             element_type = elem_type;
             fiber_section = std::make_unique<BeamColumnFiberSection>(sect);
 
-            NodeIdCoordsPairsVector node_map = frame.get_node_coords_pairs();
+            NodeIdCoordsPairsVector nodes_coords_vector = frame.get_node_coords_pairs();
             ElemIdNodeIdPairVector elem_map = frame.map_elements_to_nodes();
             if (VERBOSE)
             {
                 std::cout << "-----------------------------------------------------" << std::endl;
-                read_node_map(node_map);
+                read_nodes_coords_vector(nodes_coords_vector);
                 std::cout << "-----------------------------------------------------" << std::endl;
                 read_element_map(elem_map);
                 std::cout << "-----------------------------------------------------" << std::endl;
             }
-            setup_mesh(node_map, elem_map);
+            setup_mesh(nodes_coords_vector, elem_map);
         }
 
         FrameMesh get_frame() {return frame;}
@@ -202,7 +207,7 @@ class GlobalMesh {
          * @param pts_coords the coordinates of the end points of the line.
          * @param elem_type an enum referring to the type of element that the mesh will include.
          * @param sect a \ref BasicSection object that is used to initialise the beam-column elements.
-         * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> the node_map and elem_map of the line mesh. 
+         * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> the nodes_coords_vector and elem_map of the line mesh. 
          * @warning assumes mapping takes place from node and element ids = 1. There is no checking for conflicting ids, and nothing to reduce bandwidth!
          */
         template <typename CoordsContainer>
@@ -214,9 +219,9 @@ class GlobalMesh {
                 exit(1);
             }
 
-            NodeIdCoordsPairsVector node_map;
+            NodeIdCoordsPairsVector nodes_coords_vector;
             ElemIdNodeIdPairVector elem_map;
-            node_map.reserve(divisions + 1);
+            nodes_coords_vector.reserve(divisions + 1);
             elem_map.reserve(divisions);
 
 
@@ -224,14 +229,14 @@ class GlobalMesh {
 
             for (size_t i = 0; i < divisions + 1; ++i)
             {
-                node_map.push_back(std::make_pair(i + 1, pts_coords[0] + i*delta_xyz));
+                nodes_coords_vector.push_back(std::make_pair(i + 1, pts_coords[0] + i*delta_xyz));
             }
 
             for (size_t i = 0; i < divisions; ++i)
             {
                 elem_map.push_back(std::make_pair(i + 1, std::vector<size_t>{i + 1, i + 2}));
             }     
-            return std::make_pair(node_map, elem_map);
+            return std::make_pair(nodes_coords_vector, elem_map);
         }
         /**
          * @brief creates a line mesh map with a given number of divisions and end coordinates of the line. Does NOT take a gmsh mesh file. 
@@ -264,11 +269,11 @@ class GlobalMesh {
         /**
          * @brief creates element objects following the \ref ElemIdNodeIdPairVector object format and adds them to \ref elem_vector.
          * 
-         * @param node_map a vector of pairs mapping each node ids and coordinates.
+         * @param nodes_coords_vector a vector of pairs mapping each node ids and coordinates.
          */
-        void make_nodes (NodeIdCoordsPairsVector node_map)
+        void make_nodes (NodeIdCoordsPairsVector nodes_coords_vector)
         {
-            for (auto& node_data : node_map)
+            for (auto& node_data : nodes_coords_vector)
             {
                 node_vector.push_back(std::make_shared<Node>(node_data.first, node_data.second));
             }
@@ -318,18 +323,85 @@ class GlobalMesh {
         /**
          * @brief populates the global_mesh members: \ref nnodes, \ref nelems, \ref node_vector, and \ref elem_vector based on mesh (node and element) maps.
          * 
-         * @param node_map a vector of pairs mapping each node ids and coordinates.
+         * @param nodes_coords_vector a vector of pairs mapping each node ids and coordinates.
          * @param elem_map a vector of pairs mapping elem ids and corresponding 2 node ids.
          */
-        void setup_mesh(NodeIdCoordsPairsVector node_map, ElemIdNodeIdPairVector elem_map)
+        void setup_mesh(NodeIdCoordsPairsVector nodes_coords_vector, ElemIdNodeIdPairVector elem_map)
         {
-            nnodes = node_map.size();
+            nnodes = nodes_coords_vector.size();
             nelems = elem_map.size();
             node_vector.clear();
             node_vector.reserve(nnodes);
             elem_vector.clear();
             elem_vector.reserve(nelems);
-            make_nodes(node_map);
+            make_nodes(nodes_coords_vector);
+            make_elements(elem_map);
+            std::sort(node_vector.begin(), node_vector.end());
+            std::sort(elem_vector.begin(), elem_vector.end());
+            count_dofs();            
+        }
+
+        /**
+         * @brief populates a std::map object with a key being the node ID, and a value being the rank to which domain this node will belong using a naive algorithm where the nodes are divided amongst the ranks semi-equally with the last rank taking on any nodes that were not assigned already due to the remainder of nnodes/nranks. Also does the other way around populating a rank-node map.
+         * 
+         * @param node_rank_map std::map object with a key being the node ID, and a value being the rank to which domain this node will belong. Will be filled by reference.
+         * @param rank_nodes_map std::map object with a key being the rank and the value being a std::set of node IDs that belong to this rank. Will be filled by reference.
+         * @param nodes_coords_vector the \ref nodes_coords_vector object which relates the node ID with their coordinates.
+         * @param num_ranks the number of ranks over which the mesh is being decomposed.
+         */
+        void populate_node_rank_maps(std::map<int, int>& node_rank_map, 
+                                    std::map<int, std::set<int>>& rank_nodes_map, 
+                                    NodeIdCoordsPairsVector& nodes_coords_vector, int const num_ranks)
+        {
+            int nnodes = nodes_coords_vector.size();
+            int nodes_per_rank = nnodes/num_ranks;
+
+            for (int rank = 0; rank < num_ranks; ++rank)
+            {
+                if (rank != num_ranks - 1)
+                {                
+                    for (int i = rank*nodes_per_rank; i < (rank + 1)*nodes_per_rank; ++i)
+                    {
+                        node_rank_map[nodes_coords_vector[i].first] = rank;
+                        rank_nodes_map[rank].insert(nodes_coords_vector[i].first);
+                    }
+                }
+                else
+                {
+                    for (int i = rank*nodes_per_rank; i < nnodes; ++i)
+                    {
+                        node_rank_map[nodes_coords_vector[i].first] = rank;
+                        rank_nodes_map[rank].insert(nodes_coords_vector[i].first);
+                    }
+                }
+            }
+        }
+
+        /**
+         * @brief populates the global_mesh members: \ref nnodes, \ref nelems, \ref node_vector, and \ref elem_vector based on mesh (node and element) maps.
+         * 
+         * @param nodes_coords_vector a vector of pairs mapping each node ids and coordinates.
+         * @param elem_map a vector of pairs mapping elem ids and corresponding 2 node ids.
+         */
+        void setup_distributed_mesh(NodeIdCoordsPairsVector nodes_coords_vector, ElemIdNodeIdPairVector elem_map, 
+                                    int const rank, int const num_ranks)
+        {
+            nnodes = nodes_coords_vector.size();
+            nelems = elem_map.size();
+
+            std::map<int, int> node_rank_map; 
+            std::map<int, std::set<int>> rank_nodes_map;
+            populate_node_rank_maps(node_rank_map, rank_nodes_map, nodes_coords_vector, num_ranks);
+
+            NodeIdCoordsPairsVector rank_nodes_coords_vector;
+            ElemIdNodeIdPairVector rank_elem_map;
+            filter_node_element_vectors(nodes_coords_vector, elem_map, rank_nodes_coords_vector, rank_elem_map, rank);
+
+            node_vector.clear();
+            node_vector.reserve(nnodes);
+            elem_vector.clear();
+            elem_vector.reserve(nelems);
+            make_nodes(nodes_coords_vector);
             make_elements(elem_map);
             std::sort(node_vector.begin(), node_vector.end());
             std::sort(elem_vector.begin(), elem_vector.end());
