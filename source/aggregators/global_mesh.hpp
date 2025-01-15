@@ -13,8 +13,11 @@
 #include <string>
 #include <map>
 #include <set>
-#include<Eigen/SparseLU>
-#include<Eigen/SparseCholesky>
+#include <algorithm>
+#include <Eigen/SparseLU>
+#include <Eigen/SparseCholesky>
+
+#include <mpi.h>
 #ifdef KOKKOS
     #include <Kokkos_Core.hpp>
 #endif
@@ -59,6 +62,9 @@ class GlobalMesh {
         int rank_nnodes = 0; /**< number of nodes on current rank.*/
         int rank_ndofs = 0; /**< number of DOFs on current rank.*/
         int rank_nelems = 0; /**< number of elements on current rank.*/
+        int rank_starting_nz_i = 0; /** number at which the DoF count starts on this rank. */
+        
+        std::vector<int> ranks_ndofs; /**< a vector that contains the \ref ndofs of each rank. Needs to be communicated with MPI across ranks.*/
         std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes in the problem.*/
         std::vector<std::shared_ptr<ElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
 
@@ -118,19 +124,19 @@ class GlobalMesh {
             basic_section =  std::make_unique<BasicSection>(sect);
             open_mesh_file(mesh_file);
             NodeIdCoordsPairsVector nodes_coords_vector = read_nodes();
-            ElemIdNodeIdPairVector elem_map = read_elements();
+            ElemIdNodeIdPairVector elem_nodes_vector = read_elements();
             close_mesh_file();
-            return std::make_pair(nodes_coords_vector, elem_map);
+            return std::make_pair(nodes_coords_vector, elem_nodes_vector);
         }
         
         /**
          * @brief reads the elements from the mesh file and populates the map linking element id with its node ids.
          * 
-         * @return ElemIdNodeIdPairVector elem_map a vectpr of pairs mapping elem ids and corresponding node ids.
+         * @return ElemIdNodeIdPairVector elem_nodes_vector a vectpr of pairs mapping elem ids and corresponding node ids.
          */
         ElemIdNodeIdPairVector read_elements()
         {
-            ElemIdNodeIdPairVector elem_map;
+            ElemIdNodeIdPairVector elem_nodes_vector;
             std::vector<int> element_types;
             gmsh::model::mesh::getElementTypes(element_types);
             for (auto& elem_type: element_types)
@@ -164,12 +170,12 @@ class GlobalMesh {
                         node_itr += i;
                     }
                     ++node_itr;
-                    elem_map.push_back(std::make_pair(elem_tag, element_nodes));
+                    elem_nodes_vector.push_back(std::make_pair(elem_tag, element_nodes));
                     std::cout << "added element: " << elem_tag << " with nodes: ";
                     print_container<std::vector<std::size_t>>(element_nodes);
                 }
             }
-            return elem_map;
+            return elem_nodes_vector;
 
             void GlobalMesh::close_mesh_file()
             {
@@ -185,16 +191,16 @@ class GlobalMesh {
             fiber_section = std::make_unique<BeamColumnFiberSection>(sect);
 
             NodeIdCoordsPairsVector nodes_coords_vector = frame.get_node_coords_pairs();
-            ElemIdNodeIdPairVector elem_map = frame.map_elements_to_nodes();
+            ElemIdNodeIdPairVector elem_nodes_vector = frame.map_elements_to_nodes();
             if (VERBOSE)
             {
                 std::cout << "-----------------------------------------------------" << std::endl;
                 read_nodes_coords_vector(nodes_coords_vector);
                 std::cout << "-----------------------------------------------------" << std::endl;
-                read_element_map(elem_map);
+                read_element_map(elem_nodes_vector);
                 std::cout << "-----------------------------------------------------" << std::endl;
             }
-            setup_mesh(nodes_coords_vector, elem_map);
+            setup_mesh(nodes_coords_vector, elem_nodes_vector);
         }
 
         FrameMesh get_frame() {return frame;}
@@ -207,7 +213,7 @@ class GlobalMesh {
          * @param pts_coords the coordinates of the end points of the line.
          * @param elem_type an enum referring to the type of element that the mesh will include.
          * @param sect a \ref BasicSection object that is used to initialise the beam-column elements.
-         * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> the nodes_coords_vector and elem_map of the line mesh. 
+         * @return std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> the nodes_coords_vector and elem_nodes_vector of the line mesh. 
          * @warning assumes mapping takes place from node and element ids = 1. There is no checking for conflicting ids, and nothing to reduce bandwidth!
          */
         template <typename CoordsContainer>
@@ -220,9 +226,9 @@ class GlobalMesh {
             }
 
             NodeIdCoordsPairsVector nodes_coords_vector;
-            ElemIdNodeIdPairVector elem_map;
+            ElemIdNodeIdPairVector elem_nodes_vector;
             nodes_coords_vector.reserve(divisions + 1);
-            elem_map.reserve(divisions);
+            elem_nodes_vector.reserve(divisions);
 
 
             coords delta_xyz = (pts_coords[1] - pts_coords[0])/divisions;
@@ -234,9 +240,9 @@ class GlobalMesh {
 
             for (size_t i = 0; i < divisions; ++i)
             {
-                elem_map.push_back(std::make_pair(i + 1, std::vector<size_t>{i + 1, i + 2}));
+                elem_nodes_vector.push_back(std::make_pair(i + 1, std::vector<size_t>{i + 1, i + 2}));
             }     
-            return std::make_pair(nodes_coords_vector, elem_map);
+            return std::make_pair(nodes_coords_vector, elem_nodes_vector);
         }
         /**
          * @brief creates a line mesh map with a given number of divisions and end coordinates of the line. Does NOT take a gmsh mesh file. 
@@ -284,13 +290,13 @@ class GlobalMesh {
          * 
          * @attention only one type of elements available now. Functionality limited to creating 2D beam-columns.
          * 
-         * @param elem_map a vector of pairs mapping elem ids and corresponding node ids.
+         * @param elem_nodes_vector a vector of pairs mapping elem ids and corresponding node ids.
          */
-        void make_elements (ElemIdNodeIdPairVector elem_map)
+        void make_elements (ElemIdNodeIdPairVector elem_nodes_vector)
         {
             std::vector<std::shared_ptr<Node>> elem_nodes;
             elem_nodes.reserve(2);
-            for (auto& element_data : elem_map)
+            for (auto& element_data : elem_nodes_vector)
             {
                 elem_nodes.clear();
                 for (auto& node_id: element_data.second)
@@ -324,18 +330,18 @@ class GlobalMesh {
          * @brief populates the global_mesh members: \ref nnodes, \ref nelems, \ref node_vector, and \ref elem_vector based on mesh (node and element) maps.
          * 
          * @param nodes_coords_vector a vector of pairs mapping each node ids and coordinates.
-         * @param elem_map a vector of pairs mapping elem ids and corresponding 2 node ids.
+         * @param elem_nodes_vector a vector of pairs mapping elem ids and corresponding 2 node ids.
          */
-        void setup_mesh(NodeIdCoordsPairsVector nodes_coords_vector, ElemIdNodeIdPairVector elem_map)
+        void setup_mesh(NodeIdCoordsPairsVector nodes_coords_vector, ElemIdNodeIdPairVector elem_nodes_vector)
         {
             nnodes = nodes_coords_vector.size();
-            nelems = elem_map.size();
+            nelems = elem_nodes_vector.size();
             node_vector.clear();
             node_vector.reserve(nnodes);
             elem_vector.clear();
             elem_vector.reserve(nelems);
             make_nodes(nodes_coords_vector);
-            make_elements(elem_map);
+            make_elements(elem_nodes_vector);
             std::sort(node_vector.begin(), node_vector.end());
             std::sort(elem_vector.begin(), elem_vector.end());
             count_dofs();            
@@ -349,8 +355,8 @@ class GlobalMesh {
          * @param nodes_coords_vector the \ref nodes_coords_vector object which relates the node ID with their coordinates.
          * @param num_ranks the number of ranks over which the mesh is being decomposed.
          */
-        void populate_node_rank_maps(std::map<int, int>& node_rank_map, 
-                                    std::map<int, std::set<int>>& rank_nodes_map, 
+        void populate_node_rank_maps(std::map<size_t, int>& node_rank_map, 
+                                    std::map<int, std::set<size_t>>& rank_nodes_map, 
                                     NodeIdCoordsPairsVector& nodes_coords_vector, int const num_ranks)
         {
             int nnodes = nodes_coords_vector.size();
@@ -377,37 +383,167 @@ class GlobalMesh {
             }
         }
 
+        void filter_node_vector(std::map<int, std::set<size_t>>& rank_nodes_map,
+                                NodeIdCoordsPairsVector& nodes_coords_vector, 
+                                NodeIdCoordsPairsVector& nodes_coords_vector_on_rank, 
+                                int rank)
+        {
+            for (size_t node_id : rank_nodes_map[rank])
+            {
+                auto node_it = std::find_if(std::begin(nodes_coords_vector), std::end(nodes_coords_vector), 
+                                            [node_id](std::pair<size_t, coords> node_coords_pair) 
+                                            {
+                                                return node_coords_pair.first == node_id;
+                                            });
+                nodes_coords_vector_on_rank.push_back(*node_it);
+            }
+
+        }
+
+        void populate_node_element_map(std::map<size_t, std::set<size_t>>& node_element_map, ElemIdNodeIdPairVector& elem_nodes_vector)
+        {
+            for (auto elem_nodes_pair : elem_nodes_vector)
+            {
+                for (auto node : elem_nodes_pair.second)
+                {
+                    node_element_map[node].insert(elem_nodes_pair.first);
+                }
+            }
+        }
+
+        void find_rank_elements(std::set<size_t>& elem_id_set_on_rank,
+                                std::map<int, std::set<size_t>>&  rank_nodes_map, 
+                                std::map<size_t, std::set<size_t>> node_element_map, int rank)
+        {
+            for (size_t node_id : rank_nodes_map[rank])
+            {
+                for (size_t elem_id : node_element_map[node_id])
+                {
+                    elem_id_set_on_rank.insert(elem_id);
+                }
+            }   
+        }
+        void filter_element_vector(ElemIdNodeIdPairVector& elem_nodes_vector_on_rank,
+                                std::set<size_t>& elem_id_set_on_rank, 
+                                ElemIdNodeIdPairVector& elem_nodes_vector, int rank)
+        {
+            for (size_t elem_id : elem_id_set_on_rank)
+            {
+
+                auto elem_it = std::find_if(std::begin(elem_nodes_vector), std::end(elem_nodes_vector), 
+                                        [elem_id](std::pair<size_t, std::vector<size_t>> elem_nodes_pair) 
+                                        {
+                                            return elem_nodes_pair.first == elem_id;
+                                        });
+                elem_nodes_vector_on_rank.push_back(*elem_it);
+            }
+        }
+
+        void find_rank_nodes(std::set<size_t>& node_id_set_on_rank, 
+                            ElemIdNodeIdPairVector& elem_nodes_vector_on_rank)
+        {
+
+            for (std::pair<size_t,std::vector<size_t>> elem_nodes_pair : elem_nodes_vector_on_rank)
+            {
+                for (size_t node_id : elem_nodes_pair.second)
+                {
+                    node_id_set_on_rank.insert(node_id);
+                }
+            }  
+        }
         /**
          * @brief populates the global_mesh members: \ref nnodes, \ref nelems, \ref node_vector, and \ref elem_vector based on mesh (node and element) maps.
          * 
          * @param nodes_coords_vector a vector of pairs mapping each node ids and coordinates.
-         * @param elem_map a vector of pairs mapping elem ids and corresponding 2 node ids.
+         * @param elem_nodes_vector a vector of pairs mapping elem ids and corresponding 2 node ids.
          */
-        void setup_distributed_mesh(NodeIdCoordsPairsVector nodes_coords_vector, ElemIdNodeIdPairVector elem_map, 
+        void setup_distributed_mesh(NodeIdCoordsPairsVector& nodes_coords_vector, 
+                                    ElemIdNodeIdPairVector& elem_nodes_vector, 
                                     int const rank, int const num_ranks)
         {
             nnodes = nodes_coords_vector.size();
-            nelems = elem_map.size();
+            nelems = elem_nodes_vector.size();
+            ranks_ndofs.resize(num_ranks);
 
-            std::map<int, int> node_rank_map; 
-            std::map<int, std::set<int>> rank_nodes_map;
+            std::map<size_t, int> node_rank_map; 
+            std::map<int, std::set<size_t>> rank_nodes_map;
             populate_node_rank_maps(node_rank_map, rank_nodes_map, nodes_coords_vector, num_ranks);
+            
+            // create a map that links any nodes to the elements that connect to it.
+            std::map<size_t, std::set<size_t>> node_element_map;
+            populate_node_element_map(node_element_map, elem_nodes_vector);
+            
+            // Based on the nodes we currently have, find all elements that connect to any of these nodes.
+            std::set<size_t> elem_id_set_on_rank;
+            find_rank_elements(elem_id_set_on_rank, rank_nodes_map, node_element_map, rank);
+            rank_nelems = elem_id_set_on_rank.size();
+            // filter the elem_nodes_vector to only the members that belong on this rank (including those that are duplicated)
+            ElemIdNodeIdPairVector elem_nodes_vector_on_rank;
+            elem_nodes_vector_on_rank.reserve(rank_nelems);
+            filter_element_vector(elem_nodes_vector_on_rank, elem_id_set_on_rank, elem_nodes_vector, rank);
 
-            NodeIdCoordsPairsVector rank_nodes_coords_vector;
-            ElemIdNodeIdPairVector rank_elem_map;
-            filter_node_element_vectors(nodes_coords_vector, elem_map, rank_nodes_coords_vector, rank_elem_map, rank);
+            // Based on the members that will be created on this rank, add the nodes that will also need to be created
+            std::set<size_t> node_id_set_on_rank;
+            find_rank_nodes(node_id_set_on_rank, elem_nodes_vector_on_rank);
+            rank_nnodes = node_id_set_on_rank.size();
+            // Add the nodes that officially belong to this rank to the rank nodes coords vector.
+            NodeIdCoordsPairsVector nodes_coords_vector_on_rank;
+            nodes_coords_vector_on_rank.reserve(rank_nnodes);
+            filter_node_vector(rank_nodes_map, nodes_coords_vector, nodes_coords_vector_on_rank, rank);
 
+            // populate and sort the node and element object vectors for the rank
             node_vector.clear();
-            node_vector.reserve(nnodes);
+            node_vector.reserve(rank_nnodes);
             elem_vector.clear();
-            elem_vector.reserve(nelems);
-            make_nodes(nodes_coords_vector);
-            make_elements(elem_map);
+            elem_vector.reserve(rank_nelems);
+            make_nodes(nodes_coords_vector_on_rank);
+            make_elements(elem_nodes_vector_on_rank);
             std::sort(node_vector.begin(), node_vector.end());
             std::sort(elem_vector.begin(), elem_vector.end());
-            count_dofs();            
+
+            // should setup communication protocols here.
+            count_distributed_dofs(rank, num_ranks);            
         }
 
+        void count_distributed_dofs(int const rank, int const num_ranks)
+        {
+            int* ranks_ndofs_ptr = ranks_ndofs.data();
+
+            rank_ndofs = 0;
+            for (auto& node: node_vector)
+            {
+                node->set_nz_i(rank_ndofs);
+                if (VERBOSE)
+                {
+                    std::cout << "Node " << node->get_id() << " has nz_i = " << node->get_nz_i() << std::endl;
+                }
+                rank_ndofs += node->get_ndof();
+            }
+            // Find out what the rank_ndofs is for each rank
+            MPI_Allgather(&rank_ndofs, 1, MPI_INT,
+                        ranks_ndofs_ptr, 1, MPI_INT, 
+                        MPI_COMM_WORLD);
+
+            // update the nz_it for each node
+            // Step 1: find the number to udpate the nz_i of the nodes
+            rank_starting_nz_i = 0;
+            if (rank > 0)
+            {
+                for (int i = 0; i < rank; ++i)
+                {
+                    rank_starting_nz_i += ranks_ndofs[i];
+                }
+            }
+            // Step 2: loop over the nodes and update them.
+            for (auto& node: node_vector)
+            {
+                node->increment_nz_i(rank_starting_nz_i);
+                if (VERBOSE)
+                {
+                    std::cout << "Node " << node->get_id() << " has nz_i = " << node->get_nz_i() << std::endl;
+                }
+            }
+        }
         /**
          * @brief counts the active DOFs in the mesh by going over all the nodes and getting the number of active freedoms.
          * 
@@ -420,7 +556,7 @@ class GlobalMesh {
                 node->set_nz_i(ndofs);
                 if (VERBOSE)
                 {
-                    std::cout << "Node " << node->get_id() << " has nz_i = " << ndofs << std::endl;
+                    std::cout << "Node " << node->get_id() << " has nz_i = " << node->get_nz_i() << std::endl;
                 }
                 ndofs += node->get_ndof();
             }

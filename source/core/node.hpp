@@ -110,6 +110,7 @@ class Node {
          * @param i the value to set nz_i to; can be any integer.
          */
         void set_nz_i(int i) {nz_i = i;}
+        void increment_nz_i(int i) {nz_i += i;}
         int get_nz_i() {return nz_i;}
         void  set_z(real z) { coordinates[2] = z;}
         //@}
