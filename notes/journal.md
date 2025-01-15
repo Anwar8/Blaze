@@ -30,8 +30,12 @@ This journal contains the day-to-day project management and notes taken. It was 
 ## Desired updates:
 - [ ] Element mapping should be done with position vectors; this will greatly simplify assembly, and possibly domain disribution.
 - [ ] Change how BCs are handled by delegating their control to a BC manager class `BCManager`.
+- [ ] Wrap `MPI_Allgather` call inside `count_distributed_dofs` with a wrapper from `MPIWrappers`.
 
 ## Journal
+### 16 January
+Added documentation to the functions created yesterday, and as such I went over all the functions again and made some minor modifications. Overall, the partitioning appears sensible. Need to establish unit tests next.
+
 ### 15 January
 I have finshed creating the necessary functions for all steps required for creating the distributed domain. The next action item is to unit test these functions to make sure they operate as expected when given a rank and a number of ranks (most functions are independent of `MPI` and only care about their rank and number of ranks). That being said, `count_distributed_dofs` makes an `MPI_Allgather` call, so  I will need to figure out how to test that (maybe I should wrap the `MPI_Allgather` in `MPIWrappers`?), especially since it is also called by `setup_distributed_mesh`. Even if correct, I will still need to go over the code I have written once more to make sure it is sensible. I know it is very inefficient right now, but since it is only called once during domain setup, this might not be an issue. There is still work to do - I may have created the functions that split the domain and create local vectors of node and element objects, but I still have not let the duplicated elements across ranks know that they are duplicated and that part of their contributions will not need to be collected in the global matrices. This, of course, requires that I update the element mapping to use position vectors.
 

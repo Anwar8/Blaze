@@ -357,7 +357,8 @@ class GlobalMesh {
          */
         void populate_node_rank_maps(std::map<size_t, int>& node_rank_map, 
                                     std::map<int, std::set<size_t>>& rank_nodes_map, 
-                                    NodeIdCoordsPairsVector& nodes_coords_vector, int const num_ranks)
+                                    NodeIdCoordsPairsVector& nodes_coords_vector, 
+                                    int const num_ranks)
         {
             int nnodes = nodes_coords_vector.size();
             int nodes_per_rank = nnodes/num_ranks;
@@ -382,25 +383,59 @@ class GlobalMesh {
                 }
             }
         }
-
-        void filter_node_vector(std::map<int, std::set<size_t>>& rank_nodes_map,
-                                NodeIdCoordsPairsVector& nodes_coords_vector, 
-                                NodeIdCoordsPairsVector& nodes_coords_vector_on_rank, 
-                                int rank)
+        
+        /**
+         * @brief finds the IDs of all the nodes that need to be created on this rank. This includes nodes whose DoFs are owned by another rank but are needed for creating an interface element on the current rank. 
+         * 
+         * @param node_id_set_on_rank a set of unique node IDs that need to exist on the current rank.
+         * @param elem_nodes_vector_on_rank a map whose key is element ID and value is the nodes of that element. Only elements that are created on this rank are included, including interface elements.
+         */
+        void find_rank_nodes(std::set<size_t>& node_id_set_on_rank, 
+                            ElemIdNodeIdPairVector& elem_nodes_vector_on_rank)
         {
-            for (size_t node_id : rank_nodes_map[rank])
+
+            for (std::pair<size_t,std::vector<size_t>> elem_nodes_pair : elem_nodes_vector_on_rank)
             {
-                auto node_it = std::find_if(std::begin(nodes_coords_vector), std::end(nodes_coords_vector), 
+                for (size_t node_id : elem_nodes_pair.second)
+                {
+                    node_id_set_on_rank.insert(node_id);
+                }
+            }  
+        }
+
+        /**
+         * @brief filters out \ref nodes_coords_vector to a \ref nodes_coords_vector_on_rank that corresponds only to the nodes on the current subdomain/rank. Does this by going over a set \ref node_id_set_on_rank that has a list of all the nodes on a given rank.
+         * 
+         * @param nodes_coords_vector_on_rank a vector of pairs containing node IDs and coordinates for each node on current rank.
+         * @param nodes_coords_vector a vector of pairs containing node IDs and coordinates for each node in the global domain.
+         * @param node_id_set_on_rank a std::set<size_t> that has a nonrepeating set of node IDs for nodes that belong on current rank.
+         * @param rank the rank that is calling this function.
+         */
+        void filter_node_vector(NodeIdCoordsPairsVector& nodes_coords_vector_on_rank,
+                                NodeIdCoordsPairsVector& nodes_coords_vector, 
+                                std::set<size_t> node_id_set_on_rank,
+                                int const rank)
+        {
+            for (size_t node_id : node_id_set_on_rank)
+            {
+                auto node_coords_pair_it = std::find_if(std::begin(nodes_coords_vector), std::end(nodes_coords_vector), 
                                             [node_id](std::pair<size_t, coords> node_coords_pair) 
                                             {
                                                 return node_coords_pair.first == node_id;
                                             });
-                nodes_coords_vector_on_rank.push_back(*node_it);
+                nodes_coords_vector_on_rank.push_back(*node_coords_pair_it);
             }
 
         }
 
-        void populate_node_element_map(std::map<size_t, std::set<size_t>>& node_element_map, ElemIdNodeIdPairVector& elem_nodes_vector)
+        /**
+         * @brief populates the map node_element_map with connectivity information of the list of elements that are connected to each node. This is the inverse of \ref elem_nodes_vector which has pairs of element ID and the nodes that connect to the element.
+         * 
+         * @param node_element_map a map with node ID as key, and a set of elements that are connected to this node.
+         * @param elem_nodes_vector a vector containing the nodal ids for each element in the domain.
+         */
+        void populate_node_element_map(std::map<size_t, std::set<size_t>>& node_element_map, 
+                                        ElemIdNodeIdPairVector& elem_nodes_vector)
         {
             for (auto elem_nodes_pair : elem_nodes_vector)
             {
@@ -411,9 +446,18 @@ class GlobalMesh {
             }
         }
 
+        /**
+         * @brief finds the elements that belong on this current rank. Does this by checking the nodes that are owned by this rank, and for each node owned by this rank, finding which elements belong to it from the map node_element_set that was populated by \ref populate_node_element_map.
+         * 
+         * @param elem_id_set_on_rank a set of unique element IDs for elements that belong on this rank, including domain interface elements.
+         * @param rank_nodes_map a map whose key is the rank, and contents are the IDs of the nodes owned by this rank.
+         * @param node_element_map a map which whose key is the node ID, and value is all the elements that connect to this node.
+         * @param rank rank of the process that is calling this funciton.
+         */
         void find_rank_elements(std::set<size_t>& elem_id_set_on_rank,
                                 std::map<int, std::set<size_t>>&  rank_nodes_map, 
-                                std::map<size_t, std::set<size_t>> node_element_map, int rank)
+                                std::map<size_t, std::set<size_t>> node_element_map, 
+                                int const rank)
         {
             for (size_t node_id : rank_nodes_map[rank])
             {
@@ -423,9 +467,19 @@ class GlobalMesh {
                 }
             }   
         }
+
+        /**
+         * @brief filters out the pairs of element ID and element nodes for elements that reside on current rank from the global elem_nodes_vector.
+         * 
+         * @param elem_nodes_vector_on_rank vector of pairs of element ID and vector of connected node IDs for that will be created on the current rank.
+         * @param elem_id_set_on_rank set of unique ID numbers for elements that need to be created on the current rank.
+         * @param elem_nodes_vector vector of pairs of element ID and vector of connected node IDs for the global domain. 
+         * @param rank rank of the calling process.
+         */
         void filter_element_vector(ElemIdNodeIdPairVector& elem_nodes_vector_on_rank,
                                 std::set<size_t>& elem_id_set_on_rank, 
-                                ElemIdNodeIdPairVector& elem_nodes_vector, int rank)
+                                ElemIdNodeIdPairVector& elem_nodes_vector, 
+                                int const rank)
         {
             for (size_t elem_id : elem_id_set_on_rank)
             {
@@ -439,20 +493,9 @@ class GlobalMesh {
             }
         }
 
-        void find_rank_nodes(std::set<size_t>& node_id_set_on_rank, 
-                            ElemIdNodeIdPairVector& elem_nodes_vector_on_rank)
-        {
 
-            for (std::pair<size_t,std::vector<size_t>> elem_nodes_pair : elem_nodes_vector_on_rank)
-            {
-                for (size_t node_id : elem_nodes_pair.second)
-                {
-                    node_id_set_on_rank.insert(node_id);
-                }
-            }  
-        }
         /**
-         * @brief populates the global_mesh members: \ref nnodes, \ref nelems, \ref node_vector, and \ref elem_vector based on mesh (node and element) maps.
+         * @brief populates the global_mesh members: \ref nnodes, \ref nelems, \ref node_vector, and \ref elem_vector based on mesh (node and element) maps. Does the same for rank variants of these variables, and call \ref count_distributed_dofs to update the \ref nz_i of each node on the current rank.
          * 
          * @param nodes_coords_vector a vector of pairs mapping each node ids and coordinates.
          * @param elem_nodes_vector a vector of pairs mapping elem ids and corresponding 2 node ids.
@@ -489,7 +532,7 @@ class GlobalMesh {
             // Add the nodes that officially belong to this rank to the rank nodes coords vector.
             NodeIdCoordsPairsVector nodes_coords_vector_on_rank;
             nodes_coords_vector_on_rank.reserve(rank_nnodes);
-            filter_node_vector(rank_nodes_map, nodes_coords_vector, nodes_coords_vector_on_rank, rank);
+            filter_node_vector(nodes_coords_vector_on_rank, nodes_coords_vector, node_id_set_on_rank, rank);
 
             // populate and sort the node and element object vectors for the rank
             node_vector.clear();
@@ -504,7 +547,9 @@ class GlobalMesh {
             // should setup communication protocols here.
             count_distributed_dofs(rank, num_ranks);            
         }
-
+        /**
+         * @brief counts the active DOFs in the mesh by going over all the nodes and getting the number of active freedoms. This is done over a distributed domain by first carrying out the operation locally, then getting the number of DoFs on each rank via an MPI_Allgather call. The \ref rank_starting_nz_i is udpated for the current rank by summing all ndofs of the ranks lower than it. This rank_starting_nz_i is then used to update the nz_i of each node which was initialised with a local nz_i.
+         */
         void count_distributed_dofs(int const rank, int const num_ranks)
         {
             int* ranks_ndofs_ptr = ranks_ndofs.data();
