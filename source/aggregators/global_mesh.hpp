@@ -16,8 +16,9 @@
 #include <algorithm>
 #include <Eigen/SparseLU>
 #include <Eigen/SparseCholesky>
-
-#include <mpi.h>
+#ifdef MPI
+    #include <mpi.h>
+#endif
 #ifdef KOKKOS
     #include <Kokkos_Core.hpp>
 #endif
@@ -544,7 +545,7 @@ class GlobalMesh {
             std::sort(node_vector.begin(), node_vector.end());
             std::sort(elem_vector.begin(), elem_vector.end());
 
-            // should setup communication protocols here.
+            // count the ndofs of each rank and assign each node an index that corresponds to the global matrices and vectors.
             count_distributed_dofs(rank, num_ranks);            
         }
         /**
@@ -564,10 +565,12 @@ class GlobalMesh {
                 }
                 rank_ndofs += node->get_ndof();
             }
+            #ifdef MPI
             // Find out what the rank_ndofs is for each rank
             MPI_Allgather(&rank_ndofs, 1, MPI_INT,
                         ranks_ndofs_ptr, 1, MPI_INT, 
                         MPI_COMM_WORLD);
+            #endif
 
             // update the nz_it for each node
             // Step 1: find the number to udpate the nz_i of the nodes

@@ -33,6 +33,12 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Wrap `MPI_Allgather` call inside `count_distributed_dofs` with a wrapper from `MPIWrappers`.
 
 ## Journal
+### 19 January
+Today, I am trying to build with `MPI` support. I found out today that any additional calls to `target_include_libraries` [simply append to the include libraries](https://stackoverflow.com/questions/61760852/append-to-target-link-libraries). I can, with this information, really simplify the `CMakeLists.txt` for `Blaze`. 
+
+I just managed to correctly build the `MPI` version of `Blaze`. I now notice that once running the `MPI` distributed version, I am likely to get way too much logging information. I will need to find a way to aggregate this data at the end by perhaps creating a distributed timer that would gather, perhaps via `MPI_Gather`, data from each individual timer and present the data for each rank.
+
+
 ### 16 January
 Added documentation to the functions created yesterday, and as such I went over all the functions again and made some minor modifications. Overall, the partitioning appears sensible. Need to establish unit tests next.
 

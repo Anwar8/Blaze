@@ -58,6 +58,7 @@ void build_an_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial&
 int main (int argc, char* argv[]) {
     
     initialise_MPI(argc, argv);
+
     // create mesh
     Model model;
     
@@ -105,6 +106,11 @@ int main (int argc, char* argv[]) {
     << nfloors << "," << beam_divisions << "," << column_divisions << "," << floor_height << "," << beam_length << "," << frame_size.first << "," << frame_size.second << std::endl;
     std::cout << "END_SECTION:Model_Size" << std::endl;
     std::cout << "SECTION:Parallelism" << std::endl;
+    int rank = -1;
+    int num_ranks = -1;
+    get_my_rank(rank);
+    get_num_ranks(num_ranks);
+    std::cout << "Rank (" << rank << "/" << num_ranks << ")."  << std::endl;
     read_parallelism_information();
     std::cout << "END_SECTION:Parallelism" << std::endl;
 

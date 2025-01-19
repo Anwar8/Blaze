@@ -9,9 +9,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # options for the build:
 option(BUILD_TESTS "Build test programs" OFF)
 option(BUILD_STATIC_LIBS "Build intermediate libraries and link them to executable statically" OFF)
+option(MPI "To build the MPI-distributed version of Blaze" OFF)
 option(OMP "Build with OpenMP support" OFF)
 option(KOKKOS "Build with Kokkos" OFF)
 option(THREADS "To build the C++ Threads backend" OFF)
+
 
 option(INCLUDE_GMSH "gmsh exists and Blaze will use it" OFF)
 option(VERBOSE "Blaze operate in verbose mode for debugging" OFF)
@@ -82,6 +84,9 @@ add_subdirectory(source)
 
 ## main exercutable
 add_executable(Blaze)
+if(MPI)
+target_compile_definitions(Blaze INTERFACE MPI)
+endif(MPI)
 target_sources(Blaze PRIVATE "source/main.cpp")
 
 target_include_directories(Blaze PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/source)
@@ -99,6 +104,13 @@ message(STATUS "Building without OpenMP support")
 target_link_libraries(Blaze PUBLIC BlazeModel)
 endif(OMP)
 endif(KOKKOS)
+
+if(MPI)
+    message(STATUS "Building with MPI support.")
+    find_package(MPI REQUIRED)
+    target_include_directories(Blaze PUBLIC ${MPI_INCLUDE_PATH})
+    target_link_libraries(Blaze PUBLIC MPI::MPI_CXX)
+endif(MPI)
 
 if(BUILD_TESTS)
     find_package(GTest REQUIRED)

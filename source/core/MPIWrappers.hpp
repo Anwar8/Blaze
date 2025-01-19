@@ -10,11 +10,15 @@
 #ifndef MPI_WRAPPERS
 #define MPI_WRAPPERS
 
-#ifndef MPI
+#ifdef MPI
 #include "mpi.h"
 inline void initialise_MPI(int& argc, char**& argv)
 {
     MPI_Init(&argc, &argv);
+    int version, subversion;
+    MPI_Get_version(&version, &subversion);
+    std::cout << "MPI Version: " << version << "." << subversion << " running." << std::endl;
+    std::cout << "--------------------------------------------" << std::endl;
 }
 
 inline void finalise_MPI()
@@ -36,7 +40,8 @@ inline void get_num_ranks(int& num_ranks)
 
 inline void initialise_MPI(int argc, char* argv[])
 {
-
+    std::cout << "MPI wrappers without MPI definition running." << std::endl;
+    std::cout << "--------------------------------------------" << std::endl;
 }
 
 inline void finalise_MPI()
