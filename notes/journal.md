@@ -31,13 +31,18 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Element mapping should be done with position vectors; this will greatly simplify assembly, and possibly domain disribution.
 - [ ] Change how BCs are handled by delegating their control to a BC manager class `BCManager`.
 - [ ] Wrap `MPI_Allgather` call inside `count_distributed_dofs` with a wrapper from `MPIWrappers`.
+- [ ] Why is `FrameMesh` and attribute of `GlobalMesh`? Remove that - it is unnecessary!
 
 ## Journal
+### 20 January
+I emailed David Henty asking about unit testing `MPI` code, and I will wait and see what he says about testing `MPI` code. One approach I can take is to simply create my own simplistic testing framework where I create a handful of functions or classes that would do the testing for me. For example, if I want check whether an `MPI_Allgather` correctly collected the `ndofs` of all ranks, I can simply hard-code the correct number, check against that, and do an `MPI_Gather` call on the root rank that would retrieve `bool` values from each rank whether each rank got the answer right or not. The root rank would then output whether the answer was correct or not, and if some ranks got it wrong, it would output which ranks got it wrong. I can also simply make the ranks that got it wrong print an error message with the values it got vs the expected value.
+It is worth noting that some `MPI` tests will need to be called on a specific number of ranks, so I should figure out how to do that simply; perhaps this can be done via `make` or a `bash` script.
+
+32 unit tests were written and check the majority of the distributed behaviour except for `setup_distributed_mesh` which uses an `MPI_Allgather` call, and will need to be unit tested separately. All 32 tests are currently passing without issue.
 ### 19 January
 Today, I am trying to build with `MPI` support. I found out today that any additional calls to `target_include_libraries` [simply append to the include libraries](https://stackoverflow.com/questions/61760852/append-to-target-link-libraries). I can, with this information, really simplify the `CMakeLists.txt` for `Blaze`. 
 
 I just managed to correctly build the `MPI` version of `Blaze`. I now notice that once running the `MPI` distributed version, I am likely to get way too much logging information. I will need to find a way to aggregate this data at the end by perhaps creating a distributed timer that would gather, perhaps via `MPI_Gather`, data from each individual timer and present the data for each rank.
-
 
 ### 16 January
 Added documentation to the functions created yesterday, and as such I went over all the functions again and made some minor modifications. Overall, the partitioning appears sensible. Need to establish unit tests next.

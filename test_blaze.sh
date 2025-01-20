@@ -24,6 +24,9 @@ elif [ $1 = "modelp" ]; then
     ./TestBlaze --gtest_filter="SimplySupportedUdlPlastic.*"
 elif [ $1 = "cant" ]; then
     ./TestBlaze --gtest_filter="CantileverBeamPlastic.*"
+elif [ $1 = "custom" ]; then
+    shift
+    ./TestBlaze --gtest_filter="$@"
 else
-    echo "Unknown input: $1. Expected \"mat\", \"beam\", \"fibre\", \"fibre\", \"plastic\", \"modelp\", \"cant\", or nothing."
+    echo "Unknown input: $1. Expected \"mat\", \"beam\", \"fibre\", \"fibre\", \"plastic\", \"modelp\", \"cant\", \"custom\", or nothing."
 fi

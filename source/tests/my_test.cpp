@@ -4,6 +4,7 @@
 #include "NodalLoadTests.hpp"
 #include "ScribeTest.hpp"
 #include "ModelTests.hpp"
+#include "DistributedMeshTests.hpp"
 #include "PlasticBeamElementTests.hpp"
 #include "PlasticModelTests.hpp"
 

@@ -348,6 +348,20 @@ class GlobalMesh {
             count_dofs();            
         }
 
+        void set_elem_type(ElementType elem_type)
+        {
+            element_type = elem_type;
+        }
+        void set_basic_section(BasicSection& sect)
+        {
+            basic_section = std::make_unique<BasicSection>(sect);
+        }
+        void set_fibre_section(BeamColumnFiberSection& sect)
+        {
+            fiber_section = std::make_unique<BeamColumnFiberSection>(sect);
+        }
+
+
         /**
          * @brief populates a std::map object with a key being the node ID, and a value being the rank to which domain this node will belong using a naive algorithm where the nodes are divided amongst the ranks semi-equally with the last rank taking on any nodes that were not assigned already due to the remainder of nnodes/nranks. Also does the other way around populating a rank-node map.
          * 
@@ -453,7 +467,7 @@ class GlobalMesh {
          * @param elem_id_set_on_rank a set of unique element IDs for elements that belong on this rank, including domain interface elements.
          * @param rank_nodes_map a map whose key is the rank, and contents are the IDs of the nodes owned by this rank.
          * @param node_element_map a map which whose key is the node ID, and value is all the elements that connect to this node.
-         * @param rank rank of the process that is calling this funciton.
+         * @param rank rank of the process that is calling this function.
          */
         void find_rank_elements(std::set<size_t>& elem_id_set_on_rank,
                                 std::map<int, std::set<size_t>>&  rank_nodes_map, 
@@ -509,6 +523,7 @@ class GlobalMesh {
             nelems = elem_nodes_vector.size();
             ranks_ndofs.resize(num_ranks);
 
+            // sort nodes into the ranks that own them
             std::map<size_t, int> node_rank_map; 
             std::map<int, std::set<size_t>> rank_nodes_map;
             populate_node_rank_maps(node_rank_map, rank_nodes_map, nodes_coords_vector, num_ranks);

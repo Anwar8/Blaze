@@ -28,6 +28,7 @@
 #include "BeamColumnFiberSection.hpp"
 #include "Nonlinear2DPlasticBeamElement.hpp"
 
+#include "global_mesh.hpp"
 #include "NodalLoad.hpp"
 #include "Scribe.hpp"
 #include "Model.hpp"
@@ -203,6 +204,39 @@ void constant_positive_bending(std::vector<std::shared_ptr<Node>>& in_nodes, rea
     in_nodes[1]->set_nodal_displacement(5, theta); // node 2 U33
 }
 //@}
+/**
+ * @name map checking
+ * @brief functions that help check the different IDs in a map. 
+ */
+//@{
 
+template <typename int_like>
+void check_set_ids(std::set<int_like> checked_set, int start_i, int end_i, int id_increment)
+{
+    auto set_it = checked_set.begin();
+    std::advance(set_it, start_i);
+    for (int i = start_i; i < end_i; ++i)
+    {
+        EXPECT_EQ(*set_it, i+id_increment);
+        set_it++;
+    }
+}
 
+template <typename int_like, typename vector_like>
+void check_vector_ids(std::vector<std::pair<int_like, vector_like>> checked_vec, int start_i, int end_i, int id_increment)
+{
+    // providing an explicit lambda to sort by first is to prevent attempting to touch the second item for node-coord vectors for which a sorting operation is not available and will result in a compilation error.
+    std::sort(checked_vec.begin(), checked_vec.end(), 
+            [](auto a, auto b) {
+              return a.first < b.first;
+            });
+    auto vec_it = checked_vec.begin();
+    std::advance(vec_it, start_i);
+    for (int i = start_i; i < end_i; ++i)
+    {
+        EXPECT_EQ((*vec_it).first, i+id_increment);
+        vec_it++;
+    }
+}
+//@}
 #endif
