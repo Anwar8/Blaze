@@ -31,7 +31,8 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Element mapping should be done with position vectors; this will greatly simplify assembly, and possibly domain disribution.
 - [ ] Change how BCs are handled by delegating their control to a BC manager class `BCManager`.
 - [ ] Wrap `MPI_Allgather` call inside `count_distributed_dofs` with a wrapper from `MPIWrappers`.
-- [ ] Why is `FrameMesh` and attribute of `GlobalMesh`? Remove that - it is unnecessary!
+- [ ] Why is `FrameMesh` an attribute of `GlobalMesh`? Remove that - it is unnecessary!
+- [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
 ### 20 January
@@ -39,6 +40,21 @@ I emailed David Henty asking about unit testing `MPI` code, and I will wait and 
 It is worth noting that some `MPI` tests will need to be called on a specific number of ranks, so I should figure out how to do that simply; perhaps this can be done via `make` or a `bash` script.
 
 32 unit tests were written and check the majority of the distributed behaviour except for `setup_distributed_mesh` which uses an `MPI_Allgather` call, and will need to be unit tested separately. All 32 tests are currently passing without issue.
+
+I have managed to create a unit test for the `setup_distributed_mesh` by relying on a [tutorial I found online](https://bbanerjee.github.io/ParSim/mpi/c++/mpi-unit-testing-googletests-cmake/) by Banerjee (2017). This results in a working `TestBlazeMPI` executable that needs to be run with 
+```shell
+mpirun -n nproc bin/TestBlazeMPI
+```
+Where `nproc` is replaced with a number of processors from 1 to 4, inclusive. This means, however, that the test needs to be run four times to cover all testing cases. Furthermore, this way of testing results in a test output by each process rather than a single output that states whether the test ran or not. Perhaps a better procedure would be to create a conatiner for each test that would hold `bool` values that are collected from each custom-made unit test class for each rank, and then use `ASSERT_TRUE` on each one. So, a test that is true would pass and one that is false would fail. `MPI_Init` and `MPI_Finalize` would be called before the `RUN_ALL_TESTS()` function is called so as to only get one set of output regardless of the number of ranks the tests were called upon. Perhaps this would not, on its own, stop all ranks from still participating since they would continue to run even after `MPI_Finalize`, and so I might need to have a `if (rank == 0)` statement. I would still need to run all my tests for different number of processes, but this can be managed with a `shell` script or a `makefile` (probably a `shell` script - simpler!).
+
+Oh, I still need to:
+- Do more elaborate testin to check the actual elements created, 
+- Test using `FrameMesh`,
+- Check that `count_distributed_dofs` is providing correct DoF counting.
+ 
+**References**
+ * Banerjee, Biswajit. (2017). "Unit testing with MPI, googletest, and cmake". Accessed on: 20 January 2025. URL: https://bbanerjee.github.io/ParSim/mpi/c++/mpi-unit-testing-googletests-cmake/
+
 ### 19 January
 Today, I am trying to build with `MPI` support. I found out today that any additional calls to `target_include_libraries` [simply append to the include libraries](https://stackoverflow.com/questions/61760852/append-to-target-link-libraries). I can, with this information, really simplify the `CMakeLists.txt` for `Blaze`. 
 

@@ -844,6 +844,8 @@ class GlobalMesh {
         }
         int const get_num_elems() const {return nelems;}
         int const get_num_nodes() const {return nnodes;}
+        int const get_rank_num_nodes() const {return rank_nnodes;}
+        int const get_rank_num_elems() const {return rank_nelems;}
 };
 
 #endif

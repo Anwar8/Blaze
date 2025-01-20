@@ -15,6 +15,7 @@
 #include "ElementTypes.hpp"
 
 #include "maths_defaults.hpp"
+#include "MPIWrappers.hpp"
 #include "node.hpp"
 
 #include "BeamElementBaseClass.hpp"
