@@ -846,6 +846,18 @@ class GlobalMesh {
         int const get_num_nodes() const {return nnodes;}
         int const get_rank_num_nodes() const {return rank_nnodes;}
         int const get_rank_num_elems() const {return rank_nelems;}
-};
 
+        int const count_nodes_vector() const {return node_vector.size();}
+        int const count_elem_vector() const {return elem_vector.size();}
+
+        bool contains_nodes(std::set<size_t> node_ids) 
+        {
+            return contains_id(node_ids, node_vector);
+        }
+
+        bool contains_elements(std::set<size_t> elem_ids) 
+        {
+            return contains_id(elem_ids, elem_vector);
+        }
+};
 #endif

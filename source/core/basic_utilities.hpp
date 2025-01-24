@@ -54,6 +54,34 @@ Iterator get_id_iterator(int id, Container& a_vec)
         std::exit(1);
     }
 }
+
+/**
+ * @brief Checks whether a container of IDs are all contained in another container.
+ * 
+ * @details searches by relying on std::find_if from <algorithm>
+ * 
+ * @tparam Container any container with stl compatible interface.
+ * @tparam Container any other container with stl compatible interface.
+ * @param ids container of ids of nodes or vector to search.
+ * @param a_vec the container containing the nodes or the elements.
+ * @return Iterator 
+ */
+template <typename Container, typename Container2>
+bool contains_id(Container& ids, Container2& a_vec)
+{
+    for (auto id : ids)
+    {
+        auto itr = std::find_if(a_vec.begin(), a_vec.end(), 
+            [id](const auto item) {
+                return item->get_id() == id;
+            });
+        if (itr == a_vec.end())
+        {
+            return false;
+        } 
+    }
+    return true;
+};
 /**
  * @brief Prints the contents of a container one by one.
  * 
