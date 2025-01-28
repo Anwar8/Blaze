@@ -35,6 +35,20 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
+### 29 January
+I have now gone over the mesh decomposition algorithm in great detail and I believe I also accounted for decomposition of arbitrarily-numbered meshes (unstructured meshes) as well. More details about these trials can be seen in `mesh_distribution.xlsx`. A geometric decomposition algorithm called `naive_geometric_partitioning` was also created in the proof of concept `mesh_decomposition_2.ipynb` notebook. 
+1. On each rank, starting by first creating only the nodes that are owned by that rank.
+2. On each rank, renumber the owned node IDs starting from $ID_0^{rank\ n} = 1 + \sum_{i=0}^{i = n - 1} n_{nodes}^{rank\ i}$. Store the original ID as `nodal_record_id` on the node object.
+3. With nodes renumbered, count the DoFs of the nodes as per the regular procedure along with the exchange of `starting_nz_i`. 
+4. Establish which interface nodes will need to be created on this rank, and to which ranks they belong. 
+5. Create the interface nodes, and exchange the `nz_i` of the interface nodes between ranks.
+
+**CommunicationsManager**
+- Holds the data of `counts`, `ndofs`, `starting_nz_i` of all ranks. Each of these are `std::vector<int>` objects that are communicated into. These data are common across all ranks.
+- On each rank, holds a map of interface nodes IDs and their parent ranks. Possibly has pointer to the node objects directly. 
+- Holds receive buffers to receive communications of nodal `nz_i` values, and send buffers to pack `nz_i` values into before sending contiguosly. 
+- Has a function `exchange_nz_is()` to automatically send and receive `nz_i` values. Note that the number of `nz_i` values exchanged with each rank is always the same in both directions. That is, if sending `n` elements, we will also be receiving `n` elements. There must be an `MPI` command to do an exchange, likely buffered, of this type.
+
 ### 24 January
 Today, I built additional tests that check the IDs of all nodes and elements in the domain of each rank `line_mesh_rank_contents`, and began writing another function `line_mesh_rank_dofs` that checks the DoFs count and `rank_starting_nz_i` of each rank. While the contents of the node and element vectors are correct, I noticed a bug in the `rank_starting_nz_i` calculation. Since we have duplicate nodes, the DoFs of these duplicates are being counted are thus incrementing starting position. Therefore, this means we have a total nDoFs that corresponds to the total number of DoFs of both original nodes and the duplicates - we are double counting the duplicates. 
 

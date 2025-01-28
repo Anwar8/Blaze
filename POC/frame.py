@@ -55,6 +55,8 @@ class frame:
         self.num_floors = num_floors
         self.bay_length = bay_length
         self.floor_height = floor_height
+        self.frame_length = num_bays*bay_length
+        self.frame_height = num_floors*floor_height
         self.elements_per_bay = elements_per_bay
         self.elements_per_floor = elements_per_floor
         self.basic_count()

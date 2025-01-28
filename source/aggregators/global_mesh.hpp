@@ -859,5 +859,8 @@ class GlobalMesh {
         {
             return contains_id(elem_ids, elem_vector);
         }
+
+        int get_rank_ndofs() const {return rank_ndofs;}
+        int get_rank_starting_nz_i() const {return rank_starting_nz_i;}
 };
 #endif
