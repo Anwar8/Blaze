@@ -36,7 +36,7 @@
  * @tparam Container any container with stl compatible interface.
  * @param id unique id of node or vector to search.
  * @param a_vec the container containing the nodes or the elements.
- * @return Iterator 
+ * @return Iterator that can be a vector.end() or the iterator. if vector.end() this means the id was not found.
  */
 template <typename Iterator, typename Container>
 Iterator get_id_iterator(int id, Container& a_vec)
@@ -45,14 +45,7 @@ Iterator get_id_iterator(int id, Container& a_vec)
         [id](const auto item) {
             return item->get_id() == id;
         });
-    if (itr != a_vec.end())
-    {
         return itr;
-    } else 
-    {
-        std::cout << "could not find item with id " << id << " in vector." << std::endl;
-        std::exit(1);
-    }
 }
 
 /**

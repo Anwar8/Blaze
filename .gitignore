@@ -18,3 +18,4 @@ kokkos/*
 lib
 lib/*
 POC/__pycache__/
+POC/*.xlsx

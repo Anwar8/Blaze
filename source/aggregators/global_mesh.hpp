@@ -61,12 +61,14 @@ class GlobalMesh {
         int ndofs = 0; /**< number of DOFs in the mesh.*/
         int nelems = 0; /**< number of elements in the mesh.*/
         int rank_nnodes = 0; /**< number of nodes on current rank.*/
+        int rank_interface_nnodes = 0; /**< number of interface nodes on current rank.*/
         int rank_ndofs = 0; /**< number of DOFs on current rank.*/
         int rank_nelems = 0; /**< number of elements on current rank.*/
         int rank_starting_nz_i = 0; /** number at which the DoF count starts on this rank. */
         
         std::vector<int> ranks_ndofs; /**< a vector that contains the \ref ndofs of each rank. Needs to be communicated with MPI across ranks.*/
-        std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes in the problem.*/
+        std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes on the current rank.*/
+        std::vector<std::shared_ptr<Node>> interface_node_vector;  /**< a vector of shared ptrs referring to the interface nodes in the problem.*/
         std::vector<std::shared_ptr<ElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
 
         FrameMesh frame;
@@ -278,11 +280,19 @@ class GlobalMesh {
          * 
          * @param nodes_coords_vector a vector of pairs mapping each node ids and coordinates.
          */
-        void make_nodes (NodeIdCoordsPairsVector nodes_coords_vector)
+        void make_nodes (NodeIdCoordsPairsVector& nodes_coords_vector, bool interface = false)
         {
-            for (auto& node_data : nodes_coords_vector)
+            if (!interface)
             {
-                node_vector.push_back(std::make_shared<Node>(node_data.first, node_data.second));
+                for (auto& node_data : nodes_coords_vector)
+                {
+                    node_vector.push_back(std::make_shared<Node>(node_data.first, node_data.second));
+                }
+            } else {
+                for (auto& node_data : nodes_coords_vector)
+                {
+                    interface_node_vector.push_back(std::make_shared<Node>(node_data.first, node_data.second));
+                }
             }
         }
 
@@ -293,7 +303,7 @@ class GlobalMesh {
          * 
          * @param elem_nodes_vector a vector of pairs mapping elem ids and corresponding node ids.
          */
-        void make_elements (ElemIdNodeIdPairVector elem_nodes_vector)
+        void make_elements (ElemIdNodeIdPairVector& elem_nodes_vector)
         {
             std::vector<std::shared_ptr<Node>> elem_nodes;
             elem_nodes.reserve(2);
@@ -366,13 +376,14 @@ class GlobalMesh {
          * @brief populates a std::map object with a key being the node ID, and a value being the rank to which domain this node will belong using a naive algorithm where the nodes are divided amongst the ranks semi-equally with the last rank taking on any nodes that were not assigned already due to the remainder of nnodes/nranks. Also does the other way around populating a rank-node map.
          * 
          * @param node_rank_map std::map object with a key being the node ID, and a value being the rank to which domain this node will belong. Will be filled by reference.
-         * @param rank_nodes_map std::map object with a key being the rank and the value being a std::set of node IDs that belong to this rank. Will be filled by reference.
+         * @param node_id_set_owned_by_rank std::map object with a key being the rank and the value being a std::set of node IDs that belong to this rank. Will be filled by reference.
          * @param nodes_coords_vector the \ref nodes_coords_vector object which relates the node ID with their coordinates.
          * @param num_ranks the number of ranks over which the mesh is being decomposed.
          */
         void populate_node_rank_maps(std::map<size_t, int>& node_rank_map, 
-                                    std::map<int, std::set<size_t>>& rank_nodes_map, 
-                                    NodeIdCoordsPairsVector& nodes_coords_vector, 
+                                    std::set<size_t>& node_id_set_owned_by_rank, 
+                                    NodeIdCoordsPairsVector& nodes_coords_vector,
+                                    int const my_rank, 
                                     int const num_ranks)
         {
             int nnodes = nodes_coords_vector.size();
@@ -381,19 +392,37 @@ class GlobalMesh {
             for (int rank = 0; rank < num_ranks; ++rank)
             {
                 if (rank != num_ranks - 1)
-                {                
-                    for (int i = rank*nodes_per_rank; i < (rank + 1)*nodes_per_rank; ++i)
-                    {
-                        node_rank_map[nodes_coords_vector[i].first] = rank;
-                        rank_nodes_map[rank].insert(nodes_coords_vector[i].first);
+                {      
+                    if (rank == my_rank)
+                    {          
+                        for (int i = rank*nodes_per_rank; i < (rank + 1)*nodes_per_rank; ++i)
+                        {
+                            node_rank_map[nodes_coords_vector[i].first] = rank;
+                            node_id_set_owned_by_rank.insert(nodes_coords_vector[i].first);
+                            
+                        }
+                    } else {
+                        for (int i = rank*nodes_per_rank; i < (rank + 1)*nodes_per_rank; ++i)
+                        {
+                            node_rank_map[nodes_coords_vector[i].first] = rank;
+                            
+                        }
                     }
                 }
                 else
                 {
+                    if (rank == my_rank)
+                    {
                     for (int i = rank*nodes_per_rank; i < nnodes; ++i)
                     {
                         node_rank_map[nodes_coords_vector[i].first] = rank;
-                        rank_nodes_map[rank].insert(nodes_coords_vector[i].first);
+                        node_id_set_owned_by_rank.insert(nodes_coords_vector[i].first);
+                    }
+                    } else {
+                    for (int i = rank*nodes_per_rank; i < nnodes; ++i)
+                    {
+                        node_rank_map[nodes_coords_vector[i].first] = rank;
+                    }
                     }
                 }
             }
@@ -408,12 +437,30 @@ class GlobalMesh {
         void find_rank_nodes(std::set<size_t>& node_id_set_on_rank, 
                             ElemIdNodeIdPairVector& elem_nodes_vector_on_rank)
         {
-
             for (std::pair<size_t,std::vector<size_t>> elem_nodes_pair : elem_nodes_vector_on_rank)
             {
                 for (size_t node_id : elem_nodes_pair.second)
                 {
                     node_id_set_on_rank.insert(node_id);
+                }
+            }  
+        }
+
+        void find_rank_interface_nodes_and_elems(std::set<size_t>& interface_node_id_set_on_rank,
+                                       std::set<size_t>& interface_elem_id_set_on_rank,
+                                       std::set<size_t>& node_id_set_owned_by_rank,
+                                       ElemIdNodeIdPairVector& elem_nodes_vector_on_rank,
+                                       int const rank)
+        {
+            for (std::pair<size_t,std::vector<size_t>> elem_nodes_pair : elem_nodes_vector_on_rank)
+            {
+                for (size_t node_id : elem_nodes_pair.second)
+                {
+                    if (!node_id_set_owned_by_rank.count(node_id))
+                    {
+                        interface_node_id_set_on_rank.insert(node_id);
+                        interface_elem_id_set_on_rank.insert(elem_nodes_pair.first);
+                    }
                 }
             }  
         }
@@ -428,8 +475,7 @@ class GlobalMesh {
          */
         void filter_node_vector(NodeIdCoordsPairsVector& nodes_coords_vector_on_rank,
                                 NodeIdCoordsPairsVector& nodes_coords_vector, 
-                                std::set<size_t> node_id_set_on_rank,
-                                int const rank)
+                                std::set<size_t> node_id_set_on_rank)
         {
             for (size_t node_id : node_id_set_on_rank)
             {
@@ -465,16 +511,16 @@ class GlobalMesh {
          * @brief finds the elements that belong on this current rank. Does this by checking the nodes that are owned by this rank, and for each node owned by this rank, finding which elements belong to it from the map node_element_set that was populated by \ref populate_node_element_map.
          * 
          * @param elem_id_set_on_rank a set of unique element IDs for elements that belong on this rank, including domain interface elements.
-         * @param rank_nodes_map a map whose key is the rank, and contents are the IDs of the nodes owned by this rank.
+         * @param node_id_set_owned_by_rank a std::list which contents are the IDs of the nodes owned by this rank.
          * @param node_element_map a map which whose key is the node ID, and value is all the elements that connect to this node.
          * @param rank rank of the process that is calling this function.
          */
         void find_rank_elements(std::set<size_t>& elem_id_set_on_rank,
-                                std::map<int, std::set<size_t>>&  rank_nodes_map, 
+                                std::set<size_t>&  node_id_set_owned_by_rank, 
                                 std::map<size_t, std::set<size_t>> node_element_map, 
                                 int const rank)
         {
-            for (size_t node_id : rank_nodes_map[rank])
+            for (size_t node_id : node_id_set_owned_by_rank)
             {
                 for (size_t elem_id : node_element_map[node_id])
                 {
@@ -525,16 +571,16 @@ class GlobalMesh {
 
             // sort nodes into the ranks that own them
             std::map<size_t, int> node_rank_map; 
-            std::map<int, std::set<size_t>> rank_nodes_map;
-            populate_node_rank_maps(node_rank_map, rank_nodes_map, nodes_coords_vector, num_ranks);
+            std::set<size_t> node_id_set_owned_by_rank;
+            populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank, nodes_coords_vector, rank, num_ranks);
             
             // create a map that links any nodes to the elements that connect to it.
             std::map<size_t, std::set<size_t>> node_element_map;
             populate_node_element_map(node_element_map, elem_nodes_vector);
             
             // Based on the nodes we currently have, find all elements that connect to any of these nodes.
-            std::set<size_t> elem_id_set_on_rank;
-            find_rank_elements(elem_id_set_on_rank, rank_nodes_map, node_element_map, rank);
+            std::set<size_t> elem_id_set_on_rank; 
+            find_rank_elements(elem_id_set_on_rank, node_id_set_owned_by_rank, node_element_map, rank);
             rank_nelems = elem_id_set_on_rank.size();
             // filter the elem_nodes_vector to only the members that belong on this rank (including those that are duplicated)
             ElemIdNodeIdPairVector elem_nodes_vector_on_rank;
@@ -542,22 +588,33 @@ class GlobalMesh {
             filter_element_vector(elem_nodes_vector_on_rank, elem_id_set_on_rank, elem_nodes_vector, rank);
 
             // Based on the members that will be created on this rank, add the nodes that will also need to be created
-            std::set<size_t> node_id_set_on_rank;
-            find_rank_nodes(node_id_set_on_rank, elem_nodes_vector_on_rank);
-            rank_nnodes = node_id_set_on_rank.size();
+            std::set<size_t> interface_node_id_set_on_rank;
+            std::set<size_t> interface_elem_id_set_on_rank;
+            find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank,interface_elem_id_set_on_rank,node_id_set_owned_by_rank,elem_nodes_vector_on_rank, rank);
+
+            rank_nnodes = node_id_set_owned_by_rank.size();
+            rank_interface_nnodes = interface_node_id_set_on_rank.size();
             // Add the nodes that officially belong to this rank to the rank nodes coords vector.
             NodeIdCoordsPairsVector nodes_coords_vector_on_rank;
+            NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank;
             nodes_coords_vector_on_rank.reserve(rank_nnodes);
-            filter_node_vector(nodes_coords_vector_on_rank, nodes_coords_vector, node_id_set_on_rank, rank);
+            interface_nodes_coords_vector_on_rank.reserve(rank_interface_nnodes);
+            filter_node_vector(nodes_coords_vector_on_rank, nodes_coords_vector, node_id_set_owned_by_rank);
+            filter_node_vector(interface_nodes_coords_vector_on_rank, nodes_coords_vector, interface_node_id_set_on_rank);
 
             // populate and sort the node and element object vectors for the rank
             node_vector.clear();
             node_vector.reserve(rank_nnodes);
+            interface_node_vector.clear();
+            interface_node_vector.reserve(rank_nnodes);
+
             elem_vector.clear();
             elem_vector.reserve(rank_nelems);
             make_nodes(nodes_coords_vector_on_rank);
+            make_nodes(nodes_coords_vector_on_rank, true);
             make_elements(elem_nodes_vector_on_rank);
             std::sort(node_vector.begin(), node_vector.end());
+            std::sort(interface_node_vector.begin(), node_vector.end());
             std::sort(elem_vector.begin(), elem_vector.end());
 
             // count the ndofs of each rank and assign each node an index that corresponds to the global matrices and vectors.
@@ -565,6 +622,9 @@ class GlobalMesh {
         }
         /**
          * @brief counts the active DOFs in the mesh by going over all the nodes and getting the number of active freedoms. This is done over a distributed domain by first carrying out the operation locally, then getting the number of DoFs on each rank via an MPI_Allgather call. The \ref rank_starting_nz_i is udpated for the current rank by summing all ndofs of the ranks lower than it. This rank_starting_nz_i is then used to update the nz_i of each node which was initialised with a local nz_i.
+         * 
+         * @param rank rank of the calling process
+         * @param num_ranks number of ranks the problem is divided onto
          */
         void count_distributed_dofs(int const rank, int const num_ranks)
         {
@@ -646,16 +706,16 @@ class GlobalMesh {
          * @param id id of the node to which to apply the boundary condition.
          * @param dof DoF to apply the constraint.
          */
-        void fix_node(int id, int dof)
+        void fix_node(int const id, int const dof)
         {
-            auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
+            auto node_ptr = get_node_by_id(id, "all");
             if (dof < 0)
             {
                 std::cout << "Fixing all DoFs of node " << id << std::endl;
-                (*node_it)->fix_all_dofs();
-                (*node_it)->print_inactive_dofs();
+                node_ptr->fix_all_dofs();
+                node_ptr->print_inactive_dofs();
             } else {
-                (*node_it)->fix_dof(dof);
+                node_ptr->fix_dof(dof);
             }    
         }
         /**
@@ -664,7 +724,7 @@ class GlobalMesh {
          */
         void load_node(int id, int dof, real load)
         {
-            get_node_by_id(id)->add_nodal_load(load, dof);
+            get_node_by_id(id, "rank_owned")->add_nodal_load(load, dof);
         }
         /**
          * @brief increments the nodal load of DoF dof of node id by load increment dP. Uses \ref Node::increment_nodal_load.
@@ -675,7 +735,7 @@ class GlobalMesh {
          */
         void increment_node_load(int id, int dof, real dP)
         {
-            get_node_by_id(id)->increment_nodal_load(dP, dof);
+            get_node_by_id(id, "rank_owned")->increment_nodal_load(dP, dof);
         }
 
         /**
@@ -685,22 +745,35 @@ class GlobalMesh {
          * @param dof 
          * @param history vector where nodal DoF history is tracked.
          */
-        void track_nodal_dof(int id, int dof, std::vector<real>& history)
+        void track_nodal_dof(int const id, int const dof, std::vector<real>& history)
         {
-            auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
-            std::array<real, 6> nodal_displacements = (*node_it)->get_nodal_displacements();
+            auto node_ptr = get_node_by_id(id, "rank_owned");
+            std::array<real, 6> nodal_displacements = node_ptr->get_nodal_displacements();
             history.push_back(nodal_displacements[dof]);
         }
 
         /**
          * @brief get node shared_ptr by id.
          * @param id id of the node to get from the \ref node_vector.
+         * @param search_target a std::string that is either "all", "rank_owned", or "interface" that specifies where to search for the nodes.
          * @return std::shared_ptr<Node> a shared pointer to the node with the given id.
          */
-        std::shared_ptr<Node> get_node_by_id(int id)
+        std::shared_ptr<Node> get_node_by_id(int id, std::string search_target)
         {
-            auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
-            return *node_it;
+            if (search_target == "all" || search_target == "rank_owned" )
+            {
+                auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
+                if (node_it == node_vector.end() && search_target == "all")
+                {
+                    node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, interface_node_vector);
+                    return *node_it;
+                }
+            }
+            if (search_target == "interface")
+            {
+                auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, interface_node_vector);
+                return *node_it;
+            }
         }
 
         /**
@@ -848,11 +921,34 @@ class GlobalMesh {
         int const get_rank_num_elems() const {return rank_nelems;}
 
         int const count_nodes_vector() const {return node_vector.size();}
+        int const count_interface_nodes_vector() const {return interface_node_vector.size();}
         int const count_elem_vector() const {return elem_vector.size();}
-
-        bool contains_nodes(std::set<size_t> node_ids) 
+        /**
+         * @brief checks if \ref node_vector and/or \ref interface_node_vector contain a given set of node ids.alignas
+         * 
+         * @warning if there are fewer node_ids than in the mesh vectors and all of them are within the mesh, then this returns true although there are IDs in the mesh that are not in the passed node_ids set. 
+         * 
+         * @param node_ids a std::set of node IDs to check whether or not they are created in the mesh.          
+         * @param search_target a std::string that is either "all", "rank_owned", or "interface" that specifies where to search for the nodes.
+         * @return true if the node_ids are within the node vectors.
+         * @return false if one or more IDs from node_ids are not within the node vectors.
+         */
+        bool contains_nodes(std::set<size_t> node_ids, std::string search_target) 
         {
-            return contains_id(node_ids, node_vector);
+            bool contains_nodes;
+            if (search_target == "all" || search_target == "rank_owned")
+            {
+                contains_nodes = contains_id(node_ids, node_vector);
+                if (!contains_nodes && search_target == "all")
+                {
+                    contains_nodes = contains_id(node_ids, interface_node_vector);
+                }
+            }
+            if (search_target == "interface")
+            {
+                contains_nodes = contains_id(node_ids, interface_node_vector);
+            }
+            return contains_nodes;
         }
 
         bool contains_elements(std::set<size_t> elem_ids) 

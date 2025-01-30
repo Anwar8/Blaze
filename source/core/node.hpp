@@ -31,6 +31,8 @@ class Node {
         real mass;
         int ndof = 6; /**< the number of DoFs - should be 6 unless some are deactivated.*/
         int nz_i = 0; /**< Corresponds to global location of node and its DoFs and load, considering deactivated DoFs.*/
+        bool on_parent_rank = true; /**< Is this node object currently living on its parent rank?*/
+        int parent_rank = 0; /**< The rank that owns this node.*/
         std::set<int> connected_elements; /**< of element ids that are connected to this node; expected to be useful for element and node deletion.*/
         std::set<int> active_dofs = {0, 1, 2, 3, 4, 5}; /**< set of active DOFs; all of them at first, then if deactivated moved to inactive_dofs.*/
         std::set<int> inactive_dofs; /**< a std set of active DoFs; none at first, then if any are deactivated then they are moved from active_dofs.*/
@@ -113,6 +115,11 @@ class Node {
         void increment_nz_i(int i) {nz_i += i;}
         int get_nz_i() {return nz_i;}
         void  set_z(real z) { coordinates[2] = z;}
+        void set_parent_rank(int parent_rank, int calling_rank) 
+        {
+            parent_rank = parent_rank;
+            on_parent_rank = (parent_rank == calling_rank);
+        }
         //@}
 
         /**

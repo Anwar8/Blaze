@@ -35,6 +35,36 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
+### 30 January
+Should I create a separate `node_vector` for rank-owned nodes, or not? First, let us see when are the nodes called?
+- `Assembler::assemble_global_P` loops over the <span style="color: green;">rank-owned nodes</span> to collect their force contribution.
+- `GlobalMesh::count_distributed_dofs` should loop over <span style="color: green;">rank-owned nodes</span> to calculate their `nz_i`. 
+- `GlobalMesh::calc_nodal_contributions_to_P` loops over <span style="color: green;">rank-owned nodes</span> to get them to call `Node::compute_global_load_triplets`.
+- `GlobalMesh::track_nodal_dof` searches <span style="color: green;">rank-owned nodes</span> to track their DoFs.
+- `GlobalMesh::check_nodal_loads` loops over <span style="color: green;">rank-owned nodes</span> to check whether they are loaded *and* restrained, in which case an error is thrown.
+- `GlobalMesh::print_info` loops over <span style="color: green;">rank-owned nodes</span> to print their data. 
+
+    
+- `Assembler::map_U_to_nodes` loops over <span style="color:red;">all nodes</span> to map $\bm{U}$ to them.
+- `GlobalMesh::fix_node` searches <span style="color:red;">all nodes</span> to fix their DoFs. 
+- `GlobalMesh::get_node_by_id` searches <span style="color:red;">all nodes</span> for an ID. Should be deprecated in favour of `BasicUtilities::get_id_iterator` or a modified version that allows selection of where to search.
+- `GlobalMesh::count_nodes_vector` is used for testing and counts <span style="color:red;">all nodes</span>, but this can be changed to suit whatever design I choose.
+- `GlobalMesh::contains_nodes` calls `BasicUtilities::contains_id` on <span style="color:red;">all nodes</span>, but this behaviour could be changed as this is only used for testing right now.
+
+
+There is an important distinction: loads applied to nodes are only considered globally in $\bm{P}$, and so only <span style="color: green;">rank-owned nodes</span> are concerned with loads. The same is not true for displacements and restraints since they affect elements connected to the nodes.
+
+It appears it is safe to create two separate vectors: one for rank-owned nodes and one for interface nodes. 
+- `Assembler::map_U_to_nodes` can be updated to loop first over the rank-owned nodes which will be contiguous anyway, and then can loop over the interface nodes.
+- The same can be done for `GlobalMesh::fix_node` - first, search through the rank-owned nodes, and if not found, search through the interface nodes.
+- `GlobalMesh::get_node_by_id` can be updated to first search through the rank-owned nodes, and if it does not find them, search through the interface nodes, and if also not found, then raise an error or an output that indicates the id was not found. This is important for the function `GlobalMesh::make_elements`. 
+- This modification may also allow for counting the actually applied restraints as there is now a separation between rank-owned and interface nodes. This count would then allow for checking if the number of applied restrains in the whole model matches the number of restraints made to the function.
+
+**TODO:**
+- [ ] Node ID renumbering.
+- [ ] Update node rank and whether it is on its parent rank for each node.
+- [ ] Update testing.
+
 ### 29 January
 I have now gone over the mesh decomposition algorithm in great detail and I believe I also accounted for decomposition of arbitrarily-numbered meshes (unstructured meshes) as well. More details about these trials can be seen in `mesh_distribution.xlsx`. A geometric decomposition algorithm called `naive_geometric_partitioning` was also created in the proof of concept `mesh_decomposition_2.ipynb` notebook. 
 1. On each rank, starting by first creating only the nodes that are owned by that rank.
