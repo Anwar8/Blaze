@@ -767,6 +767,78 @@ class GlobalMesh {
             }
         }
         /**
+         * @brief exchnages the nz_i of the interface nodes between neighbouring ranks.
+         * 
+         * @param neighbour_wanted_node_id_map 
+         * @param interface_rank_node_id_map 
+         */
+        void exchange_interface_nodes_nz_i(std::map<int, std::set<unsigned>> neighbour_wanted_node_id_map, 
+                                                  std::map<int, std::set<unsigned>> interface_rank_node_id_map)
+        {
+            // get information about neighbours and buffer sizes
+            int num_neighbours = 0;
+            std::set<int> neighbours;
+            std::map<int, int> neighbour_rank_buffer_size_map;
+            for (auto rank_nodes_set_pair : neighbour_wanted_node_id_map)
+            {
+                neighbours.insert(rank_nodes_set_pair.first);
+                neighbour_rank_buffer_size_map[rank_nodes_set_pair.first] = rank_nodes_set_pair.second.size();
+            }
+            num_neighbours = neighbours.size();
+
+
+            // setup send buffers
+            std::map<int, std::vector<int>> rank_nz_i_send_buffers_map;
+            for (auto rank_buffer_size_pair : neighbour_rank_buffer_size_map)
+            {
+                rank_nz_i_send_buffers_map[rank_buffer_size_pair.first].reserve(rank_buffer_size_pair.second);
+            }
+
+            // setup receive buffers
+            std::map<int, std::vector<int>> rank_nz_i_receive_buffers_map;
+            for (auto rank_buffer_size_pair : neighbour_rank_buffer_size_map)
+            {
+                rank_nz_i_receive_buffers_map[rank_buffer_size_pair.first].resize(rank_buffer_size_pair.second);
+            }
+
+
+            // populate send buffers --- std::map<int, std::set<unsigned>> neighbour_wanted_node_id_map
+            for (auto rank_node_set : neighbour_wanted_node_id_map)
+            {
+                for (auto node_id : rank_node_set.second)
+                {
+                    unsigned node_nz_i = get_node_by_record_id(node_id, "rank_owned")->get_nz_i();
+                    rank_nz_i_send_buffers_map[rank_node_set.first].push_back(node_nz_i);
+                }
+            }
+
+            // exchange node ids
+            #ifdef MPI
+             for (int neighbor_rank : neighbours)
+            {
+                auto receive_buffer = rank_nz_i_receive_buffers_map[neighbor_rank].data();
+                auto send_buffer = rank_ids_send_buffers_map[neighbor_rank].data();
+                int num_exchanged_objects = neighbour_rank_buffer_size_map[neighbor_rank];
+                MPI_Sendrecv(send_buffer, num_exchanged_objects, MPI_INT, neighbor_rank, 0,
+                            receive_buffer, num_exchanged_objects, MPI_INT, neighbor_rank, 0, 
+                            MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            }
+            #endif
+            // copy back from the receive buffer into the nodes new ids
+            for (auto rank_id_buffer_pair : rank_nz_i_receive_buffers_map)
+            {
+                auto node_id_set_iterator = interface_rank_node_id_map[rank_id_buffer_pair.first].begin();
+                for (int i = 0; i < rank_id_buffer_pair.second.size(); ++i)
+                {
+                    int new_nz_i = rank_id_buffer_pair.second[i];
+                    unsigned original_record_id = *node_id_set_iterator;
+                    get_node_by_record_id(original_record_id, "interface")->set_nz_i(new_nz_i);
+                    ++node_id_set_iterator;
+                }
+            }
+        }
+
+        /**
          * @brief renumbers the nodes on the current rank so that they are continuous and take into account the number of nodes on all other ranks as well. Requires an MPI_Allgather operation, and requires communication to update the node number for nodes that do not belong on the current rank.
          * 
          * @param rank the MPI rank that called this function.

@@ -47,7 +47,9 @@ I should do the testing next, which will allow me to hopefully fix the rest of t
 - [x] Node ID renumbering.
 - [x] Update node rank and whether it is on its parent rank for each node.
 - [ ] Update testing.
-- [ ] Create the function `exchange_interface_nodes_updated_nz_i` which follows the same design as `exchange_interface_nodes_updated_ids`. 
+- [x] Create the function `exchange_interface_nodes_updated_nz_i` which follows the same design as `exchange_interface_nodes_updated_ids`. 
+
+Night-time now - created `exchange_interface_nodes_updated_nz_i` by copying and modifying `exchange_interface_nodes_updated_ids` but did not carefully check it - it likely has a bunch of bugs. 
 
 ### 2 February
 Oh the dilemma of communication. Each rank knows which nodes are interface in the sense it knows that they are owned by another node, but it also needs to know which of its owned nodes will need to be communicated to other nodes. That is, knowing interface nodes is not enough only in one way - it has to be two ways! 
