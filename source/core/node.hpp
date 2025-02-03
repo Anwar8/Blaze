@@ -21,7 +21,8 @@
 class Node {
 
     private:
-        unsigned id = 0; /**< unique id for node object.*/
+        unsigned id = 0; /**< unique id for node object - can be changed during renumbering.*/
+        unsigned record_id = 0; /**< unique id for node object - cannot be changed from original value given in mesh.*/
         coords coordinates; /**< x, y, and z coordinates of the node.*/
         /**
          * @brief nodal mass.
@@ -66,7 +67,7 @@ class Node {
          * @param i id number.
          * @param xyz nodal x, y, and z coordinates.
          */
-        Node(int i, coords xyz) : id(i), coordinates(xyz), mass(0.0) {}
+        Node(int i, coords xyz) : id(i), record_id(i), coordinates(xyz), mass(0.0) {}
 
         /**
          * @brief overloads the less than operator to compare nodes by their node ID, allowing easy sorting of node STL containers via \ref std::sort.
@@ -104,6 +105,7 @@ class Node {
         int const get_ndof()  {return ndof;}
         void add_connected_element(int element_id) {connected_elements.insert(element_id);}
         unsigned const get_id() const {return id;}
+        unsigned const get_record_id() const {return record_id;}
         /**
          * @brief Set the nz_i to a value.
          * 
@@ -115,11 +117,15 @@ class Node {
         void increment_nz_i(int i) {nz_i += i;}
         int get_nz_i() {return nz_i;}
         void  set_z(real z) { coordinates[2] = z;}
+
+        void set_id(unsigned new_id) { id = new_id; }
+        void increment_id(unsigned id_increment) { id += id_increment; }
         void set_parent_rank(int parent_rank, int calling_rank) 
         {
             parent_rank = parent_rank;
             on_parent_rank = (parent_rank == calling_rank);
         }
+        int get_parent_rank() const {return parent_rank;}
         //@}
 
         /**

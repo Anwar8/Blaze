@@ -35,6 +35,28 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
+### 3 February
+I have now completed (hopefully without many bugs) the renumbering algorithm along with the exchange of the node IDs between ranks. See `exchange_interface_nodes_updated_ids` for more details. So, from the TODO on 30 January, I am currently at the following stage:
+**TODO:**
+- [x] Node ID renumbering.
+- [x] Update node rank and whether it is on its parent rank for each node.
+- [ ] Update testing.
+
+I should do the testing next, which will allow me to hopefully fix the rest of the architecture. As discussed on 29 January, I will likely want to create a `CommunicationsManager` to help with managing communications. With this being said, however, it appears I am still missing the exchange of the `updated_nz_i` across ranks. Right now, my code is able to update the nodal numbers, but there is still an important missing function: `exchange_interface_nodes_updated_nz_i`. So, the updated TODO is:
+**TODO:**
+- [x] Node ID renumbering.
+- [x] Update node rank and whether it is on its parent rank for each node.
+- [ ] Update testing.
+- [ ] Create the function `exchange_interface_nodes_updated_nz_i` which follows the same design as `exchange_interface_nodes_updated_ids`. 
+
+### 2 February
+Oh the dilemma of communication. Each rank knows which nodes are interface in the sense it knows that they are owned by another node, but it also needs to know which of its owned nodes will need to be communicated to other nodes. That is, knowing interface nodes is not enough only in one way - it has to be two ways! 
+
+One way to approach this issue is by first sending a message of the node IDs that each rank wants from the other rank, and then this allows for exchange of data later on. That is, there is a setup stage where the nodes exchange which node IDs they need from one another.
+
+Another approach is to simply have this data prepared beforehand when creating the maps and separating the nodes into interface nodes and rank-owned nodes. That is, if one node is an interface node, then the other connected to the same element is going to be an interface node for the neighbour. A `neighbour_wanted_node`?
+
+
 ### 30 January
 Should I create a separate `node_vector` for rank-owned nodes, or not? First, let us see when are the nodes called?
 - `Assembler::assemble_global_P` loops over the <span style="color: green;">rank-owned nodes</span> to collect their force contribution.

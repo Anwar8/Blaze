@@ -45,9 +45,29 @@ Iterator get_id_iterator(int id, Container& a_vec)
         [id](const auto item) {
             return item->get_id() == id;
         });
+    return itr;
+}
+/**
+ * @brief Get iterator for a node by searching for their record id.
+ * 
+ * @details please see \ref get_id_iterator for original function.
+ * 
+ * 
+ * @tparam Iterator stl-compatible iterator corresponding to the stl compatible container.
+ * @tparam Container any container with stl compatible interface.
+ * @param record_id unique record_id of node.
+ * @param a_vec the container containing the nodes.
+ * @return Iterator that can be a vector.end() or the iterator. if vector.end() this means the id was not found.
+ */
+template <typename Iterator, typename Container>
+Iterator get_record_id_iterator(int record_id, Container& a_vec)
+{
+    Iterator itr = std::find_if(a_vec.begin(), a_vec.end(), 
+        [record_id](const auto item) {
+            return item->get_record_id() == record_id;
+        });
         return itr;
 }
-
 /**
  * @brief Checks whether a container of IDs are all contained in another container.
  * 
