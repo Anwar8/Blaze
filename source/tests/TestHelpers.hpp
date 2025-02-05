@@ -223,6 +223,15 @@ void check_set_ids(std::set<int_like> checked_set, int start_i, int end_i, int i
     }
 }
 
+template <typename int_like, typename stl_container>
+void check_set_ids(std::set<int_like> checked_set, stl_container checking_set)
+{
+    for (auto checking_id : checking_set)
+    {
+        EXPECT_TRUE(checked_set.count(checking_id));
+    }
+}
+
 template <typename int_like, typename vector_like>
 void check_vector_ids(std::vector<std::pair<int_like, vector_like>> checked_vec, int start_i, int end_i, int id_increment)
 {
@@ -237,6 +246,24 @@ void check_vector_ids(std::vector<std::pair<int_like, vector_like>> checked_vec,
     {
         EXPECT_EQ((*vec_it).first, i+id_increment);
         vec_it++;
+    }
+}
+
+template <typename int_like, typename vector_like, typename stl_container>
+void check_vector_ids(std::vector<std::pair<int_like, vector_like>> checked_vec, stl_container checking_vector)
+{
+    // providing an explicit lambda to sort by first is to prevent attempting to touch the second item for node-coord vectors for which a sorting operation is not available and will result in a compilation error.
+    std::sort(checked_vec.begin(), checked_vec.end(), 
+            [](auto a, auto b) {
+              return a.first < b.first;
+            });
+
+    for (auto checking_id : checking_vector)
+    {
+        EXPECT_TRUE(std::find_if(checked_vec.begin(), checked_vec.end(), 
+            [checking_id](const auto item) {
+                return item.first == checking_id;
+            })!= checked_vec.end());
     }
 }
 //@}

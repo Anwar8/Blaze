@@ -1013,7 +1013,7 @@ class GlobalMesh {
          * @param search_target a std::string that is either "all", "rank_owned", or "interface" that specifies where to search for the nodes.
          * @return std::shared_ptr<Node> a shared pointer to the node with the given id.
          */
-        std::shared_ptr<Node> get_node_by_id(int id, std::string search_target)
+        std::shared_ptr<Node> get_node_by_id(int id, std::string search_target = "all")
         {
             if (search_target == "all" || search_target == "rank_owned" )
             {
@@ -1024,7 +1024,7 @@ class GlobalMesh {
                     return *node_it;
                 }
             }
-            if (search_target == "interface")
+            if (search_target == "all" || search_target == "interface")
             {
                 auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, interface_node_vector);
                 return *node_it;
@@ -1037,7 +1037,7 @@ class GlobalMesh {
          * @param search_target a std::string that is either "all", "rank_owned", or "interface" that specifies where to search for the nodes.
          * @return std::shared_ptr<Node> a shared pointer to the node with the given record_id.
          */
-        std::shared_ptr<Node> get_node_by_record_id(int record_id, std::string search_target)
+        std::shared_ptr<Node> get_node_by_record_id(int record_id, std::string search_target = "all")
         {
             if (search_target == "all" || search_target == "rank_owned" )
             {
@@ -1048,7 +1048,7 @@ class GlobalMesh {
                     return *node_it;
                 }
             }
-            if (search_target == "interface")
+            if (search_target == "all" || search_target == "interface")
             {
                 auto node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, interface_node_vector);
                 return *node_it;

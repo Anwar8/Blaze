@@ -50,7 +50,7 @@ class NodalRestraint
         {
             for (auto& node_id : node_ids)
             {
-                restrained_nodes.insert(glob_mesh.get_node_by_id(node_id));
+                restrained_nodes.insert(glob_mesh.get_node_by_id(node_id, "all"));
             }
         }
 

@@ -38,19 +38,17 @@ class DistributedLineMeshTests : public ::testing::Test {
 TEST_F(DistributedLineMeshTests, populate_node_rank_maps_10_on_1_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 1);
-    EXPECT_EQ(rank_nodes_map.size(), 1);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 1);
     EXPECT_EQ(node_rank_map.size(), 10);
 }
 
 TEST_F(DistributedLineMeshTests, populate_node_rank_maps_10_on_1_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 1);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 1);
 
-    check_set_ids(rank_nodes_map[0], 0, 10, 1);
     
     for (int i = 1; i <= 10; ++i)
     {
@@ -61,20 +59,26 @@ TEST_F(DistributedLineMeshTests, populate_node_rank_maps_10_on_1_values)
 TEST_F(DistributedLineMeshTests, populate_node_rank_maps_10_on_2_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 2);
-    EXPECT_EQ(rank_nodes_map.size(), 2);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 2);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 2);
+
     EXPECT_EQ(node_rank_map.size(), 10);
+    EXPECT_EQ(node_id_set_owned_by_rank_0.size(), 5);
+    EXPECT_EQ(node_id_set_owned_by_rank_1.size(), 5);
 }
 
 TEST_F(DistributedLineMeshTests, populate_node_rank_maps_10_on_2_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 2);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 2);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 2);
 
-    check_set_ids(rank_nodes_map[0], 0, 5, 1);
-    check_set_ids(rank_nodes_map[1], 0, 5, 6);
+    check_set_ids(node_id_set_owned_by_rank_0, 0, 5, 1);
+    check_set_ids(node_id_set_owned_by_rank_1, 0, 5, 6);
     
     for (int i = 1; i <= 10; ++i)
     {
@@ -90,21 +94,32 @@ TEST_F(DistributedLineMeshTests, populate_node_rank_maps_10_on_2_values)
 TEST_F(DistributedLineMeshTests, populate_node_rank_maps_10_on_3_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 3);
-    EXPECT_EQ(rank_nodes_map.size(), 3);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    std::set<size_t> node_id_set_owned_by_rank_2;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_2, mesh_maps.first, 2, 3);
+    
     EXPECT_EQ(node_rank_map.size(), 10);
+    EXPECT_EQ(node_id_set_owned_by_rank_0.size(), 3);
+    EXPECT_EQ(node_id_set_owned_by_rank_1.size(), 3);
+    EXPECT_EQ(node_id_set_owned_by_rank_2.size(), 4);
 }
 
 TEST_F(DistributedLineMeshTests, populate_node_rank_maps_10_on_3_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 3);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    std::set<size_t> node_id_set_owned_by_rank_2;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_2, mesh_maps.first, 2, 3);
 
-    check_set_ids(rank_nodes_map[0], 0, 3, 1);
-    check_set_ids(rank_nodes_map[1], 0, 3, 4);
-    check_set_ids(rank_nodes_map[2], 0, 4, 7);
+    check_set_ids(node_id_set_owned_by_rank_0, 0, 3, 1);
+    check_set_ids(node_id_set_owned_by_rank_1, 0, 3, 4);
+    check_set_ids(node_id_set_owned_by_rank_2, 0, 4, 7);
     
     for (int i = 1; i <= 10; ++i)
     {
@@ -167,13 +182,13 @@ TEST_F(DistributedLineMeshTests, populate_node_element_map_9_elems_values)
 TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_1_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 1);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 1);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank_nelems = elem_id_set_on_rank_0.size();
 
     EXPECT_EQ(rank_nelems, 9);
@@ -182,13 +197,13 @@ TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_1_counts)
 TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_1_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 1);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 1);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
 
     check_set_ids(elem_id_set_on_rank_0, 0, 9, 1);
 }
@@ -196,17 +211,20 @@ TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_1_values)
 TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_2_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 2);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 2);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 2);
+
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     EXPECT_EQ(rank0_nelems, 5);
@@ -216,16 +234,19 @@ TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_2_counts)
 TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_2_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 2);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 2);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 2);
+
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
 
     check_set_ids(elem_id_set_on_rank_0, 0, 5, 1);
     check_set_ids(elem_id_set_on_rank_1, 0, 5, 5);
@@ -234,21 +255,25 @@ TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_2_values)
 TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_3_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 3);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    std::set<size_t> node_id_set_owned_by_rank_2;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_2, mesh_maps.first, 2, 3);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     std::set<size_t> elem_id_set_on_rank_2;
-    mesh.find_rank_elements(elem_id_set_on_rank_2, rank_nodes_map, node_element_map, 2);
+    mesh.find_rank_elements(elem_id_set_on_rank_2, node_id_set_owned_by_rank_2, node_element_map, 2);
     int rank2_nelems = elem_id_set_on_rank_2.size();
 
     EXPECT_EQ(rank0_nelems, 3);
@@ -259,19 +284,23 @@ TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_3_counts)
 TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_3_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 3);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    std::set<size_t> node_id_set_owned_by_rank_2;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_2, mesh_maps.first, 2, 3);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
 
     std::set<size_t> elem_id_set_on_rank_2;
-    mesh.find_rank_elements(elem_id_set_on_rank_2, rank_nodes_map, node_element_map, 2);
+    mesh.find_rank_elements(elem_id_set_on_rank_2, node_id_set_owned_by_rank_2, node_element_map, 2);
 
     check_set_ids(elem_id_set_on_rank_0, 0, 3, 1);
     check_set_ids(elem_id_set_on_rank_1, 0, 4, 3);
@@ -287,13 +316,13 @@ TEST_F(DistributedLineMeshTests, find_rank_elements_10_on_3_values)
 TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_1_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 1);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 1);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank_nelems = elem_id_set_on_rank_0.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -306,13 +335,13 @@ TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_1_counts)
 TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_1_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 1);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 1);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -325,17 +354,19 @@ TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_1_values)
 TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_2_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 2);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 2);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 2);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -353,17 +384,19 @@ TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_2_counts)
 TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_2_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 2);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 2);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 2);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -381,21 +414,25 @@ TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_2_values)
 TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_3_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 3);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    std::set<size_t> node_id_set_owned_by_rank_2;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_2, mesh_maps.first, 2, 3);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     std::set<size_t> elem_id_set_on_rank_2;
-    mesh.find_rank_elements(elem_id_set_on_rank_2, rank_nodes_map, node_element_map, 2);
+    mesh.find_rank_elements(elem_id_set_on_rank_2, node_id_set_owned_by_rank_2, node_element_map, 2);
     int rank2_nelems = elem_id_set_on_rank_2.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -418,21 +455,25 @@ TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_3_counts)
 TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_3_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 3);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    std::set<size_t> node_id_set_owned_by_rank_2;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_2, mesh_maps.first, 2, 3);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     std::set<size_t> elem_id_set_on_rank_2;
-    mesh.find_rank_elements(elem_id_set_on_rank_2, rank_nodes_map, node_element_map, 2);
+    mesh.find_rank_elements(elem_id_set_on_rank_2, node_id_set_owned_by_rank_2, node_element_map, 2);
     int rank2_nelems = elem_id_set_on_rank_2.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -462,62 +503,48 @@ TEST_F(DistributedLineMeshTests, filter_element_vector_10_on_3_values)
 TEST_F(DistributedLineMeshTests, find_rank_nodes_10_on_1_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 1);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 1);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank_nelems = elem_id_set_on_rank_0.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
     elem_nodes_vector_on_rank_0.reserve(rank_nelems);
     mesh.filter_element_vector(elem_nodes_vector_on_rank_0, elem_id_set_on_rank_0, mesh_maps.second, 0);
 
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-    int rank0_nnodes = node_id_set_on_rank_0.size();
+    std::set<size_t> interface_node_id_set_on_rank_0;
+    std::set<size_t> interface_elem_id_set_on_rank_0;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_0,interface_elem_id_set_on_rank_0,node_id_set_owned_by_rank_0,elem_nodes_vector_on_rank_0, 0);
+    int rank0_nnodes = node_id_set_owned_by_rank_0.size();
+    int rank0_interface_nnodes = interface_node_id_set_on_rank_0.size();
+    int rank0_interface_nelems = interface_elem_id_set_on_rank_0.size();
 
     EXPECT_EQ(rank0_nnodes, 10);
+    EXPECT_EQ(rank0_interface_nnodes, 0);
+    EXPECT_EQ(rank0_interface_nelems, 0);
 }
 
-TEST_F(DistributedLineMeshTests, find_rank_nodes_10_on_1_values)
-{
-    std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 1);
-    std::map<size_t, std::set<size_t>> node_element_map;
-    mesh.populate_node_element_map(node_element_map, mesh_maps.second);
-
-    std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
-    int rank0_nelems = elem_id_set_on_rank_0.size();
-
-    ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
-    elem_nodes_vector_on_rank_0.reserve(rank0_nelems);
-    mesh.filter_element_vector(elem_nodes_vector_on_rank_0, elem_id_set_on_rank_0, mesh_maps.second, 0);
-
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-
-    check_set_ids(node_id_set_on_rank_0, 0, 10, 1);
-}
 
 TEST_F(DistributedLineMeshTests, find_rank_nodes_10_on_2_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 2);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 2);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 2);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -528,32 +555,47 @@ TEST_F(DistributedLineMeshTests, find_rank_nodes_10_on_2_counts)
     elem_nodes_vector_on_rank_1.reserve(rank1_nelems);
     mesh.filter_element_vector(elem_nodes_vector_on_rank_1, elem_id_set_on_rank_1, mesh_maps.second, 1);
 
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-    int rank0_nnodes = node_id_set_on_rank_0.size();
 
-    std::set<size_t> node_id_set_on_rank_1;
-    mesh.find_rank_nodes(node_id_set_on_rank_1, elem_nodes_vector_on_rank_1);
-    int rank1_nnodes = node_id_set_on_rank_1.size();
+    std::set<size_t> interface_node_id_set_on_rank_0;
+    std::set<size_t> interface_elem_id_set_on_rank_0;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_0,interface_elem_id_set_on_rank_0,node_id_set_owned_by_rank_0,elem_nodes_vector_on_rank_0, 0);
+    int rank0_nnodes = node_id_set_owned_by_rank_0.size();
+    int rank0_interface_nnodes = interface_node_id_set_on_rank_0.size();
+    int rank0_interface_nelems = interface_elem_id_set_on_rank_0.size();
 
-    EXPECT_EQ(rank0_nnodes, 6);
-    EXPECT_EQ(rank1_nnodes, 6);
+    std::set<size_t> interface_node_id_set_on_rank_1;
+    std::set<size_t> interface_elem_id_set_on_rank_1;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_1,interface_elem_id_set_on_rank_1,node_id_set_owned_by_rank_1,elem_nodes_vector_on_rank_1, 1);
+    int rank1_nnodes = node_id_set_owned_by_rank_1.size();
+    int rank1_interface_nnodes = interface_node_id_set_on_rank_1.size();
+    int rank1_interface_nelems = interface_elem_id_set_on_rank_1.size();
+
+    EXPECT_EQ(rank0_nnodes, 5);
+    EXPECT_EQ(rank1_nnodes, 5);
+
+    EXPECT_EQ(rank0_interface_nnodes, 1);
+    EXPECT_EQ(rank1_interface_nnodes, 1);
+
+    EXPECT_EQ(rank0_interface_nelems, 1);
+    EXPECT_EQ(rank1_interface_nelems, 1);
 }
 
 TEST_F(DistributedLineMeshTests, find_rank_nodes_10_on_2_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 2);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 2);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 2);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -564,36 +606,49 @@ TEST_F(DistributedLineMeshTests, find_rank_nodes_10_on_2_values)
     elem_nodes_vector_on_rank_1.reserve(rank1_nelems);
     mesh.filter_element_vector(elem_nodes_vector_on_rank_1, elem_id_set_on_rank_1, mesh_maps.second, 1);
 
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-    int rank0_nnodes = node_id_set_on_rank_0.size();
+    std::set<size_t> interface_node_id_set_on_rank_0;
+    std::set<size_t> interface_elem_id_set_on_rank_0;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_0,interface_elem_id_set_on_rank_0,node_id_set_owned_by_rank_0,elem_nodes_vector_on_rank_0, 0);
+    int rank0_nnodes = node_id_set_owned_by_rank_0.size();
+    int rank0_interface_nnodes = interface_node_id_set_on_rank_0.size();
+    int rank0_interface_nelems = interface_elem_id_set_on_rank_0.size();
 
-    std::set<size_t> node_id_set_on_rank_1;
-    mesh.find_rank_nodes(node_id_set_on_rank_1, elem_nodes_vector_on_rank_1);
-    int rank1_nnodes = node_id_set_on_rank_1.size();
+    std::set<size_t> interface_node_id_set_on_rank_1;
+    std::set<size_t> interface_elem_id_set_on_rank_1;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_1,interface_elem_id_set_on_rank_1,node_id_set_owned_by_rank_1,elem_nodes_vector_on_rank_1, 1);
+    int rank1_nnodes = node_id_set_owned_by_rank_1.size();
+    int rank1_interface_nnodes = interface_node_id_set_on_rank_1.size();
+    int rank1_interface_nelems = interface_elem_id_set_on_rank_1.size();
 
-    check_set_ids(node_id_set_on_rank_0, 0, 6, 1);
-    check_set_ids(node_id_set_on_rank_1, 0, 6, 5);
+    check_set_ids(interface_node_id_set_on_rank_0, std::vector<int>{6});
+    check_set_ids(interface_node_id_set_on_rank_1, std::vector<int>{5});
+    
+    check_set_ids(interface_elem_id_set_on_rank_0, std::vector<int>{5});
+    check_set_ids(interface_elem_id_set_on_rank_1, std::vector<int>{5});
 }
 
 TEST_F(DistributedLineMeshTests, find_rank_nodes_10_on_3_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 3);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    std::set<size_t> node_id_set_owned_by_rank_2;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_2, mesh_maps.first, 2, 3);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     std::set<size_t> elem_id_set_on_rank_2;
-    mesh.find_rank_elements(elem_id_set_on_rank_2, rank_nodes_map, node_element_map, 2);
+    mesh.find_rank_elements(elem_id_set_on_rank_2, node_id_set_owned_by_rank_2, node_element_map, 2);
     int rank2_nelems = elem_id_set_on_rank_2.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -608,41 +663,62 @@ TEST_F(DistributedLineMeshTests, find_rank_nodes_10_on_3_counts)
     elem_nodes_vector_on_rank_2.reserve(rank2_nelems);
     mesh.filter_element_vector(elem_nodes_vector_on_rank_2, elem_id_set_on_rank_2, mesh_maps.second, 2);
 
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-    int rank0_nnodes = node_id_set_on_rank_0.size();
+    std::set<size_t> interface_node_id_set_on_rank_0;
+    std::set<size_t> interface_elem_id_set_on_rank_0;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_0,interface_elem_id_set_on_rank_0,node_id_set_owned_by_rank_0,elem_nodes_vector_on_rank_0, 0);
+    int rank0_nnodes = node_id_set_owned_by_rank_0.size();
+    int rank0_interface_nnodes = interface_node_id_set_on_rank_0.size();
+    int rank0_interface_nelems = interface_elem_id_set_on_rank_0.size();
 
-    std::set<size_t> node_id_set_on_rank_1;
-    mesh.find_rank_nodes(node_id_set_on_rank_1, elem_nodes_vector_on_rank_1);
-    int rank1_nnodes = node_id_set_on_rank_1.size();
+    std::set<size_t> interface_node_id_set_on_rank_1;
+    std::set<size_t> interface_elem_id_set_on_rank_1;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_1,interface_elem_id_set_on_rank_1,node_id_set_owned_by_rank_1,elem_nodes_vector_on_rank_1, 1);
+    int rank1_nnodes = node_id_set_owned_by_rank_1.size();
+    int rank1_interface_nnodes = interface_node_id_set_on_rank_1.size();
+    int rank1_interface_nelems = interface_elem_id_set_on_rank_1.size();
 
-    std::set<size_t> node_id_set_on_rank_2;
-    mesh.find_rank_nodes(node_id_set_on_rank_2, elem_nodes_vector_on_rank_2);
-    int rank2_nnodes = node_id_set_on_rank_2.size();
+    std::set<size_t> interface_node_id_set_on_rank_2;
+    std::set<size_t> interface_elem_id_set_on_rank_2;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_2,interface_elem_id_set_on_rank_2,node_id_set_owned_by_rank_2,elem_nodes_vector_on_rank_2, 2);
+    int rank2_nnodes = node_id_set_owned_by_rank_2.size();
+    int rank2_interface_nnodes = interface_node_id_set_on_rank_2.size();
+    int rank2_interface_nelems = interface_elem_id_set_on_rank_2.size();
 
-    EXPECT_EQ(rank0_nnodes, 4);
-    EXPECT_EQ(rank1_nnodes, 5);
-    EXPECT_EQ(rank2_nnodes, 5);
+    EXPECT_EQ(rank0_nnodes, 3);
+    EXPECT_EQ(rank1_nnodes, 3);
+    EXPECT_EQ(rank2_nnodes, 4);
+
+    EXPECT_EQ(rank0_interface_nnodes, 1);
+    EXPECT_EQ(rank1_interface_nnodes, 2);
+    EXPECT_EQ(rank2_interface_nnodes, 1);
+
+    EXPECT_EQ(rank0_interface_nelems, 1);
+    EXPECT_EQ(rank1_interface_nelems, 2);
+    EXPECT_EQ(rank2_interface_nelems, 1);    
 }
 
 TEST_F(DistributedLineMeshTests, find_rank_nodes_10_on_3_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 3);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    std::set<size_t> node_id_set_owned_by_rank_2;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_2, mesh_maps.first, 2, 3);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     std::set<size_t> elem_id_set_on_rank_2;
-    mesh.find_rank_elements(elem_id_set_on_rank_2, rank_nodes_map, node_element_map, 2);
+    mesh.find_rank_elements(elem_id_set_on_rank_2, node_id_set_owned_by_rank_2, node_element_map, 2);
     int rank2_nelems = elem_id_set_on_rank_2.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -656,21 +732,32 @@ TEST_F(DistributedLineMeshTests, find_rank_nodes_10_on_3_values)
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_2;
     elem_nodes_vector_on_rank_2.reserve(rank2_nelems);
     mesh.filter_element_vector(elem_nodes_vector_on_rank_2, elem_id_set_on_rank_2, mesh_maps.second, 2);
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-    int rank0_nnodes = node_id_set_on_rank_0.size();
 
-    std::set<size_t> node_id_set_on_rank_1;
-    mesh.find_rank_nodes(node_id_set_on_rank_1, elem_nodes_vector_on_rank_1);
-    int rank1_nnodes = node_id_set_on_rank_1.size();
+    std::set<size_t> interface_node_id_set_on_rank_0;
+    std::set<size_t> interface_elem_id_set_on_rank_0;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_0,interface_elem_id_set_on_rank_0,node_id_set_owned_by_rank_0,elem_nodes_vector_on_rank_0, 0);
+    int rank0_nnodes = node_id_set_owned_by_rank_0.size();
+    int rank0_interface_nnodes = interface_node_id_set_on_rank_0.size();
 
-    std::set<size_t> node_id_set_on_rank_2;
-    mesh.find_rank_nodes(node_id_set_on_rank_2, elem_nodes_vector_on_rank_2);
-    int rank2_nnodes = node_id_set_on_rank_2.size();
+    std::set<size_t> interface_node_id_set_on_rank_1;
+    std::set<size_t> interface_elem_id_set_on_rank_1;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_1,interface_elem_id_set_on_rank_1,node_id_set_owned_by_rank_1,elem_nodes_vector_on_rank_1, 1);
+    int rank1_nnodes = node_id_set_owned_by_rank_1.size();
+    int rank1_interface_nnodes = interface_node_id_set_on_rank_1.size();
 
-    check_set_ids(node_id_set_on_rank_0, 0, 4, 1);
-    check_set_ids(node_id_set_on_rank_1, 0, 5, 3);
-    check_set_ids(node_id_set_on_rank_2, 0, 5, 6);
+    std::set<size_t> interface_node_id_set_on_rank_2;
+    std::set<size_t> interface_elem_id_set_on_rank_2;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_2,interface_elem_id_set_on_rank_2,node_id_set_owned_by_rank_2,elem_nodes_vector_on_rank_2, 2);
+    int rank2_nnodes = node_id_set_owned_by_rank_2.size();
+    int rank2_interface_nnodes = interface_node_id_set_on_rank_2.size();
+
+    check_set_ids(interface_node_id_set_on_rank_0, std::vector<int>{4});
+    check_set_ids(interface_node_id_set_on_rank_1, std::vector<int>{3,7});
+    check_set_ids(interface_node_id_set_on_rank_2, std::vector<int>{6});
+    
+    check_set_ids(interface_elem_id_set_on_rank_0, std::vector<int>{3});
+    check_set_ids(interface_elem_id_set_on_rank_1, std::vector<int>{3,6});
+    check_set_ids(interface_elem_id_set_on_rank_2, std::vector<int>{6});
 }
 //@}
 /**
@@ -681,53 +768,62 @@ TEST_F(DistributedLineMeshTests, find_rank_nodes_10_on_3_values)
 TEST_F(DistributedLineMeshTests, filter_node_vector_10_on_1_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 1);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 1);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank_nelems = elem_id_set_on_rank_0.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
     elem_nodes_vector_on_rank_0.reserve(rank_nelems);
     mesh.filter_element_vector(elem_nodes_vector_on_rank_0, elem_id_set_on_rank_0, mesh_maps.second, 0);
 
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-    int rank0_nnodes = node_id_set_on_rank_0.size();
+    std::set<size_t> interface_node_id_set_on_rank_0;
+    std::set<size_t> interface_elem_id_set_on_rank_0;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_0,interface_elem_id_set_on_rank_0,node_id_set_owned_by_rank_0,elem_nodes_vector_on_rank_0, 0);
+    int rank0_nnodes = node_id_set_owned_by_rank_0.size();
+    int rank0_interface_nnodes = interface_node_id_set_on_rank_0.size();
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_0;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_0;
     nodes_coords_vector_on_rank_0.reserve(rank0_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_on_rank_0, 0);
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_owned_by_rank_0);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_0, mesh_maps.first, interface_node_id_set_on_rank_0);
 
     EXPECT_EQ(nodes_coords_vector_on_rank_0.size(), 10);
+    EXPECT_EQ(interface_nodes_coords_vector_on_rank_0.size(), 0);
 }
 
 TEST_F(DistributedLineMeshTests, filter_node_vector_10_on_1_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 1);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 1);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
-    int rank0_nelems = elem_id_set_on_rank_0.size();
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
+    int rank_nelems = elem_id_set_on_rank_0.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
-    elem_nodes_vector_on_rank_0.reserve(rank0_nelems);
+    elem_nodes_vector_on_rank_0.reserve(rank_nelems);
     mesh.filter_element_vector(elem_nodes_vector_on_rank_0, elem_id_set_on_rank_0, mesh_maps.second, 0);
 
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-    int rank0_nnodes = node_id_set_on_rank_0.size();
+    std::set<size_t> interface_node_id_set_on_rank_0;
+    std::set<size_t> interface_elem_id_set_on_rank_0;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_0,interface_elem_id_set_on_rank_0,node_id_set_owned_by_rank_0,elem_nodes_vector_on_rank_0, 0);
+    int rank0_nnodes = node_id_set_owned_by_rank_0.size();
+    int rank0_interface_nnodes = interface_node_id_set_on_rank_0.size();
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_0;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_0;
     nodes_coords_vector_on_rank_0.reserve(rank0_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_on_rank_0, 0);
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_owned_by_rank_0);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_0, mesh_maps.first, interface_node_id_set_on_rank_0);
 
     check_vector_ids(nodes_coords_vector_on_rank_0, 0, 10, 1);
 }
@@ -735,17 +831,19 @@ TEST_F(DistributedLineMeshTests, filter_node_vector_10_on_1_values)
 TEST_F(DistributedLineMeshTests, filter_node_vector_10_on_2_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 2);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 2);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 2);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -756,40 +854,55 @@ TEST_F(DistributedLineMeshTests, filter_node_vector_10_on_2_counts)
     elem_nodes_vector_on_rank_1.reserve(rank1_nelems);
     mesh.filter_element_vector(elem_nodes_vector_on_rank_1, elem_id_set_on_rank_1, mesh_maps.second, 1);
 
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-    int rank0_nnodes = node_id_set_on_rank_0.size();
+    std::set<size_t> interface_node_id_set_on_rank_0;
+    std::set<size_t> interface_elem_id_set_on_rank_0;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_0,interface_elem_id_set_on_rank_0,node_id_set_owned_by_rank_0,elem_nodes_vector_on_rank_0, 0);
+    int rank0_nnodes = node_id_set_owned_by_rank_0.size();
+    int rank0_interface_nnodes = interface_node_id_set_on_rank_0.size();
 
-    std::set<size_t> node_id_set_on_rank_1;
-    mesh.find_rank_nodes(node_id_set_on_rank_1, elem_nodes_vector_on_rank_1);
-    int rank1_nnodes = node_id_set_on_rank_1.size();
+    std::set<size_t> interface_node_id_set_on_rank_1;
+    std::set<size_t> interface_elem_id_set_on_rank_1;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_1,interface_elem_id_set_on_rank_1,node_id_set_owned_by_rank_1,elem_nodes_vector_on_rank_1, 1);
+    int rank1_nnodes = node_id_set_owned_by_rank_1.size();
+    int rank1_interface_nnodes = interface_node_id_set_on_rank_1.size();
+
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_0;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_0;
     nodes_coords_vector_on_rank_0.reserve(rank0_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_on_rank_0, 0);
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_owned_by_rank_0);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_0, mesh_maps.first, interface_node_id_set_on_rank_0);
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_1;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_1;
     nodes_coords_vector_on_rank_1.reserve(rank1_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_1, mesh_maps.first, node_id_set_on_rank_1, 1);
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_1, mesh_maps.first, node_id_set_owned_by_rank_1);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_1, mesh_maps.first, interface_node_id_set_on_rank_1);
 
-    EXPECT_EQ(nodes_coords_vector_on_rank_0.size(), 6);
-    EXPECT_EQ(nodes_coords_vector_on_rank_1.size(), 6);
+
+    EXPECT_EQ(nodes_coords_vector_on_rank_0.size(), 5);
+    EXPECT_EQ(nodes_coords_vector_on_rank_1.size(), 5);
+
+    EXPECT_EQ(interface_nodes_coords_vector_on_rank_0.size(), 1);
+    EXPECT_EQ(interface_nodes_coords_vector_on_rank_1.size(), 1);
 }
 
 TEST_F(DistributedLineMeshTests, filter_node_vector_10_on_2_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 2);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 2);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 2);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -800,44 +913,60 @@ TEST_F(DistributedLineMeshTests, filter_node_vector_10_on_2_values)
     elem_nodes_vector_on_rank_1.reserve(rank1_nelems);
     mesh.filter_element_vector(elem_nodes_vector_on_rank_1, elem_id_set_on_rank_1, mesh_maps.second, 1);
 
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-    int rank0_nnodes = node_id_set_on_rank_0.size();
+    std::set<size_t> interface_node_id_set_on_rank_0;
+    std::set<size_t> interface_elem_id_set_on_rank_0;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_0,interface_elem_id_set_on_rank_0,node_id_set_owned_by_rank_0,elem_nodes_vector_on_rank_0, 0);
+    int rank0_nnodes = node_id_set_owned_by_rank_0.size();
+    int rank0_interface_nnodes = interface_node_id_set_on_rank_0.size();
 
-    std::set<size_t> node_id_set_on_rank_1;
-    mesh.find_rank_nodes(node_id_set_on_rank_1, elem_nodes_vector_on_rank_1);
-    int rank1_nnodes = node_id_set_on_rank_1.size();
+    std::set<size_t> interface_node_id_set_on_rank_1;
+    std::set<size_t> interface_elem_id_set_on_rank_1;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_1,interface_elem_id_set_on_rank_1,node_id_set_owned_by_rank_1,elem_nodes_vector_on_rank_1, 1);
+    int rank1_nnodes = node_id_set_owned_by_rank_1.size();
+    int rank1_interface_nnodes = interface_node_id_set_on_rank_1.size();
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_0;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_0;
     nodes_coords_vector_on_rank_0.reserve(rank0_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_on_rank_0, 0);
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_owned_by_rank_0);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_0, mesh_maps.first, interface_node_id_set_on_rank_0);
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_1;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_1;
     nodes_coords_vector_on_rank_1.reserve(rank1_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_1, mesh_maps.first, node_id_set_on_rank_1, 1);
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_1, mesh_maps.first, node_id_set_owned_by_rank_1);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_1, mesh_maps.first, interface_node_id_set_on_rank_1);
 
-    check_vector_ids(nodes_coords_vector_on_rank_0, 0, 6, 1);
-    check_vector_ids(nodes_coords_vector_on_rank_1, 0, 6, 5);
+
+    check_vector_ids(nodes_coords_vector_on_rank_0, 0, 5, 1);
+    check_vector_ids(nodes_coords_vector_on_rank_1, 0, 5, 6);
+
+    check_vector_ids(interface_nodes_coords_vector_on_rank_0, std::vector<unsigned>{6});
+    check_vector_ids(interface_nodes_coords_vector_on_rank_1, std::vector<unsigned>{5});
 }
 
 TEST_F(DistributedLineMeshTests, filter_node_vector_10_on_3_counts)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 3);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    std::set<size_t> node_id_set_owned_by_rank_2;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_2, mesh_maps.first, 2, 3);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     std::set<size_t> elem_id_set_on_rank_2;
-    mesh.find_rank_elements(elem_id_set_on_rank_2, rank_nodes_map, node_element_map, 2);
+    mesh.find_rank_elements(elem_id_set_on_rank_2, node_id_set_owned_by_rank_2, node_element_map, 2);
     int rank2_nelems = elem_id_set_on_rank_2.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -852,53 +981,73 @@ TEST_F(DistributedLineMeshTests, filter_node_vector_10_on_3_counts)
     elem_nodes_vector_on_rank_2.reserve(rank2_nelems);
     mesh.filter_element_vector(elem_nodes_vector_on_rank_2, elem_id_set_on_rank_2, mesh_maps.second, 2);
 
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-    int rank0_nnodes = node_id_set_on_rank_0.size();
+    std::set<size_t> interface_node_id_set_on_rank_0;
+    std::set<size_t> interface_elem_id_set_on_rank_0;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_0,interface_elem_id_set_on_rank_0,node_id_set_owned_by_rank_0,elem_nodes_vector_on_rank_0, 0);
+    int rank0_nnodes = node_id_set_owned_by_rank_0.size();
+    int rank0_interface_nnodes = interface_node_id_set_on_rank_0.size();
 
-    std::set<size_t> node_id_set_on_rank_1;
-    mesh.find_rank_nodes(node_id_set_on_rank_1, elem_nodes_vector_on_rank_1);
-    int rank1_nnodes = node_id_set_on_rank_1.size();
+    std::set<size_t> interface_node_id_set_on_rank_1;
+    std::set<size_t> interface_elem_id_set_on_rank_1;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_1,interface_elem_id_set_on_rank_1,node_id_set_owned_by_rank_1,elem_nodes_vector_on_rank_1, 1);
+    int rank1_nnodes = node_id_set_owned_by_rank_1.size();
+    int rank1_interface_nnodes = interface_node_id_set_on_rank_1.size();
 
-    std::set<size_t> node_id_set_on_rank_2;
-    mesh.find_rank_nodes(node_id_set_on_rank_2, elem_nodes_vector_on_rank_2);
-    int rank2_nnodes = node_id_set_on_rank_2.size();
+    std::set<size_t> interface_node_id_set_on_rank_2;
+    std::set<size_t> interface_elem_id_set_on_rank_2;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_2,interface_elem_id_set_on_rank_2,node_id_set_owned_by_rank_2,elem_nodes_vector_on_rank_2, 2);
+    int rank2_nnodes = node_id_set_owned_by_rank_2.size();
+    int rank2_interface_nnodes = interface_node_id_set_on_rank_2.size();
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_0;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_0;
     nodes_coords_vector_on_rank_0.reserve(rank0_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_on_rank_0, 0);
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_owned_by_rank_0);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_0, mesh_maps.first, interface_node_id_set_on_rank_0);
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_1;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_1;
     nodes_coords_vector_on_rank_1.reserve(rank1_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_1, mesh_maps.first, node_id_set_on_rank_1, 1);
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_1, mesh_maps.first, node_id_set_owned_by_rank_1);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_1, mesh_maps.first, interface_node_id_set_on_rank_1);
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_2;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_2;
     nodes_coords_vector_on_rank_2.reserve(rank2_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_2, mesh_maps.first, node_id_set_on_rank_2, 2);  
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_2, mesh_maps.first, node_id_set_owned_by_rank_2);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_2, mesh_maps.first, interface_node_id_set_on_rank_2);
 
-    EXPECT_EQ(nodes_coords_vector_on_rank_0.size(), 4);
-    EXPECT_EQ(nodes_coords_vector_on_rank_1.size(), 5);
-    EXPECT_EQ(nodes_coords_vector_on_rank_2.size(), 5);
+    EXPECT_EQ(nodes_coords_vector_on_rank_0.size(), 3);
+    EXPECT_EQ(nodes_coords_vector_on_rank_1.size(), 3);
+    EXPECT_EQ(nodes_coords_vector_on_rank_2.size(), 4);
+
+    EXPECT_EQ(interface_nodes_coords_vector_on_rank_0.size(), 1);
+    EXPECT_EQ(interface_nodes_coords_vector_on_rank_1.size(), 2);
+    EXPECT_EQ(interface_nodes_coords_vector_on_rank_2.size(), 1);
 }
 
 TEST_F(DistributedLineMeshTests, filter_node_vector_10_on_3_values)
 {
     std::map<size_t, int> node_rank_map; 
-    std::map<int, std::set<size_t>> rank_nodes_map;
-    mesh.populate_node_rank_maps(node_rank_map, rank_nodes_map, mesh_maps.first, 3);
+    std::set<size_t> node_id_set_owned_by_rank_0;
+    std::set<size_t> node_id_set_owned_by_rank_1;
+    std::set<size_t> node_id_set_owned_by_rank_2;
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_0, mesh_maps.first, 0, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_1, mesh_maps.first, 1, 3);
+    mesh.populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank_2, mesh_maps.first, 2, 3);
     std::map<size_t, std::set<size_t>> node_element_map;
     mesh.populate_node_element_map(node_element_map, mesh_maps.second);
 
     std::set<size_t> elem_id_set_on_rank_0;
-    mesh.find_rank_elements(elem_id_set_on_rank_0, rank_nodes_map, node_element_map, 0);
+    mesh.find_rank_elements(elem_id_set_on_rank_0, node_id_set_owned_by_rank_0, node_element_map, 0);
     int rank0_nelems = elem_id_set_on_rank_0.size();
 
     std::set<size_t> elem_id_set_on_rank_1;
-    mesh.find_rank_elements(elem_id_set_on_rank_1, rank_nodes_map, node_element_map, 1);
+    mesh.find_rank_elements(elem_id_set_on_rank_1, node_id_set_owned_by_rank_1, node_element_map, 1);
     int rank1_nelems = elem_id_set_on_rank_1.size();
 
     std::set<size_t> elem_id_set_on_rank_2;
-    mesh.find_rank_elements(elem_id_set_on_rank_2, rank_nodes_map, node_element_map, 2);
+    mesh.find_rank_elements(elem_id_set_on_rank_2, node_id_set_owned_by_rank_2, node_element_map, 2);
     int rank2_nelems = elem_id_set_on_rank_2.size();
 
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_0;
@@ -912,33 +1061,50 @@ TEST_F(DistributedLineMeshTests, filter_node_vector_10_on_3_values)
     ElemIdNodeIdPairVector elem_nodes_vector_on_rank_2;
     elem_nodes_vector_on_rank_2.reserve(rank2_nelems);
     mesh.filter_element_vector(elem_nodes_vector_on_rank_2, elem_id_set_on_rank_2, mesh_maps.second, 2);
-    std::set<size_t> node_id_set_on_rank_0;
-    mesh.find_rank_nodes(node_id_set_on_rank_0, elem_nodes_vector_on_rank_0);
-    int rank0_nnodes = node_id_set_on_rank_0.size();
+    
+    std::set<size_t> interface_node_id_set_on_rank_0;
+    std::set<size_t> interface_elem_id_set_on_rank_0;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_0,interface_elem_id_set_on_rank_0,node_id_set_owned_by_rank_0,elem_nodes_vector_on_rank_0, 0);
+    int rank0_nnodes = node_id_set_owned_by_rank_0.size();
+    int rank0_interface_nnodes = interface_node_id_set_on_rank_0.size();
 
-    std::set<size_t> node_id_set_on_rank_1;
-    mesh.find_rank_nodes(node_id_set_on_rank_1, elem_nodes_vector_on_rank_1);
-    int rank1_nnodes = node_id_set_on_rank_1.size();
+    std::set<size_t> interface_node_id_set_on_rank_1;
+    std::set<size_t> interface_elem_id_set_on_rank_1;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_1,interface_elem_id_set_on_rank_1,node_id_set_owned_by_rank_1,elem_nodes_vector_on_rank_1, 1);
+    int rank1_nnodes = node_id_set_owned_by_rank_1.size();
+    int rank1_interface_nnodes = interface_node_id_set_on_rank_1.size();
 
-    std::set<size_t> node_id_set_on_rank_2;
-    mesh.find_rank_nodes(node_id_set_on_rank_2, elem_nodes_vector_on_rank_2);
-    int rank2_nnodes = node_id_set_on_rank_2.size();
+    std::set<size_t> interface_node_id_set_on_rank_2;
+    std::set<size_t> interface_elem_id_set_on_rank_2;
+    mesh.find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank_2,interface_elem_id_set_on_rank_2,node_id_set_owned_by_rank_2,elem_nodes_vector_on_rank_2, 2);
+    int rank2_nnodes = node_id_set_owned_by_rank_2.size();
+    int rank2_interface_nnodes = interface_node_id_set_on_rank_2.size();
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_0;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_0;
     nodes_coords_vector_on_rank_0.reserve(rank0_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_on_rank_0, 0);
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_0, mesh_maps.first, node_id_set_owned_by_rank_0);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_0, mesh_maps.first, interface_node_id_set_on_rank_0);
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_1;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_1;
     nodes_coords_vector_on_rank_1.reserve(rank1_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_1, mesh_maps.first, node_id_set_on_rank_1, 1);
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_1, mesh_maps.first, node_id_set_owned_by_rank_1);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_1, mesh_maps.first, interface_node_id_set_on_rank_1);
 
     NodeIdCoordsPairsVector nodes_coords_vector_on_rank_2;
+    NodeIdCoordsPairsVector interface_nodes_coords_vector_on_rank_2;
     nodes_coords_vector_on_rank_2.reserve(rank2_nnodes);
-    mesh.filter_node_vector(nodes_coords_vector_on_rank_2, mesh_maps.first, node_id_set_on_rank_2, 2);  
+    mesh.filter_node_vector(nodes_coords_vector_on_rank_2, mesh_maps.first, node_id_set_owned_by_rank_2);
+    mesh.filter_node_vector(interface_nodes_coords_vector_on_rank_2, mesh_maps.first, interface_node_id_set_on_rank_2);
 
-    check_vector_ids(nodes_coords_vector_on_rank_0, 0, 4, 1);
-    check_vector_ids(nodes_coords_vector_on_rank_1, 0, 5, 3);
-    check_vector_ids(nodes_coords_vector_on_rank_2, 0, 5, 6);
+    check_vector_ids(nodes_coords_vector_on_rank_0, 0, 3, 1);
+    check_vector_ids(nodes_coords_vector_on_rank_1, 0, 3, 4);
+    check_vector_ids(nodes_coords_vector_on_rank_2, 0, 4, 7);
+
+    check_vector_ids(interface_nodes_coords_vector_on_rank_0, std::vector<unsigned>{4});
+    check_vector_ids(interface_nodes_coords_vector_on_rank_1, std::vector<unsigned>{3,7});
+    check_vector_ids(interface_nodes_coords_vector_on_rank_2, std::vector<unsigned>{6});
 }
 //@}
 #endif 

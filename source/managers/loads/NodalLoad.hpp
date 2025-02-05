@@ -81,7 +81,7 @@ class NodalLoad
         {
             for (auto& node_id : node_ids)
             {
-                loaded_nodes.push_back(glob_mesh.get_node_by_id(node_id));
+                loaded_nodes.push_back(glob_mesh.get_node_by_id(node_id, "rank_owned"));
             }
         }
 
