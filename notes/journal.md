@@ -35,6 +35,9 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
+### 7 February
+Rebuilt the tests, and the initial version seems to work without `MPI`. However, the function `find_nodes_wanted_by_neighbours` appears to have a bug as during `exchange_interface_nodes_updated_ids`, rank 0 is calling an `MPI_Sendreceive` to itself. `DistributedMeshTests` did not have a set of tests for `find_nodes_wanted_by_neighbours` so these need to be added.
+
 ### 3 February
 I have now completed (hopefully without many bugs) the renumbering algorithm along with the exchange of the node IDs between ranks. See `exchange_interface_nodes_updated_ids` for more details. So, from the TODO on 30 January, I am currently at the following stage:
 **TODO:**
