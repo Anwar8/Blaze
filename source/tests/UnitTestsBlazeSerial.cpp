@@ -3,9 +3,8 @@
 #include "BeamElementTests.hpp"
 #include "NodalLoadTests.hpp"
 #include "ScribeTest.hpp"
-#include "ModelTests.hpp"
-#include "DistributedMeshTests.hpp"
 #include "PlasticBeamElementTests.hpp"
+#include "ModelTests.hpp"
 #include "PlasticModelTests.hpp"
 
 #include "gtest/gtest.h"

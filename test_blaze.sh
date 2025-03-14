@@ -1,32 +1,40 @@
 cd bin
 if [ -z $1 ]; then
-    ./TestBlaze
+    ./UnitTestBlaze
 elif [ $1 = "beam" ]; then
-	./TestBlaze --gtest_filter="RigidBodyMotionTest.*"
-    ./TestBlaze --gtest_filter="BasicTransformationTest.*"
-    ./TestBlaze --gtest_filter="ConstantStrainStateTest.*"
-    ./TestBlaze --gtest_filter="ElementMappingTest.*"
+	./UnitTestBlaze --gtest_filter="RigidBodyMotionTest.*"
+    ./UnitTestBlaze --gtest_filter="BasicTransformationTest.*"
+    ./UnitTestBlaze --gtest_filter="ConstantStrainStateTest.*"
+    ./UnitTestBlaze --gtest_filter="ElementMappingTest.*"
 elif [ $1 = "mat" ]; then
-	./TestBlaze --gtest_filter="ElasticPlasticMaterialTest.*"
+	./UnitTestBlaze --gtest_filter="ElasticPlasticMaterialTest.*"
 elif [ $1 = "fibre" ]; then
-	./TestBlaze --gtest_filter="FibreSectionCentroidTests.*"
-    ./TestBlaze --gtest_filter="MaterialFibreTests.*"
-    ./TestBlaze --gtest_filter="FibreSectionPureBendingTests.*"
-    ./TestBlaze --gtest_filter="FibreSectionPureAxialTests.*"
-    ./TestBlaze --gtest_filter="FibreSectionTangentConstitutiveMatrix.*"
-    ./TestBlaze --gtest_filter="FibreSectionTangentConstitutiveMatrixHardening.*"
+	./UnitTestBlaze --gtest_filter="FibreSectionCentroidTests.*"
+    ./UnitTestBlaze --gtest_filter="MaterialFibreTests.*"
+    ./UnitTestBlaze --gtest_filter="FibreSectionPureBendingTests.*"
+    ./UnitTestBlaze --gtest_filter="FibreSectionPureAxialTests.*"
+    ./UnitTestBlaze --gtest_filter="FibreSectionTangentConstitutiveMatrix.*"
+    ./UnitTestBlaze --gtest_filter="FibreSectionTangentConstitutiveMatrixHardening.*"
 elif [ $1 = "plastic" ]; then
-	./TestBlaze --gtest_filter="PlasticBeamTests.*"
+	./UnitTestBlaze --gtest_filter="PlasticBeamTests.*"
 elif [ $1 = "modelp" ]; then
-	./TestBlaze --gtest_filter="MeshTestsPlastic.*"
-    ./TestBlaze --gtest_filter="CantileverBeamPlastic.*"
-    ./TestBlaze --gtest_filter="SimplySupportedPlastic.*"
-    ./TestBlaze --gtest_filter="SimplySupportedUdlPlastic.*"
+	./UnitTestBlaze --gtest_filter="MeshTestsPlastic.*"
+    ./VerificationTestsBlaze --gtest_filter="CantileverBeamPlastic.*"
+    ./VerificationTestsBlaze --gtest_filter="SimplySupportedPlastic.*"
+    ./VerificationTestsBlaze --gtest_filter="SimplySupportedUdlPlastic.*"
 elif [ $1 = "cant" ]; then
-    ./TestBlaze --gtest_filter="CantileverBeamPlastic.*"
-elif [ $1 = "custom" ]; then
+    ./VerificationTestsBlaze --gtest_filter="CantileverBeamPlastic.*"
+elif [ $1 = "unit_custom" ]; then
     shift
-    ./TestBlaze --gtest_filter="$@"
+    ./UnitTestBlaze --gtest_filter="$@"
+elif [ $1 = "verification_custom" ]; then
+    shift
+    ./VerificationTestsBlaze --gtest_filter="$@"
+elif [ $1 = "verification_custom" ]; then
+    shift
+    ./DistributedTestsBlaze --gtest_filter="$@"
+elif [ $1 = "mpi" ]; then
+    mpirun -n $2 ./TestBlazeMPI
 else
     echo "Unknown input: $1. Expected \"mat\", \"beam\", \"fibre\", \"fibre\", \"plastic\", \"modelp\", \"cant\", \"custom\", or nothing."
 fi
