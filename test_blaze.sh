@@ -24,16 +24,27 @@ elif [ $1 = "modelp" ]; then
     ./VerificationTestsBlaze --gtest_filter="SimplySupportedUdlPlastic.*"
 elif [ $1 = "cant" ]; then
     ./VerificationTestsBlaze --gtest_filter="CantileverBeamPlastic.*"
+elif [ $1 = "unit" ]; then
+    ./UnitTestBlaze
 elif [ $1 = "unit_custom" ]; then
     shift
     ./UnitTestBlaze --gtest_filter="$@"
+elif [ $1 = "verification" ]; then
+    ./VerificationTestsBlaze
 elif [ $1 = "verification_custom" ]; then
     shift
     ./VerificationTestsBlaze --gtest_filter="$@"
-elif [ $1 = "verification_custom" ]; then
+elif [ $1 = "distributed" ]; then
+    ./DistributedTestsBlaze
+elif [ $1 = "distributed_custom" ]; then
     shift
     ./DistributedTestsBlaze --gtest_filter="$@"
 elif [ $1 = "mpi" ]; then
+    mpirun -n $2 ./TestBlazeMPI
+elif [ $1 = "all" ]; then
+    ./UnitTestBlaze
+    ./VerificationTestsBlaze
+    ./DistributedTestsBlaze
     mpirun -n $2 ./TestBlazeMPI
 else
     echo "Unknown input: $1. Expected \"mat\", \"beam\", \"fibre\", \"fibre\", \"plastic\", \"modelp\", \"cant\", \"custom\", or nothing."
