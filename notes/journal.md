@@ -35,6 +35,26 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
+### 25 March
+I am so confused. The function `exchange_interface_nodes_updated_ids` is presenting:
+```
+read_node_ids: Rank 1 has interface node ID = 5 and record_id = 5
+Rank 1: Could not find node with record_id 5 in interface node vectors.
+read_node_ids: Rank 0 has interface node ID = 6 and record_id = 6
+Rank 0: Could not find node with record_id 6 in interface node vectors.
+```
+
+Okay, so the bug was in the way the iterator at the end of the node containers was being checked in `get_node_by_record_id`. Rewrote that and now it works. Code now runs on 2 `MPI` processes, but fails on 3 during the `Allgather` call.
+
+[ ] Must update `get_node_by_id`.
+[ ] Clean up excessive printing.
+
+### 15 March
+
+
+### 10 February 
+There is a bug in the functions to retrieve nodes with a particular record ID `get_node_by_record_id`; this is causing the program to exit early and not search the for the nodes. I went over this function again and it is very flawed. I will need to, perhaps, redo it.
+
 ### 7 February
 Rebuilt the tests, and the initial version seems to work without `MPI`. However, the function `find_nodes_wanted_by_neighbours` appears to have a bug as during `exchange_interface_nodes_updated_ids`, rank 0 is calling an `MPI_Sendreceive` to itself. `DistributedMeshTests` did not have a set of tests for `find_nodes_wanted_by_neighbours` so these need to be added.
 

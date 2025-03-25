@@ -678,8 +678,20 @@ class GlobalMesh {
             elem_vector.clear();
             elem_vector.reserve(rank_nelems);
             make_nodes(nodes_coords_vector_on_rank);
-            make_nodes(nodes_coords_vector_on_rank, true);
+            make_nodes(interface_nodes_coords_vector_on_rank, true);
             set_nodes_parent_ranks(rank, node_rank_map);
+
+            if (VERBOSE)
+            {
+                std::cout << "Rank " << rank << " has created nodes: ";
+                for (auto node : node_vector)
+                    std::cout << node->get_id() << " ";
+                std::cout << std::endl;
+                std::cout << "Rank " << rank << " has created interface_nodes: ";
+                for (auto node : interface_node_vector)
+                    std::cout << node->get_id() << " ";
+                std::cout << std::endl;
+            }
 
             make_elements(elem_nodes_vector_on_rank);
             std::sort(node_vector.begin(), node_vector.end());
@@ -689,6 +701,10 @@ class GlobalMesh {
             renumber_nodes(rank);
             std::sort(node_vector.begin(), node_vector.end());
             std::sort(interface_node_vector.begin(), node_vector.end());
+            if (VERBOSE)
+            {
+                std::cout << "nodes renumbered and sorted. Exchanging interface node IDs next." << std::endl;
+            }
             exchange_interface_nodes_updated_ids(wanted_by_neighbour_rank_node_id_map, wanted_from_neighbour_rank_node_id_map, rank);
             // count the ndofs of each rank and assign each node an index that corresponds to the global matrices and vectors.
             count_distributed_dofs(rank, num_ranks);            
@@ -724,39 +740,61 @@ class GlobalMesh {
             int num_neighbours = 0;
             std::set<int> neighbours;
             std::map<int, int> neighbour_rank_buffer_size_map;
+            if (VERBOSE)
+                std::cout << "rank " << rank << " loop over wanted_by_neighbour_rank_node_id_map started." << std::endl;
             for (auto rank_nodes_set_pair : wanted_by_neighbour_rank_node_id_map)
             {
                 neighbours.insert(rank_nodes_set_pair.first);
                 neighbour_rank_buffer_size_map[rank_nodes_set_pair.first] = rank_nodes_set_pair.second.size();
             }
             num_neighbours = neighbours.size();
+            if (VERBOSE)
+                std::cout << "rank " << rank << " loop over wanted_by_neighbour_rank_node_id_map completed." << std::endl;
 
 
+            if (VERBOSE)
+                std::cout << "rank " << rank << " setting up send buffers started." << std::endl;
             // setup send buffers
             std::map<int, std::vector<unsigned>> rank_ids_send_buffers_map;
             for (auto rank_buffer_size_pair : neighbour_rank_buffer_size_map)
             {
                 rank_ids_send_buffers_map[rank_buffer_size_pair.first].reserve(rank_buffer_size_pair.second);
             }
+            if (VERBOSE)
+                std::cout << "rank " << rank << " setting up send buffers completed." << std::endl;
 
+            if (VERBOSE)
+                std::cout << "rank " << rank << " setting up receive buffers started." << std::endl;
             // setup receive buffers
             std::map<int, std::vector<unsigned>> rank_id_receive_buffers_map;
             for (auto rank_buffer_size_pair : neighbour_rank_buffer_size_map)
             {
                 rank_id_receive_buffers_map[rank_buffer_size_pair.first].resize(rank_buffer_size_pair.second);
             }
+            if (VERBOSE)
+                std::cout << "rank " << rank << " setting up receive buffers completed." << std::endl;
 
-
+            
+            if (VERBOSE)
+                std::cout << "rank " << rank << " populating send buffers started." << std::endl;
             // populate send buffers --- std::map<int, std::set<unsigned>> wanted_by_neighbour_rank_node_id_map
             for (auto rank_node_set : wanted_by_neighbour_rank_node_id_map)
             {
+                if (VERBOSE)
+                    std::cout << "rank " << rank << " looping over set for neighbor " << rank_node_set.first << std::endl;
                 for (auto node_id : rank_node_set.second)
                 {
+                    if (VERBOSE)
+                        std::cout << "rank " << rank << " looking for node with record_id " << node_id << " for neighbor " << rank_node_set.first << std::endl;
                     unsigned renumbered_id = get_node_by_record_id(node_id, "rank_owned")->get_id();
                     rank_ids_send_buffers_map[rank_node_set.first].push_back(renumbered_id);
                 }
             }
+            if (VERBOSE)
+                std::cout << "rank " << rank << " populating send buffers completed." << std::endl;
 
+            if (VERBOSE)
+                std::cout << "rank " << rank << " exchanging nodes ids with MPI started." << std::endl;
             // exchange node ids
             #ifdef MPI
              for (int neighbor_rank : neighbours)
@@ -767,13 +805,22 @@ class GlobalMesh {
                 int num_exchanged_objects = neighbour_rank_buffer_size_map[neighbor_rank];
                 if (VERBOSE)
                 {
-                    std::cout << "Rank " << rank << " sending " << num_exchanged_objects << " objects to " << neighbor_rank << std::endl;
+                    std::cout << "GlobalMesh::exchange_interface_nodes_updated_ids: Rank " << rank << " sending " << num_exchanged_objects << " objects to neighbor_rank " << neighbor_rank <<
+                        " send buffer size is " << rank_ids_send_buffers_map[neighbor_rank].size() <<
+                        " and receive_buffer size is: " << rank_id_receive_buffers_map[neighbor_rank].size() << "." << std::endl;
                 }
                 MPI_Sendrecv(send_buffer, num_exchanged_objects, MPI_UNSIGNED, neighbor_rank, 0,
                             receive_buffer, num_exchanged_objects, MPI_UNSIGNED, neighbor_rank, 0, 
                             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
+            
             #endif
+
+            
+            if (VERBOSE)
+                std::cout << "rank " << rank << " exchanging nodes ids with MPI completed." << std::endl;
+            if (VERBOSE)
+                std::cout << "rank " << rank << " copying back from receive buffer started." << std::endl;
             // copy back from the receive buffer into the nodes new ids
             for (auto rank_id_buffer_pair : rank_id_receive_buffers_map)
             {
@@ -782,11 +829,37 @@ class GlobalMesh {
                 {
                     unsigned new_id = rank_id_buffer_pair.second[i];
                     unsigned original_record_id = *node_id_set_iterator;
-                    get_node_by_record_id(original_record_id, "interface")->set_id(new_id);
+                    if (VERBOSE)
+                     std::cout << "rank " << rank << " looking for node " << original_record_id << " to assign it new id = " << new_id << std::endl;
+                     if (VERBOSE)
+                     {
+                         read_node_ids(rank, false);
+                         read_node_ids(rank, true);
+                     }
+                     get_node_by_record_id(original_record_id, "interface", rank)->set_id(new_id);
                     ++node_id_set_iterator;
                 }
             }
+            if (VERBOSE)
+                std::cout << "rank " << rank << " copying back from receive buffer completed." << std::endl;
+            if (VERBOSE)
+                std::cout << "rank " << rank << " exchange_interface_nodes_updated_ids all completed." << std::endl;
         }
+        void read_node_ids(int rank, bool interface = false)
+        {
+            if (!interface)
+            {
+            for (auto a_node : node_vector)
+            {
+                std::cout << "read_node_ids: Rank " << rank << " has node ID = " << a_node->get_id() << " and record_id = " << a_node->get_record_id() << std::endl;
+            }
+            } else {
+            for (auto a_node : interface_node_vector)
+            {
+                std::cout << "read_node_ids: Rank " << rank << " has interface node ID = " << a_node->get_id() << " and record_id = " << a_node->get_record_id() << std::endl;
+            }
+        }
+        } 
         /**
          * @brief exchnages the nz_i of the interface nodes between neighbouring ranks.
          * 
@@ -794,7 +867,7 @@ class GlobalMesh {
          * @param wanted_from_neighbour_rank_node_id_map 
          */
         void exchange_interface_nodes_nz_i(std::map<int, std::set<unsigned>> wanted_by_neighbour_rank_node_id_map, 
-                                                  std::map<int, std::set<unsigned>> wanted_from_neighbour_rank_node_id_map)
+                                                  std::map<int, std::set<unsigned>> wanted_from_neighbour_rank_node_id_map, int const rank)
         {
             // get information about neighbours and buffer sizes
             int num_neighbours = 0;
@@ -840,6 +913,12 @@ class GlobalMesh {
                 auto receive_buffer = rank_nz_i_receive_buffers_map[neighbor_rank].data();
                 auto send_buffer = rank_nz_i_send_buffers_map[neighbor_rank].data();
                 int num_exchanged_objects = neighbour_rank_buffer_size_map[neighbor_rank];
+                if (VERBOSE)
+                {
+                    std::cout << "GlobalMesh::exchange_interface_nodes_nz_i: Rank " << rank << " sending " << num_exchanged_objects << " objects to neighbor_rank " 
+                        << neighbor_rank << " send buffer size is " << rank_nz_i_send_buffers_map[neighbor_rank].size() <<
+                        " and receive_buffer size is: " << rank_nz_i_receive_buffers_map[neighbor_rank].size() << "." << std::endl;
+                }
                 MPI_Sendrecv(send_buffer, num_exchanged_objects, MPI_INT, neighbor_rank, 0,
                             receive_buffer, num_exchanged_objects, MPI_INT, neighbor_rank, 0, 
                             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -868,6 +947,12 @@ class GlobalMesh {
         {
             unsigned* ranks_nnodes_ptr = ranks_nnodes.data();
             #ifdef MPI
+            if (VERBOSE)
+            {
+                std::cout << "GlobalMesh::renumber_nodes: Rank " << rank << " sending via MPI_Allgather " << 1 << " objects to all ranks;" 
+                    << " send buffer size is " << 1 <<
+                    " and receive_buffer size is: " << ranks_nnodes.size() << "." << std::endl;
+            }
             // Find out what the rank_nnodes is for each rank
             MPI_Allgather(&rank_nnodes, 1, MPI_UNSIGNED,
                         ranks_nnodes_ptr, 1, MPI_UNSIGNED, 
@@ -918,6 +1003,12 @@ class GlobalMesh {
             }
             #ifdef MPI
             // Find out what the rank_ndofs is for each rank
+            if (VERBOSE)
+            {
+                std::cout << "GlobalMesh::count_distributed_dofs: Rank " << rank << " sending via MPI_Allgather " << 1 << " objects to all ranks;" 
+                    << " send buffer size is " << 1 <<
+                    " and receive_buffer size is: " << ranks_ndofs.size() << "." << std::endl;
+            }
             MPI_Allgather(&rank_ndofs, 1, MPI_INT,
                         ranks_ndofs_ptr, 1, MPI_INT, 
                         MPI_COMM_WORLD);
@@ -1036,21 +1127,32 @@ class GlobalMesh {
          */
         std::shared_ptr<Node> get_node_by_id(int id, std::string search_target = "all")
         {
-            if (search_target == "all" || search_target == "rank_owned" )
+            std::vector<std::shared_ptr<Node>>::iterator node_it;
+            if (search_target == "rank_owned")
             {
-                auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
-                if (node_it == node_vector.end() && search_target == "all")
-                {
-                    node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, interface_node_vector);
-                    return *node_it;
-                }
+                 node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
             }
-            if (search_target == "all" || search_target == "interface")
+            if (search_target == "interface")
             {
-                auto node_it = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, interface_node_vector);
-                return *node_it;
+                 node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, interface_node_vector);
             }
-            return nullptr;
+ 
+            if (search_target == "all")
+            {
+                 node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, node_vector);
+ 
+                 if (node_it == node_vector.end())
+                 {
+                     node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(id, interface_node_vector);
+                 }
+            }
+            if ((node_it != node_vector.end()) && (node_it != interface_node_vector.end()))
+            {
+             return *node_it;
+            } else {
+             std::cout << "Could not find node with record_id " << id << " in " << search_target << " node vectors." << std::endl;
+             exit(1);
+            }
         }
 
         /**
@@ -1059,24 +1161,79 @@ class GlobalMesh {
          * @param search_target a std::string that is either "all", "rank_owned", or "interface" that specifies where to search for the nodes.
          * @return std::shared_ptr<Node> a shared pointer to the node with the given record_id.
          */
-        std::shared_ptr<Node> get_node_by_record_id(int record_id, std::string search_target = "all")
+        std::shared_ptr<Node> get_node_by_record_id(int record_id, std::string search_target = "all", int rank = -1)
         {
-            if (search_target == "all" || search_target == "rank_owned" )
-            {
-                auto node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, node_vector);
-                if (node_it == node_vector.end() && search_target == "all")
+            std::vector<std::shared_ptr<Node>>::iterator node_it;
+           if (search_target == "rank_owned")
+           {
+                node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, node_vector);
+                if (node_it != node_vector.end())
                 {
-                    node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, interface_node_vector);
                     return *node_it;
                 }
             }
-            if (search_target == "all" || search_target == "interface")
-            {
-                auto node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, interface_node_vector);
-                return *node_it;
+           if (search_target == "interface")
+           {
+                std::cout << "get_node_by_record_id::Rank " << rank << ": is looking for record_id " << record_id << " in " << search_target << std::endl; 
+                read_node_ids(rank, true);
+                node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, interface_node_vector);
+                if (node_it != interface_node_vector.end())
+                {
+                    return *node_it;
+                }
             }
-            return nullptr;
+
+           if (search_target == "all")
+           {
+                node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, node_vector);
+
+                if (node_it != node_vector.end())
+                {
+                    return *node_it;
+                } else {
+                    node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, interface_node_vector);
+                    if (node_it != interface_node_vector.end())
+                    {
+                        return *node_it;
+                    }
+                }
+           }
+     
+            std::cout << "Rank " << rank << ": Could not find node with record_id " << record_id << " in " << search_target << " node vectors." << std::endl;
+            exit(1);
         }
+
+        // std::shared_ptr<Node> get_node_by_record_id(int record_id, std::string search_target = "all")
+        // {
+        //     std::cout << "get_node_by_record_id: searching " << search_target << " for record_id " << record_id << std::endl;
+        //     if (search_target == "all" || search_target == "rank_owned" )
+        //     {
+        //         std::cout << "search target matched all or rank_owned." << std::endl;
+        //         auto node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, node_vector);
+        //         if (node_it == node_vector.end() && search_target == "all")
+        //         {
+        //             node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, interface_node_vector);
+        //             if (node_it != interface_node_vector.end())
+        //             {
+        //                 return *node_it;
+        //             } else {
+        //                 std::cout << "Could not find node with record_id " << record_id << " in all node vectors." << std::endl;
+        //             }
+        //         }
+        //     }
+        //     if (search_target == "all" || search_target == "interface")
+        //     {
+        //         std::cout << "search target matched all or interface." << std::endl;
+        //         auto node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, interface_node_vector);
+        //         if (node_it != interface_node_vector.end())
+        //         {
+        //             return *node_it;
+        //         } else {
+        //             std::cout << "Could not find node with record_id " << record_id << " in all node vectors." << std::endl;
+        //         }
+        //     }
+        //     exit(1);
+        // }
         /**
          * @brief maps the stiffness of each element in the \ref elem_vector by calling \ref BeamElementCommonInterface::map_stiffness.
          * @details this function should be called after defining the constraints on the nodes, but before actually beginning th solution procedure.
