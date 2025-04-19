@@ -113,6 +113,8 @@ if(MPI)
 endif(MPI)
 
 if(BUILD_TESTS)
+    message(STATUS "Building tests with GTest.")
+    list(APPEND CMAKE_PREFIX_PATH "/work/mdisspt/mdisspt/z2259894/diss/googletest")
     find_package(GTest REQUIRED)
     add_executable(UnitTestBlaze)
     target_sources(UnitTestBlaze PRIVATE "source/tests/UnitTestsBlazeSerial.cpp")
