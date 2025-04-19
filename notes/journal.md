@@ -35,6 +35,35 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
+### 20 April
+To build `Googletest` on `Cirrus`, I have done the following:
+1. Cloned `Googletest` to `/work/mdisspt/mdisspt/z2259894/diss`
+2. Built `Googletest` with the commands:
+```bash
+cmake .. -DBUILD_GMOCK=ON -DCMAKE_INSTALL_PREFIX=/work/mdisspt/mdisspt/z2259894/diss/googletest
+make
+make install
+```
+3. Updated `CMakeLists.txt` in `Blaze`'s main directory with the command: `list(APPEND CMAKE_PREFIX_PATH "/work/mdisspt/mdisspt/z2259894/diss/googletest")` just before `find_package(GTest REQUIRED)`
+4. Built `Blaze` with the command `./build.sh tests -DMPI=ON -DVERBOSE=ON`
+
+After fixing `Googletest`, and when building on `Cirrus` with `Intel-20.4/compilers` and `Intel-20.4/mpi`, I ran into the following error:
+```console
+[ 10%] Building CXX object CMakeFiles/Blaze.dir/source/main.cpp.o
+In file included from /mnt/lustre/e1000/home/y07/shared/cirrus-software/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/include/mpi.h:2322,
+                 from /work/mdisspt/mdisspt/z2259894/diss/Blaze/source/aggregators/global_mesh.hpp:20,
+                 from /work/mdisspt/mdisspt/z2259894/diss/Blaze/source/Model.hpp:9,
+                 from /work/mdisspt/mdisspt/z2259894/diss/Blaze/source/main.cpp:12:
+/mnt/lustre/e1000/home/y07/shared/cirrus-software/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/include/mpicxx.h:64:2: error: #error "You cannot define MPI; that name is reserved for the MPI namespace"
+   64 | #error "You cannot define MPI; that name is reserved for the MPI namespace"
+      |  ^~~~~
+<command-line>: error: expected identifier before numeric constant
+<command-line>: error: expected unqualified-id before numeric constant
+make[2]: *** [CMakeFiles/Blaze.dir/build.make:76: CMakeFiles/Blaze.dir/source/main.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:213: CMakeFiles/Blaze.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2
+```
+I fixed this issue by changing `#define MPI` to `#define WITH_MPI` everywhere in the code. This had the effect of correcting the bug in `Allgather` that I had faced on 25 March!! Now the program is able to run through the tests without crashing immediately. 
 ### 25 March
 I am so confused. The function `exchange_interface_nodes_updated_ids` is presenting:
 ```

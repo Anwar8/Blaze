@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <Eigen/SparseLU>
 #include <Eigen/SparseCholesky>
-#ifdef MPI
+#ifdef WITH_MPI
     #include <mpi.h>
 #endif
 #ifdef KOKKOS
@@ -796,7 +796,7 @@ class GlobalMesh {
             if (VERBOSE)
                 std::cout << "rank " << rank << " exchanging nodes ids with MPI started." << std::endl;
             // exchange node ids
-            #ifdef MPI
+            #ifdef WITH_MPI
              for (int neighbor_rank : neighbours)
             {
 
@@ -907,7 +907,7 @@ class GlobalMesh {
             }
 
             // exchange node ids
-            #ifdef MPI
+            #ifdef WITH_MPI
              for (int neighbor_rank : neighbours)
             {
                 auto receive_buffer = rank_nz_i_receive_buffers_map[neighbor_rank].data();
@@ -946,7 +946,7 @@ class GlobalMesh {
         void renumber_nodes(int const rank)
         {
             unsigned* ranks_nnodes_ptr = ranks_nnodes.data();
-            #ifdef MPI
+            #ifdef WITH_MPI
             if (VERBOSE)
             {
                 std::cout << "GlobalMesh::renumber_nodes: Rank " << rank << " sending via MPI_Allgather " << 1 << " objects to all ranks;" 
@@ -1002,7 +1002,7 @@ class GlobalMesh {
                 }
                 rank_ndofs += node->get_ndof();
             }
-            #ifdef MPI
+            #ifdef WITH_MPI
             // Find out what the rank_ndofs is for each rank
             if (VERBOSE)
             {

@@ -10,7 +10,7 @@
 #ifndef MPI_WRAPPERS
 #define MPI_WRAPPERS
 
-#ifdef MPI
+#ifdef WITH_MPI
 #include "mpi.h"
 inline void initialise_MPI(int& argc, char**& argv)
 {
