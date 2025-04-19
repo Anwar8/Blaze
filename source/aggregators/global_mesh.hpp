@@ -954,6 +954,7 @@ class GlobalMesh {
                     " and receive_buffer size is: " << ranks_nnodes.size() << "." << std::endl;
             }
             // Find out what the rank_nnodes is for each rank
+            MPI_Barrier(MPI_COMM_WORLD);
             MPI_Allgather(&rank_nnodes, 1, MPI_UNSIGNED,
                         ranks_nnodes_ptr, 1, MPI_UNSIGNED, 
                         MPI_COMM_WORLD);
