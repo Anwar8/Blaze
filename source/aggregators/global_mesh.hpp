@@ -305,8 +305,11 @@ class GlobalMesh {
          * 
          * @param elem_nodes_vector a vector of pairs mapping elem ids and corresponding node ids.
          */
-        void make_elements (ElemIdNodeIdPairVector& elem_nodes_vector)
+        void make_elements (ElemIdNodeIdPairVector& elem_nodes_vector, int rank)
         {
+            #if VERBOSE
+                std::cout << "Rank "<< rank << " -------------GlobalMesh::make_elements-------------" << std::endl;
+            #endif
             std::vector<std::shared_ptr<Node>> elem_nodes;
             elem_nodes.reserve(2);
             for (auto& element_data : elem_nodes_vector)
@@ -314,8 +317,12 @@ class GlobalMesh {
                 elem_nodes.clear();
                 for (auto& node_id: element_data.second)
                 {
-                    auto node = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(node_id, node_vector);
-                    elem_nodes.push_back(*node);
+                    // auto node = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(node_id, node_vector);
+                    #if VERBOSE
+                        std::cout << "Rank "<< rank << " - GlobalMesh::make_elements: searching for node id = " << node_id << " to make element " << element_data.first << std::endl;
+                    #endif
+                    std::shared_ptr<Node> node = get_node_by_record_id(node_id, "all");
+                    elem_nodes.push_back(node);
                 }
 
                 switch (element_type)
@@ -354,7 +361,7 @@ class GlobalMesh {
             elem_vector.clear();
             elem_vector.reserve(nelems);
             make_nodes(nodes_coords_vector);
-            make_elements(elem_nodes_vector);
+            make_elements(elem_nodes_vector, 0);
             std::sort(node_vector.begin(), node_vector.end());
             std::sort(elem_vector.begin(), elem_vector.end());
             count_dofs();            
@@ -693,14 +700,18 @@ class GlobalMesh {
                 std::cout << std::endl;
             }
 
-            make_elements(elem_nodes_vector_on_rank);
+            make_elements(elem_nodes_vector_on_rank, rank);
             std::sort(node_vector.begin(), node_vector.end());
-            std::sort(interface_node_vector.begin(), node_vector.end());
+            std::sort(interface_node_vector.begin(), interface_node_vector.end());
+            
             std::sort(elem_vector.begin(), elem_vector.end());
-
+            if (VERBOSE)
+            {
+                std::cout << "Rank " << rank << " has sorted its node vectors." << std::endl;
+            }   
             renumber_nodes(rank);
             std::sort(node_vector.begin(), node_vector.end());
-            std::sort(interface_node_vector.begin(), node_vector.end());
+            std::sort(interface_node_vector.begin(), interface_node_vector.end());
             if (VERBOSE)
             {
                 std::cout << "nodes renumbered and sorted. Exchanging interface node IDs next." << std::endl;

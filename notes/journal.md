@@ -37,15 +37,16 @@ This journal contains the day-to-day project management and notes taken. It was 
 ## Journal
 ### 20 April
 To build `Googletest` on `Cirrus`, I have done the following:
-1. Cloned `Googletest` to `/work/mdisspt/mdisspt/z2259894/diss`
-2. Built `Googletest` with the commands:
+1. `module load Intel-20.4/compilers`, `module load Intel-20.4/mpi`, and `module load cmake`.
+2. Cloned `Googletest` to `/work/mdisspt/mdisspt/z2259894/diss`
+3. Built `Googletest` with the commands:
 ```bash
 cmake .. -DBUILD_GMOCK=ON -DCMAKE_INSTALL_PREFIX=/work/mdisspt/mdisspt/z2259894/diss/googletest
 make
 make install
 ```
-3. Updated `CMakeLists.txt` in `Blaze`'s main directory with the command: `list(APPEND CMAKE_PREFIX_PATH "/work/mdisspt/mdisspt/z2259894/diss/googletest")` just before `find_package(GTest REQUIRED)`
-4. Built `Blaze` with the command `./build.sh tests -DMPI=ON -DVERBOSE=ON`
+1. Updated `CMakeLists.txt` in `Blaze`'s main directory with the command: `list(APPEND CMAKE_PREFIX_PATH "/work/mdisspt/mdisspt/z2259894/diss/googletest")` just before `find_package(GTest REQUIRED)`
+2. Built `Blaze` with the command `./build.sh tests -DMPI=ON -DVERBOSE=ON`
 
 After fixing `Googletest`, and when building on `Cirrus` with `Intel-20.4/compilers` and `Intel-20.4/mpi`, I ran into the following error:
 ```console
@@ -64,6 +65,163 @@ make[1]: *** [CMakeFiles/Makefile2:213: CMakeFiles/Blaze.dir/all] Error 2
 make: *** [Makefile:136: all] Error 2
 ```
 I fixed this issue by changing `#define MPI` to `#define WITH_MPI` everywhere in the code. This had the effect of correcting the bug in `Allgather` that I had faced on 25 March!! Now the program is able to run through the tests without crashing immediately. 
+
+I noticed that `source/aggregators/CMakeLists.txt` had an unupdated dependency on an `MPI` definition, which caused the previous error to persist on `Cirrus`. After updating this dependency to `WITH_MPI`, the issue resolved and I was able to compile on `Cirrus`. However, when running tests on `Cirrus`, I am getting:
+```console
+[z2259894@cirrus-login3 Blaze]$ ./test_blaze.sh mpi 1
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from DistributedLineMeshTests
+[ RUN      ] DistributedLineMeshTests.line_mesh_rank_counts
+Rank 0 has created nodes: 1 2 3 4 5 6 7 8 9 10 
+Rank 0 has created interface_nodes: 
+[cirrus-login3:4114599:0:4114599] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x16ce000)
+malloc(): invalid size (unsorted)
+
+===================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   RANK 0 PID 4114599 RUNNING AT cirrus-login3
+=   KILLED BY SIGNAL: 6 (Aborted)
+===================================================================================
+```
+And when running on more than one `MPI` process, I am getting:
+```console
+[z2259894@cirrus-login3 Blaze]$ ./test_blaze.sh mpi 2
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from DistributedLineMeshTests
+[ RUN      ] DistributedLineMeshTests.line_mesh_rank_counts
+rank 1 elem 5 node 5 with parent_rank 0 pushed to wanted_from_neighbour_rank_node_id_map[parent_rank = 0].
+[----------] 1 test from DistributedLineMeshTests
+rank 1 elem 5 node 6 with parent_rank 1 pushed to neighbour_wanted_rank_node_id_map[neighbor = 0].
+[ RUN      ] DistributedLineMeshTests.line_mesh_rank_counts
+Rank 1 has created nodes: 6 7 8 9 10 
+Rank 1 has created interface_nodes: 5 
+rank 0 elem 5 node 5 with parent_rank 0 pushed to neighbour_wanted_rank_node_id_map[neighbor = 1].
+rank 0 elem 5 node 6 with parent_rank 1 pushed to wanted_from_neighbour_rank_node_id_map[parent_rank = 1].[cirrus-login3:4115738:0:4115738] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x39)
+
+Rank 0 has created nodes: 1 2 3 4 5 
+Rank 0 has created interface_nodes: 6 
+[cirrus-login3:4115737:0:4115737] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x39)
+==== backtrace (tid:4115738) ====
+ 0 0x00000000000534c9 ucs_debug_print_backtrace()  ???:0
+ 1 0x0000000000012b20 .annobin_sigaction.c()  sigaction.c:0
+ 2 0x000000000042ad58 GlobalMesh::make_elements()  ???:0
+ 3 0x000000000042e171 GlobalMesh::setup_distributed_mesh()  ???:0
+ 4 0x000000000040f7f7 DistributedLineMeshTests_line_mesh_rank_counts_Test::TestBody()  ???:0
+ 5 0x000000000047125d testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test, void>()  ???:0
+ 6 0x0000000000469fff testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>()  ???:0
+ 7 0x0000000000446880 testing::Test::Run()  ???:0
+ 8 0x000000000044718f testing::TestInfo::Run()  ???:0
+ 9 0x0000000000447a16 testing::TestSuite::Run()  ???:0
+10 0x00000000004571a4 testing::internal::UnitTestImpl::RunAllTests()  ???:0
+11 0x00000000004720d3 testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>()  ???:0
+12 0x000000000046b04f testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>()  ???:0
+13 0x0000000000455683 testing::UnitTest::Run()  ???:0
+14 0x0000000000408884 main()  ???:0
+15 0x0000000000023493 __libc_start_main()  ???:0
+16 0x0000000000408b6e _start()  ???:0
+=================================
+==== backtrace (tid:4115737) ====
+ 0 0x00000000000534c9 ucs_debug_print_backtrace()  ???:0
+ 1 0x0000000000012b20 .annobin_sigaction.c()  sigaction.c:0
+ 2 0x000000000042ad58 GlobalMesh::make_elements()  ???:0
+ 3 0x000000000042e171 GlobalMesh::setup_distributed_mesh()  ???:0
+ 4 0x000000000040f7f7 DistributedLineMeshTests_line_mesh_rank_counts_Test::TestBody()  ???:0
+ 5 0x000000000047125d testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test, void>()  ???:0
+ 6 0x0000000000469fff testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>()  ???:0
+ 7 0x0000000000446880 testing::Test::Run()  ???:0
+ 8 0x000000000044718f testing::TestInfo::Run()  ???:0
+ 9 0x0000000000447a16 testing::TestSuite::Run()  ???:0
+10 0x00000000004571a4 testing::internal::UnitTestImpl::RunAllTests()  ???:0
+11 0x00000000004720d3 testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>()  ???:0
+12 0x000000000046b04f testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>()  ???:0
+13 0x0000000000455683 testing::UnitTest::Run()  ???:0
+14 0x0000000000408884 main()  ???:0
+15 0x0000000000023493 __libc_start_main()  ???:0
+16 0x0000000000408b6e _start()  ???:0
+=================================
+
+===================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   RANK 0 PID 4115737 RUNNING AT cirrus-login3
+=   KILLED BY SIGNAL: 11 (Segmentation fault)
+===================================================================================
+
+===================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   RANK 1 PID 4115738 RUNNING AT cirrus-login3
+=   KILLED BY SIGNAL: 11 (Segmentation fault)
+===================================================================================
+```
+
+After re-running on my Mac with the correct `aggregators/CMakeLists.txt` file, I ran into the same segmentation error when running on 3 or more processes. This error is also a segmentation fault with code 11:
+```console
+(base) anwar@Mhds-MacBook-Air Blaze % test mpi 3
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from DistributedLineMeshTests
+[ RUN      ] DistributedLineMeshTests.line_mesh_rank_counts
+[----------] 1 test from DistributedLineMeshTests
+[ RUN      ] DistributedLineMeshTests.line_mesh_rank_counts
+rank 1 elem 3 node 3 with parent_rank 0 pushed to wanted_from_neighbour_rank_node_id_map[parent_rank = 0].
+rank 2 elem 6 node 6 with parent_rank 1 pushed to wanted_from_neighbour_rank_node_id_map[parent_rank = 1].
+rank 2 elem 6 node 7 with parent_rank 2 pushed to neighbour_wanted_rank_node_id_map[neighbor = 1].
+rank 1 elem 3 node 4 with parent_rank 1 pushed to neighbour_wanted_rank_node_id_map[neighbor = 0].
+rank 1 elem 6 node 6 with parent_rank 1 pushed to neighbour_wanted_rank_node_id_map[neighbor = 2].
+rank 1 elem 6 node 7 with parent_rank 2 pushed to wanted_from_neighbour_rank_node_id_map[parent_rank = 2].
+Rank 1 has created nodes: 4 5 6 
+Rank 1 has created interface_nodes: 3 7 
+Rank 2 has created nodes: 7 8 9 10 
+Rank 2 has created interface_nodes: 6 
+GlobalMesh::renumber_nodes: Rank 2 sending via MPI_Allgather 1 objects to all ranks; send buffer size is 1 and receive_buffer size is: 3.
+GlobalMesh::renumber_nodes: Rank 1 sending via MPI_Allgather 1 objects to all ranks; send buffer size is 1 and receive_buffer size is: 3.
+[----------] 1 test from DistributedLineMeshTests
+[ RUN      ] DistributedLineMeshTests.line_mesh_rank_counts
+rank 0 elem 3 node 3 with parent_rank 0 pushed to neighbour_wanted_rank_node_id_map[neighbor = 1].
+rank 0 elem 3 node 4 with parent_rank 1 pushed to wanted_from_neighbour_rank_node_id_map[parent_rank = 1].
+Rank 0 has created nodes: 1 2 3 
+Rank 0 has created interface_nodes: 4 
+[Mhds-MacBook-Air:78716] *** Process received signal ***
+[Mhds-MacBook-Air:78716] Signal: Segmentation fault: 11 (11)
+[Mhds-MacBook-Air:78716] Signal code: Invalid permissions (2)
+[Mhds-MacBook-Air:78716] Failing at address: 0x40
+[Mhds-MacBook-Air:78716] [ 0] 0   libsystem_platform.dylib            0x000000018c3bade4 _sigtramp + 56
+[Mhds-MacBook-Air:78716] [ 1] 0   TestBlazeMPI                        0x00000001041091a0 _ZN22Nonlinear2DBeamElement10initialiseINSt3__16vectorINS1_10shared_ptrI4NodeEENS1_9allocatorIS5_EEEEEEviRT_R12BasicSection + 420
+[Mhds-MacBook-Air:78716] [ 2] 0   TestBlazeMPI                        0x0000000104108f2c _ZNSt3__115allocate_sharedB8ne180100I22Nonlinear2DBeamElementNS_9allocatorIS1_EEJRmRNS_6vectorINS_10shared_ptrI4NodeEENS2_IS8_EEEER12BasicSectionEvEENS6_IT_EERKT0_DpOT1_ + 140
+[Mhds-MacBook-Air:78716] [ 3] 0   TestBlazeMPI                        0x00000001040f796c _ZN10GlobalMesh13make_elementsERNSt3__16vectorINS0_4pairImNS1_ImNS0_9allocatorImEEEEEENS3_IS6_EEEE + 780
+[Mhds-MacBook-Air:78716] [ 4] 0   TestBlazeMPI                        0x00000001040f2750 _ZN10GlobalMesh22setup_distributed_meshERNSt3__16vectorINS0_4pairImN5Eigen6MatrixIdLi3ELi1ELi0ELi3ELi1EEEEENS0_9allocatorIS6_EEEERNS1_INS2_ImNS1_ImNS7_ImEEEEEENS7_ISD_EEEEii + 1780
+[Mhds-MacBook-Air:78716] [ 5] 0   TestBlazeMPI                        0x00000001040f0f9c _ZN51DistributedLineMeshTests_line_mesh_rank_counts_Test8TestBodyEv + 72
+[Mhds-MacBook-Air:78716] [ 6] 0   TestBlazeMPI                        0x0000000104126560 _ZN7testing8internal35HandleExceptionsInMethodIfSupportedINS_9TestSuiteEvEET0_PT_MS4_FS3_vEPKc + 100
+[Mhds-MacBook-Air:78716] [ 7] 0   TestBlazeMPI                        0x00000001041264a4 _ZN7testing4Test3RunEv + 188
+[Mhds-MacBook-Air:78716] [ 8] 0   TestBlazeMPI                        0x0000000104127178 _ZN7testing8TestInfo3RunEv + 236
+[Mhds-MacBook-Air:78716] [ 9] 0   TestBlazeMPI                        0x0000000104127ad4 _ZN7testing9TestSuite3RunEv + 356
+[Mhds-MacBook-Air:78716] [10] 0   TestBlazeMPI                        0x0000000104132890 _ZN7testing8internal12UnitTestImpl11RunAllTestsEv + 896
+[Mhds-MacBook-Air:78716] [11] 0   TestBlazeMPI                        0x00000001041323ec _ZN7testing8internal35HandleExceptionsInMethodIfSupportedINS0_12UnitTestImplEbEET0_PT_MS4_FS3_vEPKc + 100
+[Mhds-MacBook-Air:78716] [12] 0   TestBlazeMPI                        0x0000000104132354 _ZN7testing8UnitTest3RunEv + 124
+[Mhds-MacBook-Air:78716] [13] 0   TestBlazeMPI                        0x00000001040f2cb0 main + 76
+[Mhds-MacBook-Air:78716] [14] 0   dyld                                0x000000018c004274 start + 2840
+[Mhds-MacBook-Air:78716] *** End of error message ***
+--------------------------------------------------------------------------
+prterun noticed that process rank 0 with PID 78716 on node Mhds-MacBook-Air exited on
+signal 11 (Segmentation fault: 11).
+--------------------------------------------------------------------------
+```
+
+tracing the error messages, it was found that the error came from the `make_elements` function, NOT from the `MPI_Allgather`, which surprised me greatly. I found that this error arose from the line:
+`// auto node = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(node_id, node_vector);` which could return an empty iterator which when accessed causes a segmentation error. I fixed this problem by replacing this with the updated call that searches both the base and interface nodes: 
+`std::shared_ptr<Node> node = get_node_by_record_id(node_id, "all");`. However, now I have a deadlock condition where rank 0 is never making the `Allgather` call like its sibling ranks.
+
+I tried to find why this deadlock was happening, but no luck. It is not caused by the `make_elements` function as commenting that out does not resolve the issue. Rank 0 is simply not making the `MPI_Allgather` call as it is not entering the function `renumber_nodes(rank);` at all.
+
+I found the bug. I had used the wrong end iterator for the sorting function: `std::sort(interface_node_vector.begin(), node_vector.end());` in stead of `std::sort(interface_node_vector.begin(), interface_node_vector.end());`. This is fixed, and now the program proceeds, at least on my machine, to run on up to 6 `MPI` ranks.
+
 ### 25 March
 I am so confused. The function `exchange_interface_nodes_updated_ids` is presenting:
 ```

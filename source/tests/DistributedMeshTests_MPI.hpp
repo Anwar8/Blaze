@@ -54,11 +54,13 @@ TEST_F(DistributedLineMeshTests, line_mesh_rank_counts)
     {
         ASSERT_EQ(mesh.count_nodes_vector(), 10);
         ASSERT_EQ(mesh.count_elem_vector(), 9);
+        ASSERT_EQ(mesh.count_interface_nodes_vector(), 0);
     }
     else if (num_ranks == 2)
     {
         ASSERT_EQ(mesh.count_nodes_vector(), 5);
         ASSERT_EQ(mesh.count_elem_vector(), 5);
+        ASSERT_EQ(mesh.count_interface_nodes_vector(), 1);
     }
     else if (num_ranks == 3)
     {
