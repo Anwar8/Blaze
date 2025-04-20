@@ -67,6 +67,8 @@ make: *** [Makefile:136: all] Error 2
 I fixed this issue by changing `#define MPI` to `#define WITH_MPI` everywhere in the code. This had the effect of correcting the bug in `Allgather` that I had faced on 25 March!! Now the program is able to run through the tests without crashing immediately. 
 
 I noticed that `source/aggregators/CMakeLists.txt` had an unupdated dependency on an `MPI` definition, which caused the previous error to persist on `Cirrus`. After updating this dependency to `WITH_MPI`, the issue resolved and I was able to compile on `Cirrus`. However, when running tests on `Cirrus`, I am getting:
+<div style="max-height: 200px; overflow-y: auto; font-size: 0.9em; border: 1px solid #ccc; padding: 5px;">
+
 ```console
 [z2259894@cirrus-login3 Blaze]$ ./test_blaze.sh mpi 1
 [==========] Running 1 test from 1 test suite.
@@ -84,7 +86,11 @@ malloc(): invalid size (unsorted)
 =   KILLED BY SIGNAL: 6 (Aborted)
 ===================================================================================
 ```
+</div>
+
 And when running on more than one `MPI` process, I am getting:
+<div style="max-height: 200px; overflow-y: auto; font-size: 0.9em; border: 1px solid #ccc; padding: 5px;">
+
 ```console
 [z2259894@cirrus-login3 Blaze]$ ./test_blaze.sh mpi 2
 [==========] Running 1 test from 1 test suite.
@@ -156,8 +162,10 @@ Rank 0 has created interface_nodes: 6
 =   KILLED BY SIGNAL: 11 (Segmentation fault)
 ===================================================================================
 ```
-
+</div>
 After re-running on my Mac with the correct `aggregators/CMakeLists.txt` file, I ran into the same segmentation error when running on 3 or more processes. This error is also a segmentation fault with code 11:
+<div style="max-height: 200px; overflow-y: auto; font-size: 0.9em; border: 1px solid #ccc; padding: 5px;">
+
 ```console
 (base) anwar@Mhds-MacBook-Air Blaze % test mpi 3
 [==========] Running 1 test from 1 test suite.
@@ -213,14 +221,24 @@ prterun noticed that process rank 0 with PID 78716 on node Mhds-MacBook-Air exit
 signal 11 (Segmentation fault: 11).
 --------------------------------------------------------------------------
 ```
-
+</div>
 tracing the error messages, it was found that the error came from the `make_elements` function, NOT from the `MPI_Allgather`, which surprised me greatly. I found that this error arose from the line:
 `// auto node = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(node_id, node_vector);` which could return an empty iterator which when accessed causes a segmentation error. I fixed this problem by replacing this with the updated call that searches both the base and interface nodes: 
 `std::shared_ptr<Node> node = get_node_by_record_id(node_id, "all");`. However, now I have a deadlock condition where rank 0 is never making the `Allgather` call like its sibling ranks.
 
 I tried to find why this deadlock was happening, but no luck. It is not caused by the `make_elements` function as commenting that out does not resolve the issue. Rank 0 is simply not making the `MPI_Allgather` call as it is not entering the function `renumber_nodes(rank);` at all.
 
-I found the bug. I had used the wrong end iterator for the sorting function: `std::sort(interface_node_vector.begin(), node_vector.end());` in stead of `std::sort(interface_node_vector.begin(), interface_node_vector.end());`. This is fixed, and now the program proceeds, at least on my machine, to run on up to 6 `MPI` ranks.
+I found the bug. I had used the wrong end iterator for the sorting function: `std::sort(interface_node_vector.begin(), node_vector.end());` in stead of `std::sort(interface_node_vector.begin(), interface_node_vector.end());`. This is fixed, and now the program proceeds, at least on my machine, to run on up to 6 `MPI` ranks. 
+
+The code now runs on up to 6 `MPI` ranks on `Cirrus` as well, if using the modules `openmpi/4.1.6(default)` and `gcc/12.3.0-offload`. It does not not work with `openmpi/5.0.0`, and I have not checked with the intel compilers.
+
+
+[x] Must update `get_node_by_id`.
+[ ] Update counting tests.
+[ ] Update number check tests.
+[ ] Start writing and illustrating algorithm.
+[ ] Clean up excessive printing.
+
 
 ### 25 March
 I am so confused. The function `exchange_interface_nodes_updated_ids` is presenting:
