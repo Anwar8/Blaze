@@ -714,6 +714,18 @@ class GlobalMesh {
             if (VERBOSE)
             {
                 std::cout << "nodes renumbered and sorted. Exchanging interface node IDs next." << std::endl;
+                std::cout << "Rank " << rank << " nodes are:";
+                for (auto a_node : node_vector)
+                {
+                    std::cout << a_node->get_id() << " ";
+                }
+                std::cout << std::endl;
+                std::cout << "Rank " << rank << " interface_nodes are:";
+                for (auto a_node : interface_node_vector)
+                {
+                    std::cout << a_node->get_id() << " ";
+                }
+                std::cout << std::endl;
             }
             exchange_interface_nodes_updated_ids(wanted_by_neighbour_rank_node_id_map, wanted_from_neighbour_rank_node_id_map, rank);
             // count the ndofs of each rank and assign each node an index that corresponds to the global matrices and vectors.
@@ -967,7 +979,7 @@ class GlobalMesh {
                     " and receive_buffer size is: " << ranks_nnodes.size() << "." << std::endl;
             }
             // Find out what the rank_nnodes is for each rank
-            MPI_Barrier(MPI_COMM_WORLD);
+            // MPI_Barrier(MPI_COMM_WORLD);
             MPI_Allgather(&rank_nnodes, 1, MPI_UNSIGNED,
                         ranks_nnodes_ptr, 1, MPI_UNSIGNED, 
                         MPI_COMM_WORLD);
@@ -983,10 +995,18 @@ class GlobalMesh {
                     rank_starting_node_id += ranks_nnodes[i];
                 }
             }
+            if (VERBOSE)
+            {
+                std::cout << "GlobalMesh::renumber_nodes: Rank " << rank << ": rank_starting_node_id is: "<< rank_starting_node_id << "." << std::endl;
+            }
             // Step 2: loop over the nodes and update them.
             unsigned temp_id = rank_starting_node_id;
             for (auto& node: node_vector)
             {
+                if (VERBOSE)
+                {
+                    std::cout << "Rank " << rank << ": Node " << node->get_id() << " will be renumbered to " << temp_id << std::endl;
+                }
                 node->set_id(temp_id);
                 ++temp_id;
                 if (VERBOSE)
