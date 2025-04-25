@@ -36,27 +36,33 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Journal
 ### 25 April
-[x] Update number check tests.
-[ ] Start writing and illustrating algorithm.
-[ ] Clean up excessive printing.
+- [x] Update number check tests.
+- [ ] Start writing and illustrating algorithm.
+- [ ] Clean up excessive printing.
 Created the `line_mesh_rank_ndof_counts` and `line_mesh_rank_interface_nzi` set of tests for the distributed mesh.
 `line_mesh_rank_ndof_counts` checks whether the distributed vector that contains the number of ranks on each rank was exchanged correctly so that each rank knows exactly how many DoFs each other rank has. 
 `line_mesh_rank_interface_nzi` check if the interface nodes have received the correct `nz_i` which tells them where to start from the other ranks.
 
 While the first works perfectly up to 5 ranks, the latter sometimes has an error on any number of `MPI` processes above 1. This does not always happen, and I believe it might be related to my how my Mac handles `MPI`. I will need to investigate on `Cirrus`.
 
+Okay, so I tested the project on Cirrus. The `line_mesh_rank_interface_nzi` always fail. I noted that the nodes are being renumbered all the time, even when only one rank is being used. I do not quite recall how the renumbering algorithm was designed, so I will need to have another look at that.
+
+Okay, I found out why this was happening. The nodes were being desorted because to sort the node vector, which is a node of pointers, one must access the node ids, not just sort the pointers. 
+
+Problem solved and `line_mesh_rank_interface_nzi` now tests and works correctly on `Cirrus` and my Mac thanks to creating two new functions for sorting the `GlobalMesh` node and element vectors: `sort_node_vector(std::string vector_to_sort="all")` and `sort_element_vector()`.
+
 
 ### 21 April
 Updated `line_mesh_rank_counts` and they now all pass correctly.
 
 
-[x] Update counting tests.
-[ ] Update number check tests.
-[ ] Start writing and illustrating algorithm.
-[ ] Clean up excessive printing.
+- [x] Update counting tests.
+- [ ] Update number check tests.
+- [ ] Start writing and illustrating algorithm.
+- [ ] Clean up excessive printing.
 ### 20 April
 To build `Googletest` on `Cirrus`, I have done the following:
-1. `module load Intel-20.4/compilers`, `module load Intel-20.4/mpi`, and `module load cmake`.
+1. `module load intel-20.4/compilers`, `module load intel-20.4/mpi`, and `module load cmake`.
 2. Cloned `Googletest` to `/work/mdisspt/mdisspt/z2259894/diss`
 3. Built `Googletest` with the commands:
 ```bash
@@ -67,7 +73,7 @@ make install
 1. Updated `CMakeLists.txt` in `Blaze`'s main directory with the command: `list(APPEND CMAKE_PREFIX_PATH "/work/mdisspt/mdisspt/z2259894/diss/googletest")` just before `find_package(GTest REQUIRED)`
 2. Built `Blaze` with the command `./build.sh tests -DMPI=ON -DVERBOSE=ON`
 
-After fixing `Googletest`, and when building on `Cirrus` with `Intel-20.4/compilers` and `Intel-20.4/mpi`, I ran into the following error:
+After fixing `Googletest`, and when building on `Cirrus` with `intel-20.4/compilers` and `intel-20.4/mpi`, I ran into the following error:
 ```console
 [ 10%] Building CXX object CMakeFiles/Blaze.dir/source/main.cpp.o
 In file included from /mnt/lustre/e1000/home/y07/shared/cirrus-software/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/include/mpi.h:2322,
