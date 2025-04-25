@@ -9,9 +9,9 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP1: Debugging of geometric nonlinearity - 2 weeks - due 15/06/2024 - COMPLETED
 ### WP2: Implementation of 1D nonlinear material - 8 weeks - due 23/09/2024 - COMPLETED
 ### WP3: Shared-memory parallelisation on Cirrus using Kokkos - 6 weeks - due 15/01/2024 - COMPLETED AHEAD OF SCHEDULE; SIMPLIFIED GREATLY
-### WP4: Internode parallelisation with MPI - 8 weeks - due 15/03/2025
-### WP5: Profiling, data collection, and analysis - 3 weeks - due 07/04/2025
-### WP6: Thesis writing - 05 weeks - due 15/05/2025
+### WP4: Internode parallelisation with MPI - 7.5 weeks - due 18/06/2025
+### WP5: Profiling, data collection, and analysis - 4 weeks - due 14/07/2025
+### WP6: Thesis writing - 05 weeks - due 18/08/2025
 
 ## Known Bugs
 - [ ] Unable to factorise matrix - this happens for the Plastic Cantilever test where it takes multiple runs to correctly proceed.
@@ -35,6 +35,25 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
+### 25 April
+[x] Update number check tests.
+[ ] Start writing and illustrating algorithm.
+[ ] Clean up excessive printing.
+Created the `line_mesh_rank_ndof_counts` and `line_mesh_rank_interface_nzi` set of tests for the distributed mesh.
+`line_mesh_rank_ndof_counts` checks whether the distributed vector that contains the number of ranks on each rank was exchanged correctly so that each rank knows exactly how many DoFs each other rank has. 
+`line_mesh_rank_interface_nzi` check if the interface nodes have received the correct `nz_i` which tells them where to start from the other ranks.
+
+While the first works perfectly up to 5 ranks, the latter sometimes has an error on any number of `MPI` processes above 1. This does not always happen, and I believe it might be related to my how my Mac handles `MPI`. I will need to investigate on `Cirrus`.
+
+
+### 21 April
+Updated `line_mesh_rank_counts` and they now all pass correctly.
+
+
+[x] Update counting tests.
+[ ] Update number check tests.
+[ ] Start writing and illustrating algorithm.
+[ ] Clean up excessive printing.
 ### 20 April
 To build `Googletest` on `Cirrus`, I have done the following:
 1. `module load Intel-20.4/compilers`, `module load Intel-20.4/mpi`, and `module load cmake`.

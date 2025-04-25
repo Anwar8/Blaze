@@ -317,7 +317,6 @@ class GlobalMesh {
                 elem_nodes.clear();
                 for (auto& node_id: element_data.second)
                 {
-                    // auto node = get_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(node_id, node_vector);
                     #if VERBOSE
                         std::cout << "Rank "<< rank << " - GlobalMesh::make_elements: searching for node id = " << node_id << " to make element " << element_data.first << std::endl;
                     #endif
@@ -718,7 +717,8 @@ class GlobalMesh {
             }
             exchange_interface_nodes_updated_ids(wanted_by_neighbour_rank_node_id_map, wanted_from_neighbour_rank_node_id_map, rank);
             // count the ndofs of each rank and assign each node an index that corresponds to the global matrices and vectors.
-            count_distributed_dofs(rank, num_ranks);            
+            count_distributed_dofs(rank, num_ranks);
+            exchange_interface_nodes_nz_i(wanted_by_neighbour_rank_node_id_map, wanted_from_neighbour_rank_node_id_map, rank);            
         }
         /**
          * @brief Set the nodes parent ranks based on current calling rank and the map node_rank_map.
@@ -797,7 +797,7 @@ class GlobalMesh {
                 {
                     if (VERBOSE)
                         std::cout << "rank " << rank << " looking for node with record_id " << node_id << " for neighbor " << rank_node_set.first << std::endl;
-                    unsigned renumbered_id = get_node_by_record_id(node_id, "rank_owned")->get_id();
+                    unsigned renumbered_id = get_node_by_record_id(node_id, "rank_owned", rank)->get_id();
                     rank_ids_send_buffers_map[rank_node_set.first].push_back(renumbered_id);
                 }
             }
@@ -870,7 +870,9 @@ class GlobalMesh {
                 std::cout << "read_node_ids: Rank " << rank << " has interface node ID = " << a_node->get_id() << " and record_id = " << a_node->get_record_id() << std::endl;
             }
         }
-        } 
+        }
+
+        std::vector<int> get_ranks_ndofs_vector() {return ranks_ndofs;}
         /**
          * @brief exchnages the nz_i of the interface nodes between neighbouring ranks.
          * 
@@ -912,7 +914,7 @@ class GlobalMesh {
             {
                 for (auto node_id : rank_node_set.second)
                 {
-                    unsigned node_nz_i = get_node_by_record_id(node_id, "rank_owned")->get_nz_i();
+                    unsigned node_nz_i = get_node_by_record_id(node_id, "rank_owned", rank)->get_nz_i();
                     rank_nz_i_send_buffers_map[rank_node_set.first].push_back(node_nz_i);
                 }
             }
@@ -943,7 +945,7 @@ class GlobalMesh {
                 {
                     int new_nz_i = rank_id_buffer_pair.second[i];
                     unsigned original_record_id = *node_id_set_iterator;
-                    get_node_by_record_id(original_record_id, "interface")->set_nz_i(new_nz_i);
+                    get_node_by_record_id(original_record_id, "interface", rank)->set_nz_i(new_nz_i);
                     ++node_id_set_iterator;
                 }
             }

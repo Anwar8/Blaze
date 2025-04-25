@@ -66,34 +66,193 @@ TEST_F(DistributedLineMeshTests, line_mesh_rank_counts)
     {
         if (rank == 0)
         {
-            ASSERT_EQ(mesh.count_nodes_vector(), 4);
+            ASSERT_EQ(mesh.count_nodes_vector(), 3);
             ASSERT_EQ(mesh.count_elem_vector(), 3);
-        } else {
-            ASSERT_EQ(mesh.count_nodes_vector(), 5);
-            ASSERT_EQ(mesh.count_elem_vector(), 4);  
+            ASSERT_EQ(mesh.count_interface_nodes_vector(), 1);
+        } 
+        else if (rank == 1)
+        {
+            ASSERT_EQ(mesh.count_nodes_vector(), 3);
+            ASSERT_EQ(mesh.count_elem_vector(), 4);
+            ASSERT_EQ(mesh.count_interface_nodes_vector(), 2);
+        } 
+        else if (rank == 2)
+        {
+            ASSERT_EQ(mesh.count_nodes_vector(), 4);
+            ASSERT_EQ(mesh.count_elem_vector(), 4);
+            ASSERT_EQ(mesh.count_interface_nodes_vector(), 1);  
         }
     }    
     else if (num_ranks == 4)
     {
         if (rank == 0)
         {
-            ASSERT_EQ(mesh.count_nodes_vector(), 3);
+            ASSERT_EQ(mesh.count_nodes_vector(), 2);
             ASSERT_EQ(mesh.count_elem_vector(), 2);
-        } else if (rank != 3) {
+            ASSERT_EQ(mesh.count_interface_nodes_vector(), 1);
+        } 
+        else if (rank == 1 || rank == 2)
+        {
+            ASSERT_EQ(mesh.count_nodes_vector(), 2);
+            ASSERT_EQ(mesh.count_elem_vector(), 3);
+            ASSERT_EQ(mesh.count_interface_nodes_vector(), 2);
+        } 
+        else if (rank == 3)
+        {
             ASSERT_EQ(mesh.count_nodes_vector(), 4);
-            ASSERT_EQ(mesh.count_elem_vector(), 3);  
-        } else {
-            ASSERT_EQ(mesh.count_nodes_vector(), 5);
-            ASSERT_EQ(mesh.count_elem_vector(), 4);  
+            ASSERT_EQ(mesh.count_elem_vector(), 4);
+            ASSERT_EQ(mesh.count_interface_nodes_vector(), 1);  
         }
-    } else 
+    }
+    else if (num_ranks == 5)
     {
-        std::cout << "DistributedLineMeshTests::line_mesh_rank_counts can only run on num_ranks from 1 to 4 ranks. Got " << num_ranks << "." << std::endl;
+        if (rank == 0 || rank == 4)
+        {
+            ASSERT_EQ(mesh.count_nodes_vector(), 2);
+            ASSERT_EQ(mesh.count_elem_vector(), 2);
+            ASSERT_EQ(mesh.count_interface_nodes_vector(), 1);
+        } 
+        else if (rank == 1 || rank == 2 || rank == 3)
+        {
+            ASSERT_EQ(mesh.count_nodes_vector(), 2);
+            ASSERT_EQ(mesh.count_elem_vector(), 3);
+            ASSERT_EQ(mesh.count_interface_nodes_vector(), 2);
+        } 
+    }
+    else 
+    {
+        std::cout << "DistributedLineMeshTests::line_mesh_rank_counts can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
         ASSERT_TRUE(false);
     }
 }
 
+TEST_F(DistributedLineMeshTests, line_mesh_rank_ndof_counts)
+{   
+    int rank, num_ranks;
+    get_my_rank(rank);
+    get_num_ranks(num_ranks);
+    mesh.setup_distributed_mesh(mesh_maps.first, mesh_maps.second, rank, num_ranks);
+    std::vector<int> ranks_ndofs_vec = mesh.get_ranks_ndofs_vector();
 
+    if (num_ranks == 1)
+    {
+        check_vector_contents<int, std::vector<int>>(ranks_ndofs_vec, {60});
+    }
+    else if (num_ranks == 2)
+    {
+
+        check_vector_contents<int, std::vector<int>>(ranks_ndofs_vec, {30, 30});
+    }
+    else if (num_ranks == 3)
+    {
+        check_vector_contents<int, std::vector<int>>(ranks_ndofs_vec, {18, 18, 24});
+    }
+    else if (num_ranks == 4)
+    {
+        check_vector_contents<int, std::vector<int>>(ranks_ndofs_vec, {12, 12, 12, 24});
+    }
+    else if (num_ranks == 5)
+    {
+        check_vector_contents<int, std::vector<int>>(ranks_ndofs_vec, {12, 12, 12, 12, 12});
+    }
+    else 
+    {
+        std::cout << "DistributedLineMeshTests::line_mesh_rank_ndof_counts can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
+        ASSERT_TRUE(false);
+    }
+}
+
+TEST_F(DistributedLineMeshTests, line_mesh_rank_interface_nzi)
+{   
+    int rank, num_ranks;
+    get_my_rank(rank);
+    get_num_ranks(num_ranks);
+    mesh.setup_distributed_mesh(mesh_maps.first, mesh_maps.second, rank, num_ranks);
+
+    if (num_ranks == 1)
+    {
+        ASSERT_EQ(mesh.get_node_by_record_id(1, "all")->get_nz_i(),0);
+    }
+    else if (num_ranks == 2)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(6, "interface")->get_nz_i(),30);
+        }
+        else if (rank == 1)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(5, "interface")->get_nz_i(),24);
+        }
+    }
+    else if (num_ranks == 3)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(4, "interface")->get_nz_i(),18);
+        } 
+        else if (rank == 1)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(3, "interface")->get_nz_i(),12);
+            ASSERT_EQ(mesh.get_node_by_record_id(7, "interface")->get_nz_i(),36);            
+        } 
+        else if (rank == 2)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(6, "interface")->get_nz_i(),30);            
+        }
+    }    
+    else if (num_ranks == 4)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(3, "interface")->get_nz_i(),12);
+        } 
+        else if (rank == 1)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(2, "interface")->get_nz_i(),6);
+            ASSERT_EQ(mesh.get_node_by_record_id(5, "interface")->get_nz_i(),24);            
+        } 
+        else if (rank == 2)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(4, "interface")->get_nz_i(),18);
+            ASSERT_EQ(mesh.get_node_by_record_id(7, "interface")->get_nz_i(),36);            
+        }
+        else if (rank == 3)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(6, "interface")->get_nz_i(),30);           
+        }
+    }
+    else if (num_ranks == 5)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(3, "interface")->get_nz_i(),12);
+        } 
+        else if (rank == 1)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(2, "interface")->get_nz_i(),6);
+            ASSERT_EQ(mesh.get_node_by_record_id(5, "interface")->get_nz_i(),24);            
+        } 
+        else if (rank == 2)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(4, "interface")->get_nz_i(),18);
+            ASSERT_EQ(mesh.get_node_by_record_id(7, "interface")->get_nz_i(),36);            
+        }
+        else if (rank == 3)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(6, "interface")->get_nz_i(),30);
+            ASSERT_EQ(mesh.get_node_by_record_id(9, "interface")->get_nz_i(),48);            
+        }
+        else if (rank == 4)
+        {
+            ASSERT_EQ(mesh.get_node_by_record_id(8, "interface")->get_nz_i(),42);           
+        }
+    }
+    else 
+    {
+        std::cout << "DistributedLineMeshTests::line_mesh_rank_interface_nzi can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
+        ASSERT_TRUE(false);
+    }
+}
 // TEST_F(DistributedLineMeshTests, line_mesh_rank_contents)
 // {   
 //     int rank, num_ranks;

@@ -266,5 +266,17 @@ void check_vector_ids(std::vector<std::pair<int_like, vector_like>> checked_vec,
             })!= checked_vec.end());
     }
 }
+
+template <typename int_like, typename stl_container>
+void check_vector_contents(std::vector<int_like> checked_vec, stl_container checking_vector)
+{
+    // providing an explicit lambda to sort by first is to prevent attempting to touch the second item for node-coord vectors for which a sorting operation is not available and will result in a compilation error.
+    std::sort(checked_vec.begin(), checked_vec.end());
+    
+    for (auto checking_id : checking_vector)
+    {
+        EXPECT_TRUE(std::find(checked_vec.begin(), checked_vec.end(), checking_id)!= checked_vec.end());
+    }
+}
 //@}
 #endif
