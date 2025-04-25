@@ -706,7 +706,19 @@ class GlobalMesh {
             std::sort(elem_vector.begin(), elem_vector.end());
             if (VERBOSE)
             {
-                std::cout << "Rank " << rank << " has sorted its node vectors." << std::endl;
+                std::cout << "Rank " << rank << " has sorted its node vectors in anticipation of renumbering." << std::endl;
+                std::cout << "Rank " << rank << " nodes are:";
+                for (auto a_node : node_vector)
+                {
+                    std::cout << a_node->get_id() << " ";
+                }
+                std::cout << std::endl;
+                std::cout << "Rank " << rank << " interface_nodes are:";
+                for (auto a_node : interface_node_vector)
+                {
+                    std::cout << a_node->get_id() << " ";
+                }
+                std::cout << std::endl;
             }   
             renumber_nodes(rank);
             std::sort(node_vector.begin(), node_vector.end());
