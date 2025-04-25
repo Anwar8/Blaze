@@ -361,8 +361,7 @@ class GlobalMesh {
             elem_vector.reserve(nelems);
             make_nodes(nodes_coords_vector);
             make_elements(elem_nodes_vector, 0);
-            std::sort(node_vector.begin(), node_vector.end());
-            std::sort(elem_vector.begin(), elem_vector.end());
+            sort_node_vector("all");
             count_dofs();            
         }
 
@@ -700,10 +699,9 @@ class GlobalMesh {
             }
 
             make_elements(elem_nodes_vector_on_rank, rank);
-            std::sort(node_vector.begin(), node_vector.end());
-            std::sort(interface_node_vector.begin(), interface_node_vector.end());
+            sort_node_vector("all");
+            sort_element_vector();
             
-            std::sort(elem_vector.begin(), elem_vector.end());
             if (VERBOSE)
             {
                 std::cout << "Rank " << rank << " has sorted its node vectors in anticipation of renumbering." << std::endl;
@@ -721,8 +719,7 @@ class GlobalMesh {
                 std::cout << std::endl;
             }   
             renumber_nodes(rank);
-            std::sort(node_vector.begin(), node_vector.end());
-            std::sort(interface_node_vector.begin(), interface_node_vector.end());
+            sort_node_vector("all");
             if (VERBOSE)
             {
                 std::cout << "nodes renumbered and sorted. Exchanging interface node IDs next." << std::endl;
@@ -1418,6 +1415,56 @@ class GlobalMesh {
             }
             U = solver.solve(P); 
             std::cout << "The solution is:" << std::endl << U << std::endl;    
+        }
+        
+
+        /**
+         * @brief sorts \ref node_vector and/or \ref interface_node_vector by ID.
+         * @param vector_to_sort a std::string that is either "all", "rank_owned", or "interface" that specifies which vector of nodes to sort.
+         * @warning depends on defining the "<" operator in \ref Node.
+         */
+        void sort_node_vector(std::string vector_to_sort="all")
+        {
+            if (vector_to_sort == "all")
+            {
+                sort_node_vector("rank_owned");
+                sort_node_vector("interface");
+            }
+            else if (vector_to_sort == "rank_owned")
+            {
+                std::sort(node_vector.begin(), node_vector.end(), 
+                        [](const auto& a, const auto& b) 
+                        {
+                        return *a < *b;
+                        }
+                        );
+            }
+            else if (vector_to_sort == "interface")
+            {
+                std::sort(interface_node_vector.begin(), interface_node_vector.end(), 
+                        [](const auto& a, const auto& b) 
+                        {
+                        return *a < *b;
+                        }
+                        );
+            }
+            else 
+            {
+                std::cout << "ERROR: GlobalMesh::sort_node_vector can only accept all, rank_owned, or interface as vector_to_sort. Received " << vector_to_sort << std::endl; 
+                exit(1);
+            }
+        }
+        /**
+         * @brief sorts \ref elem_vector by ID.
+         */
+        void sort_element_vector()
+        {
+        std::sort(elem_vector.begin(), elem_vector.end(), 
+                [](const auto& a, const auto& b) 
+                {
+                return a->get_id() < b->get_id();
+                }
+                );
         }
         int const get_num_elems() const {return nelems;}
         int const get_num_nodes() const {return nnodes;}
