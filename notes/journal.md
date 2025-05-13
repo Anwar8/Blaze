@@ -28,7 +28,7 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Build system for `BlazeCore` and `BlazeAggregators` are messy due to having many if-statemnts due to dependency on `Kokkos` and `OpenMP`.
 
 ## Desired updates:
-- [ ] Element mapping should be done with position vectors; this will greatly simplify assembly, and possibly domain disribution.
+- [x] Element mapping should be done with position vectors; this will greatly simplify assembly, and possibly domain disribution.
 - [ ] Change how BCs are handled by delegating their control to a BC manager class `BCManager`.
 - [ ] Wrap `MPI_Allgather` call inside `count_distributed_dofs` with a wrapper from `MPIWrappers`.
 - [ ] Why is `FrameMesh` an attribute of `GlobalMesh`? Remove that - it is unnecessary!
@@ -53,6 +53,10 @@ Up next:
 4. [ ] Distributed stiffness contribution assembly with `Tpetra`.
 5. [ ] Distributed solution procedure.
 6. [ ] Massive clean-up.
+7. [ ] Timer update so it can list the times for `MPI` ranks, and then display all this information at the end as a unified summary.
+
+
+**BC-handling** What if I created a map, or linked to an existing map, of which rank each node belongs to or something similar, and that is passed to the `NodalRestraint` object, which then knows where to search for each node? Or, what if I created a new class, for exampe `DistributedBCManager` that has this information, and it uses it to create the needed `NodalRestraint` objects on each rank? Actually, the second idea is quite close to what *Desired updates*: Change how BCs are handled by delegating their control to a BC manager class `BCManager`. In the same way, I could possibly use `LoadManager` to do the same for the loads, and then the `Scribe` for the records. Of course, the `Scribe` will need to do a gather operation at the end to organise the results in one place. Perhaps the `CommunicationsManager` should be revisited as it has to have the information about the mapping of the nodes and ranks?
 
 
 ### 11 May
