@@ -35,6 +35,36 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
+### 13 May
+Stiffness contributions at the element level are all calcualted, but are then wasted as they are not used if the DoF associated with them is fixed. This might not be the case when calculating reaction forces, however. 
+
+There was a bug in `update_dofs_numbers` which was accessing the `std::vector` `dofs_numbers` by iterating over while it was already cleared and thus could not be iterated over. solution for this was to use `.push_back`. 
+
+I have now changed the mapping algorithm in `BeamElementCommonInterface` and all tests ran successfully. Still running into bug `Unable to factorise matrix` which is the first known bug reported and still the most troublesome.
+
+4. [x] Change the mapping algorithm in `BeamElementCommonInterface`. 
+
+I do not have tests for testing the stiffness mapping, but that is best left for another time if at all. Since `VerificationTestsBlaze` works well, then maybe I do not need these unit tests.
+
+Up next:
+1. [ ] Distributed BC-handling.
+2. [ ] Distributed load-handling. 
+3. [ ] Distributed record-handling.
+4. [ ] Distributed stiffness contribution assembly with `Tpetra`.
+5. [ ] Distributed solution procedure.
+6. [ ] Massive clean-up.
+
+
+### 11 May
+1. [x] Add a `std::vector` or similar to `Node` that corresponds to the position vector of the node. This is now called `dofs_numbers`.
+2. [x] Ensure that this position vector is updated whenever `nz_i` is updated.
+3. [x] Ensure that position vector is updated whenever DoFs are freed or fixed.
+4. Change the mapping algorithm in `BeamElementCommonInterface`.
+
+*Warning*: There is something funny going on with how the loads are defined and how `compute_global_load_triplets` behaves having to iterate over the loads and DoFs. I think this might be simplified with the introduction of `dofs_numbers`. Need to revisit this later to see why `nodal_loads` always has 6 elements in stead of just going with the flow of the active and inactive DoFs.
+
+An important thing to note about ensuring the position vector is updated is to remember that `nz_i` must be updated after a change in active DoFs. This means that we must call `set_nz_i` or `increment_nz_i` after such operations, thus rendering it redundant to also update `dofs_numbers` after an update in boundary conditions, as this update is tied to `set_nz_i` or `increment_nz_i` anyway. 
+
 ### 25 April
 - [x] Update number check tests.
 - [ ] Start writing and illustrating algorithm.
@@ -453,7 +483,7 @@ So, Domain Setup is a very important aspect of the `MPI` parallel version of `Bl
 
 Fortunately, I already have the building blocks for graphs in `GlobalMesh` as each element knows which nodes are connected to it, and each node knows to which elements it connects. 
 
-**Idea:** It might be a good idea to replicate one element and node across neighbouring ranks, and then discard the parts of the element contribution to the global stiffness that are meant to be within the domain of anoter rank. This allows us to reduce the communication necessary to only the displacements on the shared nodes in stead of having to send stiffness contributions along the network.
+**Idea:** It might be a good idea to replicate one element and node across neighbouring ranks, and then discard the parts of the element contribution to the global stiffness that are meant to be within the domain of another rank. This allows us to reduce the communication necessary to only the displacements on the shared nodes in stead of having to send stiffness contributions along the network.
 
 There is also the option of using a greedy algorithm where I traverse the graph from one corner, and add up the "weights" of the elements to come up with an equal distribution. Of course, while doing this via a node-based dual graph, this allows me to ensure that my elements are linked. This allows overcoming the issue of unconnected but equally-sized domains that would arise by naive parsing of the node and element containers.
 
@@ -463,9 +493,10 @@ Luckily, I had implemented a prototype of the `Frame` object in `Python`. This w
 It is a big task to parallelise `Blaze` with `MPI` primarily because I don't know how to start, in a way. I have decided to use [`Tpetra`](https://trilinos.github.io/tpetra.html) for the linear algebra so once each rank finishes its assembly process, the linear algebra calculation is done via `Tpetra` and I do not have to worry about it. Therefore, the first step in parallelisation with `MPI` is to decompose the domain, create the nodes and elements, and then I can run the element state updating. I will not worry about the linear algebra for now (will not start with `Tpetra`), and will first focus on setting up the domain decomposition and stopping just at that point. That is, the first milestone is successful domain decomposition.
 
 Before I start programming, however, let us start with the program architecture. The parallelisation will be broken down into three steps:
-## Domain Setup
-## Domain Parallel Updating
-## Collective Convergence Checking
+- Domain Setup
+- Domain Parallel Updating
+- Collective Convergence Checking
+- 
 Basically, an `MPI_Allreduce` with the reduction operation being an `MPI_MAX`. 
 
 ### 22 December

@@ -37,10 +37,11 @@ class Node {
         std::set<int> connected_elements; /**< of element ids that are connected to this node; expected to be useful for element and node deletion.*/
         std::set<int> active_dofs = {0, 1, 2, 3, 4, 5}; /**< set of active DOFs; all of them at first, then if deactivated moved to inactive_dofs.*/
         std::set<int> inactive_dofs; /**< a std set of active DoFs; none at first, then if any are deactivated then they are moved from active_dofs.*/
+        std::vector<int> dofs_numbers = {0, 1, 2, 3, 4, 5}; /**< a std vector of DoF numbers where each number is equal to increments on nz_i; equal to \ref active_dofs at first, then updated when \ref nz_i is known.*/
         
         std::set<int> loaded_dofs; /**< a std set of loaded DoFs; none at first, then those loaded are added.*/
         std::array<real, 6> nodal_loads = {0., 0., 0., 0., 0., 0.}; /**< a std array containing 6 slots to be filled with nodal loads corresponding to dofs; initialised to zero.*/
-        std::vector<spnz> global_nodal_loads_triplets; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gatehred to create the global sparse matrix*/
+        std::vector<spnz> global_nodal_loads_triplets; /**< the global contributions of the element to the global stiffness - made as sparse matrix contributions that would be gathered to create the global sparse matrix*/
         
         std::array<real, 6> nodal_displacements = {0., 0., 0., 0., 0., 0.}; /**< a std array containing 6 slots to be filled with nodal displacements corresponding to dofs; initialised to zero.*/
     public:
@@ -107,14 +108,42 @@ class Node {
         unsigned const get_id() const {return id;}
         unsigned const get_record_id() const {return record_id;}
         /**
-         * @brief Set the nz_i to a value.
+         * @brief Set the nz_i to a value, and calls \ref update_dofs_numbers.
          * 
          * @attention \ref nz_i global index of node considering activated and deactivated DoFs.
          * 
          * @param i the value to set nz_i to; can be any integer.
          */
-        void set_nz_i(int i) {nz_i = i;}
-        void increment_nz_i(int i) {nz_i += i;}
+        void set_nz_i(int i) {
+            nz_i = i;
+            update_dofs_numbers();
+        }
+        /**
+         * @brief Ipdates all members of \ref dofs_numbers due to change in \ref nz_i. 
+         * 
+         */
+        void update_dofs_numbers()
+        {
+            dofs_numbers.clear();
+            for (int i = 0; i < active_dofs.size(); ++i)
+            {
+                dofs_numbers.push_back(nz_i + i);
+            }
+        }
+
+        std::vector<int> get_dofs_numbers()
+        {
+            return dofs_numbers;
+        }
+        /**
+         * @brief Increments the nz_i by a value, and calls \ref update_dofs_numbers.
+         *
+         * @param i the value to increment nz_i by; can be any integer.
+         */
+        void increment_nz_i(int i) {
+            nz_i += i;
+            update_dofs_numbers();
+        }
         int get_nz_i() {return nz_i;}
         void  set_z(real z) { coordinates[2] = z;}
 
@@ -126,6 +155,7 @@ class Node {
             on_parent_rank = (parent_rank == calling_rank);
         }
         int get_parent_rank() const {return parent_rank;}
+        bool is_on_parent_rank() const {return on_parent_rank;}
         //@}
 
         /**

@@ -213,56 +213,81 @@ class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass>
                 this->global_stiffness_triplets.push_back(spnz(kmap[2], kmap[3], val));
             }
         }
-
+        
         /**
-         * @brief populates \ref stiffness_map considering active and inactive DOFs for each node of the element
+         * @brief populates \ref stiffness_map considering active and inactive DOFs for each node of the element. Uses the position vectors of the element to do this. Does not collect row-contributions from interface nodes i.e. those not on their parent rank.
          * 
          * @details see function \ref calc_global_stiffness_triplets, and variables \ref stiffness_map, and \ref global_stiffness_triplets. 
-         * 
-         * @todo REALLY needs to be revisited. attempt to rewrite this function so it does the following:
-         *  1. gets all the contribution without worrying about active or not
-         *  2. if a contribution is inactive then that contribution is zeroed AND
-         *  3. zeroed contributions are not added to \ref global_stiffness_triplets
          * 
          */
         virtual void map_stiffness() override
         {
-             // local to global stiffness map: <<local_row, local_col, global_row, global_col>, ...>
-            this->stiffness_map.clear();
-            int stiffness_size = 0;
+            std::vector<int> local_position_vector_rows;
+            std::vector<int> local_position_vector_columns;
+            std::vector<int> position_vector_rows;
+            std::vector<int> position_vector_columns;
+
+            std::vector<int> previous_nodes_ndofs;
+            int element_ndofs = 0;
             for (auto& node: this->nodes) 
             {
-                stiffness_size += std::size(node->get_active_dofs());
+                previous_nodes_ndofs.push_back(element_ndofs);
+                element_ndofs += node->get_ndof();
             }
-            stiffness_size *= stiffness_size;
-           
-            this->stiffness_map.reserve(stiffness_size);
-            int i = 0;
-            for (auto& node_i: this->nodes)
+            
+            // set the elements of the position_vector_for_rows
+            for (auto& node: this->nodes) 
             {
-                int j = 0;
-                std::set<int> active_dofs_i = node_i->get_active_dofs();
-                int nz_i_i = node_i->get_nz_i();
-                for (auto& node_j: this->nodes)
+                std::vector<int> node_dofs_numbers;
+                if (node->is_on_parent_rank())
                 {
-                    
-                    std::set<int> active_dofs_j = node_j->get_active_dofs();
-                    
-                    int nz_i_j = node_j->get_nz_i();
-                    int dof_i_index = 0;
-                    for (auto& dof_i: active_dofs_i)
-                    {
-                        int dof_j_index = 0;
-                        for (auto& dof_j: active_dofs_j)
-                        {
-                            this->stiffness_map.push_back({6*i+dof_i, 6*j+dof_j, nz_i_i + dof_i_index, nz_i_j+dof_j_index});
-                            ++dof_j_index;
-                        }
-                        ++dof_i_index;
-                    }
-                ++j;
+                    node_dofs_numbers = node->get_dofs_numbers();
+                    position_vector_rows.insert(position_vector_rows.end(), node_dofs_numbers.begin(), node_dofs_numbers.end());
                 }
-            ++i;
+            }
+            // set the elements of the position_vector_for_columns
+            for (auto& node: this->nodes) 
+            {
+                std::vector<int> node_dofs_numbers;
+                node_dofs_numbers = node->get_dofs_numbers();
+                position_vector_columns.insert(position_vector_columns.end(), node_dofs_numbers.begin(), node_dofs_numbers.end());
+            }
+            
+            // set the elements of the local_position_vector_for_rows
+            for (int node_i = 0; node_i < this->nnodes; ++node_i)
+            {
+                std::vector<int> node_active_dofs;
+                std::set<int> node_active_dofs_set;
+                if ( this->nodes[node_i]->is_on_parent_rank())
+                {
+                    node_active_dofs_set = this->nodes[node_i]->get_active_dofs();
+                    node_active_dofs = std::vector<int>(node_active_dofs_set.begin(), node_active_dofs_set.end());
+                    std::for_each(node_active_dofs.begin(), node_active_dofs.end(), [=](int& active_dof) { active_dof+=node_i*6;}); 
+                    local_position_vector_rows.insert(local_position_vector_rows.end(), node_active_dofs.begin(), node_active_dofs.end());
+                }
+            }
+
+            // set the elements of the local_position_vector_for_columns
+            for (int node_i = 0; node_i < this->nnodes; ++node_i)
+            {
+                std::vector<int> node_active_dofs;
+                std::set<int> node_active_dofs_set;
+                node_active_dofs_set = this->nodes[node_i]->get_active_dofs();
+                node_active_dofs = std::vector<int>(node_active_dofs_set.begin(), node_active_dofs_set.end());
+                std::for_each(node_active_dofs.begin(), node_active_dofs.end(), [=](int& active_dof) { active_dof+=node_i*6;}); 
+                local_position_vector_columns.insert(local_position_vector_columns.end(), node_active_dofs.begin(), node_active_dofs.end());
+            }
+
+            this->stiffness_map.clear();
+            int stiffness_size = local_position_vector_rows.size() * local_position_vector_columns.size();
+            this->stiffness_map.reserve(stiffness_size);
+
+            for (int row_i  = 0; row_i < local_position_vector_rows.size(); ++row_i)
+            {
+                for (int column_i = 0; column_i < local_position_vector_columns.size(); ++column_i)
+                {
+                    this->stiffness_map.push_back({local_position_vector_rows[row_i], local_position_vector_columns[column_i], position_vector_rows[row_i], position_vector_columns[column_i]});
+                }
             }
         }
     //@}

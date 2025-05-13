@@ -701,7 +701,7 @@ class GlobalMesh {
             make_elements(elem_nodes_vector_on_rank, rank);
             sort_node_vector("all");
             sort_element_vector();
-            
+
             if (VERBOSE)
             {
                 std::cout << "Rank " << rank << " has sorted its node vectors in anticipation of renumbering." << std::endl;

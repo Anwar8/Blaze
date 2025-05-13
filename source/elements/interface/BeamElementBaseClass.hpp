@@ -9,6 +9,7 @@
 #include <string>
 #include <array>
 #include <memory>
+#include <numeric>
 #include "blaze_config.hpp"
 #include "SectionTypes.hpp"
 #include "maths_defaults.hpp"
