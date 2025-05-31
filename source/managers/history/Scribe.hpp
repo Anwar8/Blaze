@@ -28,9 +28,7 @@
 class Scribe
 {
     protected:
-        // std::vector<std::shared_ptr<Node>> tracked_nodes; /**< a vector of shared pointers to nodes that are tracked.*/
-        // std::set<int> tracked_dofs; /**< a std set of tracked DoFs; none at first, then those tracked are added.*/
-        
+        int rank = 0; /**< rank at which this scribe lives. */
         std::vector<Record> record_library; /**< a vector of records that are used to store the \ref Record objects for all tracked nodes.*/
         int current_row = 0; /**< the current row in the recorded data that is being filled. Used for deciding when the data needs flushing.*/
         int buffer_size = BUFFER_SIZE; /**< the size of the buffer used to store the data beyond which the data has to be flushed to file.*/
@@ -55,6 +53,21 @@ class Scribe
             }
             sort_record_library();
         }
+
+        /**
+         * @brief assigns nodes by ID to the \ref Scribe object. That is, the nodes that this object will track. Only assigns records to nodes owned by the curret rank. Also, updates \ref rank of this Scribe.
+         * 
+         * @tparam Container STL container that is compatible with standard STL iterators.
+         * @param node_ids the IDs of the nodes to be tracked.
+         * @param glob_mesh the global mesh object that contains all the nodes of the model.
+         */
+        void track_distributed_nodes_by_id(int rank, std::vector<unsigned> node_ids, std::set<int> dofs,  GlobalMesh& glob_mesh)
+        {
+            this->rank = rank;
+            std::set<unsigned> records_of_owned_node_ids = glob_mesh.filter_node_ids(node_ids, "rank_owned");
+            track_nodes_by_id(records_of_owned_node_ids, dofs, glob_mesh);
+        }
+
 
         /**
          * @brief Creates a record directly with the shared pointer to the nodes.

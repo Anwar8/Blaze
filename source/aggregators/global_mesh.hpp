@@ -73,6 +73,9 @@ class GlobalMesh {
         std::vector<std::shared_ptr<Node>> interface_node_vector;  /**< a vector of shared ptrs referring to the interface nodes in the problem.*/
         std::vector<std::shared_ptr<ElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
 
+        std::set<size_t> interface_node_id_set_on_rank; //**<a std::set of node ids for those that are interfaces on this rank. */
+        std::set<size_t> node_id_set_owned_by_rank; //**<a std::set of node ids for those that are owned by this rank. */
+
         FrameMesh frame;
         
         // SectionBaseClass section; /**< a BasicSection object that is used by all elements in the mesh.*/
@@ -638,7 +641,7 @@ class GlobalMesh {
 
             // sort nodes into the ranks that own them
             std::map<size_t, int> node_rank_map; 
-            std::set<size_t> node_id_set_owned_by_rank;
+            node_id_set_owned_by_rank.clear();
             populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank, nodes_coords_vector, rank, num_ranks);
             
             // create a map that links any nodes to the elements that connect to it.
@@ -655,7 +658,8 @@ class GlobalMesh {
             filter_element_vector(elem_nodes_vector_on_rank, elem_id_set_on_rank, elem_nodes_vector, rank);
 
             // Based on the members that will be created on this rank, add the nodes that will also need to be created
-            std::set<size_t> interface_node_id_set_on_rank;
+            // interface and rank-owned node id set will be kept for BC and load operations handling.
+            interface_node_id_set_on_rank.clear();
             std::set<size_t> interface_elem_id_set_on_rank;
             find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank,interface_elem_id_set_on_rank,node_id_set_owned_by_rank,elem_nodes_vector_on_rank, rank);
             rank_nnodes = node_id_set_owned_by_rank.size();
@@ -741,6 +745,46 @@ class GlobalMesh {
             count_distributed_dofs(rank, num_ranks);
             exchange_interface_nodes_nz_i(wanted_by_neighbour_rank_node_id_map, wanted_from_neighbour_rank_node_id_map, rank);            
         }
+        
+        /**
+         * @brief Filters a vector of node IDs to only include those matching the specified ownership type
+         * 
+         * @details Takes a vector of node IDs and returns a set containing only those IDs that exist in the 
+         * specified node set (rank_owned nodes, interface nodes, or both). This docstring (not code) was AI generated but verified and modified.
+         *
+         * @param given_node_ids A vector of unsigned node IDs to be filtered
+         * @param ownership A string specifying which nodes to match against:
+         *                  "rank_owned" - Only nodes owned by this rank
+         *                  "interface" - Only interface nodes on this rank
+         *                  "all" - Both rank_owned and interface nodes
+         * @return std::set<unsigned> A set containing the intersection of given_node_ids and the 
+         *                            specified node set
+         */
+        std::set<unsigned> filter_node_ids(std::vector<unsigned>& given_node_ids, std::string ownership = "rank_owned")
+        {
+            std::set<unsigned> given_id_set(given_node_ids.begin(), given_node_ids.end());
+            std::set<unsigned> intersection;
+            if (ownership == "rank_owned") {
+                std::set_intersection(given_id_set.begin(), given_id_set.end(), 
+                                    node_id_set_owned_by_rank.begin(), node_id_set_owned_by_rank.end(),
+                                    std::inserter(intersection, intersection.begin()));
+            }
+            if (ownership == "interface") {
+            std::set_intersection(given_id_set.begin(), given_id_set.end(), 
+                                interface_node_id_set_on_rank.begin(), interface_node_id_set_on_rank.end(),
+                                std::inserter(intersection, intersection.begin()));
+            }
+            if (ownership == "all")
+            {
+                std::set<unsigned> owned_intersection, interface_intersection;
+                owned_intersection = filter_node_ids(given_node_ids, "rank_owned");
+                interface_intersection = filter_node_ids(given_node_ids, "interface");
+                intersection.insert(owned_intersection.begin(), owned_intersection.end());
+                intersection.insert(interface_intersection.begin(), interface_intersection.end());
+            }
+            return intersection;
+        }
+        
         /**
          * @brief Set the nodes parent ranks based on current calling rank and the map node_rank_map.
          * 
@@ -1246,37 +1290,6 @@ class GlobalMesh {
             exit(1);
         }
 
-        // std::shared_ptr<Node> get_node_by_record_id(int record_id, std::string search_target = "all")
-        // {
-        //     std::cout << "get_node_by_record_id: searching " << search_target << " for record_id " << record_id << std::endl;
-        //     if (search_target == "all" || search_target == "rank_owned" )
-        //     {
-        //         std::cout << "search target matched all or rank_owned." << std::endl;
-        //         auto node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, node_vector);
-        //         if (node_it == node_vector.end() && search_target == "all")
-        //         {
-        //             node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, interface_node_vector);
-        //             if (node_it != interface_node_vector.end())
-        //             {
-        //                 return *node_it;
-        //             } else {
-        //                 std::cout << "Could not find node with record_id " << record_id << " in all node vectors." << std::endl;
-        //             }
-        //         }
-        //     }
-        //     if (search_target == "all" || search_target == "interface")
-        //     {
-        //         std::cout << "search target matched all or interface." << std::endl;
-        //         auto node_it = get_record_id_iterator<std::vector<std::shared_ptr<Node>>::iterator, std::vector<std::shared_ptr<Node>>>(record_id, interface_node_vector);
-        //         if (node_it != interface_node_vector.end())
-        //         {
-        //             return *node_it;
-        //         } else {
-        //             std::cout << "Could not find node with record_id " << record_id << " in all node vectors." << std::endl;
-        //         }
-        //     }
-        //     exit(1);
-        // }
         /**
          * @brief maps the stiffness of each element in the \ref elem_vector by calling \ref BeamElementCommonInterface::map_stiffness.
          * @details this function should be called after defining the constraints on the nodes, but before actually beginning th solution procedure.
@@ -1289,30 +1302,6 @@ class GlobalMesh {
             }
         }
 
-        /**
-         * @brief loop over elements and call each of their \ref map_stiffness and \ref calc_global_stiffness_triplets functions.
-         * 
-         */
-        void calc_global_contributions() {
-            if (VERBOSE)
-            {
-                std::cout << "Calc_global_contirbutions: There are " << ndofs << " active DoFs in the mesh." << std::endl;
-            }
-            // for (auto& elem: elem_vector) 
-            // {   
-            //     // elem->update_state(); // Should not update state if we are calling update_state explicitly on its own!
-            //     // elem->map_stiffness();
-            //     elem->calc_global_stiffness_triplets();
-            // }
-            // for (auto& node: node_vector)
-            // {
-            //     if (VERBOSE)
-            //     {
-            //         std::cout << "Computing global load triplets for node " << node->get_id() << std::endl;
-            //     }
-            //     node->compute_global_load_triplets();
-            // }
-        }
 
         /**
          * @brief makes each node calculate how much it will contribute to \f$\boldsymbol{P}\f$ by calling \ref Node::compute_global_load_triplets().

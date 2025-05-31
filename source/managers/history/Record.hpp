@@ -126,6 +126,16 @@ class Record {
          * @return mat recorded data.
          */
         std::array<std::vector<real>,6> get_recorded_data() const {return this->recorded_data;}
+
+        /**
+         * @brief overloads the less than operator to compare records by their tracked node ID, allowing easy sorting of node STL containers via \ref std::sort.
+         * 
+         */
+        bool operator<(const Record& other_record) const
+        { 
+            return tracked_node_id < other_record.tracked_node_id; 
+        } 
+
 };
 
 #endif

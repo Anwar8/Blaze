@@ -35,6 +35,16 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
+### 31 May
+`LoadManager` now calls the function `filter_node_ids` from `GlobalMesh` which filters out the nodes to be loaded by those that are meant to exist on the current rank *and are owned by it*. The same is done by `NodalRestraint` which calls the same `filter_node_ids` but this time will apply the restraint to *both interface and rank-owned nodes*. The variants of the functions that do this are marked as `distributed`: `create_a_distributed_nodal_load_by_id` for the load, and `assign_distributed_nodes_by_id` for the restraint. 
+
+I have now given `Scribe` a similar treatment creating `track_distributed_nodes_by_id` and updating `Record` to allow better (or actually, correct) sorting by overriding the less-than operator. With this, I am almost done except for testing these newly added functions.
+
+### 15 May
+`GlobalMesh` should know what rank it is on, and should also know which elements and nodes belong to which rank. Since `GlobalMesh` is accessed by `LoadManager`, then the information about which nodes belong and do not should be more easy to retrieve. 
+### 14 May
+It is not a great idea to start with the BC-handling as a manager class does not currently exist. I started by creating `RestraintManager`, which is a copy of `LoadManager` that I am modifying. Although it is a good idea to build off of `LoadManager`, it is a lot of work without first knowing how the *distributed* part of the process works. As such, it is a better to start by first doing the distributed load-handling since a manager class and the associated infrastructure already exists.
+
 ### 13 May
 Stiffness contributions at the element level are all calcualted, but are then wasted as they are not used if the DoF associated with them is fixed. This might not be the case when calculating reaction forces, however. 
 
