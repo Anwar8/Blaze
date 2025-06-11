@@ -1,7 +1,7 @@
 # Journal of Work
 This journal contains the day-to-day project management and notes taken. It was also used as an indirect form of communication with the MSc supervisor so they are always up to date with my progress.
 
-<figure style="text-align:center;">
+<figure  style="text-align:center; background-color:#434973; padding:20px; display:inline-block;">
   <img src="images/Blaze logo_white.png" alt="Blaze Logo" style="width:50%">
 </figure>
 
@@ -35,6 +35,15 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
+### 11 June
+I have now built `Tpetra` (and its dependencies `Kokkos` and `Teuchos`) from `Trilinos`. This was done following the instructions in the [quick installation documentation](https://github.com/trilinos/Trilinos/blob/master/INSTALL.rst), which is different from the [full installation documentation](https://trilinos.github.io/pdfs/TrilinosBuildReference.pdf). However, it seems I will need to configure both `Kokkos` and `Tpetra` together in stead of building a stand-alone `Kokkos` like I had done before. This is because of the way that `Tpetra` is packaged within `Trilinos` and its reliance on the build system `TriBITS`, which is part of the `Trilinos` source. I attempted a stand-alone installation of `Tpetra` where I only cloned its pacakge data from the `Trilinos` source, but that did not work out too well. *I am afraid that I am getting deeper and deeper into `Trilinos` which is not something  I was explicitly aiming to avoid. This is especially worrisome since I am starting to realise that I might be able to climb **just a little more** and use the various solvers provided in `Trilinos`.*
+
+<figure style="text-align: center; margin: 0 auto; width: 100%;">
+  <img src="images/bilbo.jpg" alt="Current feelings about Trilinos" style="width:30%; display:inline-block;">
+  <figcaption>Coming to terms with how useful Trilinos can be for me and clashing with my own ego</figcaption>
+</figure>
+
+
 ### 31 May
 `LoadManager` now calls the function `filter_node_ids` from `GlobalMesh` which filters out the nodes to be loaded by those that are meant to exist on the current rank *and are owned by it*. The same is done by `NodalRestraint` which calls the same `filter_node_ids` but this time will apply the restraint to *both interface and rank-owned nodes*. The variants of the functions that do this are marked as `distributed`: `create_a_distributed_nodal_load_by_id` for the load, and `assign_distributed_nodes_by_id` for the restraint. 
 
