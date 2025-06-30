@@ -1313,7 +1313,6 @@ class GlobalMesh {
             }
            if (search_target == "interface")
            {
-                
                 if (VERBOSE)
                 {
                     std::cout << "get_node_by_record_id::Rank " << rank << ": is looking for record_id " << record_id << " in " << search_target << std::endl; 

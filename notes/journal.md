@@ -38,6 +38,19 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### 30 June
 Tests for `DistributedModelLineMeshTests` run fine. Had to do some modifications to the codebase yesterday to avoid some compilation errors due to redefinition of operators for records which I apprently just missed that I had already done, and replaced all `unsigned` with `size_t` in the code where possibel as that caused some data compatibility issues. All `MPI` tests run fine so far. However, there was a strange error where `read_node_ids` would read that a node with rank of -1 is asking for an interface node. Not sure why that was happening but it does not seem to repeat today. There was also some verbose stuff being written out in the function `get_node_by_record_id` which I now locked behind the `VERBOSE` flag. 
 
+Built a test suite for `DistributedModelFrameMeshTests` that looks at the distributed mesh generated for a frame. The tests had no issues for 1, 2, and 4 ranks, but I ran into a bug when running on 3 or 5 ranks:
+```console
+Rank 2: Could not find node with record_id 62395648 in interface node vectors.
+[Mhds-MacBook-Air:00000] *** An error occurred in MPI_Sendrecv
+[Mhds-MacBook-Air:00000] *** reported by process [2059075585,1]
+[Mhds-MacBook-Air:00000] *** on communicator MPI_COMM_WORLD
+[Mhds-MacBook-Air:00000] *** MPI_ERR_TRUNCATE: message truncated
+[Mhds-MacBook-Air:00000] *** MPI_ERRORS_ARE_FATAL (processes in this communicator will now abort,
+[Mhds-MacBook-Air:00000] ***    and MPI will try to terminate your MPI job as well)
+```
+
+I will need to go verbose to know what has happened. All appears to go okay until renumbering. This might be an artifact of using `size_t` and its incompatibility with `MPI_UNSIGNED`. I will try to replace all `size_t` with `unsigned` and see what kind of bugs that introduces and resolves.
+
 ### 29 June
 There are 50 days remaining to the submission deadline of the thesis. There are still many tasks to complete:
 1. Test distributed boundary condition, load, and record management. 

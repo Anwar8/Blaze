@@ -273,7 +273,7 @@ class DistributedModelLineMeshTests : public ::testing::Test {
   }
   };
 
-  TEST_F(DistributedModelLineMeshTests, line_mesh_rank_counts)
+TEST_F(DistributedModelLineMeshTests, line_mesh_rank_counts)
 {   
     ASSERT_EQ(model.glob_mesh.get_num_nodes(), 10);
     if (num_ranks == 1)
@@ -351,5 +351,127 @@ class DistributedModelLineMeshTests : public ::testing::Test {
         ASSERT_TRUE(false);
     }
 }
+
+class DistributedModelFrameMeshTests : public ::testing::Test {
+    public:
+      Model model;
+
+      int rank = 0;
+      int num_ranks = 0;
+      int nbays = 3;
+      int nfloors = 2;
+      real bay_length = 6;
+      real floor_height = 4;
+      int beam_divisions = 3;
+      int column_divisions = 2;
+      CommonSectionDefinitions common;
+      
+      void SetUp() override {
+          common.initialise_section();
+          get_my_rank(rank);
+          get_num_ranks(num_ranks);
+          model.create_distributed_frame_mesh(nbays, nfloors, bay_length, floor_height, beam_divisions, column_divisions, NonlinearPlastic, common.I_section, rank, num_ranks);
+      }
+      void TearDown() override {
+  }
+  };
+
+  TEST_F(DistributedModelFrameMeshTests, frame_mesh_rank_counts)
+  {   
+      ASSERT_EQ(model.glob_mesh.get_num_nodes(), 32);
+      if (num_ranks == 1)
+      {
+          ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 32);
+          ASSERT_EQ(model.glob_mesh.count_elem_vector(), 34);
+          ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 0);
+      }
+      else if (num_ranks == 2)
+      {
+          ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 16);
+          ASSERT_EQ(model.glob_mesh.count_elem_vector(), 18);
+          ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);
+      }
+      else if (num_ranks == 3)
+      {
+          if (rank == 0)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 10);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 11);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 3);
+          } 
+          else if (rank == 1)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 10);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 14);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 5);
+          } 
+          else if (rank == 2)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 12);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 15);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 3);  
+          }
+      }    
+      else if (num_ranks == 4)
+      {
+          if (rank == 0)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 8);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);
+          } 
+          else if (rank == 1 || rank == 2)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 8);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 11);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 4);
+          } 
+          else if (rank == 3)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 8);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);  
+          }
+      }
+      else if (num_ranks == 5)
+      {
+          if (rank == 0)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 6);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 7);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);
+          } 
+          else if (rank == 2)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 6);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 5);          
+          }
+          else if (rank == 3)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 6);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 4);          
+          }
+          else if (rank == 4)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 6);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 4);          
+          }
+          else if (rank == 5)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 8);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);
+          } 
+      }
+      else 
+      {
+          std::cout << "DistributedModelFrameMeshTests::frame_mesh_rank_counts can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
+          ASSERT_TRUE(false);
+      }
+  }
+  
 
 #endif
