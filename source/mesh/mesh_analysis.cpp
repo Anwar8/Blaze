@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include "gmsh.h"
 
-void print_vector(std::vector<size_t>);
+void print_vector(std::vector<unsigned>);
 int main(int argc, char** argv) {
     // build the geometry
     gmsh::initialize();
@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
     // Analysing the nodes
     std::vector<double> coords;
     std::vector<double> parametricCoords;
-    std::vector<std::size_t> nodeTags;
+    std::vector<std::unsigned> nodeTags;
     gmsh::model::mesh::getNodes(nodeTags, coords, parametricCoords);
 
     // calculate the number of nodes
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 
     // Analysing the elements
     std::vector<int> elem_types;
-    std::vector<std::vector<size_t>> elem_tags, node_tags;
+    std::vector<std::vector<unsigned>> elem_tags, node_tags;
     
     gmsh::model::mesh::getElements(elem_types, elem_tags, node_tags);
     std::cout << "printing element tags vector:" << std::endl;
@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
         std::cout << "node category = " << i << std::endl;
         print_vector(node);
     }
-    std::vector <size_t> element_tags;
+    std::vector <unsigned> element_tags;
     for (auto& elem_vec : elem_tags)
     {
         for (auto& tag : elem_vec)
@@ -61,10 +61,10 @@ int main(int argc, char** argv) {
         }
 
     }
-    std::unordered_map <size_t, std::vector<size_t>> elem_nodes;
+    std::unordered_map <unsigned, std::vector<unsigned>> elem_nodes;
     for (auto& tag : element_tags) 
     {
-        std::vector<size_t> nodes;
+        std::vector<unsigned> nodes;
         int element_type, dim, _tag;
         gmsh::model::mesh::getElement(tag, element_type, nodes, dim, _tag);
         elem_nodes[tag] = nodes;
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-void print_vector(std::vector<size_t> V) 
+void print_vector(std::vector<unsigned> V) 
 {
     for (auto& it = V.begin(); it != V.end(); ++it) {
         std::cout << *it;

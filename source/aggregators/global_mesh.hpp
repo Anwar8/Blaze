@@ -7,6 +7,12 @@
 #ifndef GLOBAL_MESH
 #define GLOBAL_MESH
 
+// debugging!! Remove!
+#if VERBOSE == 1
+    #include <unistd.h>
+#endif
+
+
 #include <memory>
 #include <vector>
 #include <tuple>
@@ -41,13 +47,13 @@
  * @brief std vector of pairs each of which has an id and a 3-item coords vector.
  * 
  */
-using NodeIdCoordsPairsVector = std::vector<std::pair<size_t, coords>>;
+using NodeIdCoordsPairsVector = std::vector<std::pair<unsigned, coords>>;
 
 /**
  * @brief std vector of pairs each of which has an element id and a vector of node ids related to the element id.
  * 
  */
-using ElemIdNodeIdPairVector = std::vector<std::pair<size_t, std::vector<size_t>>>;
+using ElemIdNodeIdPairVector = std::vector<std::pair<unsigned, std::vector<unsigned>>>;
 
 
 /**
@@ -64,17 +70,17 @@ class GlobalMesh {
         int rank_interface_nnodes = 0; /**< number of interface nodes on current rank.*/
         int rank_ndofs = 0; /**< number of DOFs on current rank.*/
         int rank_nelems = 0; /**< number of elements on current rank.*/
-        size_t rank_starting_node_id = 1; /**< number at which the id of the first node on this rank starts.*/
+        unsigned rank_starting_node_id = 1; /**< number at which the id of the first node on this rank starts.*/
         int rank_starting_nz_i = 0; /**< number at which the DoF count starts on this rank. */
         
         std::vector<int> ranks_ndofs; /**< a vector that contains the \ref ndofs of each rank. Needs to be communicated with MPI across ranks.*/
-        std::vector<size_t> ranks_nnodes; /**< a vector that contains the \ref rank_nnodes of each rank. Needs to be communicated with MPI across ranks.*/
+        std::vector<unsigned> ranks_nnodes; /**< a vector that contains the \ref rank_nnodes of each rank. Needs to be communicated with MPI across ranks.*/
         std::vector<std::shared_ptr<Node>> node_vector;  /**< a vector of shared ptrs referring to all the nodes on the current rank.*/
         std::vector<std::shared_ptr<Node>> interface_node_vector;  /**< a vector of shared ptrs referring to the interface nodes in the problem.*/
         std::vector<std::shared_ptr<ElementBaseClass>> elem_vector; /**< a vector of shared ptrs referring to all the elements in the problem.*/
 
-        std::set<size_t> interface_node_id_set_on_rank; //**<a std::set of node ids for those that are interfaces on this rank. */
-        std::set<size_t> node_id_set_owned_by_rank; //**<a std::set of node ids for those that are owned by this rank. */
+        std::set<unsigned> interface_node_id_set_on_rank; //**<a std::set of node ids for those that are interfaces on this rank. */
+        std::set<unsigned> node_id_set_owned_by_rank; //**<a std::set of node ids for those that are owned by this rank. */
 
         FrameMesh frame;
         
@@ -104,7 +110,7 @@ class GlobalMesh {
         {
             std::vector<double> coord_vec;
             std::vector<double> parametricCoords;
-            std::vector<std::size_t> nodeTags;
+            std::vector<std::unsigned> nodeTags;
 
             gmsh::model::mesh::getNodes(nodeTags, coord_vec, parametricCoords);
             
@@ -163,10 +169,10 @@ class GlobalMesh {
                 // getting the elements and nodes for each element type
                 // this is because each type has the same number of nodes
                 std::cout << "Mapping element type: " << type_name << std::endl;
-                std::vector<std::size_t> elem_tags, node_tags;
+                std::vector<std::unsigned> elem_tags, node_tags;
                 gmsh::model::mesh::getElementsByType(elem_type, elem_tags, node_tags);
 
-                std::vector<std::size_t> element_nodes;
+                std::vector<std::unsigned> element_nodes;
                 element_nodes.reserve(num_nodes_per_elem);
                 auto node_itr = node_tags.begin() ;
                 for (auto& elem_tag: elem_tags)
@@ -180,7 +186,7 @@ class GlobalMesh {
                     ++node_itr;
                     elem_nodes_vector.push_back(std::make_pair(elem_tag, element_nodes));
                     std::cout << "added element: " << elem_tag << " with nodes: ";
-                    print_container<std::vector<std::size_t>>(element_nodes);
+                    print_container<std::vector<std::unsigned>>(element_nodes);
                 }
             }
             return elem_nodes_vector;
@@ -244,7 +250,7 @@ class GlobalMesh {
          * @warning assumes mapping takes place from node and element ids = 1. There is no checking for conflicting ids, and nothing to reduce bandwidth!
          */
         template <typename CoordsContainer>
-        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(size_t divisions, CoordsContainer pts_coords)
+        std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> map_a_line_mesh(unsigned divisions, CoordsContainer pts_coords)
         {
             if (pts_coords.size() != 2)
             {
@@ -260,14 +266,14 @@ class GlobalMesh {
 
             coords delta_xyz = (pts_coords[1] - pts_coords[0])/divisions;
 
-            for (size_t i = 0; i < divisions + 1; ++i)
+            for (unsigned i = 0; i < divisions + 1; ++i)
             {
                 nodes_coords_vector.push_back(std::make_pair(i + 1, pts_coords[0] + i*delta_xyz));
             }
 
-            for (size_t i = 0; i < divisions; ++i)
+            for (unsigned i = 0; i < divisions; ++i)
             {
-                elem_nodes_vector.push_back(std::make_pair(i + 1, std::vector<size_t>{i + 1, i + 2}));
+                elem_nodes_vector.push_back(std::make_pair(i + 1, std::vector<unsigned>{i + 1, i + 2}));
             }     
             return std::make_pair(nodes_coords_vector, elem_nodes_vector);
         }
@@ -442,8 +448,8 @@ class GlobalMesh {
          * @param nodes_coords_vector the \ref nodes_coords_vector object which relates the node ID with their coordinates.
          * @param num_ranks the number of ranks over which the mesh is being decomposed.
          */
-        void populate_node_rank_maps(std::map<size_t, int>& node_rank_map, 
-                                    std::set<size_t>& node_id_set_owned_by_rank, 
+        void populate_node_rank_maps(std::map<unsigned, int>& node_rank_map, 
+                                    std::set<unsigned>& node_id_set_owned_by_rank, 
                                     NodeIdCoordsPairsVector& nodes_coords_vector,
                                     int const my_rank, 
                                     int const num_ranks)
@@ -496,12 +502,12 @@ class GlobalMesh {
          * @param node_id_set_on_rank a set of unique node IDs that need to exist on the current rank.
          * @param elem_nodes_vector_on_rank a map whose key is element ID and value is the nodes of that element. Only elements that are created on this rank are included, including interface elements.
          */
-        void find_rank_nodes(std::set<size_t>& node_id_set_on_rank, 
+        void find_rank_nodes(std::set<unsigned>& node_id_set_on_rank, 
                             ElemIdNodeIdPairVector& elem_nodes_vector_on_rank)
         {
-            for (std::pair<size_t,std::vector<size_t>> elem_nodes_pair : elem_nodes_vector_on_rank)
+            for (std::pair<unsigned,std::vector<unsigned>> elem_nodes_pair : elem_nodes_vector_on_rank)
             {
-                for (size_t node_id : elem_nodes_pair.second)
+                for (unsigned node_id : elem_nodes_pair.second)
                 {
                     node_id_set_on_rank.insert(node_id);
                 }
@@ -517,15 +523,15 @@ class GlobalMesh {
          * @param elem_nodes_vector_on_rank 
          * @param rank 
          */
-        void find_rank_interface_nodes_and_elems(std::set<size_t>& interface_node_id_set_on_rank,
-                                       std::set<size_t>& interface_elem_id_set_on_rank,
-                                       std::set<size_t>& node_id_set_owned_by_rank,
+        void find_rank_interface_nodes_and_elems(std::set<unsigned>& interface_node_id_set_on_rank,
+                                       std::set<unsigned>& interface_elem_id_set_on_rank,
+                                       std::set<unsigned>& node_id_set_owned_by_rank,
                                        ElemIdNodeIdPairVector& elem_nodes_vector_on_rank,
                                        int const rank)
         {
-            for (std::pair<size_t,std::vector<size_t>> elem_nodes_pair : elem_nodes_vector_on_rank)
+            for (std::pair<unsigned,std::vector<unsigned>> elem_nodes_pair : elem_nodes_vector_on_rank)
             {
-                for (size_t node_id : elem_nodes_pair.second)
+                for (unsigned node_id : elem_nodes_pair.second)
                 {
                     if (!node_id_set_owned_by_rank.count(node_id))
                     {
@@ -544,26 +550,26 @@ class GlobalMesh {
          * @param elem_nodes_vector_on_rank 
          * @param node_rank_map 
          */
-        void find_nodes_wanted_by_neighbours(std::map<int, std::set<size_t>>& neighbour_wanted_rank_node_id_map,
-                                             std::map<int, std::set<size_t>>& wanted_from_neighbour_rank_node_id_map, 
-                                             std::set<size_t>& interface_elem_id_set_on_rank, 
-                                             std::set<size_t>& interface_node_id_set_on_rank, 
+        void find_nodes_wanted_by_neighbours(std::map<int, std::set<unsigned>>& neighbour_wanted_rank_node_id_map,
+                                             std::map<int, std::set<unsigned>>& wanted_from_neighbour_rank_node_id_map, 
+                                             std::set<unsigned>& interface_elem_id_set_on_rank, 
+                                             std::set<unsigned>& interface_node_id_set_on_rank, 
                                              ElemIdNodeIdPairVector& elem_nodes_vector_on_rank, 
-                                             std::map<size_t, int>& node_rank_map, int const rank)
+                                             std::map<unsigned, int>& node_rank_map, int const rank)
         {
-            for (std::pair<size_t,std::vector<size_t>> elem_nodes_pair : elem_nodes_vector_on_rank)
+            for (std::pair<unsigned,std::vector<unsigned>> elem_nodes_pair : elem_nodes_vector_on_rank)
             {
                 if (interface_elem_id_set_on_rank.count(elem_nodes_pair.first))
                 {
                     std::vector<int> neighbours_ranks;
-                    for (size_t node_id : elem_nodes_pair.second)
+                    for (unsigned node_id : elem_nodes_pair.second)
                     {
                         if (interface_node_id_set_on_rank.count(node_id))
                         {
                             neighbours_ranks.push_back(node_rank_map[node_id]);
                         } 
                     }
-                    for (size_t node_id : elem_nodes_pair.second)
+                    for (unsigned node_id : elem_nodes_pair.second)
                     {
                         int parent_rank = node_rank_map[node_id];
                         if (parent_rank == rank) // this is equivalent to the more intensive (!interface_node_id_set_on_rank.count(node_id)) as it is checking if the node is not an interface node which means it is owned by the current rank!
@@ -591,17 +597,17 @@ class GlobalMesh {
          * 
          * @param nodes_coords_vector_on_rank a vector of pairs containing node IDs and coordinates for each node on current rank.
          * @param nodes_coords_vector a vector of pairs containing node IDs and coordinates for each node in the global domain.
-         * @param node_id_set_on_rank a std::set<size_t> that has a nonrepeating set of node IDs for nodes that belong on current rank.
+         * @param node_id_set_on_rank a std::set<unsigned> that has a nonrepeating set of node IDs for nodes that belong on current rank.
          * @param rank the rank that is calling this function.
          */
         void filter_node_vector(NodeIdCoordsPairsVector& nodes_coords_vector_on_rank,
                                 NodeIdCoordsPairsVector& nodes_coords_vector, 
-                                std::set<size_t> node_id_set_on_rank)
+                                std::set<unsigned> node_id_set_on_rank)
         {
-            for (size_t node_id : node_id_set_on_rank)
+            for (unsigned node_id : node_id_set_on_rank)
             {
                 auto node_coords_pair_it = std::find_if(std::begin(nodes_coords_vector), std::end(nodes_coords_vector), 
-                                            [node_id](std::pair<size_t, coords> node_coords_pair) 
+                                            [node_id](std::pair<unsigned, coords> node_coords_pair) 
                                             {
                                                 return node_coords_pair.first == node_id;
                                             });
@@ -616,7 +622,7 @@ class GlobalMesh {
          * @param node_element_map a map with node ID as key, and a set of elements that are connected to this node.
          * @param elem_nodes_vector a vector containing the nodal ids for each element in the domain.
          */
-        void populate_node_element_map(std::map<size_t, std::set<size_t>>& node_element_map, 
+        void populate_node_element_map(std::map<unsigned, std::set<unsigned>>& node_element_map, 
                                         ElemIdNodeIdPairVector& elem_nodes_vector)
         {
             for (auto elem_nodes_pair : elem_nodes_vector)
@@ -636,14 +642,14 @@ class GlobalMesh {
          * @param node_element_map a map which whose key is the node ID, and value is all the elements that connect to this node.
          * @param rank rank of the process that is calling this function.
          */
-        void find_rank_elements(std::set<size_t>& elem_id_set_on_rank,
-                                std::set<size_t>&  node_id_set_owned_by_rank, 
-                                std::map<size_t, std::set<size_t>> node_element_map, 
+        void find_rank_elements(std::set<unsigned>& elem_id_set_on_rank,
+                                std::set<unsigned>&  node_id_set_owned_by_rank, 
+                                std::map<unsigned, std::set<unsigned>> node_element_map, 
                                 int const rank)
         {
-            for (size_t node_id : node_id_set_owned_by_rank)
+            for (unsigned node_id : node_id_set_owned_by_rank)
             {
-                for (size_t elem_id : node_element_map[node_id])
+                for (unsigned elem_id : node_element_map[node_id])
                 {
                     elem_id_set_on_rank.insert(elem_id);
                 }
@@ -659,15 +665,15 @@ class GlobalMesh {
          * @param rank rank of the calling process.
          */
         void filter_element_vector(ElemIdNodeIdPairVector& elem_nodes_vector_on_rank,
-                                std::set<size_t>& elem_id_set_on_rank, 
+                                std::set<unsigned>& elem_id_set_on_rank, 
                                 ElemIdNodeIdPairVector& elem_nodes_vector, 
                                 int const rank)
         {
-            for (size_t elem_id : elem_id_set_on_rank)
+            for (unsigned elem_id : elem_id_set_on_rank)
             {
 
                 auto elem_it = std::find_if(std::begin(elem_nodes_vector), std::end(elem_nodes_vector), 
-                                        [elem_id](std::pair<size_t, std::vector<size_t>> elem_nodes_pair) 
+                                        [elem_id](std::pair<unsigned, std::vector<unsigned>> elem_nodes_pair) 
                                         {
                                             return elem_nodes_pair.first == elem_id;
                                         });
@@ -692,16 +698,16 @@ class GlobalMesh {
             ranks_nnodes.resize(num_ranks);
 
             // sort nodes into the ranks that own them
-            std::map<size_t, int> node_rank_map; 
+            std::map<unsigned, int> node_rank_map; 
             node_id_set_owned_by_rank.clear();
             populate_node_rank_maps(node_rank_map, node_id_set_owned_by_rank, nodes_coords_vector, rank, num_ranks);
             
             // create a map that links any nodes to the elements that connect to it.
-            std::map<size_t, std::set<size_t>> node_element_map;
+            std::map<unsigned, std::set<unsigned>> node_element_map;
             populate_node_element_map(node_element_map, elem_nodes_vector);
             
             // Based on the nodes we currently have, find all elements that connect to any of these nodes.
-            std::set<size_t> elem_id_set_on_rank; 
+            std::set<unsigned> elem_id_set_on_rank; 
             find_rank_elements(elem_id_set_on_rank, node_id_set_owned_by_rank, node_element_map, rank);
             rank_nelems = elem_id_set_on_rank.size();
             // filter the elem_nodes_vector to only the members that belong on this rank (including those that are duplicated)
@@ -712,14 +718,14 @@ class GlobalMesh {
             // Based on the members that will be created on this rank, add the nodes that will also need to be created
             // interface and rank-owned node id set will be kept for BC and load operations handling.
             interface_node_id_set_on_rank.clear();
-            std::set<size_t> interface_elem_id_set_on_rank;
+            std::set<unsigned> interface_elem_id_set_on_rank;
             find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank,interface_elem_id_set_on_rank,node_id_set_owned_by_rank,elem_nodes_vector_on_rank, rank);
             rank_nnodes = node_id_set_owned_by_rank.size();
             rank_interface_nnodes = interface_node_id_set_on_rank.size();
             // Find the node IDs that each rank may want from our nodes.
 
-            std::map<int, std::set<size_t>> wanted_by_neighbour_rank_node_id_map;
-            std::map<int, std::set<size_t>> wanted_from_neighbour_rank_node_id_map;
+            std::map<int, std::set<unsigned>> wanted_by_neighbour_rank_node_id_map;
+            std::map<int, std::set<unsigned>> wanted_from_neighbour_rank_node_id_map;
             find_nodes_wanted_by_neighbours(wanted_by_neighbour_rank_node_id_map, wanted_from_neighbour_rank_node_id_map, interface_elem_id_set_on_rank, interface_node_id_set_on_rank, elem_nodes_vector_on_rank, node_rank_map, rank);
             
             // Add the nodes that officially belong to this rank to the rank nodes coords vector.
@@ -773,12 +779,24 @@ class GlobalMesh {
                     std::cout << a_node->get_id() << " ";
                 }
                 std::cout << std::endl;
-            }   
+            }
+            if (VERBOSE)
+            {
+                sleep(1);
+                MPI_Barrier(MPI_COMM_WORLD);
+                std::cout << "Rank" << rank << ": the functions renumber_nodes and sort_node_vector are next." << std::endl;
+                std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
+                sleep(1);
+            }     
             renumber_nodes(rank);
             sort_node_vector("all");
             if (VERBOSE)
             {
-                std::cout << "nodes renumbered and sorted. Exchanging interface node IDs next." << std::endl;
+                sleep(1);
+                MPI_Barrier(MPI_COMM_WORLD);
+                std::cout << "Rank " << rank << ": nodes renumbered and sorted. Exchanging interface node IDs next." << std::endl;
+                std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
+                sleep(1);
                 std::cout << "Rank " << rank << " nodes are:";
                 for (auto a_node : node_vector)
                 {
@@ -792,9 +810,33 @@ class GlobalMesh {
                 }
                 std::cout << std::endl;
             }
+            if (VERBOSE)
+            {
+                sleep(1);
+                MPI_Barrier(MPI_COMM_WORLD);
+                std::cout << "Rank" << rank << ": the function exchange_interface_nodes_updated_ids is next." << std::endl;
+                std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
+                sleep(1);
+            }
             exchange_interface_nodes_updated_ids(wanted_by_neighbour_rank_node_id_map, wanted_from_neighbour_rank_node_id_map, rank);
             // count the ndofs of each rank and assign each node an index that corresponds to the global matrices and vectors.
+            if (VERBOSE)
+            {
+                sleep(1);
+                MPI_Barrier(MPI_COMM_WORLD);
+                std::cout << "Rank" << rank << ": the function count_distributed_dofs is next." << std::endl;
+                std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
+                sleep(1);
+            }
             count_distributed_dofs(rank, num_ranks);
+            if (VERBOSE)
+            {
+                sleep(1);
+                MPI_Barrier(MPI_COMM_WORLD);
+                std::cout << "Rank" << rank << ": the function exchange_interface_nodes_nz_i is next." << std::endl;
+                std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
+                sleep(1);
+            }
             exchange_interface_nodes_nz_i(wanted_by_neighbour_rank_node_id_map, wanted_from_neighbour_rank_node_id_map, rank);            
         }
         
@@ -804,18 +846,18 @@ class GlobalMesh {
          * @details Takes a vector of node IDs and returns a set containing only those IDs that exist in the 
          * specified node set (rank_owned nodes, interface nodes, or both). This docstring (not code) was AI generated but verified and modified.
          *
-         * @param given_node_ids A vector of size_t node IDs to be filtered
+         * @param given_node_ids A vector of unsigned node IDs to be filtered
          * @param ownership A string specifying which nodes to match against:
          *                  "rank_owned" - Only nodes owned by this rank
          *                  "interface" - Only interface nodes on this rank
          *                  "all" - Both rank_owned and interface nodes
-         * @return std::set<size_t> A set containing the intersection of given_node_ids and the 
+         * @return std::set<unsigned> A set containing the intersection of given_node_ids and the 
          *                            specified node set
          */
-        std::set<size_t> filter_node_ids(std::vector<size_t>& given_node_ids, std::string ownership = "rank_owned")
+        std::set<unsigned> filter_node_ids(std::vector<unsigned>& given_node_ids, std::string ownership = "rank_owned")
         {
-            std::set<size_t> given_id_set(given_node_ids.begin(), given_node_ids.end());
-            std::set<size_t> intersection;
+            std::set<unsigned> given_id_set(given_node_ids.begin(), given_node_ids.end());
+            std::set<unsigned> intersection;
             if (ownership == "rank_owned") {
                 std::set_intersection(given_id_set.begin(), given_id_set.end(), 
                                     node_id_set_owned_by_rank.begin(), node_id_set_owned_by_rank.end(),
@@ -828,7 +870,7 @@ class GlobalMesh {
             }
             if (ownership == "all")
             {
-                std::set<size_t> owned_intersection, interface_intersection;
+                std::set<unsigned> owned_intersection, interface_intersection;
                 owned_intersection = filter_node_ids(given_node_ids, "rank_owned");
                 interface_intersection = filter_node_ids(given_node_ids, "interface");
                 intersection.insert(owned_intersection.begin(), owned_intersection.end());
@@ -841,9 +883,9 @@ class GlobalMesh {
          * @brief Set the nodes parent ranks based on current calling rank and the map node_rank_map.
          * 
          * @param rank rank that is currently calling this function.
-         * @param node_rank_map std::map<size_t, int> that links the node IDs with the ranks that own them.
+         * @param node_rank_map std::map<unsigned, int> that links the node IDs with the ranks that own them.
          */
-        void set_nodes_parent_ranks(int const rank, std::map<size_t, int>& node_rank_map)
+        void set_nodes_parent_ranks(int const rank, std::map<unsigned, int>& node_rank_map)
         {
             for (auto node: node_vector)
             {
@@ -860,8 +902,8 @@ class GlobalMesh {
          * @param wanted_by_neighbour_rank_node_id_map 
          * @param wanted_from_neighbour_rank_node_id_map 
          */
-        void exchange_interface_nodes_updated_ids(std::map<int, std::set<size_t>> wanted_by_neighbour_rank_node_id_map, 
-                                                  std::map<int, std::set<size_t>> wanted_from_neighbour_rank_node_id_map,
+        void exchange_interface_nodes_updated_ids(std::map<int, std::set<unsigned>> wanted_by_neighbour_rank_node_id_map, 
+                                                  std::map<int, std::set<unsigned>> wanted_from_neighbour_rank_node_id_map,
                                                   int const rank)
         {
             // get information about neighbours and buffer sizes
@@ -877,13 +919,33 @@ class GlobalMesh {
             }
             num_neighbours = neighbours.size();
             if (VERBOSE)
+            {
+                sleep(1);
                 std::cout << "rank " << rank << " loop over wanted_by_neighbour_rank_node_id_map completed." << std::endl;
-
+                MPI_Barrier(MPI_COMM_WORLD);
+                std::cout << "rank " << rank << " has " << num_neighbours << " neighbours which are: ";
+                print_container(neighbours);
+                sleep(1);
+            }
+            if (VERBOSE)
+            {
+                sleep(1);
+                MPI_Barrier(MPI_COMM_WORLD);
+                for (auto neighbour_i : neighbours)
+                {
+                    std::cout << "From neighbour " << neighbour_i << " rank " << rank << " wants nodes: ";
+                    print_container(wanted_from_neighbour_rank_node_id_map[neighbour_i]);
+                    
+                    std::cout << "Neighbour " << neighbour_i << " wants from rank " << rank << " the nodes: ";
+                    print_container(wanted_by_neighbour_rank_node_id_map[neighbour_i]);   
+                }
+                sleep(1);
+            }
 
             if (VERBOSE)
                 std::cout << "rank " << rank << " setting up send buffers started." << std::endl;
             // setup send buffers
-            std::map<int, std::vector<size_t>> rank_ids_send_buffers_map;
+            std::map<int, std::vector<unsigned>> rank_ids_send_buffers_map;
             for (auto rank_buffer_size_pair : neighbour_rank_buffer_size_map)
             {
                 rank_ids_send_buffers_map[rank_buffer_size_pair.first].reserve(rank_buffer_size_pair.second);
@@ -894,7 +956,7 @@ class GlobalMesh {
             if (VERBOSE)
                 std::cout << "rank " << rank << " setting up receive buffers started." << std::endl;
             // setup receive buffers
-            std::map<int, std::vector<size_t>> rank_id_receive_buffers_map;
+            std::map<int, std::vector<unsigned>> rank_id_receive_buffers_map;
             for (auto rank_buffer_size_pair : neighbour_rank_buffer_size_map)
             {
                 rank_id_receive_buffers_map[rank_buffer_size_pair.first].resize(rank_buffer_size_pair.second);
@@ -905,7 +967,7 @@ class GlobalMesh {
             
             if (VERBOSE)
                 std::cout << "rank " << rank << " populating send buffers started." << std::endl;
-            // populate send buffers --- std::map<int, std::set<size_t>> wanted_by_neighbour_rank_node_id_map
+            // populate send buffers --- std::map<int, std::set<unsigned>> wanted_by_neighbour_rank_node_id_map
             for (auto rank_node_set : wanted_by_neighbour_rank_node_id_map)
             {
                 if (VERBOSE)
@@ -914,7 +976,7 @@ class GlobalMesh {
                 {
                     if (VERBOSE)
                         std::cout << "rank " << rank << " looking for node with record_id " << node_id << " for neighbor " << rank_node_set.first << std::endl;
-                    size_t renumbered_id = get_node_by_record_id(node_id, "rank_owned", rank)->get_id();
+                    unsigned renumbered_id = get_node_by_record_id(node_id, "rank_owned", rank)->get_id();
                     rank_ids_send_buffers_map[rank_node_set.first].push_back(renumbered_id);
                 }
             }
@@ -955,24 +1017,26 @@ class GlobalMesh {
                 auto node_id_set_iterator = wanted_from_neighbour_rank_node_id_map[rank_id_buffer_pair.first].begin();
                 for (int i = 0; i < rank_id_buffer_pair.second.size(); ++i)
                 {
-                    size_t new_id = rank_id_buffer_pair.second[i];
-                    size_t original_record_id = *node_id_set_iterator;
+                    unsigned new_id = rank_id_buffer_pair.second[i];
+                    unsigned original_record_id = *node_id_set_iterator;
                     if (VERBOSE)
                      std::cout << "rank " << rank << " looking for node " << original_record_id << " to assign it new id = " << new_id << std::endl;
-                     if (VERBOSE)
-                     {
-                         read_node_ids(rank, false);
-                         read_node_ids(rank, true);
-                     }
+                    
                      get_node_by_record_id(original_record_id, "interface", rank)->set_id(new_id);
                     ++node_id_set_iterator;
                 }
             }
             if (VERBOSE)
-                std::cout << "rank " << rank << " copying back from receive buffer completed." << std::endl;
-            if (VERBOSE)
-                std::cout << "rank " << rank << " exchange_interface_nodes_updated_ids all completed." << std::endl;
+            {
+                sleep(1);
+                MPI_Barrier(MPI_COMM_WORLD);
+                std::cout << "rank " << rank << " exchange_interface_nodes_updated_ids all completed============================." << std::endl;
+                sleep(1);
+            }
+                
         }
+
+
         void read_node_ids(int rank, bool interface = false)
         {
             if (!interface)
@@ -996,8 +1060,8 @@ class GlobalMesh {
          * @param wanted_by_neighbour_rank_node_id_map 
          * @param wanted_from_neighbour_rank_node_id_map 
          */
-        void exchange_interface_nodes_nz_i(std::map<int, std::set<size_t>> wanted_by_neighbour_rank_node_id_map, 
-                                                  std::map<int, std::set<size_t>> wanted_from_neighbour_rank_node_id_map, int const rank)
+        void exchange_interface_nodes_nz_i(std::map<int, std::set<unsigned>> wanted_by_neighbour_rank_node_id_map, 
+                                                  std::map<int, std::set<unsigned>> wanted_from_neighbour_rank_node_id_map, int const rank)
         {
             // get information about neighbours and buffer sizes
             int num_neighbours = 0;
@@ -1026,12 +1090,12 @@ class GlobalMesh {
             }
 
 
-            // populate send buffers --- std::map<int, std::set<size_t>> wanted_by_neighbour_rank_node_id_map
+            // populate send buffers --- std::map<int, std::set<unsigned>> wanted_by_neighbour_rank_node_id_map
             for (auto rank_node_set : wanted_by_neighbour_rank_node_id_map)
             {
                 for (auto node_id : rank_node_set.second)
                 {
-                    size_t node_nz_i = get_node_by_record_id(node_id, "rank_owned", rank)->get_nz_i();
+                    unsigned node_nz_i = get_node_by_record_id(node_id, "rank_owned", rank)->get_nz_i();
                     rank_nz_i_send_buffers_map[rank_node_set.first].push_back(node_nz_i);
                 }
             }
@@ -1061,7 +1125,7 @@ class GlobalMesh {
                 for (int i = 0; i < rank_id_buffer_pair.second.size(); ++i)
                 {
                     int new_nz_i = rank_id_buffer_pair.second[i];
-                    size_t original_record_id = *node_id_set_iterator;
+                    unsigned original_record_id = *node_id_set_iterator;
                     get_node_by_record_id(original_record_id, "interface", rank)->set_nz_i(new_nz_i);
                     ++node_id_set_iterator;
                 }
@@ -1075,7 +1139,7 @@ class GlobalMesh {
          */
         void renumber_nodes(int const rank)
         {
-            size_t* ranks_nnodes_ptr = ranks_nnodes.data();
+            unsigned* ranks_nnodes_ptr = ranks_nnodes.data();
             #ifdef WITH_MPI
             if (VERBOSE)
             {
@@ -1105,7 +1169,7 @@ class GlobalMesh {
                 std::cout << "GlobalMesh::renumber_nodes: Rank " << rank << ": rank_starting_node_id is: "<< rank_starting_node_id << "." << std::endl;
             }
             // Step 2: loop over the nodes and update them.
-            size_t temp_id = rank_starting_node_id;
+            unsigned temp_id = rank_starting_node_id;
             for (auto& node: node_vector)
             {
                 if (VERBOSE)
@@ -1529,7 +1593,7 @@ class GlobalMesh {
          * @return true if the node_ids are within the node vectors.
          * @return false if one or more IDs from node_ids are not within the node vectors.
          */
-        bool contains_nodes(std::set<size_t> node_ids, std::string search_target) 
+        bool contains_nodes(std::set<unsigned> node_ids, std::string search_target) 
         {
             bool contains_nodes;
             if (search_target == "all" || search_target == "rank_owned")
@@ -1547,7 +1611,7 @@ class GlobalMesh {
             return contains_nodes;
         }
 
-        bool contains_elements(std::set<size_t> elem_ids) 
+        bool contains_elements(std::set<unsigned> elem_ids) 
         {
             return contains_id(elem_ids, elem_vector);
         }

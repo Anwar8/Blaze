@@ -31,7 +31,7 @@ class ElementBaseClass
          * @param global_triplets_vector The container for the triplets that are used for assembling the global stiffness matrix \f$ \boldsymbol{K}\f$ from element contributions.
          */
         virtual void insert_global_stiffness_triplets(std::vector<spnz>& global_triplets_vector) = 0;
-        virtual size_t get_id() const = 0;
+        virtual unsigned get_id() const = 0;
         
 
 };

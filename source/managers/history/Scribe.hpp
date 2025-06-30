@@ -61,10 +61,10 @@ class Scribe
          * @param node_ids the IDs of the nodes to be tracked.
          * @param glob_mesh the global mesh object that contains all the nodes of the model.
          */
-        void track_distributed_nodes_by_id(int rank, std::vector<size_t> node_ids, std::set<int> dofs,  GlobalMesh& glob_mesh)
+        void track_distributed_nodes_by_id(int rank, std::vector<unsigned> node_ids, std::set<int> dofs,  GlobalMesh& glob_mesh)
         {
             this->rank = rank;
-            std::set<size_t> records_of_owned_node_ids = glob_mesh.filter_node_ids(node_ids, "rank_owned");
+            std::set<unsigned> records_of_owned_node_ids = glob_mesh.filter_node_ids(node_ids, "rank_owned");
             track_nodes_by_id(records_of_owned_node_ids, dofs, glob_mesh);
         }
 
@@ -128,7 +128,7 @@ class Scribe
          * @brief reads the contents of a particular record corresponding to a particular node ID to the output stream.
          * 
          */
-        void read_a_record_at(size_t node_id, int i)
+        void read_a_record_at(unsigned node_id, int i)
         {
             auto record_it =  get_record_id_iterator(node_id);
             record_it->read_record_at(i);
@@ -138,7 +138,7 @@ class Scribe
          * @brief reads the contents of a particular record corresponding to a particular node ID to the output stream.
          * 
          */
-        void read_a_record(size_t node_id)
+        void read_a_record(unsigned node_id)
         {
             auto record_it =  get_record_id_iterator(node_id);
             record_it->read_record();
@@ -150,7 +150,7 @@ class Scribe
          * @param id the id of the node that is tracked by the record.
          * @return Iterator a std::vector<Record>::iterator pointing to the record with the given id.
          */     
-        std::vector<Record>::iterator get_record_id_iterator(size_t id)
+        std::vector<Record>::iterator get_record_id_iterator(unsigned id)
         {   
             auto record_it = std::find_if(std::begin(record_library), std::end(record_library), [id](Record record_obj) {return record_obj.get_tracked_node_id() == id;});
             if (record_it != std::end(record_library))

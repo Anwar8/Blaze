@@ -21,8 +21,8 @@
 class Node {
 
     private:
-        size_t id = 0; /**< unique id for node object - can be changed during renumbering.*/
-        size_t record_id = 0; /**< unique id for node object - cannot be changed from original value given in mesh.*/
+        unsigned id = 0; /**< unique id for node object - can be changed during renumbering.*/
+        unsigned record_id = 0; /**< unique id for node object - cannot be changed from original value given in mesh.*/
         coords coordinates; /**< x, y, and z coordinates of the node.*/
         /**
          * @brief nodal mass.
@@ -105,8 +105,8 @@ class Node {
         coords const get_coords() const {return coordinates;}
         int const get_ndof()  {return ndof;}
         void add_connected_element(int element_id) {connected_elements.insert(element_id);}
-        size_t const get_id() const {return id;}
-        size_t const get_record_id() const {return record_id;}
+        unsigned const get_id() const {return id;}
+        unsigned const get_record_id() const {return record_id;}
         /**
          * @brief Set the nz_i to a value, and calls \ref update_dofs_numbers.
          * 
@@ -147,8 +147,8 @@ class Node {
         int get_nz_i() {return nz_i;}
         void  set_z(real z) { coordinates[2] = z;}
 
-        void set_id(size_t new_id) { id = new_id; }
-        void increment_id(size_t id_increment) { id += id_increment; }
+        void set_id(unsigned new_id) { id = new_id; }
+        void increment_id(unsigned id_increment) { id += id_increment; }
         void set_parent_rank(int parent_rank, int calling_rank) 
         {
             parent_rank = parent_rank;

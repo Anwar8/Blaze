@@ -319,7 +319,7 @@ class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass>
         virtual int get_ndofs() const override {return this->ndofs;}
         virtual int get_nnodes() const override {return this->nnodes;}
         virtual std::string get_elem_type() const override {return this->elem_type;}
-        virtual size_t get_id() const override {return this->id;}
+        virtual unsigned get_id() const override {return this->id;}
 
         virtual vec get_global_ele_U() const override {return this->global_ele_U;}
         virtual vec get_local_d() const override {return this->local_d;}

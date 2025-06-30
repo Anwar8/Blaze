@@ -59,7 +59,7 @@ class NodalRestraint
         template <typename Container>
         void assign_distributed_nodes_by_id(Container& node_ids, GlobalMesh& glob_mesh)
         {
-            std::set<size_t> restrained_nodes_on_rank = glob_mesh.filter_node_ids(node_ids, "all");
+            std::set<unsigned> restrained_nodes_on_rank = glob_mesh.filter_node_ids(node_ids, "all");
             assign_nodes_by_id(restrained_nodes_on_rank, glob_mesh);
         }
 

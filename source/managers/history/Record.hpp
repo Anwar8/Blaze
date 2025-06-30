@@ -16,7 +16,7 @@
 class Record {
     protected:
         std::shared_ptr<Node> tracked_node; /**< a shared pointer to the node that is being tracked by this record.*/
-        size_t tracked_node_id; /**< the ID of the node that is being tracked by this record.*/
+        unsigned tracked_node_id; /**< the ID of the node that is being tracked by this record.*/
         std::array<std::vector<real>, 6> recorded_data; /**< the data that is recorded in this record by the scribe.*/
         std::set<int> tracked_dofs; /**< a std set of tracked DoFs as decided by the scribe.*/
         
@@ -102,9 +102,9 @@ class Record {
         /**
          * @brief Get the tracked node id.
          * 
-         * @return size_t 
+         * @return unsigned 
          */
-        size_t get_tracked_node_id() const {return tracked_node_id;}
+        unsigned get_tracked_node_id() const {return tracked_node_id;}
         
         /**
          * @brief Get the tracked node shared ptr.

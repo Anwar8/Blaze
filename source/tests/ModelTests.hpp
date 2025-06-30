@@ -93,7 +93,7 @@ class LoadTests : public ::testing::Test {
         BasicSection sect(2.06e11, 0.0125, 0.0004570000);
         model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}}, ELEMENT_TYPE, sect);
         
-        model.load_manager.create_a_nodal_load_by_id(std::vector<size_t>{(size_t)(divisions+1)}, std::set<int>{1}, std::vector<real>{y_load}, model.glob_mesh);
+        model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{(unsigned)(divisions+1)}, std::set<int>{1}, std::vector<real>{y_load}, model.glob_mesh);
         model.initialise_restraints_n_loads();
         
     }
@@ -161,12 +161,12 @@ class ScribeTests : public ::testing::Test {
     Model model;
     int divisions = 10;
     int tracked_dof = 1;
-    size_t tracked_node_id = divisions+1;
+    unsigned tracked_node_id = divisions+1;
 
     void SetUp() override {
         BasicSection sect(2.06e11, 0.0125, 0.0004570000);
         model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}}, ELEMENT_TYPE, sect);
-        model.scribe.track_nodes_by_id(std::set<size_t>{tracked_node_id}, std::set<int>{tracked_dof}, model.glob_mesh);
+        model.scribe.track_nodes_by_id(std::set<unsigned>{tracked_node_id}, std::set<int>{tracked_dof}, model.glob_mesh);
         
     }
     void TearDown() override {
@@ -191,7 +191,7 @@ TEST_F(ScribeTests, CheckTrackedDofs)
 TEST_F(ScribeTests, CheckTrackedNodeId)
 {
     std::vector<Record> records_library = model.scribe.get_record_library();
-    size_t node_id = records_library[0].get_tracked_node_id();
+    unsigned node_id = records_library[0].get_tracked_node_id();
     EXPECT_EQ(node_id, divisions+1);
 }
 

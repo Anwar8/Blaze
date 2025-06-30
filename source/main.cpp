@@ -125,14 +125,14 @@ int main (int argc, char* argv[]) {
     model.restraints.push_back(column_bases);
     model.restraints.push_back(out_of_plane_restraint);
 
-    std::set<size_t> loaded_nodes = the_frame.get_beam_line_node_ids(nfloors, true); 
-    std::vector<size_t> loaded_nodes_v = std::vector<size_t>(loaded_nodes.begin(), loaded_nodes.end());
+    std::set<unsigned> loaded_nodes = the_frame.get_beam_line_node_ids(nfloors, true); 
+    std::vector<unsigned> loaded_nodes_v = std::vector<unsigned>(loaded_nodes.begin(), loaded_nodes.end());
     // std::cout << "loaded nodes are: " << std::endl;    
     // print_container(loaded_nodes_v);
     model.load_manager.create_a_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{-1000}, model.glob_mesh);
 
-    // std::set<size_t> extra_loaded_nodes = the_frame.get_beam_node_ids(12, 2, false);
-    // std::vector<size_t> extra_loaded_nodes_v = std::vector<size_t>(extra_loaded_nodes.begin(), extra_loaded_nodes.end());
+    // std::set<unsigned> extra_loaded_nodes = the_frame.get_beam_node_ids(12, 2, false);
+    // std::vector<unsigned> extra_loaded_nodes_v = std::vector<unsigned>(extra_loaded_nodes.begin(), extra_loaded_nodes.end());
     // model.load_manager.create_a_nodal_load_by_id(extra_loaded_nodes_v, std::set<int>{2}, std::vector<real>{-500000}, model.glob_mesh);
 
 
@@ -166,7 +166,7 @@ int main (int argc, char* argv[]) {
     
     finalise_MPI();
     // // model.scribe.read_all_records();
-    // auto recorded_data = model.scribe.get_record_id_iterator((size_t)num_nodes)->get_recorded_data()[2];
+    // auto recorded_data = model.scribe.get_record_id_iterator((unsigned)num_nodes)->get_recorded_data()[2];
     
     // std::cout << std::setprecision(10); 
     // std::cout << "Computed deflection is: " << recorded_data.back() << std::endl;

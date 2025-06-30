@@ -51,6 +51,13 @@ Rank 2: Could not find node with record_id 62395648 in interface node vectors.
 
 I will need to go verbose to know what has happened. All appears to go okay until renumbering. This might be an artifact of using `size_t` and its incompatibility with `MPI_UNSIGNED`. I will try to replace all `size_t` with `unsigned` and see what kind of bugs that introduces and resolves.
 
+Indeed, changing `size_t` to `unsigned` resolved the bug where the starting number for the renumbering was an arbitrarly high value (see physical notebook). However, there is now a new bug where rank 0 is searching for a node with ID of 0, which does not exist. I will have to figure out why this is happening. 
+
+Bug appears to be in `exchange_interface_nodes_updated_ids`.
+
+I have added a lot of debugging verbosity, but I have found that the bug takes place when rank 1 suddenly wants to renumber a node 0 to an id of 0! I am a bit tired now, so I will take a break for now.
+
+
 ### 29 June
 There are 50 days remaining to the submission deadline of the thesis. There are still many tasks to complete:
 1. Test distributed boundary condition, load, and record management. 
