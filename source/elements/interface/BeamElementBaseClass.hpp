@@ -41,7 +41,7 @@ class BeamElementBaseClass : public ElementBaseClass {
          * @brief the basic data about the generic beam element
          */
         //@{      
-        unsigned id = 0; /**< unique identifier for the element.*/
+        size_t id = 0; /**< unique identifier for the element.*/
         std::string elem_type = "pure-virtual-beam-column"; /**< string that represents the type of the element.*/
         int ndofs = -1; /**< number of freedoms at each node. Unknown in this virtual class. Set to -1 to force implementation in subclass.*/
         int nnodes = -1; /**< number of nodes. Set to -1 to force implementation in subclass.*/
@@ -369,7 +369,7 @@ class BeamElementBaseClass : public ElementBaseClass {
         virtual int get_ndofs() const = 0;
         virtual int get_nnodes() const = 0;
         virtual std::string get_elem_type() const = 0;
-        virtual unsigned get_id() const = 0;
+        virtual size_t get_id() const = 0;
 
         virtual vec get_global_ele_U() const = 0;
         virtual vec get_local_d() const = 0;

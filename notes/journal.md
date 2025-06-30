@@ -35,6 +35,23 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Develop a better testing framework for `MPI` code.
 
 ## Journal
+### 30 June
+Tests for `DistributedModelLineMeshTests` run fine. Had to do some modifications to the codebase yesterday to avoid some compilation errors due to redefinition of operators for records which I apprently just missed that I had already done, and replaced all `unsigned` with `size_t` in the code where possibel as that caused some data compatibility issues. All `MPI` tests run fine so far. However, there was a strange error where `read_node_ids` would read that a node with rank of -1 is asking for an interface node. Not sure why that was happening but it does not seem to repeat today. There was also some verbose stuff being written out in the function `get_node_by_record_id` which I now locked behind the `VERBOSE` flag. 
+
+### 29 June
+There are 50 days remaining to the submission deadline of the thesis. There are still many tasks to complete:
+1. Test distributed boundary condition, load, and record management. 
+2. Update utilise parallel linear algebra with `Tpetra`. 
+3. Run and test parallel solutions.
+4. Profile the code and its scalability.
+5. Write the thesis. 
+
+I reckon I can finish up thesis in 14 days once I have all analysis complete. This gives me 36 days to complete the code, testing, profiling, and figure generation. This will be tough, but not impossible. 
+
+Today, I will tackle testing the parallel versions of the managers. 
+
+- Created a new set of helper functions that allow the creation of distirbuted meshes directly from within the `Model` class as should be. This is now being tested for line mesh counts. If the counts work fine, then the contents should also work fine. The tests for this are under `DistributedModelLineMeshTests`.
+
 ### 11 June
 I have now built `Tpetra` (and its dependencies `Kokkos` and `Teuchos`) from `Trilinos`. This was done following the instructions in the [quick installation documentation](https://github.com/trilinos/Trilinos/blob/master/INSTALL.rst), which is different from the [full installation documentation](https://trilinos.github.io/pdfs/TrilinosBuildReference.pdf). However, it seems I will need to configure both `Kokkos` and `Tpetra` together in stead of building a stand-alone `Kokkos` like I had done before. This is because of the way that `Tpetra` is packaged within `Trilinos` and its reliance on the build system `TriBITS`, which is part of the `Trilinos` source. I attempted a stand-alone installation of `Tpetra` where I only cloned its pacakge data from the `Trilinos` source, but that did not work out too well. *I am afraid that I am getting deeper and deeper into `Trilinos` which is not something  I was explicitly aiming to avoid. This is especially worrisome since I am starting to realise that I might be able to climb **just a little more** and use the various solvers provided in `Trilinos`.*
 

@@ -253,119 +253,103 @@ TEST_F(DistributedLineMeshTests, line_mesh_rank_interface_nzi)
         ASSERT_TRUE(false);
     }
 }
-// TEST_F(DistributedLineMeshTests, line_mesh_rank_contents)
-// {   
-//     int rank, num_ranks;
-//     get_my_rank(rank);
-//     get_num_ranks(num_ranks);
-//     mesh.setup_distributed_mesh(mesh_maps.first, mesh_maps.second, rank, num_ranks);
-//     ASSERT_EQ(mesh.get_num_nodes(), 10);
-//     if (num_ranks == 1)
-//     {
-//         ASSERT_TRUE(mesh.contains_nodes(std::set<size_t>{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
-//         ASSERT_TRUE(mesh.contains_elements(std::set<size_t>{1, 2, 3, 4, 5, 6, 7, 8, 9}));
-//     }
-//     else if (num_ranks == 2)
-//     {
-//         if (rank == 0)
-//         {
-//             ASSERT_TRUE(mesh.contains_nodes(std::set<size_t>{1, 2, 3, 4, 5, 6}));
-//             ASSERT_TRUE(mesh.contains_elements(std::set<size_t>{1, 2, 3, 4, 5}));   
-//         } else {
-//             ASSERT_TRUE(mesh.contains_nodes(std::set<size_t>{5, 6, 7, 8, 9, 10}));
-//             ASSERT_TRUE(mesh.contains_elements(std::set<size_t>{5, 6, 7, 8, 9}));
-//         }
-//     }
-//     else if (num_ranks == 3)
-//     {
-//         if (rank == 0)
-//         {
-//             ASSERT_TRUE(mesh.contains_nodes(std::set<size_t>{1, 2, 3, 4}));
-//             ASSERT_TRUE(mesh.contains_elements(std::set<size_t>{1, 2, 3}));
- 
-//         } else if (rank == 1) {
-//             ASSERT_TRUE(mesh.contains_nodes(std::set<size_t>{3, 4, 5, 6, 7}));
-//             ASSERT_TRUE(mesh.contains_elements(std::set<size_t>{3, 4, 5, 6}));
-//         } else { 
-//             ASSERT_TRUE(mesh.contains_nodes(std::set<size_t>{6, 7, 8, 9, 10}));
-//             ASSERT_TRUE(mesh.contains_elements(std::set<size_t>{6, 7, 8, 9}));
-//         }
-//     }    
-//     else if (num_ranks == 4)
-//     {
-//         if (rank == 0)
-//         {
-//             ASSERT_TRUE(mesh.contains_nodes(std::set<size_t>{1, 2, 3}));
-//             ASSERT_TRUE(mesh.contains_elements(std::set<size_t>{1, 2}));
-//         } else if (rank == 1) {
-//             ASSERT_TRUE(mesh.contains_nodes(std::set<size_t>{2, 3, 4, 5}));
-//             ASSERT_TRUE(mesh.contains_elements(std::set<size_t>{2, 3, 4}));
-//         } else if (rank == 2) {
-//             ASSERT_TRUE(mesh.contains_nodes(std::set<size_t>{4, 5, 6, 7}));
-//             ASSERT_TRUE(mesh.contains_elements(std::set<size_t>{4, 5, 6}));
-//         } else  if (rank == 3) {
-//             ASSERT_TRUE(mesh.contains_nodes(std::set<size_t>{6, 7, 8, 9, 10}));
-//             ASSERT_TRUE(mesh.contains_elements(std::set<size_t>{6, 7, 8, 9}));
-//         }
-//     } else 
-//     {
-//         std::cout << "DistributedLineMeshTests::line_mesh_rank_counts can only run on num_ranks from 1 to 4 ranks. Got " << num_ranks << "." << std::endl;
-//         ASSERT_TRUE(false);
-//     }
-// }
 
-// TEST_F(DistributedLineMeshTests, line_mesh_rank_ndofs)
-// {   
-//     int rank, num_ranks;
-//     get_my_rank(rank);
-//     get_num_ranks(num_ranks);
-//     mesh.setup_distributed_mesh(mesh_maps.first, mesh_maps.second, rank, num_ranks);
-//     ASSERT_EQ(mesh.get_num_nodes(), 10);
-//     if (num_ranks == 1)
-//     {
-//         ASSERT_EQ(mesh.get_rank_ndofs(), 60);
-//         ASSERT_EQ(mesh.get_rank_starting_nz_i(), 0);
-//     }
-//     else if (num_ranks == 2)
-//     {
-//         if (rank == 0)
-//         {
-//             ASSERT_EQ(mesh.get_rank_ndofs(), 36);
-//             ASSERT_EQ(mesh.get_rank_starting_nz_i(), 0);            
-//         } else {
-//             ASSERT_EQ(mesh.get_rank_ndofs(), 36);
-//             ASSERT_EQ(mesh.get_rank_starting_nz_i(), 30);
-//         }
-//     }
-//     else if (num_ranks == 3)
-//     {
-//         if (rank == 0)
-//         {
-//             ASSERT_EQ(mesh.count_nodes_vector(), 4);
-//             ASSERT_EQ(mesh.count_elem_vector(), 3);
-//         } else {
-//             ASSERT_EQ(mesh.count_nodes_vector(), 5);
-//             ASSERT_EQ(mesh.count_elem_vector(), 4);  
-//         }
-//     }    
-//     else if (num_ranks == 4)
-//     {
-//         if (rank == 0)
-//         {
-//             ASSERT_EQ(mesh.count_nodes_vector(), 3);
-//             ASSERT_EQ(mesh.count_elem_vector(), 2);
-//         } else if (rank != 3) {
-//             ASSERT_EQ(mesh.count_nodes_vector(), 4);
-//             ASSERT_EQ(mesh.count_elem_vector(), 3);  
-//         } else {
-//             ASSERT_EQ(mesh.count_nodes_vector(), 5);
-//             ASSERT_EQ(mesh.count_elem_vector(), 4);  
-//         }
-//     } else 
-//     {
-//         std::cout << "DistributedLineMeshTests::line_mesh_rank_counts can only run on num_ranks from 1 to 4 ranks. Got " << num_ranks << "." << std::endl;
-//         ASSERT_TRUE(false);
-//     }
-// }
+class DistributedModelLineMeshTests : public ::testing::Test {
+    public:
+      Model model;
+      int length = 9;
+      int divisions = 9;
+      int rank = 0;
+      int num_ranks = 0;
+      std::vector<coords> end_coords = {{0.0, 0.0, 0.0}, {9.0, 0.0, 0.0}};
+      
+      void SetUp() override {
+          BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+          get_my_rank(rank);
+          get_num_ranks(num_ranks);
+          model.create_distributed_line_mesh(divisions, end_coords, NonlinearElastic, sect, rank, num_ranks);
+      }
+      void TearDown() override {
+  }
+  };
+
+  TEST_F(DistributedModelLineMeshTests, line_mesh_rank_counts)
+{   
+    ASSERT_EQ(model.glob_mesh.get_num_nodes(), 10);
+    if (num_ranks == 1)
+    {
+        ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 10);
+        ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
+        ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 0);
+    }
+    else if (num_ranks == 2)
+    {
+        ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 5);
+        ASSERT_EQ(model.glob_mesh.count_elem_vector(), 5);
+        ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 1);
+    }
+    else if (num_ranks == 3)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 3);
+            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 3);
+            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 1);
+        } 
+        else if (rank == 1)
+        {
+            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 3);
+            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 4);
+            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);
+        } 
+        else if (rank == 2)
+        {
+            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 4);
+            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 4);
+            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 1);  
+        }
+    }    
+    else if (num_ranks == 4)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 2);
+            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 2);
+            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 1);
+        } 
+        else if (rank == 1 || rank == 2)
+        {
+            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 2);
+            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 3);
+            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);
+        } 
+        else if (rank == 3)
+        {
+            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 4);
+            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 4);
+            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 1);  
+        }
+    }
+    else if (num_ranks == 5)
+    {
+        if (rank == 0 || rank == 4)
+        {
+            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 2);
+            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 2);
+            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 1);
+        } 
+        else if (rank == 1 || rank == 2 || rank == 3)
+        {
+            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 2);
+            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 3);
+            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);
+        } 
+    }
+    else 
+    {
+        std::cout << "DistributedLineMeshTests::line_mesh_rank_counts can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
+        ASSERT_TRUE(false);
+    }
+}
 
 #endif

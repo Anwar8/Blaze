@@ -48,15 +48,6 @@ class LoadManager
          * @param loads the loads corresponding to the DoFs.
          */
         template <typename DofContainer, typename LoadContainer>
-        void create_a_nodal_load_by_id(std::vector<unsigned> loaded_node_ids, DofContainer loaded_dofs, LoadContainer loads, GlobalMesh& glob_mesh)
-        {
-            NodalLoad nodal_load;
-            nodal_load.assign_nodes_by_id(loaded_node_ids, glob_mesh);
-            nodal_load.assign_dofs_loads(loaded_dofs, loads);
-            nodal_loads.push_back(nodal_load);
-        }
-
-        template <typename DofContainer, typename LoadContainer>
         void create_a_nodal_load_by_id(std::vector<size_t> loaded_node_ids, DofContainer loaded_dofs, LoadContainer loads, GlobalMesh& glob_mesh)
         {
             NodalLoad nodal_load;
@@ -76,7 +67,7 @@ class LoadManager
         template <typename DofContainer, typename LoadContainer>
         void create_a_distributed_nodal_load_by_id(std::vector<size_t> loaded_node_ids, DofContainer loaded_dofs, LoadContainer loads, GlobalMesh& glob_mesh)
         {
-            std::set<unsigned> loaded_nodes_on_rank = glob_mesh.filter_node_ids(loaded_node_ids, "rank_owned");
+            std::set<size_t> loaded_nodes_on_rank = glob_mesh.filter_node_ids(loaded_node_ids, "rank_owned");
             NodalLoad nodal_load;
             nodal_load.assign_nodes_by_id(loaded_nodes_on_rank, glob_mesh);
             nodal_load.assign_dofs_loads(loaded_dofs, loads);

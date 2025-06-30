@@ -41,6 +41,8 @@ elif [ $1 = "distributed_custom" ]; then
     ./DistributedTestsBlaze --gtest_filter="$@"
 elif [ $1 = "mpi" ]; then
     mpirun -n $2 ./TestBlazeMPI
+elif [ $1 = "mpi_custom" ]; then
+    mpirun -n $2 ./TestBlazeMPI --gtest_filter="$3"
 elif [ $1 = "all" ]; then
     ./UnitTestBlaze
     ./VerificationTestsBlaze

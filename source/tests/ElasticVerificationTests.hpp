@@ -10,7 +10,7 @@ class CantileverBeam : public ::testing::Test {
       Model model;
       int divisions = 10;
       real y_load = -1e5;
-      unsigned tracked_node_id = divisions + 1;
+      size_t tracked_node_id = divisions + 1;
       int tracked_dof = 2;
       real beam_length = 10.0;
   
@@ -28,9 +28,9 @@ class CantileverBeam : public ::testing::Test {
           out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
           model.restraints.push_back(out_of_plane_restraint);
   
-          model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{(unsigned)(divisions+1)}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
+          model.load_manager.create_a_nodal_load_by_id(std::vector<size_t>{(size_t)(divisions+1)}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
   
-          model.scribe.track_nodes_by_id(std::set<unsigned>{tracked_node_id}, std::set<int>{tracked_dof}, model.glob_mesh);
+          model.scribe.track_nodes_by_id(std::set<size_t>{tracked_node_id}, std::set<int>{tracked_dof}, model.glob_mesh);
   
           model.initialise_restraints_n_loads();
           model.glob_mesh.check_nodal_loads();
@@ -63,7 +63,7 @@ class CantileverBeam : public ::testing::Test {
       Model model;
       int divisions = 10;
       real y_load = -1e5;
-      unsigned mid_node = (divisions/2) + 1;
+      size_t mid_node = (divisions/2) + 1;
       
       int tracked_dof = 2;
       real beam_length = 10.0;
@@ -87,9 +87,9 @@ class CantileverBeam : public ::testing::Test {
           out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10}, model.glob_mesh);
           model.restraints.push_back(out_of_plane_restraint);
   
-          model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{mid_node}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
+          model.load_manager.create_a_nodal_load_by_id(std::vector<size_t>{mid_node}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
   
-          model.scribe.track_nodes_by_id(std::set<unsigned>{mid_node}, std::set<int>{tracked_dof}, model.glob_mesh);
+          model.scribe.track_nodes_by_id(std::set<size_t>{mid_node}, std::set<int>{tracked_dof}, model.glob_mesh);
   
           model.initialise_restraints_n_loads();
           model.glob_mesh.check_nodal_loads();
@@ -121,8 +121,8 @@ class CantileverBeam : public ::testing::Test {
       Model model;
       int divisions = 100;
       real y_udl = -1e4; // N/m
-      unsigned mid_node = (divisions/2) + 1;
-      std::vector<unsigned> loaded_nodes = std::vector<unsigned>(divisions - 1);
+      size_t mid_node = (divisions/2) + 1;
+      std::vector<size_t> loaded_nodes = std::vector<size_t>(divisions - 1);
       int tracked_dof = 2;
       real beam_length = 5.0;
   
@@ -152,7 +152,7 @@ class CantileverBeam : public ::testing::Test {
           real y_load = y_udl*beam_length/(divisions - 1);
           model.load_manager.create_a_nodal_load_by_id(loaded_nodes, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
   
-          model.scribe.track_nodes_by_id(std::set<unsigned>{mid_node}, std::set<int>{tracked_dof}, model.glob_mesh);
+          model.scribe.track_nodes_by_id(std::set<size_t>{mid_node}, std::set<int>{tracked_dof}, model.glob_mesh);
   
           model.initialise_restraints_n_loads();
           model.glob_mesh.check_nodal_loads();
@@ -185,7 +185,7 @@ class CantileverBeam : public ::testing::Test {
       int divisions = 200;
       
   
-      unsigned tracked_node_id = divisions + 1;
+      size_t tracked_node_id = divisions + 1;
       int loaded_dof = 5;
       int tracked_dof = 2;
       real beam_length = 10.0;
@@ -195,7 +195,7 @@ class CantileverBeam : public ::testing::Test {
       real moment_of_inertia = (b*h*h*h)/12.0;
       real area = b*h;
   
-      std::vector<unsigned> restrained_nodes = std::vector<unsigned>(divisions);
+      std::vector<size_t> restrained_nodes = std::vector<size_t>(divisions);
   
       real M_max = -20*M_PI;
   
@@ -217,7 +217,7 @@ class CantileverBeam : public ::testing::Test {
   
           
   
-          model.scribe.track_nodes_by_id(std::set<unsigned>{tracked_node_id}, std::set<int>{tracked_dof}, model.glob_mesh);
+          model.scribe.track_nodes_by_id(std::set<size_t>{tracked_node_id}, std::set<int>{tracked_dof}, model.glob_mesh);
           
       }
       void TearDown() override {
@@ -225,9 +225,9 @@ class CantileverBeam : public ::testing::Test {
   
   };
   
-  void load_and_run(Model& model, unsigned loaded_node, int loaded_dof, real load, int steps)
+  void load_and_run(Model& model, size_t loaded_node, int loaded_dof, real load, int steps)
   {
-      model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{loaded_node}, std::set<int>{loaded_dof}, std::vector<real>{load}, model.glob_mesh);
+      model.load_manager.create_a_nodal_load_by_id(std::vector<size_t>{loaded_node}, std::set<int>{loaded_dof}, std::vector<real>{load}, model.glob_mesh);
       model.initialise_restraints_n_loads();
       model.glob_mesh.check_nodal_loads();
   
