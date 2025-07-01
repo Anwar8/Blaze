@@ -2,7 +2,7 @@
 #define BLAZE_CONFIG_HPP
 
 #define INCLUDE_GMSH 0
-#define VERBOSE 1
+#define VERBOSE 0
 #define VERBOSE_SLN 0
 #define VERBOSE_STIFFNESSES 0
 #define VERBOSE_NLB 0

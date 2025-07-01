@@ -441,11 +441,17 @@ class DistributedModelFrameMeshTests : public ::testing::Test {
               ASSERT_EQ(model.glob_mesh.count_elem_vector(), 7);
               ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);
           } 
-          else if (rank == 2)
+          else if (rank == 1)
           {
               ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 6);
               ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
               ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 5);          
+          }
+          else if (rank == 2)
+          {
+              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 6);
+              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
+              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 4);          
           }
           else if (rank == 3)
           {
@@ -454,12 +460,6 @@ class DistributedModelFrameMeshTests : public ::testing::Test {
               ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 4);          
           }
           else if (rank == 4)
-          {
-              ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 6);
-              ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
-              ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 4);          
-          }
-          else if (rank == 5)
           {
               ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 8);
               ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);

@@ -8,9 +8,7 @@
 #define GLOBAL_MESH
 
 // debugging!! Remove!
-#if VERBOSE == 1
-    #include <unistd.h>
-#endif
+#include <unistd.h>
 
 
 #include <memory>
@@ -899,8 +897,8 @@ class GlobalMesh {
         /**
          * @brief exchnages the IDs of the interface nodes between neighbouring ranks.
          * 
-         * @param wanted_by_neighbour_rank_node_id_map 
-         * @param wanted_from_neighbour_rank_node_id_map 
+         * @param wanted_by_neighbour_rank_node_id_map a std::map where the key is the neighbour rank and the value is a set of node IDs that this neighbour wants from the current rank
+         * @param wanted_from_neighbour_rank_node_id_map  a std::map where the key is the neighbour rank and the value is a set of node IDs that this rank wants from the neighbour rank
          */
         void exchange_interface_nodes_updated_ids(std::map<int, std::set<unsigned>> wanted_by_neighbour_rank_node_id_map, 
                                                   std::map<int, std::set<unsigned>> wanted_from_neighbour_rank_node_id_map,
@@ -909,60 +907,54 @@ class GlobalMesh {
             // get information about neighbours and buffer sizes
             int num_neighbours = 0;
             std::set<int> neighbours;
-            std::map<int, int> neighbour_rank_buffer_size_map;
-            if (VERBOSE)
-                std::cout << "rank " << rank << " loop over wanted_by_neighbour_rank_node_id_map started." << std::endl;
+            std::map<int, int> neighbour_send_buffer_size_map;
+            std::map<int, int> neighbour_receive_buffer_size_map;
+
+            for (auto rank_nodes_set_pair : wanted_from_neighbour_rank_node_id_map)
+            {
+                neighbours.insert(rank_nodes_set_pair.first);
+                neighbour_receive_buffer_size_map[rank_nodes_set_pair.first] = rank_nodes_set_pair.second.size();
+            }
+
             for (auto rank_nodes_set_pair : wanted_by_neighbour_rank_node_id_map)
             {
                 neighbours.insert(rank_nodes_set_pair.first);
-                neighbour_rank_buffer_size_map[rank_nodes_set_pair.first] = rank_nodes_set_pair.second.size();
+                neighbour_send_buffer_size_map[rank_nodes_set_pair.first] = rank_nodes_set_pair.second.size();
             }
             num_neighbours = neighbours.size();
             if (VERBOSE)
             {
                 sleep(1);
-                std::cout << "rank " << rank << " loop over wanted_by_neighbour_rank_node_id_map completed." << std::endl;
                 MPI_Barrier(MPI_COMM_WORLD);
                 std::cout << "rank " << rank << " has " << num_neighbours << " neighbours which are: ";
                 print_container(neighbours);
                 sleep(1);
-            }
-            if (VERBOSE)
-            {
-                sleep(1);
                 MPI_Barrier(MPI_COMM_WORLD);
                 for (auto neighbour_i : neighbours)
                 {
-                    std::cout << "From neighbour " << neighbour_i << " rank " << rank << " wants nodes: ";
+                    std::cout << "Rank " << rank << " - wanted_from_neighbour_rank_node_id_map[" << neighbour_i << "] = ";
                     print_container(wanted_from_neighbour_rank_node_id_map[neighbour_i]);
-                    
-                    std::cout << "Neighbour " << neighbour_i << " wants from rank " << rank << " the nodes: ";
+
+                    std::cout << "Rank " << rank << " - wanted_by_neighbour_rank_node_id_map[" << neighbour_i << "] = ";
                     print_container(wanted_by_neighbour_rank_node_id_map[neighbour_i]);   
                 }
                 sleep(1);
             }
 
-            if (VERBOSE)
-                std::cout << "rank " << rank << " setting up send buffers started." << std::endl;
             // setup send buffers
             std::map<int, std::vector<unsigned>> rank_ids_send_buffers_map;
-            for (auto rank_buffer_size_pair : neighbour_rank_buffer_size_map)
+            for (auto rank_buffer_size_pair : neighbour_send_buffer_size_map)
             {
                 rank_ids_send_buffers_map[rank_buffer_size_pair.first].reserve(rank_buffer_size_pair.second);
             }
-            if (VERBOSE)
-                std::cout << "rank " << rank << " setting up send buffers completed." << std::endl;
 
-            if (VERBOSE)
-                std::cout << "rank " << rank << " setting up receive buffers started." << std::endl;
             // setup receive buffers
             std::map<int, std::vector<unsigned>> rank_id_receive_buffers_map;
-            for (auto rank_buffer_size_pair : neighbour_rank_buffer_size_map)
+            for (auto rank_buffer_size_pair : neighbour_receive_buffer_size_map)
             {
                 rank_id_receive_buffers_map[rank_buffer_size_pair.first].resize(rank_buffer_size_pair.second);
             }
-            if (VERBOSE)
-                std::cout << "rank " << rank << " setting up receive buffers completed." << std::endl;
+            
 
             
             if (VERBOSE)
@@ -992,15 +984,16 @@ class GlobalMesh {
 
                 auto receive_buffer = rank_id_receive_buffers_map[neighbor_rank].data();
                 auto send_buffer = rank_ids_send_buffers_map[neighbor_rank].data();
-                int num_exchanged_objects = neighbour_rank_buffer_size_map[neighbor_rank];
+                int send_buffer_size = neighbour_send_buffer_size_map[neighbor_rank];
+                int receive_buffer_size = neighbour_receive_buffer_size_map[neighbor_rank];
                 if (VERBOSE)
                 {
-                    std::cout << "GlobalMesh::exchange_interface_nodes_updated_ids: Rank " << rank << " sending " << num_exchanged_objects << " objects to neighbor_rank " << neighbor_rank <<
-                        " send buffer size is " << rank_ids_send_buffers_map[neighbor_rank].size() <<
-                        " and receive_buffer size is: " << rank_id_receive_buffers_map[neighbor_rank].size() << "." << std::endl;
+                    std::cout << "GlobalMesh::exchange_interface_nodes_updated_ids: Rank " << rank << " (sending, receiving) = (" << send_buffer_size << ", " << receive_buffer_size << ") objects to neighbor_rank " << neighbor_rank <<
+                        "; send buffer size is " << rank_ids_send_buffers_map[neighbor_rank].size() <<
+                        " and receive_buffer size is " << rank_id_receive_buffers_map[neighbor_rank].size() << "." << std::endl;
                 }
-                MPI_Sendrecv(send_buffer, num_exchanged_objects, MPI_UNSIGNED, neighbor_rank, 0,
-                            receive_buffer, num_exchanged_objects, MPI_UNSIGNED, neighbor_rank, 0, 
+                MPI_Sendrecv(send_buffer, send_buffer_size, MPI_UNSIGNED, neighbor_rank, 0,
+                            receive_buffer, receive_buffer_size, MPI_UNSIGNED, neighbor_rank, 0, 
                             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
             
@@ -1066,25 +1059,33 @@ class GlobalMesh {
             // get information about neighbours and buffer sizes
             int num_neighbours = 0;
             std::set<int> neighbours;
-            std::map<int, int> neighbour_rank_buffer_size_map;
+            std::map<int, int> neighbour_send_buffer_size_map;
+            std::map<int, int> neighbour_receive_buffer_size_map;
+
+            for (auto rank_nodes_set_pair : wanted_from_neighbour_rank_node_id_map)
+            {
+                neighbours.insert(rank_nodes_set_pair.first);
+                neighbour_receive_buffer_size_map[rank_nodes_set_pair.first] = rank_nodes_set_pair.second.size();
+            }
             for (auto rank_nodes_set_pair : wanted_by_neighbour_rank_node_id_map)
             {
                 neighbours.insert(rank_nodes_set_pair.first);
-                neighbour_rank_buffer_size_map[rank_nodes_set_pair.first] = rank_nodes_set_pair.second.size();
+                neighbour_send_buffer_size_map[rank_nodes_set_pair.first] = rank_nodes_set_pair.second.size();
             }
+
             num_neighbours = neighbours.size();
 
 
             // setup send buffers
             std::map<int, std::vector<int>> rank_nz_i_send_buffers_map;
-            for (auto rank_buffer_size_pair : neighbour_rank_buffer_size_map)
+            for (auto rank_buffer_size_pair : neighbour_send_buffer_size_map)
             {
                 rank_nz_i_send_buffers_map[rank_buffer_size_pair.first].reserve(rank_buffer_size_pair.second);
             }
 
             // setup receive buffers
             std::map<int, std::vector<int>> rank_nz_i_receive_buffers_map;
-            for (auto rank_buffer_size_pair : neighbour_rank_buffer_size_map)
+            for (auto rank_buffer_size_pair : neighbour_receive_buffer_size_map)
             {
                 rank_nz_i_receive_buffers_map[rank_buffer_size_pair.first].resize(rank_buffer_size_pair.second);
             }
@@ -1106,15 +1107,16 @@ class GlobalMesh {
             {
                 auto receive_buffer = rank_nz_i_receive_buffers_map[neighbor_rank].data();
                 auto send_buffer = rank_nz_i_send_buffers_map[neighbor_rank].data();
-                int num_exchanged_objects = neighbour_rank_buffer_size_map[neighbor_rank];
+                int send_buffer_size = neighbour_send_buffer_size_map[neighbor_rank];
+                int receive_buffer_size = neighbour_receive_buffer_size_map[neighbor_rank];
                 if (VERBOSE)
                 {
-                    std::cout << "GlobalMesh::exchange_interface_nodes_nz_i: Rank " << rank << " sending " << num_exchanged_objects << " objects to neighbor_rank " 
-                        << neighbor_rank << " send buffer size is " << rank_nz_i_send_buffers_map[neighbor_rank].size() <<
-                        " and receive_buffer size is: " << rank_nz_i_receive_buffers_map[neighbor_rank].size() << "." << std::endl;
+                    std::cout << "GlobalMesh::exchange_interface_nodes_nz_i: Rank " << rank << " (sending, receiving) = (" << send_buffer_size << ", " << receive_buffer_size << ") objects to neighbor_rank " 
+                        << neighbor_rank << "; send buffer size is " << rank_nz_i_send_buffers_map[neighbor_rank].size() <<
+                        " and receive_buffer size is " << rank_nz_i_receive_buffers_map[neighbor_rank].size() << "." << std::endl;
                 }
-                MPI_Sendrecv(send_buffer, num_exchanged_objects, MPI_INT, neighbor_rank, 0,
-                            receive_buffer, num_exchanged_objects, MPI_INT, neighbor_rank, 0, 
+                MPI_Sendrecv(send_buffer, send_buffer_size, MPI_INT, neighbor_rank, 0,
+                            receive_buffer, receive_buffer_size, MPI_INT, neighbor_rank, 0, 
                             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
             #endif

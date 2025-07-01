@@ -33,8 +33,55 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Wrap `MPI_Allgather` call inside `count_distributed_dofs` with a wrapper from `MPIWrappers`.
 - [ ] Why is `FrameMesh` an attribute of `GlobalMesh`? Remove that - it is unnecessary!
 - [ ] Develop a better testing framework for `MPI` code.
+- [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 1 July
+I have found the bug that I believe most likely was culprit in `exchange_interface_nodes_updated_ids`. Sometimes, two neighbouring ranks might need to exchange a different number of nodes. Take the figure below where the mesh is divided over 3 ranks.
+
+In the figure, rank 1 wants nodes 21 and 23 from rank 2, while rank 2 wants nodes 16, 18, and 20. Currently, `exchange_interface_nodes_updated_ids` creates only one map to size the send and receive buffers, which means the send and receive buffers are always the same size. Therefore, some of the data was being exchanged between ranks 1 and 2, but it is not fitting the buffer thus causing a code-breaking issue.
+
+<figure style="text-align: center; margin: 0 auto; width: 100%;">
+  <img src="images/division_on_3_ranks.png" alt="Frame over 3 ranks" style="width:30%; display:inline-block;">
+  <figcaption>2 floor 3 bay frame with 2 column divisions and 3 beam divisions distributed naively over 3 ranks.</figcaption>
+</figure>
+
+<div style="max-height: 200px; overflow-y: auto; font-size: 0.9em; border: 1px solid #ccc; padding: 5px;">
+
+```console
+rank 0 has 1 neighbours which are: 1 
+rank 1 has 2 neighbours which are: 0 2 
+rank 2 has 1 neighbours which are: 1 
+
+receive from neighbour:
+rank 0:
+From neighbour 1 rank 0 wants nodes: 11 12 14 
+
+rank 1: 
+From neighbour 0 rank 1 wants nodes: 7 9 10 
+From neighbour 2 rank 1 wants nodes: 21 23 
+
+rank 2:
+From neighbour 1 rank 2 wants nodes: 16 18 20 
+
+rank 0:
+Neighbour 1 wants from rank 0 the nodes: 7 9 10 
+
+rank 1:
+Neighbour 0 wants from rank 1 the nodes: 11 12 14 
+Neighbour 2 wants from rank 1 the nodes: 16 18 20
+
+rank 2:
+Neighbour 1 wants from rank 2 the nodes: 21 23 
+```
+
+</div>
+
+So, the issue is with the buffer size. The buffer size for sending and receiving should be different as rank 1 expects to receive nodes 21 and 23 from rank 2, while rank 2 expects to receive nodes 16, 18, and 20. The send and receive buffer sizes should be different! I have corrected this in both `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i`. This has resolved the bug and the code now passes the `DistributedModelFrameMeshTests` for 3 and 5 ranks as well. The distributed mesh algorithm should, in principle, be functioning correctly now. The two functions above, however, are a mess and need to be re-written. Not to forget as well that there are so many debugging verbose calls that the code has become difficult to read. I will need to fix this later.
+
+Two final things before profiling: test distributed BC, load, and record handling, and develop the parallel solution procedure with `Tpetra`. 
+
+
 ### 30 June
 Tests for `DistributedModelLineMeshTests` run fine. Had to do some modifications to the codebase yesterday to avoid some compilation errors due to redefinition of operators for records which I apprently just missed that I had already done, and replaced all `unsigned` with `size_t` in the code where possibel as that caused some data compatibility issues. All `MPI` tests run fine so far. However, there was a strange error where `read_node_ids` would read that a node with rank of -1 is asking for an interface node. Not sure why that was happening but it does not seem to repeat today. There was also some verbose stuff being written out in the function `get_node_by_record_id` which I now locked behind the `VERBOSE` flag. 
 
