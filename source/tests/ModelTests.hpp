@@ -40,10 +40,11 @@ class RestraintTests : public ::testing::Test {
         BasicSection sect(2.06e11, 0.0125, 0.0004570000);
         model.create_line_mesh(divisions, {{0.0, 0.0, 0.0}, {10.0, 0.0, 0.0}}, ELEMENT_TYPE, sect);
         end_restraint.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5});
-        end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+        end_restraint.assign_nodes_by_record_id(std::set<int>{1}, model.glob_mesh);
         model.restraints.push_back(end_restraint);
         out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
-        out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+        out_of_plane_restraint.assign_nodes_by_record_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);
+        end_restraint.assign_nodes_by_record_id(std::set<int>{1}, model.glob_mesh);
     
         model.restraints.push_back(end_restraint);
         model.restraints.push_back(out_of_plane_restraint);

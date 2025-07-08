@@ -77,17 +77,17 @@ class Model
 
 
 
-        void create_distributed_line_mesh(int divisions, std::vector<coords> end_coords, ElementType elem_type, BeamColumnFiberSection& sect, int const rank, int const nranks)
+        void create_distributed_line_mesh(int divisions, std::vector<coords> end_coords, ElementType elem_type, BeamColumnFiberSection& sect)
         {
-            glob_mesh.create_distributed_line_mesh(divisions, end_coords, elem_type, sect, rank, nranks);
+            glob_mesh.create_distributed_line_mesh(divisions, end_coords, elem_type, sect);
         }
-        void create_distributed_line_mesh(int divisions, std::vector<coords> end_coords, ElementType elem_type, BasicSection& sect, int const rank, int const nranks)
+        void create_distributed_line_mesh(int divisions, std::vector<coords> end_coords, ElementType elem_type, BasicSection& sect)
         {
-            glob_mesh.create_distributed_line_mesh(divisions, end_coords, elem_type, sect, rank, nranks);
+            glob_mesh.create_distributed_line_mesh(divisions, end_coords, elem_type, sect);
         }
-        void create_distributed_frame_mesh(int nbays, int nfloors, real bay_length, real floor_height, int beam_divisions, int column_divisions, ElementType elem_type, BeamColumnFiberSection& sect, int const rank, int const nranks)
+        void create_distributed_frame_mesh(int nbays, int nfloors, real bay_length, real floor_height, int beam_divisions, int column_divisions, ElementType elem_type, BeamColumnFiberSection& sect)
         {
-            glob_mesh.create_distributed_frame_mesh(nbays, nfloors, bay_length, floor_height, beam_divisions, column_divisions, elem_type, sect, rank, nranks);
+            glob_mesh.create_distributed_frame_mesh(nbays, nfloors, bay_length, floor_height, beam_divisions, column_divisions, elem_type, sect);
         }
 
 

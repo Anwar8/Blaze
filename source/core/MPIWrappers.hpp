@@ -12,13 +12,23 @@
 
 #ifdef WITH_MPI
 #include "mpi.h"
-inline void initialise_MPI(int& argc, char**& argv)
+// inline void initialise_MPI(int& argc, char**& argv)
+// {
+//     MPI_Init(&argc, &argv);
+//     int version, subversion;
+//     MPI_Get_version(&version, &subversion);
+//     std::cout << "MPI Version: " << version << "." << subversion << " running." << std::endl;
+//     std::cout << "--------------------------------------------" << std::endl;
+// }
+
+inline int initialise_MPI(int& argc, char**& argv)
 {
     MPI_Init(&argc, &argv);
     int version, subversion;
-    MPI_Get_version(&version, &subversion);
+    int mpi_err = MPI_Get_version(&version, &subversion);
     std::cout << "MPI Version: " << version << "." << subversion << " running." << std::endl;
     std::cout << "--------------------------------------------" << std::endl;
+    return mpi_err;
 }
 
 inline void finalise_MPI()
@@ -38,10 +48,17 @@ inline void get_num_ranks(int& num_ranks)
 
 #else
 
-inline void initialise_MPI(int argc, char* argv[])
+// inline void initialise_MPI(int argc, char* argv[])
+// {
+//     std::cout << "MPI wrappers without MPI definition running." << std::endl;
+//     std::cout << "--------------------------------------------" << std::endl;
+// }
+
+inline int initialise_MPI(int argc, char* argv[])
 {
     std::cout << "MPI wrappers without MPI definition running." << std::endl;
     std::cout << "--------------------------------------------" << std::endl;
+    return 0;
 }
 
 inline void finalise_MPI()

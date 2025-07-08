@@ -36,6 +36,20 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 8 July 
+Got the BC management to work correctly for up to 2 `MPI` processes. Did not test on more, yet. Lots of small bugs were fixed to get here, and I had done this while on a plane and otherwise so unfortunatley I have not kept excellent track.
+
+### 7 July 
+Redid the interface for all of `GlobalMesh` so that the `MPI` initialisation (setting of `rank` and `num_ranks`) is now done internally and stored within `GlobalMesh`. This setup is performed during `create_distributed_` functions, which is causing an error with the tests since I explicitly build the mesh bypassing the `create_distributed_` calls. Similarly, all the tests in `DistributedMeshTests` had to be deprecated since none of the functions take `rank` or `num_ranks`, which is essential for these tests since they use these inputs to give the programme the impression of an `MPI` environment without being in one.
+
+### 6 July
+when running tests on 2 cores, the function `get_node_by_record_id` was running with a rank of -1 indicating it was not given a rank argument thus defaulting to the value I had provided. I removed this value and will explicitly provide a rank for all calls of this function which ensures the correct rank is given if `MPI` is being used by using the `#ifdef` flag.
+
+P.S. I have been working everyday and for as long as I could since the last journal entry but have not updated the journal. Most of the time, unfortunatley, the work was short and I did not need to update the journal. 
+
+### 2 July
+Must be careful about whether the load and BC assignment is using the correct form of nodal ID - they should all be using the `record_id` and filtering based on that, not using the renumbered id.
+
 ### 1 July
 I have found the bug that I believe most likely was culprit in `exchange_interface_nodes_updated_ids`. Sometimes, two neighbouring ranks might need to exchange a different number of nodes. Take the figure below where the mesh is divided over 3 ranks.
 

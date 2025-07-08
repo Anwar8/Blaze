@@ -116,11 +116,11 @@ int main (int argc, char* argv[]) {
 
     NodalRestraint column_bases;
     column_bases.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5}); // fixed support
-    column_bases.assign_nodes_by_id(the_frame.get_column_bases(), model.glob_mesh);
+    column_bases.assign_nodes_by_record_id(the_frame.get_column_bases(), model.glob_mesh);
 
     NodalRestraint out_of_plane_restraint;  
     out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
-    out_of_plane_restraint.assign_nodes_by_id(the_frame.get_out_of_plane_nodes(), model.glob_mesh);
+    out_of_plane_restraint.assign_nodes_by_record_id(the_frame.get_out_of_plane_nodes(), model.glob_mesh);
 
     model.restraints.push_back(column_bases);
     model.restraints.push_back(out_of_plane_restraint);

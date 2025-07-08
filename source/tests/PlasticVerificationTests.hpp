@@ -28,13 +28,13 @@ class CantileverBeamPlastic : public ::testing::Test {
   
           NodalRestraint end_restraint;
           end_restraint.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5});
-          end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+          end_restraint.assign_nodes_by_record_id(std::set<int>{1}, model.glob_mesh);
           model.restraints.push_back(end_restraint);
           
           NodalRestraint out_of_plane_restraint; 
           out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
-          // out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
-          out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4}, model.glob_mesh);end_restraint.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+          // out_of_plane_restraint.assign_nodes_by_record_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, model.glob_mesh);end_restraint.assign_nodes_by_record_id(std::set<int>{1}, model.glob_mesh);
+          out_of_plane_restraint.assign_nodes_by_record_id(std::set<int>{2, 3, 4}, model.glob_mesh);end_restraint.assign_nodes_by_record_id(std::set<int>{1}, model.glob_mesh);
           model.restraints.push_back(out_of_plane_restraint);
   
           model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{(unsigned)(divisions+1)}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
@@ -85,17 +85,17 @@ class CantileverBeamPlastic : public ::testing::Test {
   
           NodalRestraint end_restraint_1;
           end_restraint_1.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4}); // restrain x translation, x rotation, y translation, y rotation, and z translation
-          end_restraint_1.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+          end_restraint_1.assign_nodes_by_record_id(std::set<int>{1}, model.glob_mesh);
           model.restraints.push_back(end_restraint_1);
   
           NodalRestraint end_restraint_2;
           end_restraint_2.assign_dofs_restraints(std::set<int>{1, 2, 3, 4}); // restrain x rotation, y translation, y rotation, and z translation
-          end_restraint_2.assign_nodes_by_id(std::set<int>{divisions + 1}, model.glob_mesh);
+          end_restraint_2.assign_nodes_by_record_id(std::set<int>{divisions + 1}, model.glob_mesh);
           model.restraints.push_back(end_restraint_2);
   
           NodalRestraint out_of_plane_restraint; 
           out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4}); // restrain x rotation, y rotation, and z translation
-          out_of_plane_restraint.assign_nodes_by_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10}, model.glob_mesh);
+          out_of_plane_restraint.assign_nodes_by_record_id(std::set<int>{2, 3, 4, 5, 6, 7, 8, 9, 10}, model.glob_mesh);
           model.restraints.push_back(out_of_plane_restraint);
   
           model.load_manager.create_a_nodal_load_by_id(std::vector<unsigned>{mid_node}, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
@@ -144,19 +144,19 @@ class CantileverBeamPlastic : public ::testing::Test {
   
           NodalRestraint end_restraint_1;
           end_restraint_1.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4}); // restrain x translation, x rotation, y translation, y rotation, and z translation
-          end_restraint_1.assign_nodes_by_id(std::set<int>{1}, model.glob_mesh);
+          end_restraint_1.assign_nodes_by_record_id(std::set<int>{1}, model.glob_mesh);
           model.restraints.push_back(end_restraint_1);
   
           NodalRestraint end_restraint_2;
           end_restraint_2.assign_dofs_restraints(std::set<int>{1, 2, 3, 4}); // restrain x rotation, y translation, y rotation, and z translation
-          end_restraint_2.assign_nodes_by_id(std::set<int>{divisions + 1}, model.glob_mesh);
+          end_restraint_2.assign_nodes_by_record_id(std::set<int>{divisions + 1}, model.glob_mesh);
           model.restraints.push_back(end_restraint_2);
           // create the loaded and restrained intermediate nodes
           std::iota(loaded_nodes.begin(), loaded_nodes.end(), 2);
   
           NodalRestraint out_of_plane_restraint; 
           out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4}); // restrain x rotation, y rotation, and z translation
-          out_of_plane_restraint.assign_nodes_by_id(loaded_nodes, model.glob_mesh);
+          out_of_plane_restraint.assign_nodes_by_record_id(loaded_nodes, model.glob_mesh);
           model.restraints.push_back(out_of_plane_restraint);
   
           // calculate load

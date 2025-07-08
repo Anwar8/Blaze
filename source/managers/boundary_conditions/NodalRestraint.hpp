@@ -46,21 +46,21 @@ class NodalRestraint
          * @param glob_mesh the global mesh object that contains all the nodes of the model.
          */
         template <typename Container>
-        void assign_nodes_by_id(Container node_ids, GlobalMesh& glob_mesh)
+        void assign_nodes_by_record_id(Container node_ids, GlobalMesh& glob_mesh)
         {
             for (auto& node_id : node_ids)
             {
-                restrained_nodes.insert(glob_mesh.get_node_by_id(node_id, "all"));
+                restrained_nodes.insert(glob_mesh.get_node_by_record_id(node_id, "all"));
             }
         }
 
 
 
         template <typename Container>
-        void assign_distributed_nodes_by_id(Container& node_ids, GlobalMesh& glob_mesh)
+        void assign_distributed_nodes_by_record_id(Container node_ids, GlobalMesh& glob_mesh)
         {
             std::set<unsigned> restrained_nodes_on_rank = glob_mesh.filter_node_ids(node_ids, "all");
-            assign_nodes_by_id(restrained_nodes_on_rank, glob_mesh);
+            assign_nodes_by_record_id(restrained_nodes_on_rank, glob_mesh);
         }
 
 
@@ -126,7 +126,7 @@ class NodalRestraint
             clear_dofs();
             clear_restrained_nodes();
         }
-       
+
         /**
          * @name getters
          * @brief used for testing, mostly.
@@ -134,7 +134,8 @@ class NodalRestraint
          */
         //@{
         std::set<std::shared_ptr<Node>> get_restrained_nodes() const {return restrained_nodes;}
-        std::set<int> get_restrained_dofs() const {return restrained_dofs;};
+        std::set<int> get_restrained_dofs() const {return restrained_dofs;}
+        int get_num_restrained_nodes() const {return restrained_nodes.size();}
         //@}
 };
 #endif

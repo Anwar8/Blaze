@@ -14,7 +14,7 @@ public:
   virtual void SetUp() {
     char** argv;
     int argc = 0;
-    int mpiError = MPI_Init(&argc, &argv);
+    int mpiError = initialise_MPI(argc, argv);
     ASSERT_FALSE(mpiError);
   }
   virtual void TearDown() {
@@ -36,7 +36,7 @@ class DistributedLineMeshTests : public ::testing::Test {
 
         mesh.set_elem_type(NonlinearElastic);
         mesh.set_basic_section(sect);
-        
+        mesh.initialise_mpi_variables();
         mesh_maps = mesh.map_a_line_mesh(divisions, end_coords);
     }
     void TearDown() override {
@@ -48,7 +48,8 @@ TEST_F(DistributedLineMeshTests, line_mesh_rank_counts)
     int rank, num_ranks;
     get_my_rank(rank);
     get_num_ranks(num_ranks);
-    mesh.setup_distributed_mesh(mesh_maps.first, mesh_maps.second, rank, num_ranks);
+
+    mesh.setup_distributed_mesh(mesh_maps.first, mesh_maps.second);
     ASSERT_EQ(mesh.get_num_nodes(), 10);
     if (num_ranks == 1)
     {
@@ -131,7 +132,7 @@ TEST_F(DistributedLineMeshTests, line_mesh_rank_ndof_counts)
     int rank, num_ranks;
     get_my_rank(rank);
     get_num_ranks(num_ranks);
-    mesh.setup_distributed_mesh(mesh_maps.first, mesh_maps.second, rank, num_ranks);
+    mesh.setup_distributed_mesh(mesh_maps.first, mesh_maps.second);
     std::vector<int> ranks_ndofs_vec = mesh.get_ranks_ndofs_vector();
 
     if (num_ranks == 1)
@@ -167,7 +168,7 @@ TEST_F(DistributedLineMeshTests, line_mesh_rank_interface_nzi)
     int rank, num_ranks;
     get_my_rank(rank);
     get_num_ranks(num_ranks);
-    mesh.setup_distributed_mesh(mesh_maps.first, mesh_maps.second, rank, num_ranks);
+    mesh.setup_distributed_mesh(mesh_maps.first, mesh_maps.second);
 
     if (num_ranks == 1)
     {
@@ -267,7 +268,7 @@ class DistributedModelLineMeshTests : public ::testing::Test {
           BasicSection sect(2.06e11, 0.0125, 0.0004570000);
           get_my_rank(rank);
           get_num_ranks(num_ranks);
-          model.create_distributed_line_mesh(divisions, end_coords, NonlinearElastic, sect, rank, num_ranks);
+          model.create_distributed_line_mesh(divisions, end_coords, NonlinearElastic, sect);
       }
       void TearDown() override {
   }
@@ -370,7 +371,7 @@ class DistributedModelFrameMeshTests : public ::testing::Test {
           common.initialise_section();
           get_my_rank(rank);
           get_num_ranks(num_ranks);
-          model.create_distributed_frame_mesh(nbays, nfloors, bay_length, floor_height, beam_divisions, column_divisions, NonlinearPlastic, common.I_section, rank, num_ranks);
+          model.create_distributed_frame_mesh(nbays, nfloors, bay_length, floor_height, beam_divisions, column_divisions, NonlinearPlastic, common.I_section);
       }
       void TearDown() override {
   }
@@ -472,6 +473,6 @@ class DistributedModelFrameMeshTests : public ::testing::Test {
           ASSERT_TRUE(false);
       }
   }
-  
+
 
 #endif
