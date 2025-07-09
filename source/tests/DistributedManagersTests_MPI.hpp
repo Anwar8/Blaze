@@ -68,80 +68,75 @@ TEST_F(DistributedModelFrameManagersTests, frame_mesh_bc_handling_count)
     {
         if (rank == 0)
         {
-            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 100);
-            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 11);
-            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 3);
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 2);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 11);
         } 
         else if (rank == 1)
         {
-            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 100);
-            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 14);
-            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 5);
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 2);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 13);
+            
         } 
         else if (rank == 2)
         {
-            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 120);
-            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 15);
-            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 3);  
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 1);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 14);
         }
     }    
     else if (num_ranks == 4)
     {
         if (rank == 0)
         {
-            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 80);
-            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
-            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 1);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 9);
         } 
-        else if (rank == 1 || rank == 2)
+        else if (rank == 1)
         {
-            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 80);
-            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 11);
-            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 4);
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 1);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 11);
         } 
+        else if (rank == 2)
+        {
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 1);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 11); 
+        }
         else if (rank == 3)
         {
-            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 80);
-            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
-            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);  
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 1);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 9); 
         }
     }
     else if (num_ranks == 5)
     {
         if (rank == 0)
         {
-            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 60);
-            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 7);
-            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 1);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 7); 
         } 
         else if (rank == 1)
         {
-            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 60);
-            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
-            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 5);          
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 1);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 10);          
         }
         else if (rank == 2)
         {
-            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 60);
-            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
-            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 4);          
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 0);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 10);          
         }
         else if (rank == 3)
         {
-            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 60);
-            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
-            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 4);          
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 1);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 9);           
         }
         else if (rank == 4)
         {
-            ASSERT_EQ(model.glob_mesh.count_nodes_vector(), 80);
-            ASSERT_EQ(model.glob_mesh.count_elem_vector(), 9);
-            ASSERT_EQ(model.glob_mesh.count_interface_nodes_vector(), 2);
+            ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 1);
+            ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 9); 
         } 
     }
     else 
     {
-        std::cout << "DistributedModelFrameMeshTests::frame_mesh_rank_counts can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
+        std::cout << "DistributedModelFrameManagersTests::frame_mesh_bc_handling_count can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
         ASSERT_TRUE(false);
     }
 }
