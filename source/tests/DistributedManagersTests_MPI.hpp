@@ -42,7 +42,10 @@ class DistributedModelFrameManagersTests : public ::testing::Test {
 
             model.restraints.push_back(column_bases);
             model.restraints.push_back(out_of_plane_restraint);
-      
+
+            std::set<unsigned> loaded_nodes = the_frame.get_all_beam_line_node_ids(true);
+            std::vector<unsigned> loaded_nodes_v = std::vector<unsigned>(loaded_nodes.begin(), loaded_nodes.end());
+            model.load_manager.create_a_distributed_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{-1000}, model.glob_mesh);
         }
       void TearDown() override {
   }
@@ -141,5 +144,85 @@ TEST_F(DistributedModelFrameManagersTests, frame_mesh_bc_handling_count)
     }
 }
 
+TEST_F(DistributedModelFrameManagersTests, frame_mesh_load_handling_count)
+{   
+    // There is only one nodal load object in this model.
+    ASSERT_EQ(model.load_manager.get_num_nodal_loads(), 1);
+    int num_loaded_nodes = model.load_manager.get_nodal_load(0).get_num_loaded_nodes();
+
+    if (num_ranks == 1)
+    {
+        ASSERT_EQ(num_loaded_nodes, 20);
+    }
+    else if (num_ranks == 2)
+    {
+
+        ASSERT_EQ(num_loaded_nodes, 10);
+
+    }
+    else if (num_ranks == 3)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(num_loaded_nodes, 6);
+        } 
+        else if (rank == 1)
+        {
+            ASSERT_EQ(num_loaded_nodes, 6);
+            
+        } 
+        else if (rank == 2)
+        {
+            ASSERT_EQ(num_loaded_nodes, 8);
+        }
+    }    
+    else if (num_ranks == 4)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(num_loaded_nodes, 5);
+        } 
+        else if (rank == 1)
+        {
+            ASSERT_EQ(num_loaded_nodes, 5);
+        } 
+        else if (rank == 2)
+        {
+            ASSERT_EQ(num_loaded_nodes, 5);
+        }
+        else if (rank == 3)
+        {
+            ASSERT_EQ(num_loaded_nodes, 5);
+        }
+    }
+    else if (num_ranks == 5)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(num_loaded_nodes, 3);
+        } 
+        else if (rank == 1)
+        {
+            ASSERT_EQ(num_loaded_nodes, 4);          
+        }
+        else if (rank == 2)
+        {
+            ASSERT_EQ(num_loaded_nodes, 5);         
+        }
+        else if (rank == 3)
+        {
+            ASSERT_EQ(num_loaded_nodes, 3);          
+        }
+        else if (rank == 4)
+        {
+            ASSERT_EQ(num_loaded_nodes, 5);
+        } 
+    }
+    else 
+    {
+        std::cout << "DistributedModelFrameManagersTests::frame_mesh_load_handling_count can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
+        ASSERT_TRUE(false);
+    }
+}
   
 #endif 

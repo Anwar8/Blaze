@@ -36,8 +36,11 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 11 July
+
+
 ### 9 July
-`DistributedModelFrameManagersTests::frame_mesh_bc_handling_count` successeds on all rank counts. 
+`DistributedModelFrameManagersTests::frame_mesh_bc_handling_count` successeds on all rank counts. Same for load handling.
 
 ### 8 July 
 Got the BC management to work correctly for up to 2 `MPI` processes. Did not test on more, yet. Lots of small bugs were fixed to get here, and I had done this while on a plane and otherwise so unfortunatley I have not kept excellent track.

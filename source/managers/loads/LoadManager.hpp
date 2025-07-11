@@ -111,6 +111,12 @@ class LoadManager
             }
         }
 
+        NodalLoad get_nodal_load(int i)
+        {
+            return nodal_loads[i];
+        }
+        int get_num_nodal_loads() const {return nodal_loads.size();}
+
 };
 
 #endif 

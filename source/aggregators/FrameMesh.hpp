@@ -248,6 +248,24 @@ class FrameMesh {
         }
 
         /**
+         * @brief Gets the beam line node IDs for all floors. 
+         * 
+         * @param include_vertices boolean to include or exclude vertices of the beam.
+         * @return std::set<unsigned> A set of node IDs for the beam lines of all floors.
+         */
+        std::set<unsigned> get_all_beam_line_node_ids(bool include_vertices = false)
+        {
+            std::set<unsigned> nodes;
+            std::set<unsigned> floor_node_ids;
+            for (int floor = 1; floor <= nfloors; ++floor)
+            {
+                floor_node_ids = get_beam_line_node_ids(floor, include_vertices);
+                nodes.insert(floor_node_ids.begin(), floor_node_ids.end());           
+            }
+            return nodes;
+        }
+
+        /**
          * @brief Creates node coordinate pairs for column nodes.
          * 
          * This function generates a vector of pairs, where each pair consists of a node ID and its corresponding coordinates.

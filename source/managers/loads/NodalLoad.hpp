@@ -169,6 +169,7 @@ class NodalLoad
          */
         //@{
         std::vector<std::shared_ptr<Node>> get_loaded_nodes() const {return loaded_nodes;}
+        int get_num_loaded_nodes() const {return loaded_nodes.size();}
         std::set<int> get_loaded_dofs() const {return loaded_dofs;};
         std::array<real, 6> get_nodal_loads() const {return nodal_loads;}
         //@}
