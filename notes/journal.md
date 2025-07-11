@@ -37,7 +37,9 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Journal
 ### 11 July
+`DistributedModelFrameManagersTests::frame_mesh_record_handling_count` succeeds on all rank counts. Next, I need to make sure the timer can exchange data across ranks.
 
+I have created the functions `initialise_parallel_keeper` and `log_parallel_timers` in `TimeKeeper` to facilitate timing of parallel executions of `Blaze`. This should be tested inidividually without having to create an entire model. Just creating a `TimeKeeper` object with a couple of `ExecutionTimers` should suffice.
 
 ### 9 July
 `DistributedModelFrameManagersTests::frame_mesh_bc_handling_count` successeds on all rank counts. Same for load handling.

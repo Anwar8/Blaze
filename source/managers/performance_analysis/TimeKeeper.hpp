@@ -19,7 +19,20 @@ class TimeKeeper
 {
     protected:
         std::map<std::string, ExecutionTimer> timers_map; /**< a map of \ref ExecutionTimers that the TimeKeeper is in charge of.*/
+        int rank = 0;
+        int num_ranks = 1;
     public:
+        /**
+         * @brief sets the rank and num_ranks of the time keeper.
+         * 
+         * @param rank rank of the calling MPI process.
+         * @param num_ranks number of available MPI processes.
+         */
+        void initialise_parallel_keeper(int rank, int num_ranks)
+        {
+            this->rank = rank;
+            this->num_ranks = num_ranks;
+        }
         /**
          * @brief populates the \ref timers_map with \ref ExecutionTimer objects that this function will create.
          * 
@@ -150,7 +163,52 @@ class TimeKeeper
                     std::cout << timers_map[timers_names[i]].get_duration() << ",";
                 }
             }
-
+        }
+        
+        /**
+         * @brief prints a comma-separated list table with durations recorded by all requested timers from all ranks.
+         * @param timers_names the names of the timers which durations are to be printed.
+         */
+        void log_parallel_timers(std::vector<std::string> timers_names)
+        {
+            int num_timers = timers_names.size();
+            std::vector<double> durations_vector(num_timers*num_ranks, 0.0);
+            double* timer_data_start = durations_vector.data()+num_timers*rank;
+            // The gather command is wrong and I need to double check that I am correctly receiving the data into the 
+            // the right space in the vector. I am currently sending the correct data, but I am not sure if I am receiving it right.
+            MPI_Gather(timer_data_start, num_timers, MPI_DOUBLE, durations_vector.data(), num_timers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            
+            std::map<int, std::vector<double>> rank_durations_map;
+            for (int rank_i = 0; rank_i <num_ranks; ++rank_i)
+            {
+              rank_durations_map[rank_i] = std::vector<double>(durations_vector.begin()+rank_i*num_ranks, durations_vector.begin()+(rank_i + 1)*num_ranks);   
+            }
+            // prepare the output to include the rank as well.
+            timers_names.insert(timers_names.begin(), "rank");
+            std::cout << std::setprecision(8);
+            // Read timers names requested
+            for (int i; i < timers_names.size(); ++i)
+            {
+                if (i == (timers_names.size() - 1))
+                {
+                    std::cout << timers_names[i] << std::endl;
+                } else {
+                    std::cout << timers_names[i] << ",";    
+                }
+            } 
+            for (int rank_i = 0; rank_i <num_ranks; ++rank_i)
+            {
+                // Read the recorded times
+                for (int i; i < num_timers; ++i)
+                {
+                    if (i == (num_timers - 1))
+                    {
+                        std::cout << rank_durations_map[rank_i][rank_i*num_timers + i] << std::endl;
+                    } else {
+                        std::cout << rank_durations_map[rank_i][rank_i*num_timers + i] << ",";
+                    }
+                }
+            }
         }
 
 };
