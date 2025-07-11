@@ -182,6 +182,10 @@ class Scribe
          * @return std::vector<Record> the record library.
          */
         std::vector<Record> get_record_library() {return record_library;}
+        int get_num_of_records() {return record_library.size();}
+
+        Record get_a_record(int i) {return record_library[i];}
+        
         /**
          * @brief clears the record library. Used for testing.
          * 

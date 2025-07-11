@@ -46,6 +46,7 @@ class DistributedModelFrameManagersTests : public ::testing::Test {
             std::set<unsigned> loaded_nodes = the_frame.get_all_beam_line_node_ids(true);
             std::vector<unsigned> loaded_nodes_v = std::vector<unsigned>(loaded_nodes.begin(), loaded_nodes.end());
             model.load_manager.create_a_distributed_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{-1000}, model.glob_mesh);
+            model.scribe.track_distributed_nodes_by_id(rank, loaded_nodes_v, std::set<int>{2}, model.glob_mesh);
         }
       void TearDown() override {
   }
@@ -224,5 +225,86 @@ TEST_F(DistributedModelFrameManagersTests, frame_mesh_load_handling_count)
         ASSERT_TRUE(false);
     }
 }
+
+
+TEST_F(DistributedModelFrameManagersTests, frame_mesh_record_handling_count)
+{   
+    int num_tracked_nodes = model.scribe.get_num_of_records();
+
+    if (num_ranks == 1)
+    {
+        ASSERT_EQ(num_tracked_nodes, 20);
+    }
+    else if (num_ranks == 2)
+    {
+
+        ASSERT_EQ(num_tracked_nodes, 10);
+
+    }
+    else if (num_ranks == 3)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(num_tracked_nodes, 6);
+        } 
+        else if (rank == 1)
+        {
+            ASSERT_EQ(num_tracked_nodes, 6);
+            
+        } 
+        else if (rank == 2)
+        {
+            ASSERT_EQ(num_tracked_nodes, 8);
+        }
+    }    
+    else if (num_ranks == 4)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(num_tracked_nodes, 5);
+        } 
+        else if (rank == 1)
+        {
+            ASSERT_EQ(num_tracked_nodes, 5);
+        } 
+        else if (rank == 2)
+        {
+            ASSERT_EQ(num_tracked_nodes, 5);
+        }
+        else if (rank == 3)
+        {
+            ASSERT_EQ(num_tracked_nodes, 5);
+        }
+    }
+    else if (num_ranks == 5)
+    {
+        if (rank == 0)
+        {
+            ASSERT_EQ(num_tracked_nodes, 3);
+        } 
+        else if (rank == 1)
+        {
+            ASSERT_EQ(num_tracked_nodes, 4);          
+        }
+        else if (rank == 2)
+        {
+            ASSERT_EQ(num_tracked_nodes, 5);         
+        }
+        else if (rank == 3)
+        {
+            ASSERT_EQ(num_tracked_nodes, 3);          
+        }
+        else if (rank == 4)
+        {
+            ASSERT_EQ(num_tracked_nodes, 5);
+        } 
+    }
+    else 
+    {
+        std::cout << "DistributedModelFrameManagersTests::frame_mesh_record_handling_count can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
+        ASSERT_TRUE(false);
+    }
+}
+
   
 #endif 
