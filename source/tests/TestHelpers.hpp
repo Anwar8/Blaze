@@ -9,6 +9,8 @@
 #include <vector>
 #include <numeric>
 #include <cmath>
+#include <unistd.h>
+
 #include "gtest/gtest.h"
 
 #include "blaze_config.hpp"

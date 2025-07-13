@@ -36,6 +36,12 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 13 July
+Fixed all bugs in `TimeKeeper` and the associated test. Tests run correctly on up to 5 ranks.
+
+### 12 July
+Began creating the tests for the `TimeKeeper`. Some bugs in the end.
+
 ### 11 July
 `DistributedModelFrameManagersTests::frame_mesh_record_handling_count` succeeds on all rank counts. Next, I need to make sure the timer can exchange data across ranks.
 
