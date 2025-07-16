@@ -36,6 +36,46 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 16 July 
+Building the parallel solution procedure.
+Needed to add:
+```console
+"${workspaceFolder}/../Trilinos/trilinos-install/include",
+"/opt/homebrew/opt/libomp/include"
+```
+to `c_cpp_properties.json` to allow for developing with `TPetra` on `VSCode`. 
+
+
+
+I also had to reduild `TPetra` to turn on `MPI`. After clearing all files and directories in `trilinos-buidl`, I ran the command:
+```console
+cmake \         
+  -DTPL_ENABLE_MPI=ON \
+  -DMPI_BASE_DIR=$(brew --prefix open-mpi) \
+  -DTrilinos_ENABLE_Tpetra=ON \
+  -DCMAKE_CXX_COMPILER=/opt/homebrew/bin/mpicxx \
+  -DCMAKE_INSTALL_PREFIX=../trilinos-install \
+  ..
+```
+Followed by the command: 
+```console
+make -j4 install
+```
+This was done because I could not find `Teuchos_DefaultMpiComm.hpp` in the `Trilinos` `include` directory. 
+
+I have updated `CMakeLists.txt` to build against `Trilinos` (`Tpetra` and `Teuchos` for now). 
+
+Next, I need to:
+- [ ] Create a `Tpetra::Map<>` object that maps the vectors ($\boldsymbol{P}, \boldsymbol{R}, \boldsymbol{G}, \boldsymbol{U}$, and $d\boldsymbol{U}$) to the ranks on which they belong.
+- [ ] Create these vectors and fill them.
+- [ ] Create a `Tpetra::Map<>` for $\boldsymbol{K}$, to map the distribution of its rows and columns.
+- [ ] Fill $\boldsymbol{K}$.
+- [ ] Update the solution procedure by creating the function `parallel_solve`.
+- [ ] Solve for $d\boldsymbol{U}$, and finalise `parallel_solve`.
+
+
+
+
 ### 13 July
 Fixed all bugs in `TimeKeeper` and the associated test. Tests run correctly on up to 5 ranks.
 
