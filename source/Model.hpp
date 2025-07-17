@@ -37,10 +37,18 @@ class Model
         void initialise_restraints_n_loads()
         {
             // apply the restraints to the global mesh and thus reduce the active freedoms. 
-            for (auto& restraint : restraints)
-            {
-                restraint.apply_restraints(glob_mesh);
-            }
+            #ifndef WITH_MPI
+                for (auto& restraint : restraints)
+                {
+                    restraint.apply_restraints(glob_mesh);
+                }
+            #else
+                for (auto& restraint : restraints)
+                {
+                    restraint.apply_restraints();
+                }
+                glob_mesh.count_distributed_dofs();
+            #endif
             // initialise all the loads from the load manager
             load_manager.initialise_loads();
 

@@ -31,11 +31,16 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [x] Element mapping should be done with position vectors; this will greatly simplify assembly, and possibly domain disribution.
 - [ ] Change how BCs are handled by delegating their control to a BC manager class `BCManager`.
 - [ ] Wrap `MPI_Allgather` call inside `count_distributed_dofs` with a wrapper from `MPIWrappers`.
-- [ ] Why is `FrameMesh` an attribute of `GlobalMesh`? Remove that - it is unnecessary!
-- [ ] Develop a better testing framework for `MPI` code.
+- [x] ~~Why is `FrameMesh` an attribute of `GlobalMesh`? Remove that - it is unnecessary!~~ it is there for testing and for retrieving node IDs for BC application and loading.
+- [x] ~~Develop a better testing framework for `MPI` code.~~ not so bad at all right now.
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 17 July
+- Had to add a new function `apply_restraints()` which does not take a `GlobalMesh` object as argument as it does not call the serial `count_dofs` function needlessly. I used `#ifndef WITH_MPI` to railguard the parallel and serial versions. I have also made `count_distributed_dofs` count the total number of DoFs `ndofs` in the ssytem by summing the `std::vector` `ranks_ndofs`.
+- I have setup the `Tpetra::Map<>` object for distributing the rows nad the columns of the vectors and the sparse matrix. All I needed was the global and local number of elements in each. 
+- I will need to isolate the `MPI_Comm` object used by `Tpetra`. 
+
 ### 16 July 
 Building the parallel solution procedure.
 Needed to add:
@@ -73,7 +78,7 @@ Next, I need to:
 - [ ] Update the solution procedure by creating the function `parallel_solve`.
 - [ ] Solve for $d\boldsymbol{U}$, and finalise `parallel_solve`.
 
-
+I expect to have completed the above tasks by *end of Sunday, 20 July*.
 
 
 ### 13 July

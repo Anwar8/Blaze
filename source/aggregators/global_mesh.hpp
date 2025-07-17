@@ -22,6 +22,7 @@
 #include <Eigen/SparseCholesky>
 #ifdef WITH_MPI
     #include <mpi.h>
+    #include <tpetra_wrappers.hpp>
 #endif
 #ifdef KOKKOS
     #include <Kokkos_Core.hpp>
@@ -728,6 +729,7 @@ class GlobalMesh {
             find_rank_interface_nodes_and_elems(interface_node_id_set_on_rank,interface_elem_id_set_on_rank,node_id_set_owned_by_rank,elem_nodes_vector_on_rank);
             rank_nnodes = node_id_set_owned_by_rank.size();
             rank_interface_nnodes = interface_node_id_set_on_rank.size();
+
             // Find the node IDs that each rank may want from our nodes.
 
             std::map<int, std::set<unsigned>> wanted_by_neighbour_rank_node_id_map;
@@ -843,7 +845,7 @@ class GlobalMesh {
                 std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
                 sleep(1);
             }
-            exchange_interface_nodes_nz_i(wanted_by_neighbour_rank_node_id_map, wanted_from_neighbour_rank_node_id_map);            
+            exchange_interface_nodes_nz_i(wanted_by_neighbour_rank_node_id_map, wanted_from_neighbour_rank_node_id_map);
         }
         
         /**
@@ -1243,6 +1245,13 @@ class GlobalMesh {
                     std::cout << "Node " << node->get_id() << " has nz_i = " << node->get_nz_i() << std::endl;
                 }
             }
+
+            // Step 3: count the total ndofs of the whole problem
+            ndofs = 0;
+            for (int rank_i = 0; rank_i < num_ranks; ++rank_i)
+            {
+                ndofs += ranks_ndofs[rank_i];
+            }
         }
         /**
          * @brief counts the active DOFs in the mesh by going over all the nodes and getting the number of active freedoms.
@@ -1261,6 +1270,9 @@ class GlobalMesh {
                 ndofs += node->get_ndof();
             }
         }
+
+        int get_ndofs() {return ndofs;}
+        int get_rank_ndofs() {return rank_ndofs;}
         /**
          * @brief calls the \ref Node::print_info function of all nodes and \ref Basic2DBeamElement::print_info of all elements.
          * 

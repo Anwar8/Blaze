@@ -7,6 +7,7 @@
 #define ASSEMBLER
 
 #include "global_mesh.hpp"
+#include "tpetra_wrappers.hpp"
 #ifdef KOKKOS
     #include <Kokkos_Core.hpp>
 #endif
@@ -26,6 +27,7 @@
  */
 class Assembler {
     private:
+        #ifndef WITH_MPI
         spmat K; /**< Global stiffness matrix \f$\boldsymbol{K}\f$.*/
         spmat P; /**< Nodal force vector \f$\boldsymbol{P}\f$.*/
         spmat R; /**< Resistance force vector \f$\boldsymbol{R}\f$.*/
@@ -33,7 +35,18 @@ class Assembler {
         realx2 G_max; /**< Max out-of-balance force retrieved by taking the square-root of the l2 norm of \f$ \sqrt{\norm{\boldsymbol{G}}}\f$.*/
         spvec U; /**< Global Nodal displacement vector \f$\boldsymbol{U}\f$ - also known as system state vector.*/
         spvec dU; /**< Change in global Nodal displacement vector \f$\Delta\boldsymbol{U}\f$ - also known as system state vector increment.*/
+        #else
+        Teuchos::RCP<Tpetra::Map<>> vector_map; /**<a map that explains which rows of the \f$\boldsymbol{P}\f$, \f$\boldsymbol{U}\f$, \f$\boldsymbol{R}\f$, etc. vectors go on which cores.*/
+        Teuchos::RCP<Tpetra::Map<>> matrix_map; /**<a map that explains which rows of the \f$\boldsymbol{K}\f$ matrix go on which cores.*/
 
+        Tpetra::CrsMatrix<real> K;
+        Tpetra::Vector<real> P;
+        Tpetra::Vector<real> R;
+        Tpetra::Vector<real> G;
+        Tpetra::Vector<real> U;
+        Tpetra::Vector<real> dU;
+            
+        #endif
         std::vector<spnz> K_global_triplets; /** The container for the triplets that are used for assembling the global stiffness matrix \f$ \boldsymbol{K}\f$ from element contributions.*/
         std::vector<spnz> R_global_triplets; /** The container for the triplets that are used for assembling the global resistance vector \f$ \boldsymbol{R}\f$ from element contributions.*/
         std::vector<spnz> P_global_triplets;  /** The container for the triplets that are used for assembling the global load matrix \f$ \boldsymbol{P}\f$ from nodal contributions.*/
@@ -45,6 +58,8 @@ class Assembler {
          * @param glob_mesh  the global_mesh object which contains information about the number of nodes and degrees of freedom.
          */
         void initialise_global_matrices(GlobalMesh& glob_mesh) {
+            #ifndef WITH_MPI
+            
             K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
             R = make_spd_mat(glob_mesh.ndofs, 1);
             P = make_spd_mat(glob_mesh.ndofs, 1);
@@ -54,7 +69,23 @@ class Assembler {
             K_global_triplets.reserve(glob_mesh.nelems*36);
             R_global_triplets.reserve(glob_mesh.ndofs);
             P_global_triplets.reserve(glob_mesh.ndofs);
+            
+            #else
+            // Establish the Tpetra::Map<> objects
+            setup_tpetra_vector_map(glob_mesh.get_ndofs(), glob_mesh.get_rank_ndofs());
+            
+            #endif
         }
+
+        void setup_tpetra_vector_map(int ndofs, int rank_ndofs)
+        {
+            Teuchos::RCP<const Teuchos::Comm<int>> comm = Teuchos::rcp(new Teuchos::MpiComm<int>(MPI_COMM_WORLD));
+            const size_t numLocalEntries = rank_ndofs;
+            const Tpetra::global_size_t numGlobalEntries = ndofs;
+            const tpetra_global_ordinal indexBase = 0;
+            vector_map = Teuchos::rcp(new Tpetra::Map<>(numGlobalEntries, numLocalEntries, indexBase, comm));
+        }
+
         /**
          * @brief retrieves global load contributions from all nodes.
          * 

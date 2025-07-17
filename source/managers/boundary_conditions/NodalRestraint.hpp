@@ -78,7 +78,7 @@ class NodalRestraint
         }
 
         /**
-         * @brief applies the restraint conditions to the nodes restrained by this object.
+         * @brief applies the restraint conditions to the nodes restrained by this object and counts the number of DoFs in the GlobalMesh.
          * 
          */
         void apply_restraints(GlobalMesh& glob_mesh)
@@ -88,6 +88,17 @@ class NodalRestraint
                 node->fix_dofs(restrained_dofs);
             }
             glob_mesh.count_dofs();
+        }
+        /**
+         * @brief applies the restraint conditions to the nodes restrained by this object but does not count the number of DoFs in the GlobalMesh.
+         * 
+         */
+        void apply_restraints()
+        {
+            for (auto& node : restrained_nodes)
+            {
+                node->fix_dofs(restrained_dofs);
+            }
         }
         /**
          * @brief removes the restraints this \ref NodalRestraint object imposes on the nodes from the nodes it imposes them on.
