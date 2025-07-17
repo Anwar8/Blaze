@@ -34,7 +34,7 @@ class Node {
         int nz_i = 0; /**< Corresponds to global location of node and its DoFs and load, considering deactivated DoFs.*/
         bool on_parent_rank = true; /**< Is this node object currently living on its parent rank?*/
         int parent_rank = 0; /**< The rank that owns this node.*/
-        std::set<int> connected_elements; /**< of element ids that are connected to this node; expected to be useful for element and node deletion.*/
+        std::set<int> connected_elements; /**< set of element ids that are connected to this node; expected to be useful for element and node deletion.*/
         std::set<int> active_dofs = {0, 1, 2, 3, 4, 5}; /**< set of active DOFs; all of them at first, then if deactivated moved to inactive_dofs.*/
         std::set<int> inactive_dofs; /**< a std set of active DoFs; none at first, then if any are deactivated then they are moved from active_dofs.*/
         std::vector<int> dofs_numbers = {0, 1, 2, 3, 4, 5}; /**< a std vector of DoF numbers where each number is equal to increments on nz_i; equal to \ref active_dofs at first, then updated when \ref nz_i is known.*/
@@ -107,6 +107,16 @@ class Node {
         void add_connected_element(int element_id) {connected_elements.insert(element_id);}
         unsigned const get_id() const {return id;}
         unsigned const get_record_id() const {return record_id;}
+        int const get_num_connected_elements() {return connected_elements.size();}
+        /**
+         * @brief Get the number of rows of the stiffness matrix to which this node contributes. The calculation assumes that the self-contributions of the node to the stiffness matrix sum into the same spot for all elements connected to the node after the first one, leaving only the stiffness components that are connected to other nodes. The reason we have 2*ndof is because each element has 2 nodes.
+         * @warning only works assuming each element has two nodes!
+         * @return int const 
+         */
+        int const get_num_row_contributions() 
+        {
+            return 2*ndof + std::max((get_num_connected_elements() - 1),0)*2*ndof;
+        }
         /**
          * @brief Set the nz_i to a value, and calls \ref update_dofs_numbers.
          * 

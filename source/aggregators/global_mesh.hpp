@@ -74,6 +74,7 @@ class GlobalMesh {
         int rank_nelems = 0; /**< number of elements on current rank.*/
         unsigned rank_starting_node_id = 1; /**< number at which the id of the first node on this rank starts.*/
         int rank_starting_nz_i = 0; /**< number at which the DoF count starts on this rank. */
+        int max_num_stiffness_contributions = 0; /**< finds the maximum number of contributions made to a row of the stiffness matrix */
         
         std::vector<int> ranks_ndofs; /**< a vector that contains the \ref ndofs of each rank. Needs to be communicated with MPI across ranks.*/
         std::vector<unsigned> ranks_nnodes; /**< a vector that contains the \ref rank_nnodes of each rank. Needs to be communicated with MPI across ranks.*/
@@ -689,6 +690,17 @@ class GlobalMesh {
             }
         }
 
+        /**
+         * @brief finds the \ref max_num_stiffness_contributions by iterating over the nodes and finding the number of row contributions made by each of them.
+         * 
+         */
+        void find_max_num_stiffness_contributions()
+        {
+            for (auto node_i : node_vector)
+            {
+                max_num_stiffness_contributions = std::max(max_num_stiffness_contributions, node_i->get_num_row_contributions());
+            }
+        }
 
         /**
          * @brief populates the global_mesh members: \ref nnodes, \ref nelems, \ref node_vector, and \ref elem_vector based on mesh (node and element) maps. Does the same for rank variants of these variables, and call \ref count_distributed_dofs to update the \ref nz_i of each node on the current rank.

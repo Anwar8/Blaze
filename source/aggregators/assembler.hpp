@@ -32,12 +32,11 @@ class Assembler {
         spmat P; /**< Nodal force vector \f$\boldsymbol{P}\f$.*/
         spmat R; /**< Resistance force vector \f$\boldsymbol{R}\f$.*/
         spmat G; /**< Out of balance force vector  \f$\boldsymbol{G}\f$.*/
-        realx2 G_max; /**< Max out-of-balance force retrieved by taking the square-root of the l2 norm of \f$ \sqrt{\norm{\boldsymbol{G}}}\f$.*/
         spvec U; /**< Global Nodal displacement vector \f$\boldsymbol{U}\f$ - also known as system state vector.*/
         spvec dU; /**< Change in global Nodal displacement vector \f$\Delta\boldsymbol{U}\f$ - also known as system state vector increment.*/
         #else
         Teuchos::RCP<Tpetra::Map<>> vector_map; /**<a map that explains which rows of the \f$\boldsymbol{P}\f$, \f$\boldsymbol{U}\f$, \f$\boldsymbol{R}\f$, etc. vectors go on which cores.*/
-        Teuchos::RCP<Tpetra::Map<>> matrix_map; /**<a map that explains which rows of the \f$\boldsymbol{K}\f$ matrix go on which cores.*/
+        Teuchos::RCP<Tpetra::CrsGraph<>> matrix_graph; /**<a graph that explains which rows of the \f$\boldsymbol{K}\f$ matrix go on which cores.*/
 
         Tpetra::CrsMatrix<real> K;
         Tpetra::Vector<real> P;
@@ -47,6 +46,8 @@ class Assembler {
         Tpetra::Vector<real> dU;
             
         #endif
+
+        realx2 G_max; /**< Max out-of-balance force retrieved by taking the square-root of the l2 norm of \f$ \sqrt{\norm{\boldsymbol{G}}}\f$.*/
         std::vector<spnz> K_global_triplets; /** The container for the triplets that are used for assembling the global stiffness matrix \f$ \boldsymbol{K}\f$ from element contributions.*/
         std::vector<spnz> R_global_triplets; /** The container for the triplets that are used for assembling the global resistance vector \f$ \boldsymbol{R}\f$ from element contributions.*/
         std::vector<spnz> P_global_triplets;  /** The container for the triplets that are used for assembling the global load matrix \f$ \boldsymbol{P}\f$ from nodal contributions.*/
@@ -59,31 +60,57 @@ class Assembler {
          */
         void initialise_global_matrices(GlobalMesh& glob_mesh) {
             #ifndef WITH_MPI
-            
             K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
             R = make_spd_mat(glob_mesh.ndofs, 1);
             P = make_spd_mat(glob_mesh.ndofs, 1);
             U = make_spd_vec(glob_mesh.ndofs);
-            dU = make_spd_vec(glob_mesh.ndofs);
+            dU = make_spd_vec(glob_mesh.ndofs);            
+            #else
+            // Establish the Tpetra::Map<> objects
+            setup_tpetra_vector_map(glob_mesh.get_ndofs(), glob_mesh.get_rank_ndofs());
+            R = Tpetra::Vector<real>(vector_map);
+            P = Tpetra::Vector<real>(vector_map);
+            U = Tpetra::Vector<real>(vector_map);
+            dU = Tpetra::Vector<real>(vector_map);
+
+            setup_tpetra_crs_graph(glob_mesh.max_num_stiffness_contributions);
+            K = Tpetra::CrsMatrix<real>(matrix_graph);
+            #endif
 
             K_global_triplets.reserve(glob_mesh.nelems*36);
             R_global_triplets.reserve(glob_mesh.ndofs);
             P_global_triplets.reserve(glob_mesh.ndofs);
-            
-            #else
-            // Establish the Tpetra::Map<> objects
-            setup_tpetra_vector_map(glob_mesh.get_ndofs(), glob_mesh.get_rank_ndofs());
-            
-            #endif
         }
 
+        /**
+         * @brief Set the up tpetra vector map object which is used for initialising the distributed vectors.
+         * 
+         * @param ndofs the total number of active DoFs of the entire problem.
+         * @param rank_ndofs the number of DoFs owned by the current rank. 
+         */
         void setup_tpetra_vector_map(int ndofs, int rank_ndofs)
         {
+            #ifdef WITH_MPI
             Teuchos::RCP<const Teuchos::Comm<int>> comm = Teuchos::rcp(new Teuchos::MpiComm<int>(MPI_COMM_WORLD));
             const size_t numLocalEntries = rank_ndofs;
             const Tpetra::global_size_t numGlobalEntries = ndofs;
             const tpetra_global_ordinal indexBase = 0;
             vector_map = Teuchos::rcp(new Tpetra::Map<>(numGlobalEntries, numLocalEntries, indexBase, comm));
+            #endif
+        }
+
+        /**
+         * @brief Setup tpetra crs graph object which is used to initialise the CrsMatrix used for stiffness. This is okay because the structure of the matrix will not change in the entire runtime so we should use the graph as it is much more efficient and allows for access using the local indices.
+         * 
+         * @param max_num_row_contributions the maximum number of entries per row of the stiffness matrix - retrieved from the GlobalMesh object.
+         */
+        void setup_tpetra_crs_graph(int max_num_row_contributions)
+        {
+            #ifdef WITH_MPI
+            const size_t entriesPerRow = max_num_row_contributions;
+            matrix_graph = Teuchos::rcp(new Tpetra::CrsGraph<>(vector_map, entriesPerRow));
+            matrix_graph->fillComplete();
+            #endif
         }
 
         /**

@@ -48,6 +48,7 @@ class Model
                     restraint.apply_restraints();
                 }
                 glob_mesh.count_distributed_dofs();
+                glob_mesh.find_max_num_stiffness_contributions();
             #endif
             // initialise all the loads from the load manager
             load_manager.initialise_loads();

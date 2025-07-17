@@ -13,9 +13,4 @@ typedef Tpetra::Vector<>::scalar_type tpetra_scalar;
 typedef Tpetra::Vector<>::global_ordinal_type tpetra_global_ordinal;
 typedef Tpetra::Vector<>::local_ordinal_type tpetra_local_ordinal;
 
-Teuchos::RCP<Tpetra::Vector<>> make_rcp_to_vector(Teuchos::Map<> vector_map)
-{
-    return (new rcp)
-}
-
 #endif

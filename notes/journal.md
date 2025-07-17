@@ -37,9 +37,23 @@ This journal contains the day-to-day project management and notes taken. It was 
 
 ## Journal
 ### 17 July
-- Had to add a new function `apply_restraints()` which does not take a `GlobalMesh` object as argument as it does not call the serial `count_dofs` function needlessly. I used `#ifndef WITH_MPI` to railguard the parallel and serial versions. I have also made `count_distributed_dofs` count the total number of DoFs `ndofs` in the ssytem by summing the `std::vector` `ranks_ndofs`.
-- I have setup the `Tpetra::Map<>` object for distributing the rows nad the columns of the vectors and the sparse matrix. All I needed was the global and local number of elements in each. 
-- I will need to isolate the `MPI_Comm` object used by `Tpetra`. 
+Had to add a new function `apply_restraints()` which does not take a `GlobalMesh` object as argument as it does not call the serial `count_dofs` function needlessly. I used `#ifndef WITH_MPI` to railguard the parallel and serial versions. I have also made `count_distributed_dofs` count the total number of DoFs `ndofs` in the ssytem by summing the `std::vector` `ranks_ndofs`. 
+
+I have setup the `Tpetra::Map<>` object for distributing the rows and the columns of the vectors and the sparse matrix. All I needed was the global and local number of elements in each. 
+
+I likely will need to isolate the `MPI_Comm` object used by `Tpetra`. 
+
+So far today, I have:
+- [x] Create a `Tpetra::Map<>` object that maps the vectors ($\boldsymbol{P}, \boldsymbol{R}, \boldsymbol{G}, \boldsymbol{U}$, and $d\boldsymbol{U}$) to the ranks on which they belong.
+- [x] Create these vectors 
+- [ ] and fill them.
+- [x] Create a `Tpetra::Map<>` for $\boldsymbol{K}$, to map the distribution of its rows and columns.
+- [x] Initialise $\boldsymbol{K}$.
+- [ ] Fill $\boldsymbol{K}$.
+- [ ] Update the solution procedure by creating the function `parallel_solve`.
+- [ ] Solve for $d\boldsymbol{U}$, and finalise `parallel_solve`.
+
+The next step for me is to fill the distirbuted vectors, and then to assemble the stiffness matrix as well. This should be quite straight-forward. I think I am on track to complete all this work by 20 July. Main issue right now is that testing cannot proceed until I have completed all the updates as otherwise the programme will not compile. I really hope there will not be a lot of debugging to do, but I know there likely will be!
 
 ### 16 July 
 Building the parallel solution procedure.
