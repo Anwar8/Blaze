@@ -8,6 +8,5 @@
 #define VERBOSE_NLB 0
 #define LF_VERBOSE 0
 #define ELEMENT_VERBOSE 0
-#define WITH_MPI
 
 #endif

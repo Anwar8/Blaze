@@ -36,6 +36,14 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 19 July
+- Updated `check_convergence`.
+
+Need to move the test file for tpetra to `POC` and change its includes so it is a completely stand-alone cpp (from `Blaze` not `Trilinos`) file and build it with `Cmake`.
+Still could not compile the test `cpp`...I will figure it out later. I suspect, perhaps foolishly, that I might be able to get `Blaze` to compile regardless.
+
+Used `#ifndef WITH_MPI` as a railguard to prevent `BasicSolver` from causing compile trouble for now. I am having problemts with my complicated `CMakeLists.txt` files that are within many part of my project. I will need to address those issues specifically before proceeding.
+ 
 ### 18 July
 This is written on 19 July because I did not write anything on 18. 
 - Added a function to calculate maximum number of contributions to the stiffness matrix: `GlobalMesh::find_max_num_stiffness_contributions`, and called it from `Model`.

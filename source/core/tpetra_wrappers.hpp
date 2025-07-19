@@ -58,4 +58,72 @@ Kokkos::View<const real*, Kokkos::HostSpace> get_1d_view(Tpetra::Vector<real>& V
     return Kokkos::subview (V_2d, Kokkos::ALL (), 0);
 }
 
+std::map<tpetra_global_ordinal, std::pair<std::vector<tpetra_global_ordinal>, std::vector<real>>> map_triplets_to_rows(std::vector<spnz>& triplets)
+{
+    std::map<tpetra_global_ordinal, std::pair<std::vector<tpetra_global_ordinal>, std::vector<real>>> row_keyed_value_map;
+    for (spnz& triplet : triplets)
+    {
+        row_keyed_value_map[tpetra_global_ordinal(triplet.row())].first.push_back(tpetra_global_ordinal(triplet.col())); 
+        row_keyed_value_map[tpetra_global_ordinal(triplet.row())].second.push_back(triplet.value()); 
+    }
+    return row_keyed_value_map;
+}
+
+std::map<tpetra_global_ordinal, std::vector<tpetra_global_ordinal>> map_triplets_to_row_column_positions(std::vector<spnz>& triplets)
+{
+    std::map<tpetra_global_ordinal, std::vector<tpetra_global_ordinal>> row_keyed_position_map;
+    for (spnz& triplet : triplets)
+    {
+        row_keyed_position_map[tpetra_global_ordinal(triplet.row())].push_back(tpetra_global_ordinal(triplet.col())); 
+    }
+    return row_keyed_position_map;
+}
+/**
+ * @brief Replaces the existing values in a Tpetra::CrsMatrix based on triplets. Expects the matrix has already been initialised beforehand so will call fillResume.
+ * @note I needed help with the reference and const conversions so I used GitHub Copilot running on GPT 4.1 on 19 July 2025 to help me with the conversions.
+ * @param A a Tpetra::CrsMatrix that will be updated with new values from triplets.
+ * @param triplets a std::vector of triplets that will be used to update the matrix A.
+ */
+void set_from_triplets(Teuchos::RCP<Tpetra::CrsMatrix<real>> A, std::vector<spnz>& triplets)
+{
+    A->resumeFill();
+    auto row_map = map_triplets_to_rows(triplets);
+    for (const auto& row_entry : row_map)
+    {
+        tpetra_global_ordinal row = row_entry.first;
+        const std::vector<tpetra_global_ordinal>& cols = row_entry.second.first;
+        const std::vector<real>& vals = row_entry.second.second;
+
+        // Convert std::vector to Teuchos::ArrayView<const T> 
+        Teuchos::ArrayView<const tpetra_global_ordinal> col_view(cols);
+        Teuchos::ArrayView<const real> val_view(vals);
+
+        // Replace existing values in CrsMatrix
+        A->replaceGlobalValues(row, col_view, val_view);
+    }
+    A->fillComplete();
+}
+
+/**
+ * @brief initialises an existing graph with global indices coming from triplets calculated from the contribution of finite elements.
+ * 
+ * @param A_graph a Teuchos RCP to Tpetra::CrsGraph that will be used to initialise the stiffness matrix.
+ * @param triplets a std::vector of triplets that will be used to update the graph indices - their values will be ignored we only care about their column indices.
+ */
+void initialise_from_triplets(Teuchos::RCP<Tpetra::CrsGraph<>> A_graph, std::vector<spnz>& triplets)
+{
+    auto row_col_map = map_triplets_to_row_column_positions(triplets);
+    for (const auto& row_entry : row_col_map)
+    {
+        tpetra_global_ordinal row = row_entry.first;
+
+        // Convert std::vector to Teuchos::ArrayView<const T> 
+        Teuchos::ArrayView<const tpetra_global_ordinal> col_view(row_entry.second);
+
+        // Replace existing values in CrsMatrix
+        A_graph->insertGlobalIndices(row, col_view);
+    }
+}
+
+
 #endif

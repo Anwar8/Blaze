@@ -54,8 +54,10 @@ class Model
             load_manager.initialise_loads();
 
             // based on the restraints and loads, we can now initialise the global matrices and establish element-stiffness mapping.
-            assembler.initialise_global_matrices(glob_mesh);
+            // start with mapping stiffnesses as these are needed for initialising the sparse matrices (the stiffness matrix).
             glob_mesh.map_element_stiffnesses();
+            assembler.initialise_global_matrices(glob_mesh);
+            
         }
 
 

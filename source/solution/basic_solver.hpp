@@ -25,6 +25,7 @@ class BasicSolver {
          */
         void solve_for_U(Assembler& assembler)
         {
+            #ifndef WITH_MPI
             Eigen::SparseLU<spmat> solver;
             // Compute the ordering permutation vector from the structural pattern of A
             solver.analyzePattern(assembler.K); 
@@ -50,6 +51,8 @@ class BasicSolver {
             {
                 std::cout << "The solution is:" << std::endl << assembler.U << std::endl;
             }    
+            #else
+            #endif
         }
         /**
          * @brief solves for \f$\Delta \boldsymbol{U}\f$ from \f$\Delta \boldsymbol{U} = -\boldsymbol{K}^{-1} \boldsymbol{G}\f$.
@@ -58,6 +61,7 @@ class BasicSolver {
          */
         void solve_for_deltaU(Assembler& assembler)
         {
+            #ifndef WITH_MPI
             Eigen::SparseLU<spmat> solver;
             // Compute the ordering permutation vector from the structural pattern of A
             solver.analyzePattern(assembler.K); 
@@ -84,7 +88,10 @@ class BasicSolver {
             {    
                 std::cout << "dU is:" << std::endl << assembler.dU << std::endl;
             }
+            #else
+            #endif
         }
+        
 };
 
 #endif

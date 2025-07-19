@@ -40,7 +40,7 @@ class Assembler {
         Teuchos::RCP<Tpetra::Map<>> interface_map; /**< a map that is used for communicating the interface DoFs that are globally not locally allocated. */
         Teuchos::RCP<Tpetra::Import<>> interface_importer; /**< the importer object that is meant for communicating the \f$\boldsymbol{U}\f$ values on different nodes and ranks. */
 
-        Tpetra::CrsMatrix<real> K;
+        Teuchos::RCP<Tpetra::CrsMatrix<real>> K;
         Tpetra::Vector<real> P;
         Tpetra::Vector<real> R;
         Tpetra::Vector<real> G;
@@ -77,8 +77,8 @@ class Assembler {
             U = Tpetra::Vector<real>(vector_map);
             dU = Tpetra::Vector<real>(vector_map);
 
-            setup_tpetra_crs_graph(glob_mesh.max_num_stiffness_contributions);
-            K = Tpetra::CrsMatrix<real>(matrix_graph);
+            setup_tpetra_crs_graph(glob_mesh);
+            K = Teuchos::RCP(new Tpetra::CrsMatrix<real>(matrix_graph));
 
             setup_interface_import(glob_mesh);
             #endif
@@ -110,11 +110,13 @@ class Assembler {
          * 
          * @param max_num_row_contributions the maximum number of entries per row of the stiffness matrix - retrieved from the GlobalMesh object.
          */
-        void setup_tpetra_crs_graph(int max_num_row_contributions)
+        void setup_tpetra_crs_graph(GlobalMesh& glob_mesh)
         {
             #ifdef WITH_MPI
-            const size_t entriesPerRow = max_num_row_contributions;
+            const size_t entriesPerRow = glob_mesh.max_num_stiffness_contributions;
             matrix_graph = Teuchos::rcp(new Tpetra::CrsGraph<>(vector_map, entriesPerRow));
+            collect_global_K_triplets(glob_mesh);
+            initialise_from_triplets(matrix_graph, K_global_triplets);
             matrix_graph->fillComplete();
             #endif
         }
@@ -158,6 +160,17 @@ class Assembler {
             }
             #endif
         }
+
+        void collect_global_K_triplets(GlobalMesh& glob_mesh)
+        {
+            // clear the members but keep the size reservation unchanged.
+            K_global_triplets.clear();
+            for (auto& elem: glob_mesh.elem_vector)
+            {   
+                elem->insert_global_stiffness_triplets(K_global_triplets);
+            }
+        }
+
         /**
          * @brief retrieves global contributions to stiffness and resistance from all elements. For resistance, this function maps local element nodal forces \f$\boldsymbol{f}\f$ to the resistance vector \f$\boldsymbol{R}\f$ \ref R.
          * 
@@ -180,6 +193,11 @@ class Assembler {
                 elem->insert_global_stiffness_triplets(K_global_triplets);
                 elem->insert_global_resistance_force_triplets(R_global_triplets);
             }
+
+            #ifdef WITH_MPI
+            set_from_triplets(R, R_global_triplets);
+            set_from_triplets(K, K_global_triplets);
+            #else
             K.setFromTriplets(K_global_triplets.begin(), K_global_triplets.end());
             K.makeCompressed();
             R.setFromTriplets(R_global_triplets.begin(), R_global_triplets.end());
@@ -196,6 +214,7 @@ class Assembler {
                 std::cout << "KU, however, is:" << std::endl << Eigen::MatrixXd(K*U) << std::endl;
                 std::cout << "and P is:" << std::endl << Eigen::MatrixXd(P) << std::endl;
             }
+            #endif
         }
 
         /**
@@ -255,11 +274,9 @@ class Assembler {
                 interface_U.doImport(U, *interface_importer, Tpetra::REPLACE);
 
                 auto interface_U_local_view = get_1d_view(U);
-                int nzi = 0;
+                nzi = 0;
                 for (auto& node: glob_mesh.interface_node_vector)
                 {
-                    // int nzi = node->get_nz_i(); // where the node displacements start in the U vector.
-                    int num_node_dofs = node->get_ndof(); // how many there are to loop over.
                     std::set<int> node_active_dofs = node->get_active_dofs();
                     int i = 0;
                     for (auto& dof: node_active_dofs) {
@@ -350,7 +367,11 @@ class Assembler {
          */
         bool check_convergence(real tolerance)
         {
+            #ifdef WITH_MPI
+            G_max = G.norm2();
+            #else
             G_max = std::sqrt(calc_l2_norm(G));
+            #endif
             return G_max < tolerance;
         }
 
