@@ -54,6 +54,20 @@ ld: warning: ignoring duplicate libraries: '/Users/anwar/UOE/dissertation/code/T
 
 This worries me greatly as it might indicate that my executables will not work whenver they try to use anything related to `TPetra` even though they currently compile without issue!!!
 
+To my great surprise, it appears that all assembly functions are working almost as expected. That is, they compile correctly and they appear to distribute without much issue. The stiffness matrix is created almost without issues as well, which is puzzling as I expected the errors from above to persist. Regardless, I now can just test `Tpetra` directly within `Blaze` and I do not need a separate testing `cpp` file. That being said, the stiffness matrix is always empty - this is because the triplets are always empty! I will find out why tomorrow. Should not be that hard...right...?
+
+I also just checked, and the `SolutionProcedure` might only need minor, one might say cosmetic (if any, at all), modifications only as the interface remained unchanged. All that truly remains is debugging, and updating the `BasicSolver`. 
+
+- [x] Create a `Tpetra::Map<>` object that maps the vectors ($\boldsymbol{P}, \boldsymbol{R}, \boldsymbol{G}, \boldsymbol{U}$, and $d\boldsymbol{U}$) to the ranks on which they belong.
+- [x] Create these vectors 
+- [x] and fill them.
+- [x] Create a `Tpetra::Map<>` for $\boldsymbol{K}$, to map the distribution of its rows and columns.
+- [x] Initialise $\boldsymbol{K}$.
+- [x] Fill $\boldsymbol{K}$.*
+- [ ] Update the solution procedure by creating the function `parallel_solve`.
+- [ ] Solve for $d\boldsymbol{U}$, and finalise `parallel_solve`.
+
+*filling $\boldsymbol{K}$ is still bugged, but the procedure is ready!
 ### 18 July
 This is written on 19 July because I did not write anything on 18. 
 - Added a function to calculate maximum number of contributions to the stiffness matrix: `GlobalMesh::find_max_num_stiffness_contributions`, and called it from `Model`.

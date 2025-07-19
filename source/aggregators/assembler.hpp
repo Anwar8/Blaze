@@ -63,6 +63,10 @@ class Assembler {
          * @param glob_mesh  the global_mesh object which contains information about the number of nodes and degrees of freedom.
          */
         void initialise_global_matrices(GlobalMesh& glob_mesh) {
+            K_global_triplets.reserve(glob_mesh.nelems*36);
+            R_global_triplets.reserve(glob_mesh.ndofs);
+            P_global_triplets.reserve(glob_mesh.ndofs);
+
             #ifndef WITH_MPI
             K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
             R = make_spd_mat(glob_mesh.ndofs, 1);
@@ -83,9 +87,7 @@ class Assembler {
             setup_interface_import(glob_mesh);
             #endif
 
-            K_global_triplets.reserve(glob_mesh.nelems*36);
-            R_global_triplets.reserve(glob_mesh.ndofs);
-            P_global_triplets.reserve(glob_mesh.ndofs);
+           
         }
 
         /**
@@ -118,6 +120,41 @@ class Assembler {
             collect_global_K_triplets(glob_mesh);
             initialise_from_triplets(matrix_graph, K_global_triplets);
             matrix_graph->fillComplete();
+            #endif
+        }
+
+        /**
+         * @brief prints the force vector P
+         * 
+         */
+        void print_P()
+        {
+            #ifdef WITH_MPI
+            Teuchos::RCP<Teuchos::FancyOStream> out = Teuchos::getFancyOStream(Teuchos::rcpFromRef(std::cout));
+            P.describe(*out, Teuchos::VERB_HIGH);
+            #endif
+        }
+
+        /**
+         * @brief prints the stiffness matrix to the output stream
+         * 
+         */
+        void print_stiffness()
+        {
+            #ifdef WITH_MPI
+            Teuchos::RCP<Teuchos::FancyOStream> out = Teuchos::getFancyOStream(Teuchos::rcpFromRef(std::cout));
+            K->describe(*out, Teuchos::VERB_HIGH);
+            #endif
+        }
+        /**
+         * @brief prints \ref stiffness_map to the output stream
+         * 
+         */
+        void print_stiffness_graph()
+        {
+            #ifdef WITH_MPI
+            Teuchos::RCP<Teuchos::FancyOStream> out = Teuchos::getFancyOStream(Teuchos::rcpFromRef(std::cout));
+            matrix_graph->describe(*out, Teuchos::VERB_HIGH);
             #endif
         }
 

@@ -8,6 +8,7 @@
 #include <Tpetra_Vector.hpp>
 #include <Tpetra_CrsMatrix.hpp>
 #include <Tpetra_Version.hpp>
+#include <Teuchos_FancyOStream.hpp>
 
 typedef Tpetra::Vector<>::scalar_type tpetra_scalar;
 typedef Tpetra::Vector<>::global_ordinal_type tpetra_global_ordinal;
@@ -113,6 +114,7 @@ void set_from_triplets(Teuchos::RCP<Tpetra::CrsMatrix<real>> A, std::vector<spnz
 void initialise_from_triplets(Teuchos::RCP<Tpetra::CrsGraph<>> A_graph, std::vector<spnz>& triplets)
 {
     auto row_col_map = map_triplets_to_row_column_positions(triplets);
+    std::cout << "there are " << row_col_map.size() << " entires in glob_mesh.update_elements_states()." << std::endl;
     for (const auto& row_entry : row_col_map)
     {
         tpetra_global_ordinal row = row_entry.first;
