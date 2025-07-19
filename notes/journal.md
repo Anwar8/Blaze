@@ -43,7 +43,17 @@ Need to move the test file for tpetra to `POC` and change its includes so it is 
 Still could not compile the test `cpp`...I will figure it out later. I suspect, perhaps foolishly, that I might be able to get `Blaze` to compile regardless.
 
 Used `#ifndef WITH_MPI` as a railguard to prevent `BasicSolver` from causing compile trouble for now. I am having problemts with my complicated `CMakeLists.txt` files that are within many part of my project. I will need to address those issues specifically before proceeding.
- 
+
+I am currently at a loss as to what to do. `Blaze` seems to build just okay, but I still cannot get the code `test_tpetra_wrappers.cpp` to compile even when I directly include it in my existing `CMakeLists.txt` that is intended for `Blaze`. I am also getting the follow linker warning for every target being built:
+<div style="max-height: 200px; overflow-y: auto; font-size: 0.9em; border: 1px solid #ccc; padding: 5px;">
+
+```console
+ld: warning: ignoring duplicate libraries: '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libkokkoscontainers.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libkokkoscore.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libkokkoskernels.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libkokkossimd.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libkokkostsqr.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libteuchoscomm.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libteuchoscore.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libteuchoskokkoscomm.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libteuchoskokkoscompat.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libteuchosnumerics.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libteuchosparameterlist.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libteuchosparser.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libteuchosremainder.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libtpetra.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libtpetraclassic.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libtpetraext.a', '/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install/lib/libtpetrainout.a', '/opt/homebrew/lib/libgtest.a'
+```
+</div>
+
+This worries me greatly as it might indicate that my executables will not work whenver they try to use anything related to `TPetra` even though they currently compile without issue!!!
+
 ### 18 July
 This is written on 19 July because I did not write anything on 18. 
 - Added a function to calculate maximum number of contributions to the stiffness matrix: `GlobalMesh::find_max_num_stiffness_contributions`, and called it from `Model`.
