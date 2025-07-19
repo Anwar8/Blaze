@@ -36,6 +36,17 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 18 July
+This is written on 19 July because I did not write anything on 18. 
+- Added a function to calculate maximum number of contributions to the stiffness matrix: `GlobalMesh::find_max_num_stiffness_contributions`, and called it from `Model`.
+- Setup `Tpetra::CrsGraph` which is used to initialise the stiffness matrix `Tpetra::CrsMatrix` object. 
+- Created `Tpetra` compatible assembly functions including:
+  - `setup_interface_import` for managing exchange of displacement components that are spread across different ranks.
+  - `assemble_global_P`.
+  - Began updating and almost finished `map_U_to_nodes`.
+  - `calcualte_out_of_balance`.
+  - `increment_U`.
+  - And created interfaces for setting up `Tpetra::Vectors<>` including two versions of `set_from_triplets` (one using global references and one using local references), and `get_1d_view` for getting a local `Kokkos::View` of a `Tpetra::Vector<>`. 
 ### 17 July
 Had to add a new function `apply_restraints()` which does not take a `GlobalMesh` object as argument as it does not call the serial `count_dofs` function needlessly. I used `#ifndef WITH_MPI` to railguard the parallel and serial versions. I have also made `count_distributed_dofs` count the total number of DoFs `ndofs` in the ssytem by summing the `std::vector` `ranks_ndofs`. 
 

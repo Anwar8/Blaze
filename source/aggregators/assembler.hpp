@@ -37,6 +37,8 @@ class Assembler {
         #else
         Teuchos::RCP<Tpetra::Map<>> vector_map; /**<a map that explains which rows of the \f$\boldsymbol{P}\f$, \f$\boldsymbol{U}\f$, \f$\boldsymbol{R}\f$, etc. vectors go on which cores.*/
         Teuchos::RCP<Tpetra::CrsGraph<>> matrix_graph; /**<a graph that explains which rows of the \f$\boldsymbol{K}\f$ matrix go on which cores.*/
+        Teuchos::RCP<Tpetra::Map<>> interface_map; /**< a map that is used for communicating the interface DoFs that are globally not locally allocated. */
+        Teuchos::RCP<Tpetra::Import<>> interface_importer; /**< the importer object that is meant for communicating the \f$\boldsymbol{U}\f$ values on different nodes and ranks. */
 
         Tpetra::CrsMatrix<real> K;
         Tpetra::Vector<real> P;
@@ -44,6 +46,8 @@ class Assembler {
         Tpetra::Vector<real> G;
         Tpetra::Vector<real> U;
         Tpetra::Vector<real> dU;
+
+        Tpetra::Vector<real> interface_U; /**< the interface version of the U vector.*/
             
         #endif
 
@@ -66,8 +70,8 @@ class Assembler {
             U = make_spd_vec(glob_mesh.ndofs);
             dU = make_spd_vec(glob_mesh.ndofs);            
             #else
-            // Establish the Tpetra::Map<> objects
             setup_tpetra_vector_map(glob_mesh.get_ndofs(), glob_mesh.get_rank_ndofs());
+            // The constructor for the vectors that follows prefills the vectors with zeros.
             R = Tpetra::Vector<real>(vector_map);
             P = Tpetra::Vector<real>(vector_map);
             U = Tpetra::Vector<real>(vector_map);
@@ -75,6 +79,8 @@ class Assembler {
 
             setup_tpetra_crs_graph(glob_mesh.max_num_stiffness_contributions);
             K = Tpetra::CrsMatrix<real>(matrix_graph);
+
+            setup_interface_import(glob_mesh);
             #endif
 
             K_global_triplets.reserve(glob_mesh.nelems*36);
@@ -141,12 +147,16 @@ class Assembler {
                 }
                 std::cout << "There are " << std::size(P_global_triplets) << " P_global contributions to add up." << std::endl;
             }
+            #ifdef WITH_MPI
+            set_from_triplets(P, P_global_triplets, glob_mesh.rank_starting_nz_i);
+            #else
             P.setFromTriplets(P_global_triplets.begin(), P_global_triplets.end());
             P.makeCompressed();
             if (VERBOSE_NLB)
             {
                 std::cout << "The P vector is:" << std::endl << Eigen::MatrixXd(P) << std::endl;
             }
+            #endif
         }
         /**
          * @brief retrieves global contributions to stiffness and resistance from all elements. For resistance, this function maps local element nodal forces \f$\boldsymbol{f}\f$ to the resistance vector \f$\boldsymbol{R}\f$ \ref R.
@@ -189,6 +199,36 @@ class Assembler {
         }
 
         /**
+         * @brief initialises \ref interface_map and \ref interface_U, and sets up \ref interface_importer for future communication.
+         * 
+         * @param glob_mesh the \ref GlobalMesh object.
+         */
+        void setup_interface_import(GlobalMesh& glob_mesh)
+        {
+            std::vector<unsigned> interface_dofs;
+            // the presizing is too big as it does not account for inactive DoFs, but is better than trying to resize the vector many times over. The big size is not an issue because I expect only a few interface nodes anyway!
+            interface_dofs.reserve(glob_mesh.interface_node_vector.size()*6);
+
+            for (auto& node: glob_mesh.interface_node_vector)
+            {
+                int nzi = node->get_nz_i(); // where the node displacements start in the U vector.
+                int num_node_dofs = node->get_ndof(); // how many there are to loop over.
+                std::set<int> node_active_dofs = node->get_active_dofs();
+                int i = 0;
+                for (auto& dof: node_active_dofs) {
+                    interface_dofs.push_back(i + nzi);
+                    ++i;
+                }
+            }
+            Teuchos::Array<tpetra_global_ordinal> interface_dofs_array(interface_dofs.size());
+            interface_map = Teuchos::rcp(new Tpetra::Map<>(INVALID, interface_dofs_array, 0, vector_map->getComm()));
+            interface_U = Tpetra::Vector<real>(interface_map);
+            interface_importer = Teuchos::rcp(new Tpetra::Import<>(vector_map, interface_map));
+            // since it is initialisation, the Tpetra::CombineMode is INSERT.
+            interface_U.doImport(U, *interface_importer, Tpetra::INSERT);
+        }
+
+        /**
          * @brief maps state vector U back to nodes.
          * 
          * @param glob_mesh takes the global_mesh object as input to get the counters and containers for nodes and elements.
@@ -196,6 +236,39 @@ class Assembler {
         void map_U_to_nodes(GlobalMesh& glob_mesh)
         {
             std::vector<std::shared_ptr<Node>>* nodes = &glob_mesh.node_vector;
+            #ifdef WITH_MPI
+            auto U_local_view = get_1d_view(U);
+            int nzi = 0;
+            for (auto& node: glob_mesh.node_vector)
+                {
+                    // int nzi = node->get_nz_i(); // where the node displacements start in the U vector.
+                    int num_node_dofs = node->get_ndof(); // how many there are to loop over.
+                    std::set<int> node_active_dofs = node->get_active_dofs();
+                    int i = 0;
+                    for (auto& dof: node_active_dofs) {
+                        node->set_nodal_displacement(dof, U_local_view(i + nzi));
+                        ++i;
+                    }
+                    nzi += i;
+                }
+                // since this is a call happening often, the Tpetra::CombineMode is REPLACE since the elements should already exist inplace.
+                interface_U.doImport(U, *interface_importer, Tpetra::REPLACE);
+
+                auto interface_U_local_view = get_1d_view(U);
+                int nzi = 0;
+                for (auto& node: glob_mesh.interface_node_vector)
+                {
+                    // int nzi = node->get_nz_i(); // where the node displacements start in the U vector.
+                    int num_node_dofs = node->get_ndof(); // how many there are to loop over.
+                    std::set<int> node_active_dofs = node->get_active_dofs();
+                    int i = 0;
+                    for (auto& dof: node_active_dofs) {
+                        node->set_nodal_displacement(dof, interface_U_local_view(i + nzi));
+                        ++i;
+                    }
+                    nzi += i;
+                }
+            #else
             #ifdef KOKKOS
                 Kokkos::parallel_for( "Assembler::map_U_to_nodes", glob_mesh.node_vector.size(), KOKKOS_LAMBDA (int i) {
                     int nzi = (*nodes)[i]->get_nz_i(); // where the node displacements start in the U vector.
@@ -208,7 +281,6 @@ class Assembler {
                     }
                 });
             #else
-                #pragma omp parallel for
                 for (auto& node: glob_mesh.node_vector)
                 {
                     int nzi = node->get_nz_i(); // where the node displacements start in the U vector.
@@ -235,6 +307,7 @@ class Assembler {
                         ++i;
                     }
                 }
+            #endif
         }
 
         /**
@@ -242,22 +315,30 @@ class Assembler {
          * 
          */
         void calculate_out_of_balance() {
+            #ifdef WITH_MPI
+            G.update(1.0, R, -1.0, P, 0.0);
+            #else
             G = R - P;
             if (VERBOSE_NLB)
             {
                 std::cout << "The G (out of balance) vector is:" << std::endl << Eigen::MatrixXd(G) << std::endl;
             }
+            #endif
         }
         /**
          * @brief updates \f$\boldsymbol{U}\f$ by incrementing with \f$ \Delta \boldsymbol{U}\f$.
          * 
          */
         void increment_U() {
+            #ifdef WITH_MPI
+            U.update(1.0, dU, 1.0);
+            #else
             if (VERBOSE_NLB)
                 std::cout << "U before update is " << std::endl << U << std::endl;
             U += dU;
             if (VERBOSE_NLB)
                 std::cout << "U after update is " << std::endl << U << std::endl;
+            #endif
         }
 
         /**
