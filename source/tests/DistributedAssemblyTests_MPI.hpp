@@ -5,6 +5,11 @@
 #define ELEMENT_TYPE NonlinearElastic
 
 
+/**
+ * @brief 
+ * @details this model has 32 nodes, out of which 4 have 0 DoFs, while the remaining 28 each have 3 DoFs for a total of 84 DoFs in the whole system. 
+ * 
+ */
 class DistributedModelFrameAssemblyTests : public ::testing::Test {
     public:
       Model model;
@@ -46,7 +51,7 @@ class DistributedModelFrameAssemblyTests : public ::testing::Test {
             std::set<unsigned> loaded_nodes = the_frame.get_all_beam_line_node_ids(true);
             std::vector<unsigned> loaded_nodes_v = std::vector<unsigned>(loaded_nodes.begin(), loaded_nodes.end());
             model.load_manager.create_a_distributed_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{-1000}, model.glob_mesh);
-
+            model.initialise_restraints_n_loads();
             
         }
       void TearDown() override {
@@ -55,12 +60,10 @@ class DistributedModelFrameAssemblyTests : public ::testing::Test {
 
 TEST_F(DistributedModelFrameAssemblyTests, frame_mesh_vector_sizes)
 {   
-    model.initialise_restraints_n_loads();
-    model.assembler.print_P();
-    model.assembler.print_stiffness_graph();
-    model.assembler.assemble_global_K_R(model.glob_mesh);
-    std::cout << "------------------------------------printing stiffness next------------------------------------------------------------------------" << std::endl;
-    model.assembler.print_stiffness();
+    std::cout << std::endl << std::endl;
+    std::cout << "The fully-assembled stiffness matrix K is:" << std::endl;
+    model.assembler.print_distributed_maths_object("K", Teuchos::VERB_EXTREME);
+
 
     if (num_ranks == 1)
     {

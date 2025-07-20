@@ -92,7 +92,6 @@ target_sources(Blaze PRIVATE "source/main.cpp")
 target_include_directories(Blaze PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/source)
 
 if(KOKKOS)
-message(STATUS "Building with Kokkos ----------------------------------------------------------><><><><><>")
 target_link_libraries (Blaze PRIVATE BlazeModel Kokkos::kokkos)
 else(KOKKOS)
 if(OMP)

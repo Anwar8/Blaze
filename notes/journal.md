@@ -44,6 +44,8 @@ cmake -DTPL_ENABLE_MPI=ON -DMPI_BASE_DIR=$(brew --prefix open-mpi) -DCMAKE_OSX_A
 
 I have now managed to compile `Blaze` with `Amesos2` solving with `klu2`, which required me to change all `Tpetra::Vector<>` objects with `Tpetra::MultiVector<>`.
 
+I think the stiffness matrix is initialised and filled successfully now.
+
 ### 19 July
 - Updated `check_convergence`.
 

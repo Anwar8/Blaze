@@ -64,6 +64,10 @@ std::map<tpetra_global_ordinal, std::pair<std::vector<tpetra_global_ordinal>, st
     std::map<tpetra_global_ordinal, std::pair<std::vector<tpetra_global_ordinal>, std::vector<real>>> row_keyed_value_map;
     for (spnz& triplet : triplets)
     {
+        if (triplet.row() >= 27 && triplet.row() < 30)
+        {
+            std::cout << "row,col " << triplet.row() << "," << triplet.col() << " has value " << triplet.value() << "." << std::endl;
+        }
         row_keyed_value_map[tpetra_global_ordinal(triplet.row())].first.push_back(tpetra_global_ordinal(triplet.col())); 
         row_keyed_value_map[tpetra_global_ordinal(triplet.row())].second.push_back(triplet.value()); 
     }
@@ -72,6 +76,7 @@ std::map<tpetra_global_ordinal, std::pair<std::vector<tpetra_global_ordinal>, st
 
 std::map<tpetra_global_ordinal, std::vector<tpetra_global_ordinal>> map_triplets_to_row_column_positions(std::vector<spnz>& triplets)
 {
+    std::cout << "map_triplets_to_row_column_positions: there are " << triplets.size() << " entries in glob_mesh.update_elements_states()." << std::endl;
     std::map<tpetra_global_ordinal, std::vector<tpetra_global_ordinal>> row_keyed_position_map;
     for (spnz& triplet : triplets)
     {
@@ -88,6 +93,8 @@ std::map<tpetra_global_ordinal, std::vector<tpetra_global_ordinal>> map_triplets
 void set_from_triplets(Teuchos::RCP<Tpetra::CrsMatrix<real>> A, std::vector<spnz>& triplets)
 {
     A->resumeFill();
+    // we have repeats in our row values, so we need to sum rather than replace. Therefore, we have to start by first zeroing the entire matrix.
+    A->setAllToScalar(0.0);
     auto row_map = map_triplets_to_rows(triplets);
     for (const auto& row_entry : row_map)
     {
@@ -100,7 +107,7 @@ void set_from_triplets(Teuchos::RCP<Tpetra::CrsMatrix<real>> A, std::vector<spnz
         Teuchos::ArrayView<const real> val_view(vals);
 
         // Replace existing values in CrsMatrix
-        A->replaceGlobalValues(row, col_view, val_view);
+        A->sumIntoGlobalValues(row, col_view, val_view);
     }
     A->fillComplete();
 }
@@ -114,7 +121,7 @@ void set_from_triplets(Teuchos::RCP<Tpetra::CrsMatrix<real>> A, std::vector<spnz
 void initialise_from_triplets(Teuchos::RCP<Tpetra::CrsGraph<>> A_graph, std::vector<spnz>& triplets)
 {
     auto row_col_map = map_triplets_to_row_column_positions(triplets);
-    std::cout << "there are " << row_col_map.size() << " entires in glob_mesh.update_elements_states()." << std::endl;
+    std::cout << "initialise_from_triplets: there are " << row_col_map.size() << " entries in glob_mesh.update_elements_states()." << std::endl;
     for (const auto& row_entry : row_col_map)
     {
         tpetra_global_ordinal row = row_entry.first;

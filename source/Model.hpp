@@ -52,13 +52,22 @@ class Model
             #endif
             // initialise all the loads from the load manager
             load_manager.initialise_loads();
+            glob_mesh.map_element_stiffnesses();
+
+            glob_mesh.calc_nodal_contributions_to_P();
+
 
             // based on the restraints and loads, we can now initialise the global matrices and establish element-stiffness mapping.
             // start with mapping stiffnesses as these are needed for initialising the sparse matrices (the stiffness matrix).
+            assembler.initialise_global_vectors(glob_mesh);
+            assembler.assemble_global_P(glob_mesh);
+
+            assembler.map_U_to_nodes(glob_mesh);
             glob_mesh.update_elements_states();
-            glob_mesh.map_element_stiffnesses();
-            assembler.initialise_global_matrices(glob_mesh);
-            
+            assembler.initialise_stiffness_matrix(glob_mesh);
+            std::cout << "The initial stiffness matrix K is:" << std::endl;
+            assembler.print_distributed_maths_object("K", Teuchos::VERB_EXTREME);
+            assembler.assemble_global_K_R(glob_mesh);
         }
 
 

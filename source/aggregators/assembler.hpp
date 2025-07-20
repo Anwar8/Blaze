@@ -58,18 +58,31 @@ class Assembler {
     public:
         friend class BasicSolver;
         /**
-         * @brief initialises the K, P, U, and dU sparse matrices and vectors to the sizes that correspond to the mesh being used.
+         * @brief initialises the K sparse matrix to the size that correspond to the mesh being used.
          * 
          * @param glob_mesh  the global_mesh object which contains information about the number of nodes and degrees of freedom.
          */
-        void initialise_global_matrices(GlobalMesh& glob_mesh) {
+        void initialise_stiffness_matrix(GlobalMesh& glob_mesh) {
             K_global_triplets.reserve(glob_mesh.nelems*36);
+            #ifndef WITH_MPI
+            K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
+            #else
+            setup_tpetra_crs_graph(glob_mesh);
+            K = Teuchos::RCP(new Tpetra::CrsMatrix<real>(matrix_graph));
+            #endif 
+        }
+        /**
+         * @brief initialises the P, U, G, and dU vectors to the sizes that correspond to the mesh being used.
+         * 
+         * @param glob_mesh  the global_mesh object which contains information about the number of nodes and degrees of freedom.
+         */
+        void initialise_global_vectors(GlobalMesh& glob_mesh) {
             R_global_triplets.reserve(glob_mesh.ndofs);
             P_global_triplets.reserve(glob_mesh.ndofs);
 
             #ifndef WITH_MPI
-            K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
             R = make_spd_mat(glob_mesh.ndofs, 1);
+            G = make_spd_mat(glob_mesh.ndofs, 1);
             P = make_spd_mat(glob_mesh.ndofs, 1);
             U = make_spd_vec(glob_mesh.ndofs);
             dU = make_spd_vec(glob_mesh.ndofs);            
@@ -77,19 +90,13 @@ class Assembler {
             setup_tpetra_vector_map(glob_mesh.get_ndofs(), glob_mesh.get_rank_ndofs());
             // The constructor for the vectors that follows prefills the vectors with zeros.
             R = Tpetra::MultiVector<real>(vector_map, 1);
+            G = Tpetra::MultiVector<real>(vector_map, 1);
             P = Tpetra::MultiVector<real>(vector_map, 1);
             U = Tpetra::MultiVector<real>(vector_map, 1);
             dU = Tpetra::MultiVector<real>(vector_map, 1);
-
-            setup_tpetra_crs_graph(glob_mesh);
-            K = Teuchos::RCP(new Tpetra::CrsMatrix<real>(matrix_graph));
-
             setup_interface_import(glob_mesh);
-            #endif
-
-           
+            #endif 
         }
-
         /**
          * @brief Set the up tpetra vector map object which is used for initialising the distributed vectors.
          * 
@@ -120,6 +127,47 @@ class Assembler {
             collect_global_K_triplets(glob_mesh);
             initialise_from_triplets(matrix_graph, K_global_triplets);
             matrix_graph->fillComplete();
+            #endif
+        }
+
+        /**
+         * @brief prints Tpetra::MultiVector or Tpetra::CrsMatrix or Tpetra::CrsGraph
+         * 
+         */
+        void print_distributed_maths_object(std::string what, Teuchos::EVerbosityLevel verbosity = Teuchos::VERB_HIGH)
+        {
+            #ifdef WITH_MPI
+            Teuchos::RCP<Teuchos::FancyOStream> out = Teuchos::getFancyOStream(Teuchos::rcpFromRef(std::cout));
+            if (what == "P")
+            {
+                P.describe(*out, verbosity);                
+            }
+            else if (what == "K")
+            {
+                K->describe(*out, verbosity);
+            }
+            else if (what == "U")
+            {
+                U.describe(*out, verbosity);                
+            }
+            else if (what == "dU")
+            {
+                dU.describe(*out, verbosity);           
+            }
+            else if (what == "R")
+            {
+                R.describe(*out, verbosity);                
+            }
+            else if (what == "G")
+            {
+                G.describe(*out, verbosity);                
+            }
+            else
+            {
+                std::cout << "Assembler:print_distributed_maths_object can only print U, dU, P, G, R, or K, but was asked to print " << what << std::endl;
+                exit(1);
+            }
+
             #endif
         }
 
@@ -188,6 +236,10 @@ class Assembler {
             }
             #ifdef WITH_MPI
             set_from_triplets(P, P_global_triplets, glob_mesh.rank_starting_nz_i);
+            if (VERBOSE)
+            {
+                print_distributed_maths_object("P");
+            }
             #else
             P.setFromTriplets(P_global_triplets.begin(), P_global_triplets.end());
             P.makeCompressed();
@@ -206,6 +258,8 @@ class Assembler {
             {   
                 elem->insert_global_stiffness_triplets(K_global_triplets);
             }
+
+            std::cout << "Assembler::collect_global_K_triplets: there are " << K_global_triplets.size() << " triplets that were collected from the elements." << std::endl;
         }
 
         /**
@@ -234,6 +288,10 @@ class Assembler {
             #ifdef WITH_MPI
             set_from_triplets(R, R_global_triplets);
             set_from_triplets(K, K_global_triplets);
+            if (VERBOSE)
+            {
+                print_distributed_maths_object("K");
+            }
             #else
             K.setFromTriplets(K_global_triplets.begin(), K_global_triplets.end());
             K.makeCompressed();
@@ -261,6 +319,7 @@ class Assembler {
          */
         void setup_interface_import(GlobalMesh& glob_mesh)
         {
+            #ifdef WITH_MPI
             std::vector<unsigned> interface_dofs;
             // the presizing is too big as it does not account for inactive DoFs, but is better than trying to resize the vector many times over. The big size is not an issue because I expect only a few interface nodes anyway!
             interface_dofs.reserve(glob_mesh.interface_node_vector.size()*6);
@@ -282,6 +341,7 @@ class Assembler {
             interface_importer = Teuchos::rcp(new Tpetra::Import<>(vector_map, interface_map));
             // since it is initialisation, the Tpetra::CombineMode is INSERT.
             interface_U.doImport(U, *interface_importer, Tpetra::INSERT);
+            #endif
         }
 
         /**

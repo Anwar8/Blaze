@@ -115,7 +115,7 @@ class Node {
          */
         int const get_num_row_contributions() 
         {
-            return 2*ndof + std::max((get_num_connected_elements() - 1),0)*2*ndof;
+            return ndof + get_num_connected_elements()*ndof;
         }
         /**
          * @brief Set the nz_i to a value, and calls \ref update_dofs_numbers.
