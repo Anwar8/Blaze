@@ -41,13 +41,13 @@ class Assembler {
         Teuchos::RCP<Tpetra::Import<>> interface_importer; /**< the importer object that is meant for communicating the \f$\boldsymbol{U}\f$ values on different nodes and ranks. */
 
         Teuchos::RCP<Tpetra::CrsMatrix<real>> K;
-        Tpetra::Vector<real> P;
-        Tpetra::Vector<real> R;
-        Tpetra::Vector<real> G;
-        Tpetra::Vector<real> U;
-        Tpetra::Vector<real> dU;
+        Tpetra::MultiVector<real> P;
+        Tpetra::MultiVector<real> R;
+        Tpetra::MultiVector<real> G;
+        Tpetra::MultiVector<real> U;
+        Tpetra::MultiVector<real> dU;
 
-        Tpetra::Vector<real> interface_U; /**< the interface version of the U vector.*/
+        Tpetra::MultiVector<real> interface_U; /**< the interface version of the U vector.*/
             
         #endif
 
@@ -76,10 +76,10 @@ class Assembler {
             #else
             setup_tpetra_vector_map(glob_mesh.get_ndofs(), glob_mesh.get_rank_ndofs());
             // The constructor for the vectors that follows prefills the vectors with zeros.
-            R = Tpetra::Vector<real>(vector_map);
-            P = Tpetra::Vector<real>(vector_map);
-            U = Tpetra::Vector<real>(vector_map);
-            dU = Tpetra::Vector<real>(vector_map);
+            R = Tpetra::MultiVector<real>(vector_map, 1);
+            P = Tpetra::MultiVector<real>(vector_map, 1);
+            U = Tpetra::MultiVector<real>(vector_map, 1);
+            dU = Tpetra::MultiVector<real>(vector_map, 1);
 
             setup_tpetra_crs_graph(glob_mesh);
             K = Teuchos::RCP(new Tpetra::CrsMatrix<real>(matrix_graph));
@@ -278,7 +278,7 @@ class Assembler {
             }
             Teuchos::Array<tpetra_global_ordinal> interface_dofs_array(interface_dofs.size());
             interface_map = Teuchos::rcp(new Tpetra::Map<>(INVALID, interface_dofs_array, 0, vector_map->getComm()));
-            interface_U = Tpetra::Vector<real>(interface_map);
+            interface_U = Tpetra::MultiVector<real>(interface_map, 1);
             interface_importer = Teuchos::rcp(new Tpetra::Import<>(vector_map, interface_map));
             // since it is initialisation, the Tpetra::CombineMode is INSERT.
             interface_U.doImport(U, *interface_importer, Tpetra::INSERT);
@@ -405,7 +405,10 @@ class Assembler {
         bool check_convergence(real tolerance)
         {
             #ifdef WITH_MPI
-            G_max = G.norm2();
+            // had some trouble with the types for the norms, so I used copilot for help with typing here.
+            Kokkos::View<double*, Kokkos::HostSpace> norms("norms", 1);
+            G.norm2(norms);
+            G_max = norms(0); 
             #else
             G_max = std::sqrt(calc_l2_norm(G));
             #endif

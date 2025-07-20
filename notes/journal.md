@@ -36,6 +36,14 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 20 July
+Started by rebuilding `Trilinos` with the command:
+```console
+cmake -DTPL_ENABLE_MPI=ON -DMPI_BASE_DIR=$(brew --prefix open-mpi) -DCMAKE_OSX_ARCHITECTURES=arm64 -DTrilinos_ENABLE_Tpetra=ON -DTrilinos_ENABLE_Amesos2=ON -DCMAKE_CXX_COMPILER=/opt/homebrew/bin/mpicxx  -DCMAKE_INSTALL_PREFIX=../trilinos-install ..
+```
+
+I have now managed to compile `Blaze` with `Amesos2` solving with `klu2`, which required me to change all `Tpetra::Vector<>` objects with `Tpetra::MultiVector<>`.
+
 ### 19 July
 - Updated `check_convergence`.
 

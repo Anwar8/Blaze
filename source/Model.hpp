@@ -65,6 +65,7 @@ class Model
         void initialise_solution_parameters(real max_load_factor, int num_steps, real convergence_tolerance, int max_num_of_iterations)
         {
             solution_procedure.initialise_solution_parameters(max_load_factor, num_steps, convergence_tolerance, max_num_of_iterations);
+            solver.initialise_solver(assembler);
         }
 
         void solve(int logging_frequency = -1)
