@@ -33,6 +33,11 @@ class SolutionProcedure
         {
             time_keeper.log_timers(timers_names);
         }
+        void log_parallel_timers(std::vector<std::string> timers_names)
+        {
+            time_keeper.log_parallel_timers(timers_names);
+        }
+        
         
         void read_timers(std::vector<std::string> timers_names, std::string reference_timer = "")
         {

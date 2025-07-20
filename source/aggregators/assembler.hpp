@@ -259,7 +259,7 @@ class Assembler {
                 elem->insert_global_stiffness_triplets(K_global_triplets);
             }
 
-            std::cout << "Assembler::collect_global_K_triplets: there are " << K_global_triplets.size() << " triplets that were collected from the elements." << std::endl;
+            // std::cout << "Assembler::collect_global_K_triplets: there are " << K_global_triplets.size() << " triplets that were collected from the elements." << std::endl;
         }
 
         /**

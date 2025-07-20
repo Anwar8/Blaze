@@ -60,9 +60,27 @@ class DistributedModelFrameAssemblyTests : public ::testing::Test {
 
 TEST_F(DistributedModelFrameAssemblyTests, frame_mesh_vector_sizes)
 {   
-    std::cout << std::endl << std::endl;
-    std::cout << "The fully-assembled stiffness matrix K is:" << std::endl;
-    model.assembler.print_distributed_maths_object("K", Teuchos::VERB_EXTREME);
+    // std::cout << std::endl << std::endl;
+    // std::cout << "The fully-assembled stiffness matrix K is:" << std::endl;
+    // model.assembler.print_distributed_maths_object("K", Teuchos::VERB_EXTREME);
+
+    // // initialise solution parameters
+    real max_LF = 1;
+    int nsteps = 100;
+    real tolerance = 1e-2;
+    int max_iterations = 10;
+    model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
+    model.solve(1);
+    std::cout << "SECTION:Timing" << std::endl;
+    model.log_parallel_timers({"U_to_nodes_mapping", 
+                    "element_state_update", 
+                    "element_global_response",
+                    "assembly",
+                    "convergence_check",
+                    "dU_calculation",
+                    "material_state_update",
+                    "result_recording",
+                    "all"});
 
 
     if (num_ranks == 1)

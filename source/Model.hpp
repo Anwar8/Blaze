@@ -65,8 +65,8 @@ class Model
             assembler.map_U_to_nodes(glob_mesh);
             glob_mesh.update_elements_states();
             assembler.initialise_stiffness_matrix(glob_mesh);
-            std::cout << "The initial stiffness matrix K is:" << std::endl;
-            assembler.print_distributed_maths_object("K", Teuchos::VERB_EXTREME);
+            // std::cout << "The initial stiffness matrix K is:" << std::endl;
+            // assembler.print_distributed_maths_object("K", Teuchos::VERB_EXTREME);
             assembler.assemble_global_K_R(glob_mesh);
         }
 
@@ -121,6 +121,12 @@ class Model
         void log_timers(std::vector<std::string> timers_names)
         {
             solution_procedure.log_timers(timers_names);
+        }
+        
+
+        void log_parallel_timers(std::vector<std::string> timers_names)
+        {
+            solution_procedure.log_parallel_timers(timers_names);
         }
 
         void read_timers(std::vector<std::string> timers_names, std::string reference_timer = "")

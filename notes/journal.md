@@ -46,6 +46,8 @@ I have now managed to compile `Blaze` with `Amesos2` solving with `klu2`, which 
 
 I think the stiffness matrix is initialised and filled successfully now.
 
+I have found another bug - it appears that the interface node contributions are still being somehow being added as running the assembly tests on two ranks attempts to add contributions "90, 91, 92, 93, 94, 95" which are more than the 84 DoFs of this problem. These contribution numbers correspond to the contributions of node 16 at the start when it had been assumed all nodes have 6 DoFs. Otherwise, it appears that the solution procedure works correctly. I am very, very close.
+
 ### 19 July
 - Updated `check_convergence`.
 
