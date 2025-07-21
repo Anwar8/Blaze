@@ -56,8 +56,7 @@ class Scribe
 
         /**
          * @brief assigns nodes by ID to the \ref Scribe object. That is, the nodes that this object will track. Only assigns records to nodes owned by the curret rank. Also, updates \ref rank of this Scribe.
-         * 
-         * @tparam Container STL container that is compatible with standard STL iterators.
+         * @todo this function really should not update the rank of this Scribe.
          * @param node_ids the IDs of the nodes to be tracked.
          * @param glob_mesh the global mesh object that contains all the nodes of the model.
          */

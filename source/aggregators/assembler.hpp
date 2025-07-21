@@ -134,7 +134,7 @@ class Assembler {
          * @brief prints Tpetra::MultiVector or Tpetra::CrsMatrix or Tpetra::CrsGraph
          * 
          */
-        void print_distributed_maths_object(std::string what, Teuchos::EVerbosityLevel verbosity = Teuchos::VERB_HIGH)
+        void print_distributed_maths_object(std::string what, Teuchos::EVerbosityLevel verbosity = Teuchos::VERB_EXTREME)
         {
             #ifdef WITH_MPI
             Teuchos::RCP<Teuchos::FancyOStream> out = Teuchos::getFancyOStream(Teuchos::rcpFromRef(std::cout));
@@ -171,29 +171,6 @@ class Assembler {
             #endif
         }
 
-        /**
-         * @brief prints the force vector P
-         * 
-         */
-        void print_P()
-        {
-            #ifdef WITH_MPI
-            Teuchos::RCP<Teuchos::FancyOStream> out = Teuchos::getFancyOStream(Teuchos::rcpFromRef(std::cout));
-            P.describe(*out, Teuchos::VERB_HIGH);
-            #endif
-        }
-
-        /**
-         * @brief prints the stiffness matrix to the output stream
-         * 
-         */
-        void print_stiffness()
-        {
-            #ifdef WITH_MPI
-            Teuchos::RCP<Teuchos::FancyOStream> out = Teuchos::getFancyOStream(Teuchos::rcpFromRef(std::cout));
-            K->describe(*out, Teuchos::VERB_HIGH);
-            #endif
-        }
         /**
          * @brief prints \ref stiffness_map to the output stream
          * 
@@ -292,6 +269,15 @@ class Assembler {
             {
                 print_distributed_maths_object("K");
             }
+            if (VERBOSE_NLB)
+            {
+                std::cout << "The R vector is:" << std::endl;
+                print_distributed_maths_object("R");
+                std::cout << std::endl;
+                std::cout << "and P vector is:" << std::endl;
+                print_distributed_maths_object("P");
+                std::cout << std::endl;
+            }
             #else
             K.setFromTriplets(K_global_triplets.begin(), K_global_triplets.end());
             K.makeCompressed();
@@ -382,6 +368,10 @@ class Assembler {
                     }
                     nzi += i;
                 }
+                if (VERBOSE_NLB)
+                {
+                    glob_mesh.read_nodal_U();
+                }
             #else
             #ifdef KOKKOS
                 Kokkos::parallel_for( "Assembler::map_U_to_nodes", glob_mesh.node_vector.size(), KOKKOS_LAMBDA (int i) {
@@ -431,6 +421,12 @@ class Assembler {
         void calculate_out_of_balance() {
             #ifdef WITH_MPI
             G.update(1.0, R, -1.0, P, 0.0);
+            if (VERBOSE_NLB)
+            {
+                std::cout << "The G (out of balance) vector is:" << std::endl;
+                print_distributed_maths_object("G");
+                std::cout << std::endl;
+            }
             #else
             G = R - P;
             if (VERBOSE_NLB)
@@ -445,7 +441,19 @@ class Assembler {
          */
         void increment_U() {
             #ifdef WITH_MPI
+            if (VERBOSE_NLB)
+            {
+                std::cout << "U before update is " << std::endl;
+                print_distributed_maths_object("U");
+                std::cout << std::endl;
+            }
             U.update(1.0, dU, 1.0);
+            if (VERBOSE_NLB)
+            {
+                std::cout << "U after update is " << std::endl;
+                print_distributed_maths_object("U");
+                std::cout << std::endl;
+            }
             #else
             if (VERBOSE_NLB)
                 std::cout << "U before update is " << std::endl << U << std::endl;
@@ -466,9 +474,9 @@ class Assembler {
         {
             #ifdef WITH_MPI
             // had some trouble with the types for the norms, so I used copilot for help with typing here.
-            Kokkos::View<double*, Kokkos::HostSpace> norms("norms", 1);
+            Teuchos::Array<typename Tpetra::MultiVector<>::mag_type> norms(1);
             G.norm2(norms);
-            G_max = norms(0); 
+            G_max = norms[0];
             #else
             G_max = std::sqrt(calc_l2_norm(G));
             #endif

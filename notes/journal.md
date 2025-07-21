@@ -46,7 +46,30 @@ I have found the problem. Although I am calling `map_element_stiffnesses` in `in
 
 There was an issue with the `TimeKeeper` which was not communicating results correctly. It turned out that all `TimeKeeper` objects had a rank of 0, as the function `initialise_parallel_keeper` was never called. This has been rectified. It is also worth noting that since the `TimeKeeper` does a call to `MPI_Gather`, the fact that all of them had a rank of 0 likely resulted in communication errors which arose when I ran the program with 3 ranks. This resulted in an expected error and breakdown of program. This behaviour cannot be replicated anymore after the `TimeKeeper` `rank` and `num_ranks` were correctly initialised. Note that `DistributedModelFrameAssemblyTests` still fail at 3 or more ranks but that's because these assembly tests are not yet setup correctly. This does not matter at this point however, as this test is really primarily for me to check if `Blaze` would run at all (i.e. correctly assemble the matrices, and then proceed through a solution without much error). 
 
+I have implemented a plastic verification case under UDL. There are errors in the solution. 
+One error I caught is that there is a mistake in mapping the U vector across ranks. 
 
+When running on 2 ranks:
+```console
+Rank 1-owned node 6 has displacements: 10.376 0 25.2537 0 0 53.8308 
+Rank 0 interface node 6 has displacements: 26.3832 0 5.40737 0 0 9.21884 
+
+Rank 0-owned node 5 has displacements: 9.24314 0 25.202 0 0 20.5498 
+Rank 1 interface node 5 has displacements: 10.376 0 25.2537 0 0 53.8308
+
+Rank 0-owned node 1 has displacements: 0 0 0 0 0 26.3832 
+Rank 0-owned node 2 has displacements: 5.40737 0 9.21884 0 0 17.1278
+``` 
+As it can be seen above, it appears that the exchanged data is shifted so that interface node 6 on rank 0 is getting the data from nodes 1 and 2, while the interface node 5 on rank 1 is getting the data from node 6 on the same rank.
+- [ ] Need to correct `setup_interface_import`.
+
+
+For the next step of debugging, I need to also make sure that the stiffness matrix is being correctly mapped. I have to rerun the programme with a smaller mesh (about 3 or 4 elements), and check if the mapping is done correctly. That is, the mapping of the stiffness matrix.
+
+- [x] Check mapping of $\boldsymbol{P}$.
+- [ ] Check mapping of $\boldsymbol{R}$.
+- [ ] Check mapping of $\boldsymbol{G}$.
+- [ ] Check mapping of $\boldsymbol{K}$.
 ### 20 July
 Started by rebuilding `Trilinos` with the command:
 ```console

@@ -637,6 +637,34 @@ class GlobalMesh {
             }
 
         }
+        /**
+         * @brief checks if a given node is owned by this rank.
+         * 
+         * @param node_record_id the node record_ID that is being checked.
+         * @return true if the calling rank owns this node.
+         * @return false if the calling rank does not own this node.
+         */
+        bool owns_node_record_id(unsigned node_record_id)
+        {
+            return node_id_set_owned_by_rank.find(node_record_id) != node_id_set_owned_by_rank.end();
+        }
+
+        void read_nodal_U()
+        {
+            for (auto node: node_vector)
+            {
+                auto displacements = node->get_nodal_displacements();
+                std::cout << "Rank " << rank << "-owned node " << node->get_id() << " has displacements: "; 
+                print_container(displacements);
+            }
+
+            for (auto node: interface_node_vector)
+            {
+                auto displacements = node->get_nodal_displacements();
+                std::cout << "Rank " << rank << " interface node " << node->get_id() << " has displacements: "; 
+                print_container(displacements);
+            }
+        }
 
         /**
          * @brief populates the map node_element_map with connectivity information of the list of elements that are connected to each node. This is the inverse of \ref elem_nodes_vector which has pairs of element ID and the nodes that connect to the element.

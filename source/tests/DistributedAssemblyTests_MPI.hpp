@@ -103,4 +103,86 @@ TEST_F(DistributedModelFrameAssemblyTests, frame_mesh_vector_sizes)
     }
 }
   
+
+class DistributedModelSimplySuportedUdlPlastic : public ::testing::Test {
+    public:
+      Model model;
+      CommonSectionDefinitions common;
+      int divisions = 10;
+      real beam_length = 5.0;
+      real y_udl = -1e4; // N/m
+      
+      unsigned mid_node = (divisions/2) + 1;
+      std::vector<unsigned> loaded_nodes = std::vector<unsigned>(divisions - 1);
+      std::set<unsigned> end_nodes = {1, unsigned(1 + divisions)};
+      int tracked_dof = 2;
+      
+      int rank = 0;
+      int num_ranks = 0;
+      
+      NodalRestraint end_restraints_1;
+      NodalRestraint end_restraints_2;
+      NodalRestraint out_of_plane_restraint; 
+      
+      void SetUp() override {
+          common.initialise_section();
+          get_my_rank(rank);
+          get_num_ranks(num_ranks);
+          model.create_distributed_line_mesh(divisions, {{0.0, 0.0, 0.0}, {beam_length, 0.0, 0.0}}, NonlinearPlastic, common.I_section);
+
+          std::set<unsigned> end_nodes_1 = {1};
+          std::set<unsigned> end_nodes_2 = {unsigned(1 + divisions)};
+          end_restraints_1.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4}); // restrain x translation, x rotation, y translation, y rotation, and z translation
+          end_restraints_1.assign_distributed_nodes_by_record_id(end_nodes_1, model.glob_mesh);
+          
+          end_restraints_2.assign_dofs_restraints(std::set<int>{1, 2, 3, 4}); // restrain x rotation, y translation, y 
+          end_restraints_2.assign_distributed_nodes_by_record_id(end_nodes_2, model.glob_mesh);
+
+          // create the loaded and restrained intermediate nodes
+          std::iota(loaded_nodes.begin(), loaded_nodes.end(), 2);
+          out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4}); // restrain x rotation, y rotation, and z translation
+          out_of_plane_restraint.assign_distributed_nodes_by_record_id(loaded_nodes, model.glob_mesh);
+
+          model.restraints.push_back(end_restraints_1);
+          model.restraints.push_back(end_restraints_2);
+          model.restraints.push_back(out_of_plane_restraint);
+
+        // calculate and apply load
+          real y_load = y_udl*beam_length/(divisions - 1);
+          model.load_manager.create_a_distributed_nodal_load_by_id(loaded_nodes, std::set<int>{tracked_dof}, std::vector<real>{y_load}, model.glob_mesh);
+        
+        // track mid-point
+          model.scribe.track_distributed_nodes_by_id(rank ,std::vector<unsigned>{mid_node}, std::set<int>{tracked_dof}, model.glob_mesh);
+        // initialise solver and solve
+          model.initialise_restraints_n_loads();
+          model.initialise_solution_parameters(1.0, 100, 1e-3, 10);
+          model.solve(-1);
+            
+        }
+      void TearDown() override {
+  }
+  };
+
+  TEST_F(DistributedModelSimplySuportedUdlPlastic, CheckMidSpanDeflection)
+  {
+    if (model.glob_mesh.owns_node_record_id(mid_node))
+    {
+        std::shared_ptr<Node> node = model.glob_mesh.get_node_by_id(mid_node);
+  
+        std::vector<Record> record_library = model.scribe.get_record_library();
+        Record record = record_library.back();
+    
+        std::array<std::vector<real>, 6> recorded_data = record.get_recorded_data(); 
+        std::vector<real> disp_data = recorded_data[tracked_dof];
+
+        // $\delta = \frac{5 w L^4}{384 EI} $
+        real correct_disp = 5*y_udl*std::pow(beam_length, 4)/(384*(YOUNGS_MODULUS)*(common.moment_of_inertia));
+        real tolerance = std::abs(PERCENT_TOLERANCE*correct_disp);
+        EXPECT_NEAR(disp_data.back(), correct_disp, tolerance);
+    } else {
+        GTEST_SKIP() << "Rank " << rank  << " does not own the node; skipping check.";
+    }
+
+  }
+
 #endif 
