@@ -174,6 +174,7 @@ class TimeKeeper
         {
             int num_timers = timers_names.size();
             std::vector<double> durations_vector(num_timers*num_ranks, 0.0);
+            std::cout << "Rank " << rank << " tried to collect " << num_timers << " timers." << std::endl;
 
             // Write the recorded durations into the duration_vector
             for (int timer_i = 0; timer_i < num_timers; ++timer_i)
@@ -191,8 +192,7 @@ class TimeKeeper
             for (int rank_i = 0; rank_i <num_ranks; ++rank_i)
             {
               rank_durations_map[rank_i] = std::vector<double>(durations_vector.begin()+rank_i*num_timers, durations_vector.begin()+(rank_i + 1)*num_timers);   
-            }
-            
+            }    
             }
         }
 

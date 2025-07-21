@@ -36,6 +36,17 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 21 July
+I need to make sure that the interface nodes also know that a boundary condition has been added, and that they must be restrained in the same way. For that to happen:
+1. Make sure that boundary conditions are applied to the interface nodes.
+2. Make sure that the node's position vectors is being updated after BC application.
+3. Make sure that `nz_i` is exchanged so the DoF numbers are correct.
+
+I have found the problem. Although I am calling `map_element_stiffnesses` in `initialise_restraints_n_loads`, this needs to happen *after* updating the DoF numbering which takes place in `count_distributed_dofs` *and* after the new numbering has been communicated to the interface nodes via `exchange_interface_nodes_nz_i`. This has now been wrapped in a new function called `count_and_exchange_distributed_dofs`. This now allows for correct construction of the stiffness matrix.
+
+There was an issue with the `TimeKeeper` which was not communicating results correctly. It turned out that all `TimeKeeper` objects had a rank of 0, as the function `initialise_parallel_keeper` was never called. This has been rectified. It is also worth noting that since the `TimeKeeper` does a call to `MPI_Gather`, the fact that all of them had a rank of 0 likely resulted in communication errors which arose when I ran the program with 3 ranks. This resulted in an expected error and breakdown of program. This behaviour cannot be replicated anymore after the `TimeKeeper` `rank` and `num_ranks` were correctly initialised. Note that `DistributedModelFrameAssemblyTests` still fail at 3 or more ranks but that's because these assembly tests are not yet setup correctly. This does not matter at this point however, as this test is really primarily for me to check if `Blaze` would run at all (i.e. correctly assemble the matrices, and then proceed through a solution without much error). 
+
+
 ### 20 July
 Started by rebuilding `Trilinos` with the command:
 ```console

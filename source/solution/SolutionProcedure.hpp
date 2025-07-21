@@ -33,7 +33,7 @@ class SolutionProcedure
         {
             time_keeper.log_timers(timers_names);
         }
-        void log_parallel_timers(std::vector<std::string> timers_names)
+        void log_parallel_timers(std::vector<std::string>& timers_names)
         {
             time_keeper.log_parallel_timers(timers_names);
         }
@@ -65,6 +65,12 @@ class SolutionProcedure
                                     "result_recording"});
         }
 
+        void initialise_parallel_timer(int rank, int num_ranks)
+        {
+            #ifdef WITH_MPI
+            time_keeper.initialise_parallel_keeper(rank, num_ranks);
+            #endif
+        }
         void solve(GlobalMesh& glob_mesh, Assembler& assembler, BasicSolver& solver, LoadManager& load_manager, Scribe& scribe, int logging_frequency)
         {
             time_keeper.start_timer("all");

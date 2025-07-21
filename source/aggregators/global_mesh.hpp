@@ -85,6 +85,11 @@ class GlobalMesh {
         std::set<unsigned> interface_node_id_set_on_rank; //**<a std::set of node ids for those that are interfaces on this rank. */
         std::set<unsigned> node_id_set_owned_by_rank; //**<a std::set of node ids for those that are owned by this rank. */
 
+
+        std::map<int, std::set<unsigned>> wanted_by_neighbour_rank_node_id_map;/**<a std::map that maps neighbour rank to a set of node IDs that this neighbour wants from the current rank. */
+        std::map<int, std::set<unsigned>> wanted_from_neighbour_rank_node_id_map; /**<a std::map that maps neighbour rank to a set of node IDs that the current rank wants from this neighbour. */
+
+
         FrameMesh frame;
         
         // SectionBaseClass section; /**< a BasicSection object that is used by all elements in the mesh.*/
@@ -209,6 +214,10 @@ class GlobalMesh {
             get_my_rank(rank);
             get_num_ranks(num_ranks);
         }
+
+        int get_mesh_num_ranks() {return num_ranks;}
+        int get_mesh_rank() {return rank;}
+
 
         void create_frame_mesh(int nbays, int nfloors, real bay_length, real floor_height, int beam_divisions, int column_divisions, ElementType elem_type, BeamColumnFiberSection& sect)
         {
@@ -744,8 +753,6 @@ class GlobalMesh {
 
             // Find the node IDs that each rank may want from our nodes.
 
-            std::map<int, std::set<unsigned>> wanted_by_neighbour_rank_node_id_map;
-            std::map<int, std::set<unsigned>> wanted_from_neighbour_rank_node_id_map;
             find_nodes_wanted_by_neighbours(wanted_by_neighbour_rank_node_id_map, wanted_from_neighbour_rank_node_id_map, interface_elem_id_set_on_rank, interface_node_id_set_on_rank, elem_nodes_vector_on_rank, node_rank_map);
             
             // Add the nodes that officially belong to this rank to the rank nodes coords vector.
@@ -848,6 +855,16 @@ class GlobalMesh {
                 std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
                 sleep(1);
             }
+            // Is there a point in calling the count and exchange funciton here, or should it only be called by the `Model`?
+            count_and_exchange_distributed_dofs();
+        }
+
+        /**
+         * @brief counts the distributed DoFs and exchanges them updating the interface node DoFs as well.
+         * 
+         */
+        void count_and_exchange_distributed_dofs()
+        {
             count_distributed_dofs();
             if (VERBOSE)
             {

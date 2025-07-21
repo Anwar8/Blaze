@@ -47,7 +47,7 @@ class Model
                 {
                     restraint.apply_restraints();
                 }
-                glob_mesh.count_distributed_dofs();
+                glob_mesh.count_and_exchange_distributed_dofs();
                 glob_mesh.find_max_num_stiffness_contributions();
             #endif
             // initialise all the loads from the load manager
@@ -73,6 +73,7 @@ class Model
 
         void initialise_solution_parameters(real max_load_factor, int num_steps, real convergence_tolerance, int max_num_of_iterations)
         {
+            solution_procedure.initialise_parallel_timer(glob_mesh.get_mesh_rank(), glob_mesh.get_mesh_num_ranks());
             solution_procedure.initialise_solution_parameters(max_load_factor, num_steps, convergence_tolerance, max_num_of_iterations);
             solver.initialise_solver(assembler);
         }
@@ -123,7 +124,12 @@ class Model
             solution_procedure.log_timers(timers_names);
         }
         
-
+        /**
+         * @brief calls `log_parallel_timers` from the \ref TimeKeeper stored in \ref SolutionProcedure.
+         * @warning cannot be 
+         * 
+         * @param timers_names 
+         */
         void log_parallel_timers(std::vector<std::string> timers_names)
         {
             solution_procedure.log_parallel_timers(timers_names);
