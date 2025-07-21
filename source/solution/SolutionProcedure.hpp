@@ -151,6 +151,15 @@ class SolutionProcedure
                         std::cout << std::endl << "Entering solver.solve_for_deltaU(assembler);" << std::endl;
                         #endif
                         solver.solve_for_deltaU(assembler);
+                        #if VERBOSE_NLB
+                        int rank;
+                        get_my_rank(rank);
+                        if (rank==0)
+                        {
+                            std::cout << "Solver found dU vector is:" << std::endl;
+                            assembler.print_distributed_maths_object("dU");
+                        }
+                        #endif
                         #if VERBOSE_SLN
                         std::cout << std::endl << "Entering assembler.increment_U();" << std::endl;
                         #endif

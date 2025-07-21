@@ -263,7 +263,7 @@ class Assembler {
             }
 
             #ifdef WITH_MPI
-            set_from_triplets(R, R_global_triplets);
+            set_from_triplets(R, R_global_triplets, glob_mesh.rank_starting_nz_i);
             set_from_triplets(K, K_global_triplets);
             if (VERBOSE)
             {
@@ -418,6 +418,7 @@ class Assembler {
             #endif
         }
 
+
         /**
          * @brief calculates out of balance forces from \f$\boldsymbol{G} =  \boldsymbol{R} - \boldsymbol{P}\f$.
          * 
@@ -448,14 +449,14 @@ class Assembler {
             if (VERBOSE_NLB)
             {
                 std::cout << "U before update is " << std::endl;
-                print_distributed_maths_object("U");
+                print_distributed_maths_object("U", Teuchos::VERB_EXTREME);
                 std::cout << std::endl;
             }
-            U.update(1.0, dU, 1.0);
+            U.update(-1.0, dU, 1.0);
             if (VERBOSE_NLB)
             {
                 std::cout << "U after update is " << std::endl;
-                print_distributed_maths_object("U");
+                print_distributed_maths_object("U", Teuchos::VERB_EXTREME);
                 std::cout << std::endl;
             }
             #else

@@ -25,9 +25,10 @@ const Tpetra::global_size_t INVALID = Teuchos::OrdinalTraits<Tpetra::global_size
  */
 void set_from_triplets(Tpetra::MultiVector<real>& V, std::vector<spnz>& triplets)
 {
+    V.putScalar(0.0);
     for (spnz& triplet : triplets)
     {
-        V.replaceGlobalValue(triplet.row(), 0, triplet.value());
+        V.sumIntoGlobalValue(triplet.row(), 0, triplet.value());
     }
 }
 
@@ -41,9 +42,10 @@ void set_from_triplets(Tpetra::MultiVector<real>& V, std::vector<spnz>& triplets
  */
 void set_from_triplets(Tpetra::MultiVector<real>& V, std::vector<spnz>& triplets, int const nz_i)
 {
+    V.putScalar(0.0);
     for (spnz& triplet : triplets)
     {
-        V.replaceLocalValue(triplet.row() - nz_i, 0, triplet.value());
+        V.sumIntoLocalValue(triplet.row() - nz_i, 0, triplet.value());
     }
 }
 

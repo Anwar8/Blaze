@@ -14,7 +14,7 @@ This journal contains the day-to-day project management and notes taken. It was 
 ### WP6: Thesis writing - 05 weeks - due 18/08/2025
 
 ## Known Bugs
-- [ ] Unable to factorise matrix - this happens for the Plastic Cantilever test where it takes multiple runs to correctly proceed.
+- [ ] Unable to factorise matrix - this happens for the Plastic Cantilever test where it takes multiple runs to correctly proceed. **Update:** This problem persists and is amplified by the parallel tests where `nan` values are returned rather than a failure to factorise. It also resolves after a couple of runs.
 - [ ] "could not find item with id 1 in vector." Occurs occasionally, and prevents running the model. As with the matrix factorisation, this resolves after running a couple of times. **Potentially fixed on 8 December by rewriting `get_id_iterator` in `basic_utilities.hpp`**
 - [ ] Number of used threads cannot be output with `read_parallelism_information` when using the `C++ Threads` backend for `Kokkos`. This returns a 0. 
 
@@ -61,17 +61,22 @@ Rank 0-owned node 1 has displacements: 0 0 0 0 0 26.3832
 Rank 0-owned node 2 has displacements: 5.40737 0 9.21884 0 0 17.1278
 ``` 
 As it can be seen above, it appears that the exchanged data is shifted so that interface node 6 on rank 0 is getting the data from nodes 1 and 2, while the interface node 5 on rank 1 is getting the data from node 6 on the same rank.
-- [ ] Need to correct `setup_interface_import`.
+- [x] Need to correct `setup_interface_import`.
 
 
 For the next step of debugging, I need to also make sure that the stiffness matrix is being correctly mapped. I have to rerun the programme with a smaller mesh (about 3 or 4 elements), and check if the mapping is done correctly. That is, the mapping of the stiffness matrix.
 
 - [x] Check mapping of $\boldsymbol{P}$.
-- [ ] Check mapping of $\boldsymbol{R}$.
-- [ ] Check mapping of $\boldsymbol{G}$.
+- [x] Check mapping of $\boldsymbol{R}$.
+- [x] Check mapping of $\boldsymbol{G}$.
 - [ ] Check mapping of $\boldsymbol{K}$.
 
 I have corrected `setup_interface_import`. The problem was that I prepared the array for exchanging the DoFs, but I never actually put in the DoF indices into it! I added a loop that took the DoF indices from a `std::vector` and placed them in the `Teuchos::Array` that is used to construct the `Tpetra::Map<>` object.
+
+Mapping was done incorrectly via the `tpetra_wrappers.hpp` function `set_from_triplets`. This function was replacing value, which when considering that tehre are multiple triplets that add into the same row and column indices, results in *overwriting* the values rather than properly *asssembling* them. By fixing this issue, **`Blaze` now runs in parallel and produces correct results!**
+
+Now, I am ready to compile on `Cirrus` and maybe `Archer2`, profile the code, and write the thesis. I am feeling great, but god am I tired!
+
 ### 20 July
 Started by rebuilding `Trilinos` with the command:
 ```console
