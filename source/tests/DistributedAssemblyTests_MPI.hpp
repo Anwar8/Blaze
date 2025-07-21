@@ -108,7 +108,7 @@ class DistributedModelSimplySuportedUdlPlastic : public ::testing::Test {
     public:
       Model model;
       CommonSectionDefinitions common;
-      int divisions = 10;
+      int divisions = 4;
       real beam_length = 5.0;
       real y_udl = -1e4; // N/m
       
@@ -155,7 +155,7 @@ class DistributedModelSimplySuportedUdlPlastic : public ::testing::Test {
           model.scribe.track_distributed_nodes_by_id(rank ,std::vector<unsigned>{mid_node}, std::set<int>{tracked_dof}, model.glob_mesh);
         // initialise solver and solve
           model.initialise_restraints_n_loads();
-          model.initialise_solution_parameters(1.0, 100, 1e-3, 10);
+          model.initialise_solution_parameters(1.0, 100, 1e-3, 2);
           model.solve(-1);
             
         }

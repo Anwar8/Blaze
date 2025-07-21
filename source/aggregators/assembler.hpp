@@ -322,6 +322,10 @@ class Assembler {
                 }
             }
             Teuchos::Array<tpetra_global_ordinal> interface_dofs_array(interface_dofs.size());
+            for (int k = 0; k < interface_dofs.size(); ++k) {
+                interface_dofs_array[k] = interface_dofs[k];
+            }
+            // cyclicMap = rcp (new map_type (numGlobalEntries, elementList, indexBase, comm));
             interface_map = Teuchos::rcp(new Tpetra::Map<>(INVALID, interface_dofs_array, 0, vector_map->getComm()));
             interface_U = Tpetra::MultiVector<real>(interface_map, 1);
             interface_importer = Teuchos::rcp(new Tpetra::Import<>(vector_map, interface_map));
@@ -356,7 +360,7 @@ class Assembler {
                 // since this is a call happening often, the Tpetra::CombineMode is REPLACE since the elements should already exist inplace.
                 interface_U.doImport(U, *interface_importer, Tpetra::REPLACE);
 
-                auto interface_U_local_view = get_1d_view(U);
+                auto interface_U_local_view = get_1d_view(interface_U);
                 nzi = 0;
                 for (auto& node: glob_mesh.interface_node_vector)
                 {

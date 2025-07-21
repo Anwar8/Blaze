@@ -7,6 +7,6 @@
 #define VERBOSE_STIFFNESSES 0
 #define VERBOSE_NLB 1
 #define LF_VERBOSE 1
-#define ELEMENT_VERBOSE 0
-
+#define ELEMENT_VERBOSE 1
+#define WITH_MPI
 #endif

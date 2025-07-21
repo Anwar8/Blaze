@@ -70,6 +70,8 @@ For the next step of debugging, I need to also make sure that the stiffness matr
 - [ ] Check mapping of $\boldsymbol{R}$.
 - [ ] Check mapping of $\boldsymbol{G}$.
 - [ ] Check mapping of $\boldsymbol{K}$.
+
+I have corrected `setup_interface_import`. The problem was that I prepared the array for exchanging the DoFs, but I never actually put in the DoF indices into it! I added a loop that took the DoF indices from a `std::vector` and placed them in the `Teuchos::Array` that is used to construct the `Tpetra::Map<>` object.
 ### 20 July
 Started by rebuilding `Trilinos` with the command:
 ```console
