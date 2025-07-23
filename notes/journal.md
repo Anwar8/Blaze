@@ -61,6 +61,18 @@ PMPI_Gather(403): MPI_Gather(sbuf=0x2c503f0, scount=5, MPI_DOUBLE, rbuf=0x2c503f
 PMPI_Gather(338): Buffers must not be aliased
 ```
 Which may be due to the way the gather is done on the same buffer that is used for sending. I have separated the two, and while this runs on my MacBook, I am now going to test on `Cirrus`.
+
+On `Cirrus`:
+- [x] `TimeKeeperParallelTests` on 1 - 5 cores.
+- [x] `DistributedModelFrameManagersTests` on 1 - 5 cores.
+- [x] `DistributedLineMeshTests` on 1 - 5 cores.
+- [x] `DistributedModelSimplySuportedUdlPlastic` on 1 - 5 cores.
+- [x] `DistributedModelSimplySuportedUdlElastic` on 1 - 5 cores.
+- [x] `DistributedModelLineMeshTests` on 1 - 5 cores.
+- [x] `DistributedModelFrameMeshTests` on 1 - 5 cores.
+
+However, and interestingly, when these tests are all run in one go using the command `./test_blaze N` where `N` is replaced by number of cores, the test `DistributedModelSimplySuportedUdlPlastic.CheckMidSpanDeflection` fails. Additionally, when running all these test suites together, the tests fail catastrophically. I believe this must be due to incorrect setup of the `MPI` test environment which is not correctly calling `MPI_Finalize()`. 
+
 ### 23 July
 I have started to build `Trilinos` on `Cirrus`. `Kokkos` does not support `Intel` compilers, however, so I had to stick to `GCC` compilers. These are still available via the `Intel` modules: `intel-20.4\compilers`, `intel-20.4\mpi`, `intel-20.4\cmkl`, and `cmake`. Note that it is required to load the `MKL` module to provide `BLAS` and `LAPACK` which are required for the install.
 ```shell
