@@ -36,6 +36,38 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 24 July
+Today, the first step is to compile `Blaze` on `Cirrus`. 
+
+The following line was added to `CMakeLists.txt`:
+```cmake
+ list(APPEND CMAKE_PREFIX_PATH  "/work/mdisspt/mdisspt/z2259894/Trilinos/trilinos-install/include")
+```
+replacing the original:
+```cmake
+list(APPEND CMAKE_PREFIX_PATH "/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install")
+```
+
+This `CMake` line does not seem to have done much as it did not really allow `CMake` to find `Trilinos` and thus failed to build. The following export was required before `Blaze` could be compiled correctly: 
+```shell
+export Trilinos_DIR="/work/mdisspt/mdisspt/z2259894/Trilinos/trilinos-install"
+```
+`GTest` was built before (check history in this journal), and did not need to be rebuilt. `Blaze` compiled correctly, and the last verification test was run correctly on up to 5 cores.
+
+The `TimeKeeperParallelTests` failed though, which is expected to be due to the error: 
+```shell
+Abort(403268609) on node 0 (rank 0 in comm 0): Fatal error in PMPI_Gather: Invalid buffer pointer, error stack:
+PMPI_Gather(403): MPI_Gather(sbuf=0x2c503f0, scount=5, MPI_DOUBLE, rbuf=0x2c503f0, rcount=5, MPI_DOUBLE, root=0, comm=MPI_COMM_WORLD) failed
+PMPI_Gather(338): Buffers must not be aliased
+```
+Which may be due to the way the gather is done on the same buffer that is used for sending. I have separated the two, and while this runs on my MacBook, I am now going to test on `Cirrus`.
+### 23 July
+I have started to build `Trilinos` on `Cirrus`. `Kokkos` does not support `Intel` compilers, however, so I had to stick to `GCC` compilers. These are still available via the `Intel` modules: `intel-20.4\compilers`, `intel-20.4\mpi`, `intel-20.4\cmkl`, and `cmake`. Note that it is required to load the `MKL` module to provide `BLAS` and `LAPACK` which are required for the install.
+```shell
+cmake -DTPL_ENABLE_MPI=ON -DTPL_ENABLE_MKL=ON -DTPL_MKL_INCLUDE_DIRS="${MKLROOT}/include" -DTPL_MKL_LIBRARIES="${MKLROOT}/lib/intel64/libmkl_rt.so" -DTPL_ENABLE_BLAS=ON -DTPL_ENABLE_LAPACK=ON -DTPL_BLAS_LIBRARIES="${MKLROOT}/lib/intel64/libmkl_rt.so" -DTPL_LAPACK_LIBRARIES="${MKLROOT}/lib/intel64/libmkl_rt.so" -DTrilinos_ENABLE_Tpetra=ON -DTrilinos_ENABLE_Amesos2=ON -DCMAKE_INSTALL_PREFIX=../trilinos-install ..
+```
+This is followed by `make install`, which should really have been done in a parallel way via `make -j8 install` given `Cirrus` has more cores than my MacBook. The installation of `Trilinos` with only `Kokkos`, `Teuchos`, `Tpetra`, and `Amesos2` took over 3 hours. That being said, `Trilinos` is now installed in `$work` on `Cirrus`. 
+
 ### 21 July
 I need to make sure that the interface nodes also know that a boundary condition has been added, and that they must be restrained in the same way. For that to happen:
 1. Make sure that boundary conditions are applied to the interface nodes.

@@ -174,6 +174,12 @@ class TimeKeeper
         {
             int num_timers = timers_names.size();
             std::vector<double> durations_vector(num_timers*num_ranks, 0.0);
+
+            std::vector<double> collected_durations_vector;
+            if (rank == 0)
+            {
+                collected_durations_vector.resize(num_timers*num_ranks, 0.0);
+            }
             std::cout << "Rank " << rank << " tried to collect " << num_timers << " timers." << std::endl;
 
             // Write the recorded durations into the duration_vector
@@ -183,7 +189,7 @@ class TimeKeeper
             }
 
             double* timer_data_start = durations_vector.data()+num_timers*rank;
-            MPI_Gather(timer_data_start, num_timers, MPI_DOUBLE, durations_vector.data(), num_timers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Gather(timer_data_start, num_timers, MPI_DOUBLE, collected_durations_vector.data(), num_timers, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
             if (rank == 0) 
             {
@@ -191,7 +197,7 @@ class TimeKeeper
             // fill out the rank_durations_map with content from the gatehred durations_vector
             for (int rank_i = 0; rank_i <num_ranks; ++rank_i)
             {
-              rank_durations_map[rank_i] = std::vector<double>(durations_vector.begin()+rank_i*num_timers, durations_vector.begin()+(rank_i + 1)*num_timers);   
+              rank_durations_map[rank_i] = std::vector<double>(collected_durations_vector.begin()+rank_i*num_timers, collected_durations_vector.begin()+(rank_i + 1)*num_timers);   
             }    
             }
         }
