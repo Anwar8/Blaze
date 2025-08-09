@@ -26,8 +26,10 @@ inline int initialise_MPI(int& argc, char**& argv)
     MPI_Init(&argc, &argv);
     int version, subversion;
     int mpi_err = MPI_Get_version(&version, &subversion);
-    std::cout << "MPI Version: " << version << "." << subversion << " running." << std::endl;
-    std::cout << "--------------------------------------------" << std::endl;
+    #if VERBOSE
+        std::cout << "MPI Version: " << version << "." << subversion << " running." << std::endl;
+        std::cout << "--------------------------------------------" << std::endl;
+    #endif
     return mpi_err;
 }
 

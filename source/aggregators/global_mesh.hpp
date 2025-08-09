@@ -241,10 +241,29 @@ class GlobalMesh {
         void create_distributed_frame_mesh(int nbays, int nfloors, real bay_length, real floor_height, int beam_divisions, int column_divisions, ElementType elem_type, BeamColumnFiberSection& sect)
         {
             initialise_mpi_variables();
-            std::cout << "rank " << rank << " of " << num_ranks << "." << std::endl;
             frame = FrameMesh(nbays, nfloors, bay_length, floor_height, beam_divisions, column_divisions);
             element_type = elem_type;
             fiber_section = std::make_unique<BeamColumnFiberSection>(sect);
+
+            NodeIdCoordsPairsVector nodes_coords_vector = frame.get_node_coords_pairs();
+            ElemIdNodeIdPairVector elem_nodes_vector = frame.map_elements_to_nodes();
+            if (VERBOSE)
+            {
+                std::cout << "-----------------------------------------------------" << std::endl;
+                read_nodes_coords_vector(nodes_coords_vector);
+                std::cout << "-----------------------------------------------------" << std::endl;
+                read_element_map(elem_nodes_vector);
+                std::cout << "-----------------------------------------------------" << std::endl;
+            }
+            setup_distributed_mesh(nodes_coords_vector, elem_nodes_vector);
+        }
+
+        void create_distributed_frame_mesh(int nbays, int nfloors, real bay_length, real floor_height, int beam_divisions, int column_divisions, ElementType elem_type, BasicSection& sect)
+        {
+            initialise_mpi_variables();
+            frame = FrameMesh(nbays, nfloors, bay_length, floor_height, beam_divisions, column_divisions);
+            element_type = elem_type;
+            set_basic_section(sect);
 
             NodeIdCoordsPairsVector nodes_coords_vector = frame.get_node_coords_pairs();
             ElemIdNodeIdPairVector elem_nodes_vector = frame.map_elements_to_nodes();
@@ -323,7 +342,6 @@ class GlobalMesh {
        void create_distributed_line_mesh(int divisions, std::vector<coords> end_coords, ElementType elem_type, BeamColumnFiberSection& sect)
        {
             initialise_mpi_variables();
-           std::cout << "rank " << rank << " of " << num_ranks << "." << std::endl;
            element_type = elem_type;
            fiber_section = std::make_unique<BeamColumnFiberSection>(sect);
            std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> mesh_maps = map_a_line_mesh(divisions, end_coords);
@@ -356,7 +374,6 @@ class GlobalMesh {
        void create_distributed_line_mesh(int divisions, std::vector<coords> end_coords, ElementType elem_type, BasicSection& sect)
        {
            initialise_mpi_variables();
-           std::cout << "rank " << rank << " of " << num_ranks << "." << std::endl;
            element_type = elem_type;
            basic_section = std::make_unique<BasicSection>(sect);
            std::pair<NodeIdCoordsPairsVector, ElemIdNodeIdPairVector> mesh_maps = map_a_line_mesh(divisions, end_coords);

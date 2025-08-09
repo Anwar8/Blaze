@@ -55,14 +55,131 @@ void build_an_I_section(BeamColumnFiberSection& section, ElasticPlasticMaterial&
     section.add_fibres(&steel, areas, ys);
 }
 
+/**
+ * @brief options that user can change; sets default values.
+ * 
+ */
+struct InputOptions {
+    int nbays = 10;
+    int nfloors = 5;
+    int flange_divisions = 10;
+    int web_divisions = 40;
+
+    real udl = -3000; 
+
+    int beam_divisions = 50;
+    int column_divisions = 35;
+    real floor_height = 3.5;
+    real beam_length = 5.0;
+
+    real max_LF = 1;
+    int nsteps = 10;
+    real tolerance = 1e-2;
+    int max_iterations = 10;
+
+    ElementType element_type = LinearElastic;
+    BasicSection basic_sect;
+    BeamColumnFiberSection fibre_sect;
+
+    real get_nodal_load()
+    {
+        return udl * beam_length / (beam_divisions - 1);
+    }
+
+    void set_element_type(std::string element_type_str) {
+        if (element_type_str == "NonlinearPlastic")
+            element_type =  NonlinearPlastic;
+        else if (element_type_str == "NonlinearElastic")
+            element_type =  NonlinearElastic;
+        else if (element_type_str == "LinearElastic")
+            element_type = LinearElastic;
+        else
+        {
+            std::cout << "Element string is " << element_type_str << ", while only accept LinearElastic, NonlinearElastic, and NonlinearPlastic" << std::endl;
+            exit(-1);
+        }
+    }
+
+    void print_summary_csv(int num_nodes, int num_elements) const {
+    std::cout << "nbays,nfloors,beam_length,floor_height,beam_divisions,column_divisions,element_type,flange_divisions,web_divisions,udl,max_LF,nsteps,tolerance,max_iterations,num_nodes,num_elements" << std::endl;
+    std::cout << nbays << ","
+                << nfloors << ","
+                << beam_length << ","
+                << floor_height << ","
+                << beam_divisions << ","
+                << column_divisions << ","
+                << element_type << ","
+                << flange_divisions << ","
+                << web_divisions << ","
+                << udl << ","
+                << max_LF << ","
+                << nsteps << ","
+                << tolerance << ","
+                << max_iterations << ","
+                << num_nodes << ","
+                << num_elements << std::endl;
+    }
+};
+
+/**
+ * @brief populates the input options for Blaze.
+ * 
+ * @param argc 
+ * @param argv 
+ * @return InputOptions 
+ */
+InputOptions parse_input(int argc, char* argv[]) {
+    InputOptions opts;
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--nbays" && i + 1 < argc) {
+            opts.nbays = std::stoi(argv[++i]);
+        } else if (arg == "--nfloors" && i + 1 < argc) {
+            opts.nfloors = std::stoi(argv[++i]);
+        } else if (arg == "--flange_divisions" && i + 1 < argc) {
+            opts.flange_divisions = std::stoi(argv[++i]);
+        } else if (arg == "--web_divisions" && i + 1 < argc) {
+            opts.web_divisions = std::stoi(argv[++i]);
+        } else if (arg == "--elem_type" && i + 1 < argc) {
+            opts.set_element_type(argv[++i]);
+        } else if (arg == "--udl" && i + 1 < argc) {
+            opts.udl = std::stod(argv[++i]);
+        } else if (arg == "--beam_divisions" && i + 1 < argc) {
+            opts.beam_divisions = std::stoi(argv[++i]);
+        } else if (arg == "--column_divisions" && i + 1 < argc) {
+            opts.column_divisions = std::stoi(argv[++i]);
+        } else if (arg == "--floor_height" && i + 1 < argc) {
+            opts.floor_height = std::stod(argv[++i]);
+        } else if (arg == "--beam_length" && i + 1 < argc) {
+            opts.beam_length = std::stod(argv[++i]);
+        } else if (arg == "--max_LF" && i + 1 < argc) {
+            opts.max_LF = std::stod(argv[++i]);
+        } else if (arg == "--nsteps" && i + 1 < argc) {
+            opts.nsteps = std::stoi(argv[++i]);
+        } else if (arg == "--tolerance" && i + 1 < argc) {
+            opts.tolerance = std::stod(argv[++i]);
+        } else if (arg == "--max_iterations" && i + 1 < argc) {
+            opts.max_iterations = std::stoi(argv[++i]);
+        }
+    }
+    return opts;
+}
 int main (int argc, char* argv[]) {
     
     initialise_MPI(argc, argv);
-
+    #ifdef KOKKOS
+        Kokkos::initialize(argc, argv);
+    #endif
+    // need a scope to contain anything that call Trilinos to avoid incorrect finalization
+    {
     // create mesh
     Model model;
-    
-    // BasicSection sect(2.06e11, 0.0125, 0.0004570000);
+    int rank = -1;
+    int num_ranks = -1;
+    get_my_rank(rank);
+    get_num_ranks(num_ranks);
+    InputOptions input_options = parse_input(argc, argv);
+
     // material information
     real youngs_modulus = 2e11;
     real yield_strength = 455e18;
@@ -75,82 +192,52 @@ int main (int argc, char* argv[]) {
     real h = 467.2e-3;
     real moment_of_inertia = tw*pow(h - 2*tf, 3)/12 + 2*b*pow(tf,3)/12 + 2*(tf*b)*pow(0.5*h - 0.5*tf, 2); // m^4 
     real section_area = 2*tf*b + (h - 2*tf)*tw;
-    BeamColumnFiberSection sect;
-    build_an_I_section(sect, steel, 0.0, tf, b, tw, h, 10, 20);
-    // model.create_line_mesh(num_divisions, end_coords, NonlinearPlastic, sect);
-
-    int nbays, nfloors, beam_divisions, column_divisions;
-    real floor_height, beam_length;
-    std::cout << "THERE ARE " << argc << " ARGUMENTS!!" << std::endl;
-    if (argc == 3)
-    {
-        nbays = std::stoi(argv[1]);
-        nfloors = std::stoi(argv[2]);
-    }
+    
+    build_an_I_section(input_options.fibre_sect, steel, 0.0, tf, b, tw, h, input_options.flange_divisions, input_options.web_divisions);
+    input_options.basic_sect = BasicSection(youngs_modulus, section_area, moment_of_inertia);
+    
+    
+    // Definition of the mesh:
+    if (input_options.element_type == NonlinearPlastic)
+        model.create_distributed_frame_mesh(input_options.nbays, input_options.nfloors, input_options.beam_length, input_options.floor_height, input_options.beam_divisions, input_options.column_divisions, input_options.element_type, input_options.fibre_sect);
     else
-    {
-        nbays = 10;
-        nfloors = 5; 
-    }  
-    beam_divisions = 50;
-    column_divisions = 35;
-    floor_height = 3.5;
-    beam_length = 5.0;
-    model.create_frame_mesh(nbays, nfloors, beam_length, floor_height, beam_divisions, column_divisions, NonlinearPlastic, sect);
-    FrameMesh the_frame = model.glob_mesh.get_frame();
-    // the_frame.read_frame_size();
-    std::pair<int,int> frame_size = the_frame.get_frame_size();
-    std::cout << "SECTION:Model_Size" << std::endl;
-    std::cout << "nbays,nfloors,beam_divisions,column_divisions,floor_height,beam_length,num_nodes,num_elements" << std::endl;
-    std::cout << nbays << "," 
-    << nfloors << "," << beam_divisions << "," << column_divisions << "," << floor_height << "," << beam_length << "," << frame_size.first << "," << frame_size.second << std::endl;
-    std::cout << "END_SECTION:Model_Size" << std::endl;
-    std::cout << "SECTION:Parallelism" << std::endl;
-    int rank = -1;
-    int num_ranks = -1;
-    get_my_rank(rank);
-    get_num_ranks(num_ranks);
-    std::cout << "Rank (" << rank << "/" << num_ranks << ")."  << std::endl;
-    read_parallelism_information();
-    std::cout << "END_SECTION:Parallelism" << std::endl;
+        model.create_distributed_frame_mesh(input_options.nbays, input_options.nfloors, input_options.beam_length, input_options.floor_height, input_options.beam_divisions, input_options.column_divisions, input_options.element_type, input_options.basic_sect);
 
+    FrameMesh the_frame = model.glob_mesh.get_frame();
+    std::pair<int,int> frame_size = the_frame.get_frame_size();
+    if (rank == 0)
+    {
+    input_options.print_summary_csv(frame_size.first, frame_size.second);
+    }
+    
+    // Boundary conditions
     NodalRestraint column_bases;
     column_bases.assign_dofs_restraints(std::set<int>{0, 1, 2, 3, 4, 5}); // fixed support
-    column_bases.assign_nodes_by_record_id(the_frame.get_column_bases(), model.glob_mesh);
+    column_bases.assign_distributed_nodes_by_record_id(the_frame.get_column_bases(), model.glob_mesh);
 
     NodalRestraint out_of_plane_restraint;  
     out_of_plane_restraint.assign_dofs_restraints(std::set<int>{1, 3, 4});
-    out_of_plane_restraint.assign_nodes_by_record_id(the_frame.get_out_of_plane_nodes(), model.glob_mesh);
+    out_of_plane_restraint.assign_distributed_nodes_by_record_id(the_frame.get_out_of_plane_nodes(), model.glob_mesh);
 
     model.restraints.push_back(column_bases);
     model.restraints.push_back(out_of_plane_restraint);
 
-    std::set<unsigned> loaded_nodes = the_frame.get_beam_line_node_ids(nfloors, true); 
+    // Loads
+    std::set<unsigned> loaded_nodes = the_frame.get_all_beam_line_node_ids(false); 
     std::vector<unsigned> loaded_nodes_v = std::vector<unsigned>(loaded_nodes.begin(), loaded_nodes.end());
-    // std::cout << "loaded nodes are: " << std::endl;    
-    // print_container(loaded_nodes_v);
-    model.load_manager.create_a_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{-1000}, model.glob_mesh);
+    model.load_manager.create_a_distributed_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{input_options.get_nodal_load()}, model.glob_mesh);
 
-    // std::set<unsigned> extra_loaded_nodes = the_frame.get_beam_node_ids(12, 2, false);
-    // std::vector<unsigned> extra_loaded_nodes_v = std::vector<unsigned>(extra_loaded_nodes.begin(), extra_loaded_nodes.end());
-    // model.load_manager.create_a_nodal_load_by_id(extra_loaded_nodes_v, std::set<int>{2}, std::vector<real>{-500000}, model.glob_mesh);
-
-
+    // Load and BC initilaisation
     model.initialise_restraints_n_loads();
-    model.glob_mesh.check_nodal_loads();
 
-    // // initialise solution parameters
-    real max_LF = 1;
-    int nsteps = 100;
-    real tolerance = 1e-2;
-    int max_iterations = 10;
-    model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
-    #ifdef KOKKOS
-        Kokkos::initialize(argc, argv);
-    #endif
-    model.solve(1);
-    std::cout << "SECTION:Timing" << std::endl;
-    model.log_timers({"U_to_nodes_mapping", 
+    // initialise solution parameters 
+    model.initialise_solution_parameters(input_options.max_LF, input_options.nsteps, input_options.tolerance, input_options.max_iterations);
+
+    // Solution
+    model.solve(-1);
+
+
+    model.log_parallel_timers({"U_to_nodes_mapping", 
                     "element_state_update", 
                     "element_global_response",
                     "assembly",
@@ -159,16 +246,9 @@ int main (int argc, char* argv[]) {
                     "material_state_update",
                     "result_recording",
                     "all"});
-    std::cout << "END_SECTION:Timing" << std::endl;
+    }
     #ifdef KOKKOS
         Kokkos::finalize();
     #endif
-    
     finalise_MPI();
-    // // model.scribe.read_all_records();
-    // auto recorded_data = model.scribe.get_record_id_iterator((unsigned)num_nodes)->get_recorded_data()[2];
-    
-    // std::cout << std::setprecision(10); 
-    // std::cout << "Computed deflection is: " << recorded_data.back() << std::endl;
-    // std::cout << "Expected deflection is: " << expected_deflection << std::endl;
 }

@@ -26,6 +26,8 @@ class SolutionProcedure
         int step;
         real tolerance;
         int max_iter;
+        int rank; 
+        int num_ranks;
 
         TimeKeeper time_keeper;
     public:
@@ -53,6 +55,12 @@ class SolutionProcedure
             step = 1;
             tolerance = convergence_tolerance;
             max_iter = max_num_of_iterations;
+            
+            get_my_rank(rank);
+            get_num_ranks(num_ranks);
+            #ifdef WITH_MPI
+                time_keeper.initialise_parallel_keeper(rank, num_ranks);
+            #endif
 
             time_keeper.add_timers({"all",
                                     "U_to_nodes_mapping", 
@@ -65,12 +73,6 @@ class SolutionProcedure
                                     "result_recording"});
         }
 
-        void initialise_parallel_timer(int rank, int num_ranks)
-        {
-            #ifdef WITH_MPI
-            time_keeper.initialise_parallel_keeper(rank, num_ranks);
-            #endif
-        }
         void solve(GlobalMesh& glob_mesh, Assembler& assembler, BasicSolver& solver, LoadManager& load_manager, Scribe& scribe, int logging_frequency)
         {
             time_keeper.start_timer("all");
@@ -88,7 +90,7 @@ class SolutionProcedure
                     std::cout << std::endl << "Entering glob_mesh.calc_nodal_contributions_to_P()" << std::endl;
                 #endif
                 time_keeper.start_timer("element_global_response");
-                glob_mesh.calc_nodal_contributions_to_P(); // calculates the global stiffness and load contributions from the elements and nodes, respectively. Does not assemble them.
+                glob_mesh.calc_nodal_contributions_to_P(); // calculates the global load contributions from the nodes. Does not assemble them.
                 time_keeper.stop_timer("element_global_response");
                 
                 #if VERBOSE_SLN
@@ -202,10 +204,18 @@ class SolutionProcedure
                     break;
                 }
             }
-            #if LF_VERBOSE
-            std::cout << std::endl << "---<Analysis complete. LF = " << load_factor << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
-            #endif
             time_keeper.stop_timer("all");
+            if (rank == 0)
+            {
+                std::cout << std::endl << "---<Analysis complete. LF = " << load_factor << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
+            
+                if (std::abs(load_factor - max_LF)/max_LF < 1e-3)
+                    std::cout << "ANALYSIS_SUCCEEDED" << std::endl;
+                else
+                    std::cout << "ANALYSIS_FAILED" << std::endl;
+                
+            }
+
         }
 };
 

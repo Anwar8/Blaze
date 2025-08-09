@@ -180,7 +180,6 @@ class TimeKeeper
             {
                 collected_durations_vector.resize(num_timers*num_ranks, 0.0);
             }
-            std::cout << "Rank " << rank << " tried to collect " << num_timers << " timers." << std::endl;
 
             // Write the recorded durations into the duration_vector
             for (int timer_i = 0; timer_i < num_timers; ++timer_i)

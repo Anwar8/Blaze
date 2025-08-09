@@ -442,6 +442,8 @@ class FrameMesh {
         {
             return std::make_pair(num_nodes, num_elements);
         }
+        int get_num_elements() {return num_elements;}
+        int get_num_nodes() {return num_nodes;}
 
 };
 

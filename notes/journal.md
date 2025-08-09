@@ -36,6 +36,8 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 9 August
+
 ### 24 July
 Today, the first step is to compile `Blaze` on `Cirrus`. 
 
@@ -72,6 +74,8 @@ On `Cirrus`:
 - [x] `DistributedModelFrameMeshTests` on 1 - 5 cores.
 
 However, and interestingly, when these tests are all run in one go using the command `./test_blaze N` where `N` is replaced by number of cores, the test `DistributedModelSimplySuportedUdlPlastic.CheckMidSpanDeflection` fails. Additionally, when running all these test suites together, the tests fail catastrophically. I believe this must be due to incorrect setup of the `MPI` test environment which is not correctly calling `MPI_Finalize()`. 
+
+I am busy working on the thesis today, but I should really start to think about which problem I want to use for profiling `Blaze` and start to build in `main` and then run it on `Cirrus`. 
 
 ### 23 July
 I have started to build `Trilinos` on `Cirrus`. `Kokkos` does not support `Intel` compilers, however, so I had to stick to `GCC` compilers. These are still available via the `Intel` modules: `intel-20.4\compilers`, `intel-20.4\mpi`, `intel-20.4\cmkl`, and `cmake`. Note that it is required to load the `MKL` module to provide `BLAS` and `LAPACK` which are required for the install.

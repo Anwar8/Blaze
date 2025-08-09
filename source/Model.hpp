@@ -73,7 +73,6 @@ class Model
 
         void initialise_solution_parameters(real max_load_factor, int num_steps, real convergence_tolerance, int max_num_of_iterations)
         {
-            solution_procedure.initialise_parallel_timer(glob_mesh.get_mesh_rank(), glob_mesh.get_mesh_num_ranks());
             solution_procedure.initialise_solution_parameters(max_load_factor, num_steps, convergence_tolerance, max_num_of_iterations);
             solver.initialise_solver(assembler);
         }
@@ -109,6 +108,10 @@ class Model
             glob_mesh.create_distributed_line_mesh(divisions, end_coords, elem_type, sect);
         }
         void create_distributed_frame_mesh(int nbays, int nfloors, real bay_length, real floor_height, int beam_divisions, int column_divisions, ElementType elem_type, BeamColumnFiberSection& sect)
+        {
+            glob_mesh.create_distributed_frame_mesh(nbays, nfloors, bay_length, floor_height, beam_divisions, column_divisions, elem_type, sect);
+        }
+        void create_distributed_frame_mesh(int nbays, int nfloors, real bay_length, real floor_height, int beam_divisions, int column_divisions, ElementType elem_type, BasicSection& sect)
         {
             glob_mesh.create_distributed_frame_mesh(nbays, nfloors, bay_length, floor_height, beam_divisions, column_divisions, elem_type, sect);
         }

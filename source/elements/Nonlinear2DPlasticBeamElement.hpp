@@ -289,8 +289,6 @@ class Nonlinear2DPlasticBeamElement : public BeamElementCommonInterface<BeamColu
 
         /**
          * @brief calculates strains based on (4.b) and (4.c) from Izzuddin. This is done per Gauss point, which in this case is just at midpoint of element.
-         * @details the relationship between the \ref local_d and \ref local_eps is nonlinear, and as such we 
-         * cannot simply use \f$\boldsymbol{\sigma} = \boldsymbol{B}\boldsymbol{d}\f$ which was used in \ref Linear2DBeamElement.
          */
         void calc_eps() {
 
