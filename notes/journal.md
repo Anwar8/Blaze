@@ -38,6 +38,9 @@ This journal contains the day-to-day project management and notes taken. It was 
 ## Journal
 ### 9 August
 
+I have made some major modifications to `main.cpp` today. Along the way, however, I broke something and the distributed mesh no longer works. I think I broke something today because what used to run today morning (5 floors 10 bays) on 4 cores, no longer runs. I must have done some silly mistake somewhere.
+- check the `create_distributed_frame_mesh` in GlobalMesh on line 261
+- 
 ### 24 July
 Today, the first step is to compile `Blaze` on `Cirrus`. 
 

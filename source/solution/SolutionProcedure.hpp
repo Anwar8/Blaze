@@ -58,9 +58,8 @@ class SolutionProcedure
             
             get_my_rank(rank);
             get_num_ranks(num_ranks);
-            #ifdef WITH_MPI
-                time_keeper.initialise_parallel_keeper(rank, num_ranks);
-            #endif
+            time_keeper.initialise_parallel_keeper(rank, num_ranks);
+            
 
             time_keeper.add_timers({"all",
                                     "U_to_nodes_mapping", 
@@ -76,25 +75,28 @@ class SolutionProcedure
         void solve(GlobalMesh& glob_mesh, Assembler& assembler, BasicSolver& solver, LoadManager& load_manager, Scribe& scribe, int logging_frequency)
         {
             time_keeper.start_timer("all");
-            while (load_factor < max_LF)
+            while (step <= nsteps)
             {
                 load_factor += dLF;
                 #if LF_VERBOSE
-                    std::cout << std::endl << "===================================[Load step " << step << " - LF = " << load_factor << "]===================================" << std::endl;
+                    if (rank == 0)
+                        std::cout << std::endl << "===================================[Load step " << step << " - LF = " << load_factor << "]===================================" << std::endl;
                 #endif
                 load_manager.increment_loads(dLF);
                 bool converged = false;
                 int iter = 1;
 
                 #if VERBOSE_SLN
-                    std::cout << std::endl << "Entering glob_mesh.calc_nodal_contributions_to_P()" << std::endl;
+                    if (rank == 0)
+                        std::cout << std::endl << "Entering glob_mesh.calc_nodal_contributions_to_P()" << std::endl;
                 #endif
                 time_keeper.start_timer("element_global_response");
                 glob_mesh.calc_nodal_contributions_to_P(); // calculates the global load contributions from the nodes. Does not assemble them.
                 time_keeper.stop_timer("element_global_response");
                 
                 #if VERBOSE_SLN
-                    std::cout << std::endl << "Entering assembler.assemble_global_P(glob_mesh)" << std::endl;
+                    if (rank == 0)
+                        std::cout << std::endl << "Entering assembler.assemble_global_P(glob_mesh)" << std::endl;
                 #endif
                 time_keeper.start_timer("assembly");
                 assembler.assemble_global_P(glob_mesh);
@@ -104,7 +106,8 @@ class SolutionProcedure
                 while ((iter <= max_iter) && !(converged))
                 {   
                     #if LF_VERBOSE
-                    std::cout << "-----------------------------------<Started: Iteration " << iter << ">-------------------------------------" << std::endl;
+                    if (rank == 0)
+                        std::cout << "-----------------------------------<Started: Iteration " << iter << ">-------------------------------------" << std::endl;
                     #endif
                     // solver.solve_for_U(assembler);
 
@@ -113,36 +116,38 @@ class SolutionProcedure
                      * For each iteration after that, \f$\boldsymbol{U} = \boldsymbol{U} +  d\boldsymbol{U}\f$, and so \f$ \boldsymbol{d}\f$ maps from \f$\boldsymbol{U}\f$
                      */
                     #if VERBOSE_SLN
-                    std::cout << std::endl << "Entering assembler.map_U_to_nodes(glob_mesh)" << std::endl;
+                    if (rank == 0)
+                        std::cout << std::endl << "Entering assembler.map_U_to_nodes(glob_mesh)" << std::endl;
                     #endif
                     time_keeper.start_timer("U_to_nodes_mapping");
                     assembler.map_U_to_nodes(glob_mesh);
                     time_keeper.stop_timer("U_to_nodes_mapping"); 
-                    if (VERBOSE)
-                    {
-                        glob_mesh.print_info();
-                    }
+        
                     #if VERBOSE_SLN
-                    std::cout << std::endl << "Entering glob_mesh.update_elements_states();" << std::endl;
+                    if (rank == 0)
+                        std::cout << std::endl << "Entering glob_mesh.update_elements_states();" << std::endl;
                     #endif
                     time_keeper.start_timer("element_state_update");
                     glob_mesh.update_elements_states(); // calculates internal state of strain, stress, and nodal responses. 
                     time_keeper.stop_timer("element_state_update");
                     #if VERBOSE_SLN
-                    std::cout << std::endl << "Entering assembler.assemble_global_K_R(glob_mesh);" << std::endl;
+                    if (rank == 0)
+                        std::cout << std::endl << "Entering assembler.assemble_global_K_R(glob_mesh);" << std::endl;
                     #endif
                     time_keeper.start_timer("assembly");
                     assembler.assemble_global_K_R(glob_mesh); // assembles the stiffness and load contributions into the global stiffness matrix and load vector.                    
                     time_keeper.stop_timer("assembly");
                     
                     #if VERBOSE_SLN
-                    std::cout << std::endl << "Entering assembler.calculate_out_of_balance();" << std::endl;
+                    if (rank == 0)
+                        std::cout << std::endl << "Entering assembler.calculate_out_of_balance();" << std::endl;
                     #endif
                     time_keeper.start_timer("convergence_check");
                     assembler.calculate_out_of_balance();
 
                     #if VERBOSE_SLN
-                    std::cout << std::endl << "Entering assembler.check_convergence(tolerance);" << std::endl;
+                    if (rank == 0)
+                        std::cout << std::endl << "Entering assembler.check_convergence(tolerance);" << std::endl;
                     #endif
                     converged = assembler.check_convergence(tolerance);
                     time_keeper.stop_timer("convergence_check");
@@ -150,12 +155,11 @@ class SolutionProcedure
                     if (!converged)
                     {
                         #if VERBOSE_SLN
-                        std::cout << std::endl << "Entering solver.solve_for_deltaU(assembler);" << std::endl;
+                        if (rank == 0)
+                            std::cout << std::endl << "Entering solver.solve_for_deltaU(assembler);" << std::endl;
                         #endif
                         solver.solve_for_deltaU(assembler);
                         #if VERBOSE_NLB
-                        int rank;
-                        get_my_rank(rank);
                         if (rank==0)
                         {
                             std::cout << "Solver found dU vector is:" << std::endl;
@@ -163,7 +167,8 @@ class SolutionProcedure
                         }
                         #endif
                         #if VERBOSE_SLN
-                        std::cout << std::endl << "Entering assembler.increment_U();" << std::endl;
+                        if (rank == 0)
+                            std::cout << std::endl << "Entering assembler.increment_U();" << std::endl;
                         #endif
                         assembler.increment_U();
                     }
@@ -171,6 +176,8 @@ class SolutionProcedure
                     // WARNING: this is a debugging line that MUST be removed after problem with convergence is solved.
                     // scribe.write_to_records();
                     #if LF_VERBOSE
+                    if (rank == 0)
+                    {
                     if (!converged)
                     {
                         std::cout << "G_max = " << assembler.get_G_max() << " while tolerance " << tolerance << std::endl;
@@ -178,14 +185,11 @@ class SolutionProcedure
                     } else {
                         std::cout << "-------------------------------------<Iteration " << iter << " Converged>-----------------------------------" << std::endl;
                     }
+                    }
                     #endif
-                    iter++;
-                }
-                if (VERBOSE) 
-                {
-                    glob_mesh.print_elements_states(true, true, true, true);
-                }              
-                step++;
+                    ++iter;
+                }           
+                ++step;
                 time_keeper.start_timer("material_state_update");
                 glob_mesh.update_element_sections_starting_states();
                 time_keeper.stop_timer("material_state_update");
@@ -199,7 +203,8 @@ class SolutionProcedure
                 if ((iter >= max_iter) && !(converged))
                 {
                     #if LF_VERBOSE
-                    std::cout << std::endl << "---<WARNING: Analysis incomplete due to convergence errors. LF = " << load_factor << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
+                    if (rank == 0)
+                        std::cout << std::endl << "---<WARNING: Analysis incomplete due to convergence errors. LF = " << load_factor << ", and out-of-balance = " << assembler.get_G_max() << ">---" << std::endl;
                     #endif
                     break;
                 }

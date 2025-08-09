@@ -57,53 +57,103 @@ class DistributedModelFrameAssemblyTests : public ::testing::Test {
       void TearDown() override {
   }
   };
-
-TEST_F(DistributedModelFrameAssemblyTests, frame_mesh_vector_sizes)
+/**
+ * @brief checks that the nDoFs for all ranks are correct.
+ * 
+ */
+TEST_F(DistributedModelFrameAssemblyTests, frame_mesh_ndofs)
 {   
-    // std::cout << std::endl << std::endl;
-    // std::cout << "The fully-assembled stiffness matrix K is:" << std::endl;
-    // model.assembler.print_distributed_maths_object("K", Teuchos::VERB_EXTREME);
-
-    // // initialise solution parameters
-    real max_LF = 1;
-    int nsteps = 100;
-    real tolerance = 1e-2;
-    int max_iterations = 10;
-    model.initialise_solution_parameters(max_LF, nsteps, tolerance, max_iterations);
-    model.solve(1);
-    std::cout << "SECTION:Timing" << std::endl;
-    model.log_parallel_timers({"U_to_nodes_mapping", 
-                    "element_state_update", 
-                    "element_global_response",
-                    "assembly",
-                    "convergence_check",
-                    "dU_calculation",
-                    "material_state_update",
-                    "result_recording",
-                    "all"});
-
+    // global number of DoFs
+    ASSERT_EQ(model.glob_mesh.get_ndofs(), 28*3);
+    std::vector<int> ranks_ndofs_vec = model.glob_mesh.get_ranks_ndofs_vector();
 
     if (num_ranks == 1)
     {
-        ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 4);
-        ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 28);
+        check_vector_contents<int, std::vector<int>>(ranks_ndofs_vec, {28*3});
     }
     else if (num_ranks == 2)
     {
 
-        ASSERT_EQ(model.restraints[0].get_num_restrained_nodes(), 2);
-        // remember that the interface nodes are also restrained, so we have two more nodes 
-        ASSERT_EQ(model.restraints[1].get_num_restrained_nodes(), 16);
-
+        check_vector_contents<int, std::vector<int>>(ranks_ndofs_vec, {14*3, 14*3});
     }
+    else if (num_ranks == 3)
+    {
+        check_vector_contents<int, std::vector<int>>(ranks_ndofs_vec, {8*3, 9*3, 11*3});
+    }
+    else if (num_ranks == 4)
+    {
+        check_vector_contents<int, std::vector<int>>(ranks_ndofs_vec, {7*3, 7*3, 7*3, 7*3});
+    }
+    else if (num_ranks == 5)
+    {
+        check_vector_contents<int, std::vector<int>>(ranks_ndofs_vec, {5*3, 5*3, 6*3, 5*3, 7*3});
+      }
     else 
     {
-        std::cout << "DistributedModelFrameAssemblyTests::frame_mesh_vector_sizes can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
+        std::cout << "DistributedModelFrameAssemblyTests::frame_mesh_ndofs can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
         ASSERT_TRUE(false);
     }
 }
   
 
+/**
+ * @brief check that vector sizes for U, P, G, dU, R are all correct.
+ * 
+ */
+TEST_F(DistributedModelFrameAssemblyTests, frame_mesh_vector_size)
+{   
+
+    std::vector<int> ranks_ndofs_vec = model.glob_mesh.get_ranks_ndofs_vector();
+
+    if (num_ranks == 1)
+    {
+        ASSERT_EQ(model.assembler.get_U_length(), 28*3);
+        ASSERT_EQ(model.assembler.get_dU_length(), 28*3);
+        ASSERT_EQ(model.assembler.get_R_length(), 28*3);
+        ASSERT_EQ(model.assembler.get_P_length(), 28*3);
+        ASSERT_EQ(model.assembler.get_G_length(), 28*3);
+    }
+    else if (num_ranks == 2)
+    {
+        ASSERT_EQ(model.assembler.get_U_length(), 14*3);
+        ASSERT_EQ(model.assembler.get_dU_length(), 14*3);
+        ASSERT_EQ(model.assembler.get_R_length(), 14*3);
+        ASSERT_EQ(model.assembler.get_P_length(), 14*3);
+        ASSERT_EQ(model.assembler.get_G_length(), 14*3);
+    }
+    else if (num_ranks == 3)
+    {
+        std::vector<int> dof_numbers = {8*3, 9*3, 11*3};
+        ASSERT_EQ(model.assembler.get_U_length(), dof_numbers[rank]);
+        ASSERT_EQ(model.assembler.get_dU_length(), dof_numbers[rank]);
+        ASSERT_EQ(model.assembler.get_R_length(), dof_numbers[rank]);
+        ASSERT_EQ(model.assembler.get_P_length(), dof_numbers[rank]);
+        ASSERT_EQ(model.assembler.get_G_length(), dof_numbers[rank]);
+    }
+    else if (num_ranks == 4)
+    {
+        ASSERT_EQ(model.assembler.get_U_length(), 7*3);
+        ASSERT_EQ(model.assembler.get_dU_length(), 7*3);
+        ASSERT_EQ(model.assembler.get_R_length(), 7*3);
+        ASSERT_EQ(model.assembler.get_P_length(), 7*3);
+        ASSERT_EQ(model.assembler.get_G_length(), 7*3);
+        
+    }
+    else if (num_ranks == 5)
+    {
+        std::vector<int> dof_numbers = {5*3, 5*3, 6*3, 5*3, 7*3};
+        ASSERT_EQ(model.assembler.get_U_length(), dof_numbers[rank]);
+        ASSERT_EQ(model.assembler.get_dU_length(), dof_numbers[rank]);
+        ASSERT_EQ(model.assembler.get_R_length(), dof_numbers[rank]);
+        ASSERT_EQ(model.assembler.get_P_length(), dof_numbers[rank]);
+        ASSERT_EQ(model.assembler.get_G_length(), dof_numbers[rank]);
+    }
+    else 
+    {
+        std::cout << "DistributedModelFrameAssemblyTests::frame_mesh_ndofs can only run on num_ranks from 1 to 5 ranks. Got " << num_ranks << "." << std::endl;
+        ASSERT_TRUE(false);
+    }
+}
 class DistributedModelSimplySuportedUdlPlastic : public ::testing::Test {
     public:
       Model model;

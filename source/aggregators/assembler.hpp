@@ -489,5 +489,27 @@ class Assembler {
         }
 
         realx2 get_G_max() {return G_max;}
+
+        int get_P_length() 
+        {
+            return P.getLocalLength();
+        }
+        int get_R_length() 
+        {
+            return R.getLocalLength();
+        }
+        int get_U_length() 
+        {
+            return U.getLocalLength();
+        }
+        int get_dU_length() 
+        {
+            return dU.getLocalLength();
+        }
+        int get_G_length() 
+        {
+            return G.getLocalLength();
+        }
+
 };
 #endif

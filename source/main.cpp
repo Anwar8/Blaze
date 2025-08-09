@@ -171,6 +171,7 @@ int main (int argc, char* argv[]) {
         Kokkos::initialize(argc, argv);
     #endif
     // need a scope to contain anything that call Trilinos to avoid incorrect finalization
+    
     {
     // create mesh
     Model model;
@@ -199,15 +200,19 @@ int main (int argc, char* argv[]) {
     
     // Definition of the mesh:
     if (input_options.element_type == NonlinearPlastic)
+    {
         model.create_distributed_frame_mesh(input_options.nbays, input_options.nfloors, input_options.beam_length, input_options.floor_height, input_options.beam_divisions, input_options.column_divisions, input_options.element_type, input_options.fibre_sect);
+    }
     else
+    {
         model.create_distributed_frame_mesh(input_options.nbays, input_options.nfloors, input_options.beam_length, input_options.floor_height, input_options.beam_divisions, input_options.column_divisions, input_options.element_type, input_options.basic_sect);
+    }
 
     FrameMesh the_frame = model.glob_mesh.get_frame();
     std::pair<int,int> frame_size = the_frame.get_frame_size();
     if (rank == 0)
     {
-    input_options.print_summary_csv(frame_size.first, frame_size.second);
+        input_options.print_summary_csv(frame_size.first, frame_size.second);
     }
     
     // Boundary conditions
@@ -234,9 +239,7 @@ int main (int argc, char* argv[]) {
     model.initialise_solution_parameters(input_options.max_LF, input_options.nsteps, input_options.tolerance, input_options.max_iterations);
 
     // Solution
-    model.solve(-1);
-
-
+    model.solve(1);
     model.log_parallel_timers({"U_to_nodes_mapping", 
                     "element_state_update", 
                     "element_global_response",
@@ -246,6 +249,8 @@ int main (int argc, char* argv[]) {
                     "material_state_update",
                     "result_recording",
                     "all"});
+    
+    MPI_Barrier(MPI_COMM_WORLD);
     }
     #ifdef KOKKOS
         Kokkos::finalize();
