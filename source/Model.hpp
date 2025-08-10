@@ -13,6 +13,7 @@
 #include "LoadManager.hpp"
 #include "Scribe.hpp"
 #include "NodalRestraint.hpp"
+#include "tpetra_wrappers.hpp"
 
 class Model
 {

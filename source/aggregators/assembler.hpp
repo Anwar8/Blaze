@@ -106,9 +106,9 @@ class Assembler {
         void setup_tpetra_vector_map(int ndofs, int rank_ndofs, Teuchos::RCP<const Teuchos::Comm<int>>& comm)
         {
             #ifdef WITH_MPI
-            const unsigned numLocalEntries = rank_ndofs;
-            const unsigned numGlobalEntries = ndofs;
-            const unsigned indexBase = 0;
+            const local_ordinal_type numLocalEntries = rank_ndofs;
+            const global_ordinal_type numGlobalEntries = ndofs;
+            const global_ordinal_type indexBase = 0;
             vector_map = Teuchos::rcp(new Tpetra::Map<local_ordinal_type, global_ordinal_type, node_type>(numGlobalEntries, numLocalEntries, indexBase, comm));
             #endif
         }
@@ -121,7 +121,7 @@ class Assembler {
         void setup_tpetra_crs_graph(GlobalMesh& glob_mesh)
         {
             #ifdef WITH_MPI
-            const unsigned entriesPerRow = glob_mesh.max_num_stiffness_contributions;
+            const local_ordinal_type entriesPerRow = glob_mesh.max_num_stiffness_contributions;
             matrix_graph = Teuchos::rcp(new Tpetra::CrsGraph<local_ordinal_type, global_ordinal_type, node_type>(vector_map, entriesPerRow));
             collect_global_K_triplets(glob_mesh);
             initialise_from_triplets(matrix_graph, K_global_triplets);
@@ -324,7 +324,7 @@ class Assembler {
                 //     ++i;
                 // }
             }
-            Teuchos::Array<int> interface_dofs_array(interface_dofs.size());
+            Teuchos::Array<global_ordinal_type> interface_dofs_array(interface_dofs.size());
             for (int k = 0; k < interface_dofs.size(); ++k) {
                 interface_dofs_array[k] = interface_dofs[k];
             }
@@ -399,9 +399,9 @@ class Assembler {
                 get_my_rank(rank);
                 std::cout << "Rank " << rank << " has " << U.getLocalLength() << " U local members." << std::endl;
 
-                auto U_local_view = get_1d_view(U);
-                // auto U_2d = U.getLocalViewHost(Tpetra::Access::ReadOnly);
-                // auto U_local_view = Kokkos::subview (U_2d, Kokkos::ALL (), 0);
+                // auto U_local_view = get_1d_view(U);
+                auto U_2d = U.getLocalViewHost(Tpetra::Access::ReadOnly);
+                auto U_local_view = Kokkos::subview (U_2d, Kokkos::ALL (), 0);
                 int nzi = 0;
                 for (auto& node: glob_mesh.node_vector)
                 {
@@ -421,10 +421,10 @@ class Assembler {
                 // since this is a call happening often, the Tpetra::CombineMode is REPLACE since the elements should already exist inplace.
                 interface_U.doImport(U, *interface_importer, Tpetra::REPLACE);
 
-                auto interface_U_local_view = get_1d_view(interface_U);
+                // auto interface_U_local_view = get_1d_view(interface_U);
                 // nzi = 0;
-                // auto interface_U_2d = interface_U.getLocalViewHost(Tpetra::Access::ReadOnly);
-                // auto interface_U_local_view = Kokkos::subview (interface_U_2d, Kokkos::ALL (), 0);
+                auto interface_U_2d = interface_U.getLocalViewHost(Tpetra::Access::ReadOnly);
+                auto interface_U_local_view = Kokkos::subview (interface_U_2d, Kokkos::ALL (), 0);
                 int nzi = 0;
                 for (auto& node: glob_mesh.interface_node_vector)
                 {

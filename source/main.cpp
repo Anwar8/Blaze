@@ -14,6 +14,7 @@
 #include "BeamColumnFiberSection.hpp"
 #include "basic_utilities.hpp"
 #include "MPIWrappers.hpp"
+#include "tpetra_wrappers.hpp"
 #ifdef KOKKOS
     #include <Kokkos_Core.hpp>
 #endif
