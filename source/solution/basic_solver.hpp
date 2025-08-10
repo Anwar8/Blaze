@@ -25,13 +25,13 @@ class BasicSolver {
     // Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<>, Tpetra::MultiVector<>>> dU_solver; 
     // Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<>, Tpetra::MultiVector<>>> U_solver; 
 
-    Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>, Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>>> dU_solver;
-    Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>, Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>>> U_solver;
+    Teuchos::RCP<Amesos2::Solver<TpetraCrsMatrix, TpetraMultiVector>> dU_solver;
+    Teuchos::RCP<Amesos2::Solver<TpetraCrsMatrix, TpetraMultiVector>> U_solver;
 
-    Teuchos::RCP<Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>> U_rcp;
-    Teuchos::RCP<Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>> P_rcp;
-    Teuchos::RCP<Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>> dU_rcp;
-    Teuchos::RCP<Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>> G_rcp;
+    Teuchos::RCP<TpetraMultiVector> U_rcp;
+    Teuchos::RCP<TpetraMultiVector> P_rcp;
+    Teuchos::RCP<TpetraMultiVector> dU_rcp;
+    Teuchos::RCP<TpetraMultiVector> G_rcp;
     #else
     Eigen::SparseLU<spmat> solver;
     #endif
@@ -53,8 +53,8 @@ class BasicSolver {
             // using GO = std::remove_reference_t<decltype(*assembler.K)>::global_ordinal_type;
             // using ST = std::remove_reference_t<decltype(*assembler.K)>::scalar_type;
 
-            U_solver = Amesos2::create<Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>,Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>>("klu2", assembler.K, U_rcp, P_rcp);
-            dU_solver = Amesos2::create<Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>,Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>>("klu2", assembler.K, dU_rcp, G_rcp);
+            U_solver = Amesos2::create<TpetraCrsMatrix,TpetraMultiVector>("klu2", assembler.K, U_rcp, P_rcp);
+            dU_solver = Amesos2::create<TpetraCrsMatrix,TpetraMultiVector>("klu2", assembler.K, dU_rcp, G_rcp);
             #endif
         }
 

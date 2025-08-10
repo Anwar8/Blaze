@@ -35,19 +35,19 @@ class Assembler {
         spvec U; /**< Global Nodal displacement vector \f$\boldsymbol{U}\f$ - also known as system state vector.*/
         spvec dU; /**< Change in global Nodal displacement vector \f$\Delta\boldsymbol{U}\f$ - also known as system state vector increment.*/
         #else
-        Teuchos::RCP<Tpetra::Map<local_ordinal_type, global_ordinal_type, node_type>> vector_map; /**<a map that explains which rows of the \f$\boldsymbol{P}\f$, \f$\boldsymbol{U}\f$, \f$\boldsymbol{R}\f$, etc. vectors go on which cores.*/
-        Teuchos::RCP<Tpetra::CrsGraph<local_ordinal_type, global_ordinal_type, node_type>> matrix_graph; /**<a graph that explains which rows of the \f$\boldsymbol{K}\f$ matrix go on which cores.*/
-        Teuchos::RCP<Tpetra::Map<local_ordinal_type, global_ordinal_type, node_type>> interface_map; /**< a map that is used for communicating the interface DoFs that are globally not locally allocated. */
+        Teuchos::RCP<TpetraMap> vector_map; /**<a map that explains which rows of the \f$\boldsymbol{P}\f$, \f$\boldsymbol{U}\f$, \f$\boldsymbol{R}\f$, etc. vectors go on which cores.*/
+        Teuchos::RCP<TpetraCrsGraph> matrix_graph; /**<a graph that explains which rows of the \f$\boldsymbol{K}\f$ matrix go on which cores.*/
+        Teuchos::RCP<TpetraMap> interface_map; /**< a map that is used for communicating the interface DoFs that are globally not locally allocated. */
         Teuchos::RCP<Tpetra::Import<local_ordinal_type, global_ordinal_type, node_type>> interface_importer; /**< the importer object that is meant for communicating the \f$\boldsymbol{U}\f$ values on different nodes and ranks. */
 
-        Teuchos::RCP<Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>> K;
-        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> P;
-        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> R;
-        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> G;
-        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> U;
-        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> dU;
+        Teuchos::RCP<TpetraCrsMatrix> K;
+        TpetraMultiVector P;
+        TpetraMultiVector R;
+        TpetraMultiVector G;
+        TpetraMultiVector U;
+        TpetraMultiVector dU;
 
-        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> interface_U; /**< the interface version of the U vector.*/
+        TpetraMultiVector interface_U; /**< the interface version of the U vector.*/
             
         #endif
 
@@ -68,7 +68,7 @@ class Assembler {
             K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
             #else
             setup_tpetra_crs_graph(glob_mesh);
-            K = Teuchos::RCP(new Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(matrix_graph));
+            K = Teuchos::RCP(new TpetraCrsMatrix(matrix_graph));
             #endif 
         }
         /**
@@ -89,11 +89,11 @@ class Assembler {
             #else
             setup_tpetra_vector_map(glob_mesh.get_ndofs(), glob_mesh.get_rank_ndofs(), comm);
             // The constructor for the vectors that follows prefills the vectors with zeros.
-            R = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(vector_map, 1);
-            G = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(vector_map, 1);
-            P = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(vector_map, 1);
-            U = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(vector_map, 1);
-            dU = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(vector_map, 1);
+            R = TpetraMultiVector(vector_map, 1);
+            G = TpetraMultiVector(vector_map, 1);
+            P = TpetraMultiVector(vector_map, 1);
+            U = TpetraMultiVector(vector_map, 1);
+            dU = TpetraMultiVector(vector_map, 1);
             setup_interface_import(glob_mesh, comm);
             #endif 
         }
@@ -109,7 +109,7 @@ class Assembler {
             const local_ordinal_type numLocalEntries = rank_ndofs;
             const global_ordinal_type numGlobalEntries = ndofs;
             const global_ordinal_type indexBase = 0;
-            vector_map = Teuchos::rcp(new Tpetra::Map<local_ordinal_type, global_ordinal_type, node_type>(numGlobalEntries, numLocalEntries, indexBase, comm));
+            vector_map = Teuchos::rcp(new TpetraMap(numGlobalEntries, numLocalEntries, indexBase, comm));
             #endif
         }
 
@@ -122,7 +122,7 @@ class Assembler {
         {
             #ifdef WITH_MPI
             const local_ordinal_type entriesPerRow = glob_mesh.max_num_stiffness_contributions;
-            matrix_graph = Teuchos::rcp(new Tpetra::CrsGraph<local_ordinal_type, global_ordinal_type, node_type>(vector_map, entriesPerRow));
+            matrix_graph = Teuchos::rcp(new TpetraCrsGraph(vector_map, entriesPerRow));
             collect_global_K_triplets(glob_mesh);
             initialise_from_triplets(matrix_graph, K_global_triplets);
             matrix_graph->fillComplete();
@@ -328,9 +328,9 @@ class Assembler {
             for (int k = 0; k < interface_dofs.size(); ++k) {
                 interface_dofs_array[k] = interface_dofs[k];
             }
-            interface_map = Teuchos::rcp(new Tpetra::Map<local_ordinal_type, global_ordinal_type, node_type>(INVALID, interface_dofs_array, 0, comm));
+            interface_map = Teuchos::rcp(new TpetraMap(INVALID, interface_dofs_array, 0, comm));
             
-            interface_U = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(interface_map, 1);
+            interface_U = TpetraMultiVector(interface_map, 1);
             interface_importer = Teuchos::rcp(new Tpetra::Import<local_ordinal_type, global_ordinal_type, node_type>(vector_map, interface_map));
             // since it is initialisation, the Tpetra::CombineMode is INSERT.
             interface_U.doImport(U, *interface_importer, Tpetra::INSERT);

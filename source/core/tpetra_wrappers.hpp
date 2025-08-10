@@ -10,10 +10,16 @@
 #include <Tpetra_Version.hpp>
 #include <Teuchos_FancyOStream.hpp>
 
+
+using TpetraMultiVector = Tpetra::MultiVector<>;
+using TpetraCrsGraph = Tpetra::CrsGraph<>;
+using TpetraMap = Tpetra::Map<>;
+using TpetraCrsMatrix = Tpetra::CrsMatrix<>;
+
 using node_type = Tpetra::Details::DefaultTypes::node_type;
-typedef Tpetra::MultiVector<real, int, int, node_type>::scalar_type scalar_type;
-typedef Tpetra::MultiVector<real, int, int, node_type>::local_ordinal_type local_ordinal_type;
-typedef Tpetra::MultiVector<real, int, int, node_type>::global_ordinal_type global_ordinal_type;
+using scalar_type = TpetraMultiVector::scalar_type;
+using local_ordinal_type = TpetraMultiVector::local_ordinal_type;
+using global_ordinal_type = TpetraMultiVector::global_ordinal_type;
 
 const Tpetra::global_size_t INVALID = Teuchos::OrdinalTraits<Tpetra::global_size_t>::invalid ();
 
@@ -24,7 +30,7 @@ const Tpetra::global_size_t INVALID = Teuchos::OrdinalTraits<Tpetra::global_size
  * @param V Tpetra::MultiVector 
  * @param triplets a std::vector of Eigen::triplet<real> objects that were originally meant for populating an Eigen sparse matrix
  */
-void set_from_triplets(Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>& V, std::vector<spnz>& triplets)
+void set_from_triplets(TpetraMultiVector& V, std::vector<spnz>& triplets)
 {
     V.putScalar(0.0);
     for (spnz& triplet : triplets)
@@ -41,7 +47,7 @@ void set_from_triplets(Tpetra::MultiVector<scalar_type, local_ordinal_type, glob
  * @param nz_i is the starting value for numbering the DoFs on a rank; used to convert from global to local numbering.
  * @warning only works because the mapping from global to local is a simple offset due to the renumbering of the nodes and DoFs on each rank.
  */
-void set_from_triplets(Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>& V, std::vector<spnz>& triplets, int const nz_i)
+void set_from_triplets(TpetraMultiVector& V, std::vector<spnz>& triplets, int const nz_i)
 {
     V.putScalar(0.0);
     for (spnz& triplet : triplets)
@@ -56,7 +62,7 @@ void set_from_triplets(Tpetra::MultiVector<scalar_type, local_ordinal_type, glob
  * @param V 
  * @return Kokkos::View<const scalar_type*, Kokkos::HostSpace> 
  */
-Kokkos::View<const real*, Kokkos::HostSpace> get_1d_view(Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>& V)
+Kokkos::View<const real*, Kokkos::HostSpace> get_1d_view(TpetraMultiVector& V)
 {
     auto V_2d = V.getLocalViewHost(Tpetra::Access::ReadOnly);
     return Kokkos::subview (V_2d, Kokkos::ALL (), 0);
@@ -89,7 +95,7 @@ std::map<global_ordinal_type, std::vector<global_ordinal_type>> map_triplets_to_
  * @param A a Tpetra::CrsMatrix that will be updated with new values from triplets.
  * @param triplets a std::vector of triplets that will be used to update the matrix A.
  */
-void set_from_triplets(Teuchos::RCP<Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>> A, std::vector<spnz>& triplets)
+void set_from_triplets(Teuchos::RCP<TpetraCrsMatrix> A, std::vector<spnz>& triplets)
 {
     A->resumeFill();
     // we have repeats in our row values, so we need to sum rather than replace. Therefore, we have to start by first zeroing the entire matrix.
@@ -117,7 +123,7 @@ void set_from_triplets(Teuchos::RCP<Tpetra::CrsMatrix<scalar_type, local_ordinal
  * @param A_graph a Teuchos RCP to Tpetra::CrsGraph that will be used to initialise the stiffness matrix.
  * @param triplets a std::vector of triplets that will be used to update the graph indices - their values will be ignored we only care about their column indices.
  */
-void initialise_from_triplets(Teuchos::RCP<Tpetra::CrsGraph<local_ordinal_type, global_ordinal_type, node_type>> A_graph, std::vector<spnz>& triplets)
+void initialise_from_triplets(Teuchos::RCP<TpetraCrsGraph> A_graph, std::vector<spnz>& triplets)
 {
     auto row_col_map = map_triplets_to_row_column_positions(triplets);
     // std::cout << "initialise_from_triplets: there are " << row_col_map.size() << " entries in glob_mesh.update_elements_states()." << std::endl;
