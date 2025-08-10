@@ -25,17 +25,39 @@ class BasicSolver {
     // Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<>, Tpetra::MultiVector<>>> dU_solver; 
     // Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<>, Tpetra::MultiVector<>>> U_solver; 
 
-    Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<real, int, long long>, Tpetra::MultiVector<real, int, long long>>> dU_solver;
-    Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<real, int, long long>, Tpetra::MultiVector<real, int, long long>>> U_solver;
+    Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>, Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>>> dU_solver;
+    Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>, Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>>> U_solver;
 
-    Teuchos::RCP<Tpetra::MultiVector<real>> U_rcp;
-    Teuchos::RCP<Tpetra::MultiVector<real>> P_rcp;
-    Teuchos::RCP<Tpetra::MultiVector<real>> dU_rcp;
-    Teuchos::RCP<Tpetra::MultiVector<real>> G_rcp;
+    Teuchos::RCP<Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>> U_rcp;
+    Teuchos::RCP<Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>> P_rcp;
+    Teuchos::RCP<Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>> dU_rcp;
+    Teuchos::RCP<Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>> G_rcp;
     #else
     Eigen::SparseLU<spmat> solver;
     #endif
     public:
+        /**
+         * @brief creates a Teuchos::RCP that points to the memory in the Assembler that holds \f$\boldsymbol{U}\f$, \f$d\boldsymbol{U}\f$ and \f$\boldsymbol{P}\f$.
+         * 
+         * @param assembler the \ref Assembler object used in the \ref Model
+         */
+        void initialise_solver(Assembler& assembler)
+        {
+            #ifdef WITH_MPI
+            U_rcp = Teuchos::rcpFromRef(assembler.U);
+            P_rcp  = Teuchos::rcpFromRef(assembler.P);
+            dU_rcp = Teuchos::rcpFromRef(assembler.dU);
+            G_rcp  = Teuchos::rcpFromRef(assembler.G);
+            
+            // using LO = std::remove_reference_t<decltype(*assembler.K)>::local_ordinal_type;
+            // using GO = std::remove_reference_t<decltype(*assembler.K)>::global_ordinal_type;
+            // using ST = std::remove_reference_t<decltype(*assembler.K)>::scalar_type;
+
+            U_solver = Amesos2::create<Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>,Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>>("klu2", assembler.K, U_rcp, P_rcp);
+            dU_solver = Amesos2::create<Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>,Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>>("klu2", assembler.K, dU_rcp, G_rcp);
+            #endif
+        }
+
         /**
          * @brief solves for U using the global matrices contained in \ref Assembler; uses Eigen's SparseLU solver.
          * 
@@ -74,27 +96,7 @@ class BasicSolver {
             #endif
         }
         
-        /**
-         * @brief creates a Teuchos::RCP that points to the memory in the Assembler that holds \f$\boldsymbol{U}\f$, \f$d\boldsymbol{U}\f$ and \f$\boldsymbol{P}\f$.
-         * 
-         * @param assembler the \ref Assembler object used in the \ref Model
-         */
-        void initialise_solver(Assembler& assembler)
-        {
-            #ifdef WITH_MPI
-            U_rcp = Teuchos::rcpFromRef(assembler.U);
-            P_rcp  = Teuchos::rcpFromRef(assembler.P);
-            dU_rcp = Teuchos::rcpFromRef(assembler.dU);
-            G_rcp  = Teuchos::rcpFromRef(assembler.G);
-            
-            // using LO = std::remove_reference_t<decltype(*assembler.K)>::local_ordinal_type;
-            // using GO = std::remove_reference_t<decltype(*assembler.K)>::global_ordinal_type;
-            // using ST = std::remove_reference_t<decltype(*assembler.K)>::scalar_type;
 
-            U_solver = Amesos2::create<Tpetra::CrsMatrix<real, int, long long>,Tpetra::MultiVector<real, int, long long>>("klu2", assembler.K, U_rcp, P_rcp);
-            dU_solver = Amesos2::create<Tpetra::CrsMatrix<real, int, long long>,Tpetra::MultiVector<real, int, long long>>("klu2", assembler.K, dU_rcp, G_rcp);
-            #endif
-        }
 
         /**
          * @brief solves for \f$\Delta \boldsymbol{U}\f$ from \f$\Delta \boldsymbol{U} = -\boldsymbol{K}^{-1} \boldsymbol{G}\f$.

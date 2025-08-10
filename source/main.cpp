@@ -166,14 +166,16 @@ InputOptions parse_input(int argc, char* argv[]) {
 }
 int main (int argc, char* argv[]) {
     
-    initialise_MPI(argc, argv);
-    #ifdef KOKKOS
-        Kokkos::initialize(argc, argv);
-    #endif
+    // initialise_MPI(argc, argv);
+
+    // #ifdef KOKKOS
+    //     Kokkos::initialize(argc, argv);
+    // #endif
     // need a scope to contain anything that call Trilinos to avoid incorrect finalization
-    
+    Tpetra::ScopeGuard tpetraScope (&argc, &argv);
     {
     // create mesh
+    Teuchos::RCP<const Teuchos::Comm<int>> comm = Teuchos::rcp(new Teuchos::MpiComm<int>(MPI_COMM_WORLD));
     Model model;
     int rank = -1;
     int num_ranks = -1;
@@ -209,6 +211,12 @@ int main (int argc, char* argv[]) {
     }
 
     FrameMesh the_frame = model.glob_mesh.get_frame();
+    the_frame.read_frame_size();
+    read_nodes_coords_vector(the_frame.get_node_coords_pairs());
+    read_element_map(the_frame.map_elements_to_nodes());
+    
+
+
     std::pair<int,int> frame_size = the_frame.get_frame_size();
     if (rank == 0)
     {
@@ -249,11 +257,9 @@ int main (int argc, char* argv[]) {
                     "material_state_update",
                     "result_recording",
                     "all"});
-    
-    MPI_Barrier(MPI_COMM_WORLD);
     }
-    #ifdef KOKKOS
-        Kokkos::finalize();
-    #endif
-    finalise_MPI();
+    // #ifdef KOKKOS
+    //     Kokkos::finalize();
+    // #endif
+    // finalise_MPI();
 }

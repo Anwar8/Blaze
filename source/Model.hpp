@@ -24,6 +24,7 @@ class Model
         LoadManager load_manager;
         Scribe scribe;
         std::vector<NodalRestraint> restraints;
+        Teuchos::RCP<const Teuchos::Comm<int>> comm;
 
         /**
          * @brief Initialise restraints and loads for the model.
@@ -38,6 +39,7 @@ class Model
         {
             // apply the restraints to the global mesh and thus reduce the active freedoms. 
             #ifndef WITH_MPI
+            comm = Teuchos::rcp(new Teuchos::MpiComm<int>(MPI_COMM_WORLD));
                 for (auto& restraint : restraints)
                 {
                     restraint.apply_restraints(glob_mesh);
@@ -59,7 +61,7 @@ class Model
 
             // based on the restraints and loads, we can now initialise the global matrices and establish element-stiffness mapping.
             // start with mapping stiffnesses as these are needed for initialising the sparse matrices (the stiffness matrix).
-            assembler.initialise_global_vectors(glob_mesh);
+            assembler.initialise_global_vectors(glob_mesh, comm);
             assembler.assemble_global_P(glob_mesh);
 
             assembler.map_U_to_nodes(glob_mesh);

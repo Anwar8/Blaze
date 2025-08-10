@@ -74,7 +74,7 @@ class FrameMesh {
             dx = bay_length/beam_divisions;
             dy = floor_height/column_divisions;
             num_nodes = nodes_per_column_line * (nbays + 1) + nodes_per_full_bay*(nbays);
-            num_elements = (nodes_per_column_line - 1) * (nbays + 1) + ( nodes_per_full_bay - 1)*(nbays);
+            num_elements = (nodes_per_column_line - 1) * (nbays + 1) + (beam_divisions * nfloors * nbays);
         }
 
         /**
@@ -442,6 +442,7 @@ class FrameMesh {
         {
             return std::make_pair(num_nodes, num_elements);
         }
+
         int get_num_elements() {return num_elements;}
         int get_num_nodes() {return num_nodes;}
 

@@ -1509,6 +1509,8 @@ class GlobalMesh {
          */
         void map_element_stiffnesses()
         {
+            MPI_Barrier(MPI_COMM_WORLD);
+            sleep(rank*2);
             for (auto& elem: elem_vector)
             {
                 elem->map_stiffness();

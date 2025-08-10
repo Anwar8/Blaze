@@ -289,6 +289,24 @@ class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass>
                     this->stiffness_map.push_back({local_position_vector_rows[row_i], local_position_vector_columns[column_i], position_vector_rows[row_i], position_vector_columns[column_i]});
                 }
             }
+
+            // std::vector<int> local_position_vector_rows;
+            // std::vector<int> local_position_vector_columns;
+            // std::vector<int> position_vector_rows;
+            // std::vector<int> position_vector_columns;
+            int rank;
+            get_my_rank(rank);
+            std::cout << "--------------------------------------------------------------" << std::endl;
+            std::cout << "Rank " << rank << " element " << this->id << ":" << std::endl;
+            std::cout << "local_position_vector_rows = "; 
+            print_container(local_position_vector_rows);
+            std::cout << "position_vector_rows = "; 
+            print_container(position_vector_rows);
+            std::cout << "local_position_vector_columns = "; 
+            print_container(local_position_vector_columns);
+            std::cout << "position_vector_columns = "; 
+            print_container(position_vector_columns);
+            std::cout << "--------------------------------------------------------------" << std::endl;
         }
     //@}
 

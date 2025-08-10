@@ -35,19 +35,19 @@ class Assembler {
         spvec U; /**< Global Nodal displacement vector \f$\boldsymbol{U}\f$ - also known as system state vector.*/
         spvec dU; /**< Change in global Nodal displacement vector \f$\Delta\boldsymbol{U}\f$ - also known as system state vector increment.*/
         #else
-        Teuchos::RCP<Tpetra::Map<>> vector_map; /**<a map that explains which rows of the \f$\boldsymbol{P}\f$, \f$\boldsymbol{U}\f$, \f$\boldsymbol{R}\f$, etc. vectors go on which cores.*/
-        Teuchos::RCP<Tpetra::CrsGraph<>> matrix_graph; /**<a graph that explains which rows of the \f$\boldsymbol{K}\f$ matrix go on which cores.*/
-        Teuchos::RCP<Tpetra::Map<>> interface_map; /**< a map that is used for communicating the interface DoFs that are globally not locally allocated. */
-        Teuchos::RCP<Tpetra::Import<>> interface_importer; /**< the importer object that is meant for communicating the \f$\boldsymbol{U}\f$ values on different nodes and ranks. */
+        Teuchos::RCP<Tpetra::Map<local_ordinal_type, global_ordinal_type, node_type>> vector_map; /**<a map that explains which rows of the \f$\boldsymbol{P}\f$, \f$\boldsymbol{U}\f$, \f$\boldsymbol{R}\f$, etc. vectors go on which cores.*/
+        Teuchos::RCP<Tpetra::CrsGraph<local_ordinal_type, global_ordinal_type, node_type>> matrix_graph; /**<a graph that explains which rows of the \f$\boldsymbol{K}\f$ matrix go on which cores.*/
+        Teuchos::RCP<Tpetra::Map<local_ordinal_type, global_ordinal_type, node_type>> interface_map; /**< a map that is used for communicating the interface DoFs that are globally not locally allocated. */
+        Teuchos::RCP<Tpetra::Import<local_ordinal_type, global_ordinal_type, node_type>> interface_importer; /**< the importer object that is meant for communicating the \f$\boldsymbol{U}\f$ values on different nodes and ranks. */
 
-        Teuchos::RCP<Tpetra::CrsMatrix<real>> K;
-        Tpetra::MultiVector<real> P;
-        Tpetra::MultiVector<real> R;
-        Tpetra::MultiVector<real> G;
-        Tpetra::MultiVector<real> U;
-        Tpetra::MultiVector<real> dU;
+        Teuchos::RCP<Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>> K;
+        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> P;
+        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> R;
+        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> G;
+        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> U;
+        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> dU;
 
-        Tpetra::MultiVector<real> interface_U; /**< the interface version of the U vector.*/
+        Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type> interface_U; /**< the interface version of the U vector.*/
             
         #endif
 
@@ -68,7 +68,7 @@ class Assembler {
             K = make_spd_mat(glob_mesh.ndofs, glob_mesh.ndofs);
             #else
             setup_tpetra_crs_graph(glob_mesh);
-            K = Teuchos::RCP(new Tpetra::CrsMatrix<real>(matrix_graph));
+            K = Teuchos::RCP(new Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(matrix_graph));
             #endif 
         }
         /**
@@ -76,7 +76,7 @@ class Assembler {
          * 
          * @param glob_mesh  the global_mesh object which contains information about the number of nodes and degrees of freedom.
          */
-        void initialise_global_vectors(GlobalMesh& glob_mesh) {
+        void initialise_global_vectors(GlobalMesh& glob_mesh, Teuchos::RCP<const Teuchos::Comm<int>>& comm) {
             R_global_triplets.reserve(glob_mesh.ndofs);
             P_global_triplets.reserve(glob_mesh.ndofs);
 
@@ -87,14 +87,14 @@ class Assembler {
             U = make_spd_vec(glob_mesh.ndofs);
             dU = make_spd_vec(glob_mesh.ndofs);            
             #else
-            setup_tpetra_vector_map(glob_mesh.get_ndofs(), glob_mesh.get_rank_ndofs());
+            setup_tpetra_vector_map(glob_mesh.get_ndofs(), glob_mesh.get_rank_ndofs(), comm);
             // The constructor for the vectors that follows prefills the vectors with zeros.
-            R = Tpetra::MultiVector<real>(vector_map, 1);
-            G = Tpetra::MultiVector<real>(vector_map, 1);
-            P = Tpetra::MultiVector<real>(vector_map, 1);
-            U = Tpetra::MultiVector<real>(vector_map, 1);
-            dU = Tpetra::MultiVector<real>(vector_map, 1);
-            setup_interface_import(glob_mesh);
+            R = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(vector_map, 1);
+            G = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(vector_map, 1);
+            P = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(vector_map, 1);
+            U = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(vector_map, 1);
+            dU = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(vector_map, 1);
+            setup_interface_import(glob_mesh, comm);
             #endif 
         }
         /**
@@ -103,14 +103,13 @@ class Assembler {
          * @param ndofs the total number of active DoFs of the entire problem.
          * @param rank_ndofs the number of DoFs owned by the current rank. 
          */
-        void setup_tpetra_vector_map(int ndofs, int rank_ndofs)
+        void setup_tpetra_vector_map(int ndofs, int rank_ndofs, Teuchos::RCP<const Teuchos::Comm<int>>& comm)
         {
             #ifdef WITH_MPI
-            Teuchos::RCP<const Teuchos::Comm<int>> comm = Teuchos::rcp(new Teuchos::MpiComm<int>(MPI_COMM_WORLD));
-            const size_t numLocalEntries = rank_ndofs;
-            const Tpetra::global_size_t numGlobalEntries = ndofs;
-            const tpetra_global_ordinal indexBase = 0;
-            vector_map = Teuchos::rcp(new Tpetra::Map<>(numGlobalEntries, numLocalEntries, indexBase, comm));
+            const unsigned numLocalEntries = rank_ndofs;
+            const unsigned numGlobalEntries = ndofs;
+            const unsigned indexBase = 0;
+            vector_map = Teuchos::rcp(new Tpetra::Map<local_ordinal_type, global_ordinal_type, node_type>(numGlobalEntries, numLocalEntries, indexBase, comm));
             #endif
         }
 
@@ -122,8 +121,8 @@ class Assembler {
         void setup_tpetra_crs_graph(GlobalMesh& glob_mesh)
         {
             #ifdef WITH_MPI
-            const size_t entriesPerRow = glob_mesh.max_num_stiffness_contributions;
-            matrix_graph = Teuchos::rcp(new Tpetra::CrsGraph<>(vector_map, entriesPerRow));
+            const unsigned entriesPerRow = glob_mesh.max_num_stiffness_contributions;
+            matrix_graph = Teuchos::rcp(new Tpetra::CrsGraph<local_ordinal_type, global_ordinal_type, node_type>(vector_map, entriesPerRow));
             collect_global_K_triplets(glob_mesh);
             initialise_from_triplets(matrix_graph, K_global_triplets);
             matrix_graph->fillComplete();
@@ -303,10 +302,10 @@ class Assembler {
          * 
          * @param glob_mesh the \ref GlobalMesh object.
          */
-        void setup_interface_import(GlobalMesh& glob_mesh)
+        void setup_interface_import(GlobalMesh& glob_mesh, Teuchos::RCP<const Teuchos::Comm<int>>& comm)
         {
             #ifdef WITH_MPI
-            std::vector<unsigned> interface_dofs;
+            std::vector<int> interface_dofs;
             // the presizing is too big as it does not account for inactive DoFs, but is better than trying to resize the vector many times over. The big size is not an issue because I expect only a few interface nodes anyway!
             interface_dofs.reserve(glob_mesh.interface_node_vector.size()*6);
 
@@ -314,21 +313,25 @@ class Assembler {
             {
                 int nzi = node->get_nz_i(); // where the node displacements start in the U vector.
                 int num_node_dofs = node->get_ndof(); // how many there are to loop over.
-                std::set<int> node_active_dofs = node->get_active_dofs();
-                int i = 0;
-                for (auto& dof: node_active_dofs) {
+                for (int i = 0; i < num_node_dofs; ++i)
+                {
                     interface_dofs.push_back(i + nzi);
-                    ++i;
                 }
+                // int i = 0;
+                // std::set<int> node_active_dofs = node->get_active_dofs();
+                // for (auto& dof: node_active_dofs) {
+                //     interface_dofs.push_back(i + nzi);
+                //     ++i;
+                // }
             }
-            Teuchos::Array<tpetra_global_ordinal> interface_dofs_array(interface_dofs.size());
+            Teuchos::Array<int> interface_dofs_array(interface_dofs.size());
             for (int k = 0; k < interface_dofs.size(); ++k) {
                 interface_dofs_array[k] = interface_dofs[k];
             }
-            // cyclicMap = rcp (new map_type (numGlobalEntries, elementList, indexBase, comm));
-            interface_map = Teuchos::rcp(new Tpetra::Map<>(INVALID, interface_dofs_array, 0, vector_map->getComm()));
-            interface_U = Tpetra::MultiVector<real>(interface_map, 1);
-            interface_importer = Teuchos::rcp(new Tpetra::Import<>(vector_map, interface_map));
+            interface_map = Teuchos::rcp(new Tpetra::Map<local_ordinal_type, global_ordinal_type, node_type>(INVALID, interface_dofs_array, 0, comm));
+            
+            interface_U = Tpetra::MultiVector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>(interface_map, 1);
+            interface_importer = Teuchos::rcp(new Tpetra::Import<local_ordinal_type, global_ordinal_type, node_type>(vector_map, interface_map));
             // since it is initialisation, the Tpetra::CombineMode is INSERT.
             interface_U.doImport(U, *interface_importer, Tpetra::INSERT);
             #endif
@@ -341,43 +344,105 @@ class Assembler {
          */
         void map_U_to_nodes(GlobalMesh& glob_mesh)
         {
-            std::vector<std::shared_ptr<Node>>* nodes = &glob_mesh.node_vector;
+            
             #ifdef WITH_MPI
-            auto U_local_view = get_1d_view(U);
-            int nzi = 0;
-            for (auto& node: glob_mesh.node_vector)
+            // {
+            //     // Get a view of the Vector's entries.  The view has type
+            //     // Kokkos::View.  Kokkos::View acts like an array, but is
+            //     // reference-counted like std::shared_ptr or Teuchos::RCP.  This
+            //     // means that it may persist beyond the lifetime of the Vector.  A
+            //     // View is like a shallow copy of the data, so be careful
+            //     // modifying the Vector while a view of it exists.  You may
+            //     // decrement the reference count manually by assigning an empty
+            //     // View to it.  We put this code in an inner scope (in an extra
+            //     // pair of {}) so that the Kokkos::View will fall out of scope
+            //     // before the next example, which modifies the entries of the
+            //     // Vector.
+            //     // We want a _host_ View.  Vector implements "dual view"
+            //     // semantics.  This is really only relevant for architectures with
+            //     // two memory spaces.
+            //     auto x_2d = x.getLocalViewHost(Tpetra::Access::ReadOnly);
+            //     // getLocalView returns a 2-D View by default.  We want a 1-D
+            //     // View, so we take a subview.
+            //     auto x_1d = Kokkos::subview (x_2d, Kokkos::ALL (), 0);
+            //     // x_data.extent (0) may be longer than the number of local
+            //     // rows in the Vector, so be sure to ask the Vector for its
+            //     // dimensions, rather than the ArrayRCP.
+            //     const size_t localLength = x.getLocalLength ();
+            //     // Count the local number of entries less than 0.5.
+            //     // Use local indices to access the entries of x_data.
+            //     size_t localCount = 0;
+            //     for (size_t k = 0; k < localLength; ++k) {
+            //     if (x_1d(k) < 0.5) {
+            //         ++localCount;
+            //     }
+            //     }
+            //     // "reduceAll" is a type-safe templated version of MPI_Allreduce.
+            //     // "outArg" is like taking the address using &, but makes it more
+            //     // clear that its argument is an output argument of a function.
+            //     size_t globalCount = 0;
+            //     reduceAll<int, size_t> (*comm, REDUCE_SUM, localCount,
+            //                             outArg (globalCount));
+            //     // Find the total number of entries less than 0.5, over all
+            //     // processes in the Vector's communicator.  Note the trick for
+            //     // pluralizing the word "entry" conditionally on globalCount.
+            //     if (myRank == 0) {
+            //     out << "x has " << globalCount << " entr"
+            //         << (globalCount != 1 ? "ies" : "y")
+            //         << " less than 0.5." << endl;
+            //     }
+            // }
+
+            // scope to destroy the view.
+            {
+                int rank; 
+                get_my_rank(rank);
+                std::cout << "Rank " << rank << " has " << U.getLocalLength() << " U local members." << std::endl;
+
+                auto U_local_view = get_1d_view(U);
+                // auto U_2d = U.getLocalViewHost(Tpetra::Access::ReadOnly);
+                // auto U_local_view = Kokkos::subview (U_2d, Kokkos::ALL (), 0);
+                int nzi = 0;
+                for (auto& node: glob_mesh.node_vector)
                 {
-                    // int nzi = node->get_nz_i(); // where the node displacements start in the U vector.
-                    int num_node_dofs = node->get_ndof(); // how many there are to loop over.
                     std::set<int> node_active_dofs = node->get_active_dofs();
-                    int i = 0;
                     for (auto& dof: node_active_dofs) {
-                        node->set_nodal_displacement(dof, U_local_view(i + nzi));
-                        ++i;
+                        node->set_nodal_displacement(dof, U_local_view(nzi));
+                        ++nzi;
                     }
-                    nzi += i;
+                    
                 }
+            }
+
+            {
+                int rank; 
+                get_my_rank(rank);
+                std::cout << "Rank " << rank << " has " << interface_U.getLocalLength() << " interface_U local members." << std::endl;
                 // since this is a call happening often, the Tpetra::CombineMode is REPLACE since the elements should already exist inplace.
                 interface_U.doImport(U, *interface_importer, Tpetra::REPLACE);
 
                 auto interface_U_local_view = get_1d_view(interface_U);
-                nzi = 0;
+                // nzi = 0;
+                // auto interface_U_2d = interface_U.getLocalViewHost(Tpetra::Access::ReadOnly);
+                // auto interface_U_local_view = Kokkos::subview (interface_U_2d, Kokkos::ALL (), 0);
+                int nzi = 0;
                 for (auto& node: glob_mesh.interface_node_vector)
                 {
                     std::set<int> node_active_dofs = node->get_active_dofs();
-                    int i = 0;
                     for (auto& dof: node_active_dofs) {
-                        node->set_nodal_displacement(dof, interface_U_local_view(i + nzi));
-                        ++i;
+                        node->set_nodal_displacement(dof, interface_U_local_view(nzi));
+                        ++nzi;
                     }
-                    nzi += i;
-                }
-                if (VERBOSE_NLB)
-                {
-                    glob_mesh.read_nodal_U();
-                }
+                }   
+            }
+
+            if (VERBOSE_NLB)
+            {
+                glob_mesh.read_nodal_U();
+            }
             #else
             #ifdef KOKKOS
+                std::vector<std::shared_ptr<Node>>* nodes = &glob_mesh.node_vector;
                 Kokkos::parallel_for( "Assembler::map_U_to_nodes", glob_mesh.node_vector.size(), KOKKOS_LAMBDA (int i) {
                     int nzi = (*nodes)[i]->get_nz_i(); // where the node displacements start in the U vector.
                     int num_node_dofs = (*nodes)[i]->get_ndof(); // how many there are to loop over.

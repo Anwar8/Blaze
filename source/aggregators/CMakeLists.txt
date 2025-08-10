@@ -18,6 +18,7 @@ else(BUILD_STATIC_LIBS)
         target_link_libraries(BlazeAggregators INTERFACE BlazeCore BlazeMaterials BlazeElements)
     endif(KOKKOS)
 endif(BUILD_STATIC_LIBS)
+
 if(WITH_MPI)
     find_package(MPI REQUIRED)
     list(APPEND CMAKE_PREFIX_PATH "/Users/anwar/UOE/dissertation/code/Trilinos/trilinos-install")
