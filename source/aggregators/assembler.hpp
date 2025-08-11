@@ -211,6 +211,7 @@ class Assembler {
                 std::cout << "There are " << std::size(P_global_triplets) << " P_global contributions to add up." << std::endl;
             }
             #ifdef WITH_MPI
+            std::cout << "Setting P" << std::endl;
             set_from_triplets(P, P_global_triplets, glob_mesh.rank_starting_nz_i);
             if (VERBOSE)
             {
@@ -262,6 +263,7 @@ class Assembler {
             }
 
             #ifdef WITH_MPI
+            std::cout << "Setting R" << std::endl;
             set_from_triplets(R, R_global_triplets, glob_mesh.rank_starting_nz_i);
             set_from_triplets(K, K_global_triplets);
             if (VERBOSE)

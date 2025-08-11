@@ -39,19 +39,19 @@ class Model
         void initialise_restraints_n_loads()
         {
             // apply the restraints to the global mesh and thus reduce the active freedoms. 
-            #ifndef WITH_MPI
-            comm = Teuchos::rcp(new Teuchos::MpiComm<int>(MPI_COMM_WORLD));
-                for (auto& restraint : restraints)
-                {
-                    restraint.apply_restraints(glob_mesh);
-                }
-            #else
+            #ifdef WITH_MPI
+                comm = Teuchos::rcp(new Teuchos::MpiComm<int>(MPI_COMM_WORLD));
                 for (auto& restraint : restraints)
                 {
                     restraint.apply_restraints();
                 }
                 glob_mesh.count_and_exchange_distributed_dofs();
                 glob_mesh.find_max_num_stiffness_contributions();
+            #else
+                for (auto& restraint : restraints)
+                {
+                    restraint.apply_restraints(glob_mesh);
+                }
             #endif
             // initialise all the loads from the load manager
             load_manager.initialise_loads();

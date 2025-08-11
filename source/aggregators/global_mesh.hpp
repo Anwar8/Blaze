@@ -1132,6 +1132,17 @@ class GlobalMesh {
         }
 
         std::vector<int> get_ranks_ndofs_vector() {return ranks_ndofs;}
+
+        // void print_local_nodes()
+        // {
+        //     std::cout << 
+        // }
+        // void print_local_ndofs()
+        // {
+
+        // }
+
+
         /**
          * @brief exchnages the nz_i of the interface nodes between neighbouring ranks.
          * 
@@ -1510,7 +1521,7 @@ class GlobalMesh {
         void map_element_stiffnesses()
         {
             MPI_Barrier(MPI_COMM_WORLD);
-            sleep(rank*2);
+            // sleep(rank*2);
             for (auto& elem: elem_vector)
             {
                 elem->map_stiffness();

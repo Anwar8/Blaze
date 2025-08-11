@@ -9,6 +9,7 @@
 #include <Tpetra_CrsMatrix.hpp>
 #include <Tpetra_Version.hpp>
 #include <Teuchos_FancyOStream.hpp>
+#include "MPIWrappers.hpp"
 
 
 using TpetraMultiVector = Tpetra::MultiVector<real, int, long long>;
@@ -25,6 +26,27 @@ using TpetraMap = Tpetra::Map<local_ordinal_type, global_ordinal_type>;
 
 
 const Tpetra::global_size_t INVALID = Teuchos::OrdinalTraits<Tpetra::global_size_t>::invalid ();
+void read_triplets(std::vector<spnz>& triplets, int const nz_i, int const vector_length)
+{
+    int rank;
+    get_my_rank(rank);
+    sleep(rank*2);
+    std::cout << std::endl << std::endl;
+    std::cout << "set_from_triplets::Rank " << rank << ", nz_i = " << nz_i << ", vector length is " << vector_length <<  ",  and triplets (row, row - nz_i) are: " << std::endl;
+    int n_triplets = triplets.size();
+    int i = 0;
+    for (spnz& triplet : triplets)
+    {
+        if (i != n_triplets - 1)
+        {
+            std::cout << "(" << triplet.row() << ", " << triplet.row() - nz_i << "), ";
+        } else {
+            std::cout << "(" << triplet.row() << ", " << triplet.row() - nz_i << ")." << std::endl << std::endl;
+        }
+        ++i;
+    }
+
+}
 
 /**
  * @brief populate Tpetra::MultiVector<> by using the less efficient replaceGlobalValue method and iterating over a std::vector of Eigen::triplet<real> 
@@ -52,12 +74,15 @@ void set_from_triplets(TpetraMultiVector& V, std::vector<spnz>& triplets)
  */
 void set_from_triplets(TpetraMultiVector& V, std::vector<spnz>& triplets, int const nz_i)
 {
+    // read_triplets(triplets, nz_i, V.getLocalLength());
+
     V.putScalar(0.0);
     for (spnz& triplet : triplets)
     {
         V.sumIntoLocalValue(triplet.row() - nz_i, 0, triplet.value());
     }
 }
+
 
 /**
  * @brief Get a local memory (HostSpace) 1D view from a Tpetra::MultiVector

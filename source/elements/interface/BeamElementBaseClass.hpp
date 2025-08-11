@@ -95,7 +95,9 @@ class BeamElementBaseClass : public ElementBaseClass {
          * not change regardless of element type and implementation.
          */
         std::vector<std::array<int,4>> stiffness_map; 
-        //@}
+
+        std::vector<std::pair<int, int>> resistance_map;
+         //@}
 
         
 

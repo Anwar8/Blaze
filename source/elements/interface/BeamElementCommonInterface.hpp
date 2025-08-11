@@ -168,29 +168,16 @@ class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass>
         virtual void populate_resistance_force_triplets() override {
             this->global_R_triplets.clear();
             // the 12x1 full resistance vector from local nodal forces vector f
-            std::set<int> node_active_dofs;
-            int nz_i = 0;
+            // std::set<int> node_active_dofs;
+            // int nz_i = 0;
             real force_value;
-            int total_nodal_ndofs_completed = 0; // each node we finish with, we add 6 to this. 
-            // This means we have to move to the next set of values corresponding to the next 
-            // node in the full resistance vector.         
-            for (auto& node: this->nodes)
+            // int total_nodal_ndofs_completed = 0; // each node we finish with, we add 6 to this. 
+            // // This means we have to move to the next set of values corresponding to the next 
+            // // node in the full resistance vector.   
+            for (std::pair<int, int> resistance_maplet : this->resistance_map)
             {
-                int nodal_dof_index = 0;
-                node_active_dofs = node->get_active_dofs();
-                nz_i = node->get_nz_i();
-                for (auto& active_dof: node_active_dofs)
-                {
-                    force_value = this->element_global_resistance_forces(active_dof + total_nodal_ndofs_completed);
-                    // since inactive nodes do not appear in R, we have to make sure to be careful about where we add our nodal forces.
-                    // here, nz_i + nodal_dof_index simply starts at where the node freedoms start in the global index, and then
-                    // iterates one by one. See how we ++ nodal_dof_index for each freedom we add, and how we restart from zero when
-                    // we start work with the next node?
-                    this->global_R_triplets.push_back(spnz(nz_i + nodal_dof_index, 0, force_value));
-                    nodal_dof_index++;
-                }
-                //**< has to be 6 because each node has 6 dofs and our \ref element_global_resistance_forces also has 6 rows for each node!*
-                total_nodal_ndofs_completed += 6;
+                force_value = this->element_global_resistance_forces(resistance_maplet.first);
+                this->global_R_triplets.push_back(spnz(resistance_maplet.second, 0, force_value));
             }
         }
         /**
@@ -290,23 +277,28 @@ class BeamElementCommonInterface : public BeamElementBaseClass<BeamSectionClass>
                 }
             }
 
-            // std::vector<int> local_position_vector_rows;
-            // std::vector<int> local_position_vector_columns;
-            // std::vector<int> position_vector_rows;
-            // std::vector<int> position_vector_columns;
-            int rank;
-            get_my_rank(rank);
-            std::cout << "--------------------------------------------------------------" << std::endl;
-            std::cout << "Rank " << rank << " element " << this->id << ":" << std::endl;
-            std::cout << "local_position_vector_rows = "; 
-            print_container(local_position_vector_rows);
-            std::cout << "position_vector_rows = "; 
-            print_container(position_vector_rows);
-            std::cout << "local_position_vector_columns = "; 
-            print_container(local_position_vector_columns);
-            std::cout << "position_vector_columns = "; 
-            print_container(position_vector_columns);
-            std::cout << "--------------------------------------------------------------" << std::endl;
+            this->resistance_map.clear();
+            int resistance_size = local_position_vector_rows.size();
+            this->resistance_map.reserve(resistance_size);
+
+            for (int row_i  = 0; row_i < local_position_vector_rows.size(); ++row_i)
+            {
+                this->resistance_map.push_back({local_position_vector_rows[row_i],position_vector_rows[row_i]});
+            }
+
+            // int rank;
+            // get_my_rank(rank);
+            // std::cout << "--------------------------------------------------------------" << std::endl;
+            // std::cout << "Rank " << rank << " element " << this->id << ":" << std::endl;
+            // std::cout << "local_position_vector_rows = "; 
+            // print_container(local_position_vector_rows);
+            // std::cout << "position_vector_rows = "; 
+            // print_container(position_vector_rows);
+            // std::cout << "local_position_vector_columns = "; 
+            // print_container(local_position_vector_columns);
+            // std::cout << "position_vector_columns = "; 
+            // print_container(position_vector_columns);
+            // std::cout << "--------------------------------------------------------------" << std::endl;
         }
     //@}
 
