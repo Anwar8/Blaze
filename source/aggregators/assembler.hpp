@@ -211,7 +211,7 @@ class Assembler {
                 std::cout << "There are " << std::size(P_global_triplets) << " P_global contributions to add up." << std::endl;
             }
             #ifdef WITH_MPI
-            std::cout << "Setting P" << std::endl;
+            // std::cout << "Setting P" << std::endl;
             set_from_triplets(P, P_global_triplets, glob_mesh.rank_starting_nz_i);
             if (VERBOSE)
             {
@@ -263,7 +263,7 @@ class Assembler {
             }
 
             #ifdef WITH_MPI
-            std::cout << "Setting R" << std::endl;
+            // std::cout << "Setting R" << std::endl;
             set_from_triplets(R, R_global_triplets, glob_mesh.rank_starting_nz_i);
             set_from_triplets(K, K_global_triplets);
             if (VERBOSE)
@@ -397,9 +397,9 @@ class Assembler {
 
             // scope to destroy the view.
             {
-                int rank; 
-                get_my_rank(rank);
-                std::cout << "Rank " << rank << " has " << U.getLocalLength() << " U local members." << std::endl;
+                // int rank; 
+                // get_my_rank(rank);
+                // std::cout << "Rank " << rank << " has " << U.getLocalLength() << " U local members." << std::endl;
 
                 // auto U_local_view = get_1d_view(U);
                 auto U_2d = U.getLocalViewHost(Tpetra::Access::ReadOnly);
@@ -417,9 +417,9 @@ class Assembler {
             }
 
             {
-                int rank; 
-                get_my_rank(rank);
-                std::cout << "Rank " << rank << " has " << interface_U.getLocalLength() << " interface_U local members." << std::endl;
+                // int rank; 
+                // get_my_rank(rank);
+                // std::cout << "Rank " << rank << " has " << interface_U.getLocalLength() << " interface_U local members." << std::endl;
                 // since this is a call happening often, the Tpetra::CombineMode is REPLACE since the elements should already exist inplace.
                 interface_U.doImport(U, *interface_importer, Tpetra::REPLACE);
 

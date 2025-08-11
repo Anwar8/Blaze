@@ -36,6 +36,113 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 11 August
+If the indices fall on allocated memory then it would work, and if it is not allocated then it would seg-fault. 
+
+I found that using that `export TPETRA_DEBUG=1` allow `Tpetra` to check for errors for me. This has allowed me to find that the reason I am getting a segmentation fault is because the indices for the resistance triplets are drifting and becoming negative, as well as accessing parts of the local vector that do not belong to it. This was only possible to find with the debug flag turned on. It turns out that the `populate_resistance_force_triplets` (which was calculating indices every iteration!) was incorrectly calculating and populating triplets for the resistance that should not exist. I redid this funciton in a similar way to the `stiffness_map` and created a `resistance_map`. I don't know how this was not a problem with my correctness tests before. `Blaze` now works again, and even more it appears that the scaling is much better as well, at least for the `LinearElastic` element!
+<div style="max-height: 200px; overflow-y: auto; font-size: 0.9em; border: 1px solid #ccc; padding: 5px;">
+
+```bash
+./build.sh debug -DWITH_MPI=ON -DVERBOSE_NLB=OFF
+mpirun -n 1 bin/Blaze --nsteps 5 --nbays 40 --nfloors 5 --beam_divisions 50 --column_divisions 35
+ANALYSIS_SUCCEEDED
+0,0.11398578,3.5555394,0.0091762543,6.0477438,0.0026636124,0.086703539,0.0023369789,5.0067902e-06,9.8216679
+mpirun -n 2 bin/Blaze --nsteps 5 --nbays 40 --nfloors 5 --beam_divisions 50 --column_divisions 35
+ANALYSIS_SUCCEEDED
+0,0.058568239,1.7685223,0.0045959949,2.8784623,0.00095009804,0.1220386,0.0014078617,5.9604645e-06,4.837115
+1,0.059354305,1.7654555,0.0046095848,2.8817062,0.0010237694,0.12193966,0.001411438,5.7220459e-06,4.8371119
+mpirun -n 4 bin/Blaze --nsteps 5 --nbays 40 --nfloors 5 --beam_divisions 50 --column_divisions 35
+ANALYSIS_SUCCEEDED
+0,0.036394835,1.0411108,0.002849102,1.5999932,0.0020313263,0.1221621,0.00096011162,7.8678131e-06,2.8076711
+1,0.036536932,1.040652,0.0026381016,1.6004791,0.0024595261,0.12202883,0.001335144,1.1920929e-05,2.807796
+2,0.037374496,1.045444,0.0028600693,1.595571,0.0022675991,0.12209177,0.0010211468,7.1525574e-06,2.807668
+3,0.036758661,1.0458643,0.0026891232,1.5949667,0.0027275085,0.12210035,0.00096297264,5.9604645e-06,2.807667
+
+./build.sh custom -DWITH_MPI=ON
+mpirun -n 1 bin/Blaze --nsteps 5 --nbays 40 --nfloors 5 --beam_divisions 50 --column_divisions 35
+nbays,nfloors,beam_length,floor_height,beam_divisions,column_divisions,element_type,flange_divisions,web_divisions,udl,max_LF,nsteps,tolerance,max_iterations,num_nodes,num_elements
+40,5,5,3.5,50,35,0,10,40,-3000,1,5,0.01,10,17016,17175
+
+---<Analysis complete. LF = 1, and out-of-balance = 5.270684e-06>---
+ANALYSIS_SUCCEEDED
+rank,U_to_nodes_mapping,element_state_update,element_global_response,assembly,convergence_check,dU_calculation,material_state_update,result_recording,all
+0,0.01388073,0.16001678,0.0011842251,0.44037223,0.0010409355,0.081753016,0.00082683563,0,0.69988799
+mpirun -n 1 bin/Blaze --nsteps 25 --nbays 100 --nfloors 5 --beam_divisions 50 --column_divisions 35
+nbays,nfloors,beam_length,floor_height,beam_divisions,column_divisions,element_type,flange_divisions,web_divisions,udl,max_LF,nsteps,tolerance,max_iterations,num_nodes,num_elements
+100,5,5,3.5,50,35,0,10,40,-3000,1,25,0.01,10,42276,42675
+
+---<Analysis complete. LF = 1, and out-of-balance = 8.4214831e-06>---
+ANALYSIS_SUCCEEDED
+rank,U_to_nodes_mapping,element_state_update,element_global_response,assembly,convergence_check,dU_calculation,material_state_update,result_recording,all
+0,0.1764822,1.9264524,0.012082815,6.0333073,0.013837099,1.045821,0.010655165,0,9.2282951
+mpirun -n 2 bin/Blaze --nsteps 25 --nbays 100 --nfloors 5 --beam_divisions 50 --column_divisions 35
+nbays,nfloors,beam_length,floor_height,beam_divisions,column_divisions,element_type,flange_divisions,web_divisions,udl,max_LF,nsteps,tolerance,max_iterations,num_nodes,num_elements
+100,5,5,3.5,50,35,0,10,40,-3000,1,25,0.01,10,42276,42675
+
+---<Analysis complete. LF = 1, and out-of-balance = 8.2829442e-06>---
+ANALYSIS_SUCCEEDED
+rank,U_to_nodes_mapping,element_state_update,element_global_response,assembly,convergence_check,dU_calculation,material_state_update,result_recording,all
+0,0.097741604,1.0343359,0.011091471,3.0015895,0.0085713863,1.2711201,0.0082592964,3.0994415e-06,5.4392478
+1,0.098077536,1.0239112,0.010839939,3.0104847,0.0097980499,1.2710516,0.0080566406,3.8146973e-06,5.439204
+mpirun -n 3 bin/Blaze --nsteps 25 --nbays 100 --nfloors 5 --beam_divisions 50 --column_divisions 35
+ANALYSIS_SUCCEEDED
+rank,U_to_nodes_mapping,element_state_update,element_global_response,assembly,convergence_check,dU_calculation,material_state_update,result_recording,all
+0,0.064471483,0.67055678,0.01076889,2.1161816,0.0058717728,1.2842271,0.0058727264,5.0067902e-06,4.1638248
+1,0.065245152,0.79466271,0.010519028,1.9857216,0.012291908,1.2836475,0.0059916973,1.1920929e-06,4.1638281
+2,0.065020323,0.67267227,0.010650396,2.1090837,0.010878086,1.284163,0.0059165955,1.9073486e-06,4.1638291
+mpirun -n 4 bin/Blaze --nsteps 25 --nbays 100 --nfloors 5 --beam_divisions 50 --column_divisions 35
+ANALYSIS_SUCCEEDED
+rank,U_to_nodes_mapping,element_state_update,element_global_response,assembly,convergence_check,dU_calculation,material_state_update,result_recording,all
+0,0.050813198,0.52206945,0.010863304,1.5667493,0.0076467991,1.2720532,0.005153656,9.5367432e-07,3.441215
+1,0.051819801,0.52284861,0.011188269,1.5671973,0.0064043999,1.2710736,0.0051431656,7.6293945e-06,3.4412141
+2,0.051342964,0.53248453,0.011269093,1.5577831,0.0061244965,1.2715166,0.0051333904,2.8610229e-06,3.4412131
+3,0.050878286,0.57648087,0.011206627,1.5127594,0.0072276592,1.2719586,0.0051498413,5.7220459e-06,3.441215
+mpirun -n 5 bin/Blaze --nsteps 25 --nbays 100 --nfloors 5 --beam_divisions 50 --column_divisions 35
+nbays,nfloors,beam_length,floor_height,beam_divisions,column_divisions,element_type,flange_divisions,web_divisions,udl,max_LF,nsteps,tolerance,max_iterations,num_nodes,num_elements
+100,5,5,3.5,50,35,0,10,40,-3000,1,25,0.01,10,42276,42675
+
+---<Analysis complete. LF = 1, and out-of-balance = 8.2829442e-06>---
+ANALYSIS_SUCCEEDED
+rank,U_to_nodes_mapping,element_state_update,element_global_response,assembly,convergence_check,dU_calculation,material_state_update,result_recording,all
+0,0.12580729,0.53734207,0.0086894035,1.4722419,0.089706421,1.4691298,0.0061781406,2.8610229e-06,3.7152989
+1,0.12989569,0.46040916,0.009424448,1.5583324,0.079643965,1.4670777,0.005089283,5.0067902e-06,3.7154882
+2,0.12573767,0.59007359,0.0091657639,1.4119673,0.096755266,1.4697163,0.0056562424,1.001358e-05,3.7153149
+3,0.1260407,0.55835772,0.0089221001,1.4620857,0.079119921,1.4685817,0.0059804916,6.1988831e-06,3.7153242
+4,0.12633085,0.53111863,0.0096225739,1.4676023,0.10060954,1.4690752,0.0053930283,8.5830688e-06,3.7153161
+(base) anwar@Mhds-MacBook-Air Blaze % mpirun -n 5 bin/Blaze --nsteps 25 --nbays 100 --nfloors 5 --beam_divisions 50 --column_divisions 35
+nbays,nfloors,beam_length,floor_height,beam_divisions,column_divisions,element_type,flange_divisions,web_divisions,udl,max_LF,nsteps,tolerance,max_iterations,num_nodes,num_elements
+100,5,5,3.5,50,35,0,10,40,-3000,1,25,0.01,10,42276,42675
+
+---<Analysis complete. LF = 1, and out-of-balance = 8.2829442e-06>---
+ANALYSIS_SUCCEEDED
+rank,U_to_nodes_mapping,element_state_update,element_global_response,assembly,convergence_check,dU_calculation,material_state_update,result_recording,all
+0,0.13200736,0.55392146,0.0097351074,1.6755326,0.089695692,1.541353,0.0057542324,4.2915344e-06,4.0142791
+1,0.13433576,0.54725718,0.009193182,1.6741166,0.098000526,1.5393288,0.005825758,4.7683716e-06,4.0141709
+2,0.1349628,0.63452458,0.0088553429,1.5798168,0.10467863,1.5397048,0.0059785843,3.8146973e-06,4.0142272
+3,0.13334084,0.52487016,0.0092525482,1.7031586,0.090355873,1.5403011,0.0067000389,5.9604645e-06,4.0137858
+4,0.12860537,0.56113029,0.0090780258,1.6505301,0.10820794,1.5408778,0.0079023838,4.7683716e-06,4.0127749
+(base) anwar@Mhds-MacBook-Air Blaze % mpirun -n 4 bin/Blaze --nsteps 25 --nbays 100 --nfloors 5 --beam_divisions 50 --column_divisions 35
+nbays,nfloors,beam_length,floor_height,beam_divisions,column_divisions,element_type,flange_divisions,web_divisions,udl,max_LF,nsteps,tolerance,max_iterations,num_nodes,num_elements
+100,5,5,3.5,50,35,0,10,40,-3000,1,25,0.01,10,42276,42675
+
+---<Analysis complete. LF = 1, and out-of-balance = 8.2829442e-06>---
+ANALYSIS_SUCCEEDED
+rank,U_to_nodes_mapping,element_state_update,element_global_response,assembly,convergence_check,dU_calculation,material_state_update,result_recording,all
+0,0.051790237,0.53215814,0.010652781,1.5882077,0.0095627308,1.3110495,0.0054137707,3.8146973e-06,3.51437
+1,0.053060532,0.56876445,0.010442972,1.5558834,0.004942894,1.3100221,0.0054678917,5.0067902e-06,3.5142651
+2,0.052560091,0.58927035,0.010774136,1.5332367,0.0071568489,1.3103998,0.0054330826,8.3446503e-06,3.514327
+3,0.051964521,0.5319798,0.010477543,1.5916827,0.0061371326,1.3109431,0.0054705143,2.8610229e-06,3.514256
+``` 
+</div>
+
+
+### 10 August
+- Step by step through main and find when the program is failing. It now fails every time which is good.
+- Cannot template multivectors with int for global ordinal, needs to be long long.
+- Is communicator surviving the different scopes?
+
+
+
 ### 9 August
 
 I have made some major modifications to `main.cpp` today. Along the way, however, I broke something and the distributed mesh no longer works. I think I broke something today because what used to run today morning (5 floors 10 bays) on 4 cores, no longer runs. I must have done some silly mistake somewhere.

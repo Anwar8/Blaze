@@ -240,7 +240,7 @@ int main (int argc, char* argv[]) {
     std::set<unsigned> loaded_nodes = the_frame.get_all_beam_line_node_ids(false); 
     std::vector<unsigned> loaded_nodes_v = std::vector<unsigned>(loaded_nodes.begin(), loaded_nodes.end());
     model.load_manager.create_a_distributed_nodal_load_by_id(loaded_nodes_v, std::set<int>{2}, std::vector<real>{input_options.get_nodal_load()}, model.glob_mesh);
-    std::cout << "going into: initialise_restraints_n_loads" << std::endl;
+    // std::cout << "going into: initialise_restraints_n_loads" << std::endl;
     // Load and BC initilaisation
     model.initialise_restraints_n_loads();
 
