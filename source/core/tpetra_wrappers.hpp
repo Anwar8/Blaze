@@ -11,15 +11,18 @@
 #include <Teuchos_FancyOStream.hpp>
 
 
-using TpetraMultiVector = Tpetra::MultiVector<>;
-using TpetraCrsGraph = Tpetra::CrsGraph<>;
-using TpetraMap = Tpetra::Map<>;
-using TpetraCrsMatrix = Tpetra::CrsMatrix<>;
-
-using node_type = Tpetra::Details::DefaultTypes::node_type;
+using TpetraMultiVector = Tpetra::MultiVector<real, int, long long>;
+using node_type = TpetraMultiVector::node_type;
 using scalar_type = TpetraMultiVector::scalar_type;
 using local_ordinal_type = TpetraMultiVector::local_ordinal_type;
 using global_ordinal_type = TpetraMultiVector::global_ordinal_type;
+
+using TpetraCrsMatrix = Tpetra::CrsMatrix<scalar_type, local_ordinal_type, global_ordinal_type>;
+using TpetraCrsGraph = Tpetra::CrsGraph<local_ordinal_type, global_ordinal_type>;
+using TpetraMap = Tpetra::Map<local_ordinal_type, global_ordinal_type>;
+
+
+
 
 const Tpetra::global_size_t INVALID = Teuchos::OrdinalTraits<Tpetra::global_size_t>::invalid ();
 
