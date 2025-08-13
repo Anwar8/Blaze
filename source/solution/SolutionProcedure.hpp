@@ -64,7 +64,6 @@ class SolutionProcedure
             time_keeper.add_timers({"all",
                                     "U_to_nodes_mapping", 
                                     "element_state_update", 
-                                    "element_global_response",
                                     "assembly",
                                     "convergence_check",
                                     "dU_calculation",
@@ -74,6 +73,7 @@ class SolutionProcedure
 
         void solve(GlobalMesh& glob_mesh, Assembler& assembler, BasicSolver& solver, LoadManager& load_manager, Scribe& scribe, int logging_frequency)
         {
+            int num_iterations = 0;
             time_keeper.start_timer("all");
             while (step <= nsteps)
             {
@@ -90,21 +90,20 @@ class SolutionProcedure
                     if (rank == 0)
                         std::cout << std::endl << "Entering glob_mesh.calc_nodal_contributions_to_P()" << std::endl;
                 #endif
-                time_keeper.start_timer("element_global_response");
+                time_keeper.start_timer("assembly");
                 glob_mesh.calc_nodal_contributions_to_P(); // calculates the global load contributions from the nodes. Does not assemble them.
-                time_keeper.stop_timer("element_global_response");
                 
                 #if VERBOSE_SLN
                     if (rank == 0)
                         std::cout << std::endl << "Entering assembler.assemble_global_P(glob_mesh)" << std::endl;
                 #endif
-                time_keeper.start_timer("assembly");
                 assembler.assemble_global_P(glob_mesh);
                 time_keeper.stop_timer("assembly");
 
                 // begin nonlinear iterations:
                 while ((iter <= max_iter) && !(converged))
                 {   
+                    ++num_iterations;
                     #if LF_VERBOSE
                     if (rank == 0)
                         std::cout << "-----------------------------------<Started: Iteration " << iter << ">-------------------------------------" << std::endl;
@@ -196,10 +195,10 @@ class SolutionProcedure
                 time_keeper.start_timer("result_recording");
                 scribe.write_to_records();
                 time_keeper.stop_timer("result_recording");
-                if (step%logging_frequency == 0 && logging_frequency > 0)
-                {
-                    scribe.read_all_records();
-                }
+                // if (step%logging_frequency == 0 && logging_frequency > 0)
+                // {
+                //     scribe.read_all_records();
+                // }
                 if ((iter >= max_iter) && !(converged))
                 {
                     #if LF_VERBOSE
@@ -219,6 +218,7 @@ class SolutionProcedure
                 else
                     std::cout << "ANALYSIS_FAILED" << std::endl;
                 
+                std::cout << "num_iterations:" << num_iterations << std::endl; 
             }
 
         }
