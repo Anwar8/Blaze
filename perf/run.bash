@@ -1,0 +1,14 @@
+sbatch --nodes=1 --tasks-per-node=1 auto.slurm 1
+sbatch --nodes=1 --tasks-per-node=2 auto.slurm 2
+sbatch --nodes=1 --tasks-per-node=4 auto.slurm 4
+sbatch --nodes=1 --tasks-per-node=6 auto.slurm 6
+sbatch --nodes=1 --tasks-per-node=8 auto.slurm 8
+sbatch --nodes=1 --tasks-per-node=10 auto.slurm 10
+sbatch --nodes=1 --tasks-per-node=12 auto.slurm 12
+sbatch --nodes=1 --tasks-per-node=16 auto.slurm 16
+sbatch --nodes=1 --tasks-per-node=24 auto.slurm 24
+sbatch --nodes=1 --tasks-per-node=36 auto.slurm 36
+sbatch --nodes=2 --tasks-per-node=36 auto.slurm 45
+sbatch --nodes=2 --tasks-per-node=36 auto.slurm 54
+sbatch --nodes=2 --tasks-per-node=36 auto.slurm 63
+sbatch --nodes=2 --tasks-per-node=36 auto.slurm 72
