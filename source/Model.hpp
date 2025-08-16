@@ -25,7 +25,9 @@ class Model
         LoadManager load_manager;
         Scribe scribe;
         std::vector<NodalRestraint> restraints;
+        #ifdef WITH_MPI
         Teuchos::RCP<const Teuchos::Comm<int>> comm;
+        #endif
 
         /**
          * @brief Initialise restraints and loads for the model.
@@ -62,7 +64,11 @@ class Model
 
             // based on the restraints and loads, we can now initialise the global matrices and establish element-stiffness mapping.
             // start with mapping stiffnesses as these are needed for initialising the sparse matrices (the stiffness matrix).
+            #ifdef WITH_MPI
             assembler.initialise_global_vectors(glob_mesh, comm);
+            #else
+            assembler.initialise_global_vectors(glob_mesh);
+            #endif
             assembler.assemble_global_P(glob_mesh);
 
             assembler.map_U_to_nodes(glob_mesh);
@@ -130,6 +136,7 @@ class Model
             solution_procedure.log_timers(timers_names);
         }
         
+        #ifdef WITH_MPI
         /**
          * @brief calls `log_parallel_timers` from the \ref TimeKeeper stored in \ref SolutionProcedure.
          * @warning cannot be 
@@ -140,6 +147,7 @@ class Model
         {
             solution_procedure.log_parallel_timers(timers_names);
         }
+        #endif
 
         void read_timers(std::vector<std::string> timers_names, std::string reference_timer = "")
         {

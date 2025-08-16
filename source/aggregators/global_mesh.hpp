@@ -854,8 +854,6 @@ class GlobalMesh {
             }
             if (VERBOSE)
             {
-                sleep(1);
-                MPI_Barrier(MPI_COMM_WORLD);
                 std::cout << "Rank" << rank << ": the functions renumber_nodes and sort_node_vector are next." << std::endl;
                 std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
                 sleep(1);
@@ -864,8 +862,6 @@ class GlobalMesh {
             sort_node_vector("all");
             if (VERBOSE)
             {
-                sleep(1);
-                MPI_Barrier(MPI_COMM_WORLD);
                 std::cout << "Rank " << rank << ": nodes renumbered and sorted. Exchanging interface node IDs next." << std::endl;
                 std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
                 sleep(1);
@@ -884,8 +880,6 @@ class GlobalMesh {
             }
             if (VERBOSE)
             {
-                sleep(1);
-                MPI_Barrier(MPI_COMM_WORLD);
                 std::cout << "Rank" << rank << ": the function exchange_interface_nodes_updated_ids is next." << std::endl;
                 std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
                 sleep(1);
@@ -894,8 +888,6 @@ class GlobalMesh {
             // count the ndofs of each rank and assign each node an index that corresponds to the global matrices and vectors.
             if (VERBOSE)
             {
-                sleep(1);
-                MPI_Barrier(MPI_COMM_WORLD);
                 std::cout << "Rank" << rank << ": the function count_distributed_dofs is next." << std::endl;
                 std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
                 sleep(1);
@@ -913,8 +905,6 @@ class GlobalMesh {
             count_distributed_dofs();
             if (VERBOSE)
             {
-                sleep(1);
-                MPI_Barrier(MPI_COMM_WORLD);
                 std::cout << "Rank" << rank << ": the function exchange_interface_nodes_nz_i is next." << std::endl;
                 std::cout << "--------------------------------------------------------------------------------------------------------" << std::endl;
                 sleep(1);
@@ -1009,12 +999,8 @@ class GlobalMesh {
             num_neighbours = neighbours.size();
             if (VERBOSE)
             {
-                sleep(1);
-                MPI_Barrier(MPI_COMM_WORLD);
                 std::cout << "rank " << rank << " has " << num_neighbours << " neighbours which are: ";
                 print_container(neighbours);
-                sleep(1);
-                MPI_Barrier(MPI_COMM_WORLD);
                 for (auto neighbour_i : neighbours)
                 {
                     std::cout << "Rank " << rank << " - wanted_from_neighbour_rank_node_id_map[" << neighbour_i << "] = ";
@@ -1106,8 +1092,6 @@ class GlobalMesh {
             }
             if (VERBOSE)
             {
-                sleep(1);
-                MPI_Barrier(MPI_COMM_WORLD);
                 std::cout << "rank " << rank << " exchange_interface_nodes_updated_ids all completed============================." << std::endl;
                 sleep(1);
             }
@@ -1520,8 +1504,6 @@ class GlobalMesh {
          */
         void map_element_stiffnesses()
         {
-            MPI_Barrier(MPI_COMM_WORLD);
-            // sleep(rank*2);
             for (auto& elem: elem_vector)
             {
                 elem->map_stiffness();

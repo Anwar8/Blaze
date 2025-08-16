@@ -198,17 +198,19 @@ InputOptions parse_input(int argc, char* argv[]) {
     return opts;
 }
 int main (int argc, char* argv[]) {
-    
-    // initialise_MPI(argc, argv);
 
-    // #ifdef KOKKOS
-    //     Kokkos::initialize(argc, argv);
-    // #endif
-    // need a scope to contain anything that call Trilinos to avoid incorrect finalization
+    #ifdef KOKKOS
+        Kokkos::initialize(argc, argv);
+    #endif
+    
+    #ifdef WITH_MPI
     Tpetra::ScopeGuard tpetraScope (&argc, &argv);
+    #endif
     {
     //input handling
+    #ifdef WITH_MPI
     Teuchos::RCP<const Teuchos::Comm<int>> comm = Teuchos::rcp(new Teuchos::MpiComm<int>(MPI_COMM_WORLD));
+    #endif
     TimeKeeper time_keeper;
     Model model;
     int rank = -1;
@@ -288,6 +290,7 @@ int main (int argc, char* argv[]) {
     time_keeper.stop_timer("solution");
     time_keeper.stop_timer("all");
     // timers outputs
+    #ifdef WITH_MPI
     time_keeper.log_parallel_timers(timers_names);
     model.log_parallel_timers({"U_to_nodes_mapping", 
                     "element_state_update",
@@ -297,5 +300,6 @@ int main (int argc, char* argv[]) {
                     "material_state_update",
                     "result_recording",
                     "all"});
+    #endif 
     }
 }

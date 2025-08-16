@@ -165,7 +165,7 @@ class TimeKeeper
                 }
             }
         }
-        
+        #ifdef WITH_MPI
         /**
          * @brief collects all the time data from all ranks on master rank 0, thus populating the \ref rank_durations_map object.
          * @param timers_names the names of the timers which durations are to be printed.
@@ -214,7 +214,8 @@ class TimeKeeper
             }
             
         }
-
+        #endif 
+        
         /**
          * @brief prints the \ref rank_durations_map object.
          * @param timers_names the names of the timers which durations are to be printed.

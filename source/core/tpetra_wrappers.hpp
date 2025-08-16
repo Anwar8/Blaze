@@ -1,6 +1,7 @@
 #ifndef TPETRA_WRAPPERS_HPP
 #define  TPETRA_WRAPPERS_HPP
 
+#ifdef WITH_MPI
 #include <Teuchos_DefaultMpiComm.hpp> 
 #include <Teuchos_Comm.hpp>
 #include <Teuchos_OrdinalTraits.hpp>
@@ -167,5 +168,5 @@ void initialise_from_triplets(Teuchos::RCP<TpetraCrsGraph> A_graph, std::vector<
     }
 }
 
-
+#endif
 #endif

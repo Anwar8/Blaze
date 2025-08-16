@@ -71,6 +71,7 @@ class Assembler {
             K = Teuchos::RCP(new TpetraCrsMatrix(matrix_graph));
             #endif 
         }
+        #ifdef WITH_MPI
         /**
          * @brief initialises the P, U, G, and dU vectors to the sizes that correspond to the mesh being used.
          * 
@@ -79,14 +80,6 @@ class Assembler {
         void initialise_global_vectors(GlobalMesh& glob_mesh, Teuchos::RCP<const Teuchos::Comm<int>>& comm) {
             R_global_triplets.reserve(glob_mesh.ndofs);
             P_global_triplets.reserve(glob_mesh.ndofs);
-
-            #ifndef WITH_MPI
-            R = make_spd_mat(glob_mesh.ndofs, 1);
-            G = make_spd_mat(glob_mesh.ndofs, 1);
-            P = make_spd_mat(glob_mesh.ndofs, 1);
-            U = make_spd_vec(glob_mesh.ndofs);
-            dU = make_spd_vec(glob_mesh.ndofs);            
-            #else
             setup_tpetra_vector_map(glob_mesh.get_ndofs(), glob_mesh.get_rank_ndofs(), comm);
             // The constructor for the vectors that follows prefills the vectors with zeros.
             R = TpetraMultiVector(vector_map, 1);
@@ -95,8 +88,27 @@ class Assembler {
             U = TpetraMultiVector(vector_map, 1);
             dU = TpetraMultiVector(vector_map, 1);
             setup_interface_import(glob_mesh, comm);
-            #endif 
         }
+        #endif
+
+        #ifndef WITH_MPI
+        /**
+         * @brief initialises the P, U, G, and dU vectors to the sizes that correspond to the mesh being used.
+         * 
+         * @param glob_mesh  the global_mesh object which contains information about the number of nodes and degrees of freedom.
+         */
+        void initialise_global_vectors(GlobalMesh& glob_mesh) {
+            R_global_triplets.reserve(glob_mesh.ndofs);
+            P_global_triplets.reserve(glob_mesh.ndofs);
+
+            R = make_spd_mat(glob_mesh.ndofs, 1);
+            G = make_spd_mat(glob_mesh.ndofs, 1);
+            P = make_spd_mat(glob_mesh.ndofs, 1);
+            U = make_spd_vec(glob_mesh.ndofs);
+            dU = make_spd_vec(glob_mesh.ndofs);            
+        }
+        #endif
+        #ifdef WITH_MPI
         /**
          * @brief Set the up tpetra vector map object which is used for initialising the distributed vectors.
          * 
@@ -112,6 +124,7 @@ class Assembler {
             vector_map = Teuchos::rcp(new TpetraMap(numGlobalEntries, numLocalEntries, indexBase, comm));
             #endif
         }
+        #endif
 
         /**
          * @brief Setup tpetra crs graph object which is used to initialise the CrsMatrix used for stiffness. This is okay because the structure of the matrix will not change in the entire runtime so we should use the graph as it is much more efficient and allows for access using the local indices.
@@ -129,13 +142,13 @@ class Assembler {
             #endif
         }
 
+        #ifdef WITH_MPI
         /**
          * @brief prints Tpetra::MultiVector or Tpetra::CrsMatrix or Tpetra::CrsGraph
          * 
          */
         void print_distributed_maths_object(std::string what, Teuchos::EVerbosityLevel verbosity = Teuchos::VERB_EXTREME)
         {
-            #ifdef WITH_MPI
             Teuchos::RCP<Teuchos::FancyOStream> out = Teuchos::getFancyOStream(Teuchos::rcpFromRef(std::cout));
             if (what == "P")
             {
@@ -166,9 +179,8 @@ class Assembler {
                 std::cout << "Assembler:print_distributed_maths_object can only print U, dU, P, G, R, or K, but was asked to print " << what << std::endl;
                 exit(1);
             }
-
-            #endif
         }
+        
 
         /**
          * @brief prints \ref stiffness_map to the output stream
@@ -176,11 +188,10 @@ class Assembler {
          */
         void print_stiffness_graph()
         {
-            #ifdef WITH_MPI
             Teuchos::RCP<Teuchos::FancyOStream> out = Teuchos::getFancyOStream(Teuchos::rcpFromRef(std::cout));
             matrix_graph->describe(*out, Teuchos::VERB_HIGH);
-            #endif
         }
+        #endif
 
         /**
          * @brief retrieves global load contributions from all nodes.
@@ -299,6 +310,7 @@ class Assembler {
             #endif
         }
 
+        #ifdef WITH_MPI
         /**
          * @brief initialises \ref interface_map and \ref interface_U, and sets up \ref interface_importer for future communication.
          * 
@@ -338,6 +350,7 @@ class Assembler {
             interface_U.doImport(U, *interface_importer, Tpetra::INSERT);
             #endif
         }
+        #endif
 
         /**
          * @brief maps state vector U back to nodes.
@@ -348,60 +361,8 @@ class Assembler {
         {
             
             #ifdef WITH_MPI
-            // {
-            //     // Get a view of the Vector's entries.  The view has type
-            //     // Kokkos::View.  Kokkos::View acts like an array, but is
-            //     // reference-counted like std::shared_ptr or Teuchos::RCP.  This
-            //     // means that it may persist beyond the lifetime of the Vector.  A
-            //     // View is like a shallow copy of the data, so be careful
-            //     // modifying the Vector while a view of it exists.  You may
-            //     // decrement the reference count manually by assigning an empty
-            //     // View to it.  We put this code in an inner scope (in an extra
-            //     // pair of {}) so that the Kokkos::View will fall out of scope
-            //     // before the next example, which modifies the entries of the
-            //     // Vector.
-            //     // We want a _host_ View.  Vector implements "dual view"
-            //     // semantics.  This is really only relevant for architectures with
-            //     // two memory spaces.
-            //     auto x_2d = x.getLocalViewHost(Tpetra::Access::ReadOnly);
-            //     // getLocalView returns a 2-D View by default.  We want a 1-D
-            //     // View, so we take a subview.
-            //     auto x_1d = Kokkos::subview (x_2d, Kokkos::ALL (), 0);
-            //     // x_data.extent (0) may be longer than the number of local
-            //     // rows in the Vector, so be sure to ask the Vector for its
-            //     // dimensions, rather than the ArrayRCP.
-            //     const size_t localLength = x.getLocalLength ();
-            //     // Count the local number of entries less than 0.5.
-            //     // Use local indices to access the entries of x_data.
-            //     size_t localCount = 0;
-            //     for (size_t k = 0; k < localLength; ++k) {
-            //     if (x_1d(k) < 0.5) {
-            //         ++localCount;
-            //     }
-            //     }
-            //     // "reduceAll" is a type-safe templated version of MPI_Allreduce.
-            //     // "outArg" is like taking the address using &, but makes it more
-            //     // clear that its argument is an output argument of a function.
-            //     size_t globalCount = 0;
-            //     reduceAll<int, size_t> (*comm, REDUCE_SUM, localCount,
-            //                             outArg (globalCount));
-            //     // Find the total number of entries less than 0.5, over all
-            //     // processes in the Vector's communicator.  Note the trick for
-            //     // pluralizing the word "entry" conditionally on globalCount.
-            //     if (myRank == 0) {
-            //     out << "x has " << globalCount << " entr"
-            //         << (globalCount != 1 ? "ies" : "y")
-            //         << " less than 0.5." << endl;
-            //     }
-            // }
-
             // scope to destroy the view.
             {
-                // int rank; 
-                // get_my_rank(rank);
-                // std::cout << "Rank " << rank << " has " << U.getLocalLength() << " U local members." << std::endl;
-
-                // auto U_local_view = get_1d_view(U);
                 auto U_2d = U.getLocalViewHost(Tpetra::Access::ReadOnly);
                 auto U_local_view = Kokkos::subview (U_2d, Kokkos::ALL (), 0);
                 int nzi = 0;
@@ -417,14 +378,8 @@ class Assembler {
             }
 
             {
-                // int rank; 
-                // get_my_rank(rank);
-                // std::cout << "Rank " << rank << " has " << interface_U.getLocalLength() << " interface_U local members." << std::endl;
-                // since this is a call happening often, the Tpetra::CombineMode is REPLACE since the elements should already exist inplace.
                 interface_U.doImport(U, *interface_importer, Tpetra::REPLACE);
 
-                // auto interface_U_local_view = get_1d_view(interface_U);
-                // nzi = 0;
                 auto interface_U_2d = interface_U.getLocalViewHost(Tpetra::Access::ReadOnly);
                 auto interface_U_local_view = Kokkos::subview (interface_U_2d, Kokkos::ALL (), 0);
                 int nzi = 0;
@@ -556,7 +511,7 @@ class Assembler {
         }
 
         realx2 get_G_max() {return G_max;}
-
+        #ifdef WITH_MPI
         int get_P_length() 
         {
             return P.getLocalLength();
@@ -577,6 +532,7 @@ class Assembler {
         {
             return G.getLocalLength();
         }
+        #endif
 
 };
 #endif
