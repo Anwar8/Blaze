@@ -6,7 +6,6 @@ source/mesh/mesh
 source/mesh/test.msh
 source/mesh/mesh_analysis
 /build
-/doc
 /bin
 .DS_Store
 .vscode/
@@ -19,3 +18,10 @@ lib
 lib/*
 POC/__pycache__/
 POC/*.xlsx
+POC
+notes
+perf
+doc
+run.sh
+size.sh
+update.sh
