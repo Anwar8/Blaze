@@ -25,3 +25,9 @@ doc
 run.sh
 size.sh
 update.sh
+QuickCMakeLists.txt
+aliases.sh
+html
+latex
+include/kokkos
+test_blaze.sh

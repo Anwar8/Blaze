@@ -1,5 +1,5 @@
 <figure style="text-align:center;">
-  <img src="notes/images/Blaze logo_blue.png" alt="Blaze Logo" style="width:50%">
+  <img src="Blaze logo_blue.png" alt="Blaze Logo" style="width:50%">
 </figure>
 
 ## Summary
