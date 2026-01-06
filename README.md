@@ -120,25 +120,25 @@ bash build.sh
 
 - Release version with any additional flags from table above.
 ```bash
-bash build.sh custom --D####=ON
+bash build.sh custom -D####=ON
 ```
-Where `--D####` is any of the configuration flags above. For example:
+Where `-D####` is any of the configuration flags above. For example:
 ```bash
-bash build.sh custom --DWITH_MPI=ON --DLF_VERBOSE=ON
+bash build.sh custom -DWITH_MPI=ON -DLF_VERBOSE=ON
 ```
 Builds the distributed memory version of `Blaze` and turns on `LF_VERBOSE`.
 
 - Release version with tests and any additional flags from table above.
 ```bash
-bash build.sh tests --D####=ON
+bash build.sh tests -D####=ON
 ```
-Where `--D####` is any of the configuration flags above. 
+Where `-D####` is any of the configuration flags above. 
 
 - Debug version with `LF_VERBOSE` and `VERBOSE_SLN` turned on, and any additional configuration flags from above:
 ```bash
-bash build.sh debug --D####=ON
+bash build.sh debug -D####=ON
 ```
-Where `--D####` is any of the configuration flags above. 
+Where `-D####` is any of the configuration flags above. 
 
 To debug `Tpetra` matrices, after completing the build of `Blaze` and before running any executables please also run:
 ```bash

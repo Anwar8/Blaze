@@ -15,7 +15,7 @@ elif [ $1 = "debug" ]; then
     shift
     cmake -B build -S . -DBUILD_STATIC_LIBS=OFF -DVERBOSE_SLN=ON -DLF_VERBOSE=ON -DCMAKE_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Debug "$@"
 else
-    echo "Unknown input: $1. Expected \"custom\", \"mesh\", \"tests\", \"debug", or nothing."
+    echo "Unknown input: $1. Expected \"custom\", \"mesh\", \"tests\", \"debug\", or nothing."
 fi
 cd build
 make install
