@@ -48,3 +48,25 @@ which avoids having to name the libraries explicitly using `-DBLAS_LIBRARY_NAMES
 
 Using `-DCMAKE_CXX_COMPILER=/opt/intel/oneapi/mpi/2021.14/bin/mpicxx` ensures we use the `MPI` wrapper of the `oneAPI` compiler. 
 
+Finally, it is important to tell the build-system where to find the install directory for `Trilinos`. This is done via the  variable `Trilinos_DIR`, which can be defined via the command: 
+```bash
+export Trilinos_DIR=/home/anwar/work/Trilinos/trilinos-install
+``` 
+where `/home/anwar/work/Trilinos/trilinos-install` is simply the install directory.
+
+## Installing `Googletest`
+Follow the instructions in the `README`, but remember to tell `cmake` where to find the root directory of `googletest`:
+```bash
+export GTEST_ROOT=/home/anwar/work/googletest
+```
+
+## `.bashrc` modifications
+To simplify things, the following set of commands should be added to `.bashrc`:
+```bash
+source /opt/intel/oneapi/setvars.sh
+export PATH=/snap/bin:$PATH
+export CC=icx
+export CXX=icpx
+export Trilinos_DIR=/home/anwar/work/Trilinos/trilinos-install
+export GTEST_ROOT=/home/anwar/work/googletest
+```
