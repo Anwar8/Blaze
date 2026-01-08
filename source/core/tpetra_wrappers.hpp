@@ -23,8 +23,18 @@ using TpetraCrsMatrix = Tpetra::CrsMatrix<scalar_type, local_ordinal_type, globa
 using TpetraCrsGraph = Tpetra::CrsGraph<local_ordinal_type, global_ordinal_type>;
 using TpetraMap = Tpetra::Map<local_ordinal_type, global_ordinal_type>;
 
+using operator_type = Tpetra::Operator<scalar_type, local_ordinal_type, global_ordinal_type, node_type>;
+
+#ifdef WITH_BELOS
+// Belos
+#include "BelosConfigDefs.hpp"
+#include "BelosLinearProblem.hpp"
+#include "BelosTpetraAdapter.hpp"
 
 
+  using belos_operator_traits = Belos::OperatorTraits<scalar_type,TpetraMultiVector,operator_type>;
+  using belos_multi_vector_traits = Belos::MultiVecTraits<scalar_type,TpetraMultiVector>;
+#endif
 
 const Tpetra::global_size_t INVALID = Teuchos::OrdinalTraits<Tpetra::global_size_t>::invalid ();
 void read_triplets(std::vector<spnz>& triplets, int const nz_i, int const vector_length)

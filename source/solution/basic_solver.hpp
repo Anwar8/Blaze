@@ -12,7 +12,11 @@
 #define BASIC_SOLVER
 #include "assembler.hpp"
 #ifdef WITH_MPI
+#ifdef WITH_BELOS
+#include "BelosPseudoBlockCGSolMgr.hpp"
+#else
 #include "Amesos2.hpp"
+#endif
 #include "tpetra_wrappers.hpp"
 #endif
 /**
@@ -21,13 +25,21 @@
  */
 class BasicSolver {
     protected:
-    #ifdef WITH_MPI
-    // Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<>, Tpetra::MultiVector<>>> dU_solver; 
-    // Teuchos::RCP<Amesos2::Solver<Tpetra::CrsMatrix<>, Tpetra::MultiVector<>>> U_solver; 
+    #ifdef WITH_MPI 
+    #ifdef WITH_BELOS
+    
+    Teuchos::RCP<Belos::LinearProblem<scalar_type,TpetraMultiVector,operator_type>> problem_KU_P;
+    Teuchos::RCP<Belos::LinearProblem<scalar_type,TpetraMultiVector,operator_type>> problem_KdU_G;
 
+    Teuchos::RCP<Teuchos::ParameterList> belos_solver_parameters;
+
+    Teuchos::RCP<Belos::SolverManager<scalar_type, TpetraMultiVector,operator_type> > dU_solver;
+    Teuchos::RCP<Belos::SolverManager<scalar_type, TpetraMultiVector,operator_type> > U_solver;
+
+    #else
     Teuchos::RCP<Amesos2::Solver<TpetraCrsMatrix, TpetraMultiVector>> dU_solver;
     Teuchos::RCP<Amesos2::Solver<TpetraCrsMatrix, TpetraMultiVector>> U_solver;
-
+    #endif
     Teuchos::RCP<TpetraMultiVector> U_rcp;
     Teuchos::RCP<TpetraMultiVector> P_rcp;
     Teuchos::RCP<TpetraMultiVector> dU_rcp;
@@ -49,12 +61,40 @@ class BasicSolver {
             dU_rcp = Teuchos::rcpFromRef(assembler.dU);
             G_rcp  = Teuchos::rcpFromRef(assembler.G);
             
-            // using LO = std::remove_reference_t<decltype(*assembler.K)>::local_ordinal_type;
-            // using GO = std::remove_reference_t<decltype(*assembler.K)>::global_ordinal_type;
-            // using ST = std::remove_reference_t<decltype(*assembler.K)>::scalar_type;
+            #ifdef WITH_BELOS
+                belos_operator_traits::Apply(*(assembler.K), *U_rcp, *P_rcp);
+                belos_operator_traits::Apply(*(assembler.K), *dU_rcp, *G_rcp);
+                // Define the "problem"
 
-            U_solver = Amesos2::create<TpetraCrsMatrix,TpetraMultiVector>("klu2", assembler.K, U_rcp, P_rcp);
-            dU_solver = Amesos2::create<TpetraCrsMatrix,TpetraMultiVector>("klu2", assembler.K, dU_rcp, G_rcp);
+                problem_KU_P = Teuchos::make_rcp<Belos::LinearProblem<scalar_type,TpetraMultiVector,operator_type>>((assembler.K, U_rcp, P_rcp));
+                problem_KdU_G = Teuchos::make_rcp<Belos::LinearProblem<scalar_type,TpetraMultiVector,operator_type>>((assembler.K, dU_rcp, G_rcp));
+                
+                // problem_KU_P->setOperator(assembler.K);
+                // problem_KdU_G->setOperator(assembler.K);
+
+                // problem_KU_P->setRHS(P_rcp);
+                // problem_KdU_G->setRHS(G_rcp);
+
+                // problem_KU_P->setLHS(U_rcp);
+                // problem_KdU_G->setLHS(dU_rcp);
+
+                problem_KU_P->setProblem();
+                problem_KdU_G->setProblem();
+                // Define the solver parameters
+                belos_solver_parameters->set("Maximum Iterations", 20);       // Maximum number of iterations allowed
+                belos_solver_parameters->set("Convergence Tolerance", 0.02);         // Relative convergence tolerance 
+                belos_solver_parameters->set("Output Frequency", 1);
+                belos_solver_parameters->set("Verbosity", Belos::Errors + Belos::Warnings + Belos::TimingDetails + Belos::StatusTestDetails );
+
+                // Define the solver
+                U_solver = Teuchos::make_rcp<Belos::PseudoBlockCGSolMgr<scalar_type, TpetraMultiVector, operator_type>>(problem_KU_P, belos_solver_parameters);
+                dU_solver = Teuchos::make_rcp<Belos::PseudoBlockCGSolMgr<scalar_type, TpetraMultiVector, operator_type>>(problem_KdU_G, belos_solver_parameters);
+                
+
+            #else
+                U_solver = Amesos2::create<TpetraCrsMatrix,TpetraMultiVector>("klu2", assembler.K, U_rcp, P_rcp);
+                dU_solver = Amesos2::create<TpetraCrsMatrix,TpetraMultiVector>("klu2", assembler.K, dU_rcp, G_rcp);
+            #endif
             #endif
         }
 
@@ -92,7 +132,13 @@ class BasicSolver {
                 std::cout << "The solution is:" << std::endl << assembler.U << std::endl;
             }    
             #else
-            U_solver->symbolicFactorization().numericFactorization().solve();
+            #ifdef WITH_BELOS
+                U_solver->solve();
+                int num_of_iterations = U_solver->getNumIters();
+                std::cout << "Solver required " << num_of_iterations << " iterations." << std::endl;
+            #else
+                U_solver->symbolicFactorization().numericFactorization().solve();
+            #endif
             #endif
         }
         
@@ -132,7 +178,13 @@ class BasicSolver {
                 std::cout << "dU is:" << std::endl << assembler.dU << std::endl;
             }
             #else
-            dU_solver->symbolicFactorization().numericFactorization().solve();
+            #ifdef WITH_BELOS   
+                dU_solver->solve();
+                int num_of_iterations = dU_solver->getNumIters();
+                std::cout << "Solver required " << num_of_iterations << " iterations." << std::endl;
+            #else
+                dU_solver->symbolicFactorization().numericFactorization().solve();
+            #endif
             #endif
         }
         
