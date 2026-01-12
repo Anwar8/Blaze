@@ -31,3 +31,4 @@ html
 latex
 include/kokkos
 test_blaze.sh
+source/blaze_config.hpp

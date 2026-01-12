@@ -14,6 +14,7 @@
 #ifdef WITH_MPI
 #ifdef WITH_BELOS
 #include "BelosPseudoBlockCGSolMgr.hpp"
+#include "Teuchos_ParameterList.hpp"
 #else
 #include "Amesos2.hpp"
 #endif
@@ -66,8 +67,8 @@ class BasicSolver {
                 belos_operator_traits::Apply(*(assembler.K), *dU_rcp, *G_rcp);
                 // Define the "problem"
 
-                problem_KU_P = Teuchos::make_rcp<Belos::LinearProblem<scalar_type,TpetraMultiVector,operator_type>>((assembler.K, U_rcp, P_rcp));
-                problem_KdU_G = Teuchos::make_rcp<Belos::LinearProblem<scalar_type,TpetraMultiVector,operator_type>>((assembler.K, dU_rcp, G_rcp));
+                problem_KU_P = Teuchos::make_rcp<Belos::LinearProblem<scalar_type,TpetraMultiVector,operator_type>>(assembler.K, U_rcp, P_rcp);
+                problem_KdU_G = Teuchos::make_rcp<Belos::LinearProblem<scalar_type,TpetraMultiVector,operator_type>>(assembler.K, dU_rcp, G_rcp);
                 
                 // problem_KU_P->setOperator(assembler.K);
                 // problem_KdU_G->setOperator(assembler.K);
@@ -81,9 +82,10 @@ class BasicSolver {
                 problem_KU_P->setProblem();
                 problem_KdU_G->setProblem();
                 // Define the solver parameters
-                belos_solver_parameters->set("Maximum Iterations", 20);       // Maximum number of iterations allowed
-                belos_solver_parameters->set("Convergence Tolerance", 0.02);         // Relative convergence tolerance 
-                belos_solver_parameters->set("Output Frequency", 1);
+                belos_solver_parameters = Teuchos::make_rcp<Teuchos::ParameterList>();
+                belos_solver_parameters->set("Maximum Iterations", 100);       // Maximum number of iterations allowed
+                belos_solver_parameters->set("Convergence Tolerance", 1e-5);         // Relative convergence tolerance 
+                belos_solver_parameters->set("Output Frequency", 5);
                 belos_solver_parameters->set("Verbosity", Belos::Errors + Belos::Warnings + Belos::TimingDetails + Belos::StatusTestDetails );
 
                 // Define the solver
@@ -133,9 +135,15 @@ class BasicSolver {
             }    
             #else
             #ifdef WITH_BELOS
+                problem_KU_P->setProblem();
+                // std::cout << "Staring solving U with Belos:" << std::endl;
+                // assembler.print_distributed_maths_object("U");
+                // assembler.print_distributed_maths_object("P");
                 U_solver->solve();
                 int num_of_iterations = U_solver->getNumIters();
                 std::cout << "Solver required " << num_of_iterations << " iterations." << std::endl;
+                // std::cout << "Finished U with Belos:" << std::endl;
+                // assembler.print_distributed_maths_object("U");
             #else
                 U_solver->symbolicFactorization().numericFactorization().solve();
             #endif
@@ -178,10 +186,16 @@ class BasicSolver {
                 std::cout << "dU is:" << std::endl << assembler.dU << std::endl;
             }
             #else
-            #ifdef WITH_BELOS   
+            #ifdef WITH_BELOS
+                problem_KdU_G->setProblem();
+                // std::cout << "Staring solving dU with Belos:" << std::endl;
+                // assembler.print_distributed_maths_object("dU");
+                // assembler.print_distributed_maths_object("G");
                 dU_solver->solve();
                 int num_of_iterations = dU_solver->getNumIters();
                 std::cout << "Solver required " << num_of_iterations << " iterations." << std::endl;
+                // std::cout << "Finished dU with Belos:" << std::endl;
+                // assembler.print_distributed_maths_object("dU");
             #else
                 dU_solver->symbolicFactorization().numericFactorization().solve();
             #endif
