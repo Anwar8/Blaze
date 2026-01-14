@@ -36,6 +36,39 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 14 Jan 2026
+Completed watching the 4th `Trilinos tutorial` from yesterday. Will need to use a preconditioner likely from `Ifpack2` to improve the scalability of `Blaze`. I did not think too deeply before about how the choice of solver parameters or methodology can affect salability - fortunately, I have what I need within `Trilinos`, and when the time is right, `Sparky`. 
+
+
+### 13 Jan 2026
+Tested the scaling of `Blaze` with `Belos` on my office workstation, and the results were rather poor. I needed approximately the same number of iterations as I have DoFs for the conjugate gradient to converge. The scaling was very poor, and the performance was much better using `Amesos2` (`Belos` x100 runtime of `Amesos2`). Using an iterative solver is not a panacea, it is only a step in the right direction. Using it incorrectly or poorly will destroy performance. Looking at the [`Trilinos` tutorial](https://www.youtube.com/watch?v=5BnKjYn1_BY&t=916s), I can see that this is because of the huge number of iterations required for convergence.
+
+### 12 Jan 2026
+There was a small bug where double brackets were typo'd in the `Teuchos::ParameterList` constructor, thus preventing code compilation. This was corrected, and `Blaze` compiled correctly, and seemed to run approporiately. However, some of the tests were not run correctly exiting with a segmentation fault.
+
+I also did some work configuring `VSCode` to debug `Blaze`. I now understand `tasks.json` and `launch.json` better. For example, I have found how to pass arguments to a launch in `VSCode` as shown below, which will appear as an option in my debug interface:
+```json
+{
+    "name": "Debug Blaze using lldb",
+    "type": "lldb",
+    "request": "launch",
+    "program": "${workspaceFolder}/bin/Blaze",
+    "args": ["--nbays", "3", "--nfloors", "2", "--beam_divisions", "4", "--column_divisions", "3", "--udl", "-1000", "--max_LF", "1", "--nsteps", "5"],
+    "stopOnEntry": true,
+    "cwd": "${workspaceFolder}/bin",
+}
+``` 
+To run an `MPI` debug, however, it is not possible to directly "launch" - I will need to run an `MPI` program, and then "attach" to its process. This does not work well for small problems (or any problems, actually) as I have to manually select the process I want to attach to using a property like `pid`. It is possible to add a pause to the program, or require user input to proceed, but I am not sure I particuarly want to do this. The way to do this, however, would be to use a *prelaunch task* and create a task in `tasks.json` such as:
+```json
+{
+"label": "Run Blaze with MPI",
+"type": "shell",
+"command": "mpirun",
+"args": ["-n", "1", "${workspaceFolder}/bin/Blaze", "--nbays", "3", "--nfloors", "2", "--beam_divisions", "4", "--column_divisions", "3", "--udl", "-1000", "--max_LF", "1", "--nsteps", "5"],
+"isBackground": true
+}
+```
+
 ### 6 Jan 2026
 today, I installed `Blaze` on my workstation in the office. The detailed instructions for this have been added to the `README.md`. 
 

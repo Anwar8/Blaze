@@ -186,6 +186,7 @@ Alternatively
 | `BUILD_TESTS`           | Build test programs                                                                          | ON / OFF    | OFF     |
 | `BUILD_STATIC_LIBS`     | Build intermediate libraries and link them statically                                         | ON / OFF    | OFF     |
 | `WITH_MPI`              | Build the MPI-distributed version of Blaze                                                   | ON / OFF    | OFF     |
+| `WITH_BELOS`              | Build Blaze with `Belos` iterative solvers in stead of direct solvers from `Amesos2`. Requires `WITH_MPI`                                                  | ON / OFF    | OFF     |
 | `KOKKOS`                | Build with Kokkos - shared memory parallelism; needs to be built with either `OMP` or `THREADS` for non-serial backend                                                                           | ON / OFF    | OFF     |
 | `OMP`                   | Build with OpenMP support                                                                    | ON / OFF    | OFF     |
 | `THREADS`               | Build the C++ Threads backend for Kokkos                                                               | ON / OFF    | OFF     |
