@@ -156,7 +156,9 @@ class SolutionProcedure
                     {
                         #if VERBOSE_SLN
                         if (rank == 0)
-                            std::cout << std::endl << "Entering solver.solve_for_deltaU(assembler);" << std::endl;
+                            {
+                                std::cout << std::endl << "Entering solver.solve_for_deltaU(assembler);" << std::endl;
+                            }
                         #endif
                         solver.solve_for_deltaU(assembler);
                         #if VERBOSE_NLB
@@ -168,7 +170,9 @@ class SolutionProcedure
                         #endif
                         #if VERBOSE_SLN
                         if (rank == 0)
+                        {
                             std::cout << std::endl << "Entering assembler.increment_U();" << std::endl;
+                        }
                         #endif
                         assembler.increment_U();
                     }

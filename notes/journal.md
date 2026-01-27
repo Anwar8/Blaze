@@ -36,6 +36,10 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 24 Jan 2026
+For some reason, I am getting an `MPI` error with `Blaze` when using `Belos` and the number of iterations exceeds about 8000. It seems to be something about running out of `MPI` tags. This was happening on my laptop as well as my office workstation. This did not occur again today on my laptop, to my surprise. What is going on? I changed almost nothing or completely nothing other than some of the number of iterations parameters? 
+
+
 ### 14 Jan 2026
 Completed watching the 4th `Trilinos tutorial` from yesterday. Will need to use a preconditioner likely from `Ifpack2` to improve the scalability of `Blaze`. I did not think too deeply before about how the choice of solver parameters or methodology can affect salability - fortunately, I have what I need within `Trilinos`, and when the time is right, `Sparky`. 
 
