@@ -19,6 +19,8 @@
   - [Installing `Trilinos`](#installing-trilinos)
   - [Installing `Googletest`](#installing-googletest)
   - [`.bashrc` modifications](#bashrc-modifications)
+- [Instructions for building dependencies on a Mac with M-architecture](#instructions-for-building-dependencies-on-a-mac-with-m-architecture)
+  - [Trilinos](#trilinos-1)
 - [Building `Blaze`](#building-blaze)
   - [`CMake` flags](#cmake-flags)
   - [Predefined configurations](#predefined-configurations)
@@ -74,13 +76,13 @@ cmake -DTPL_ENABLE_MPI=ON -DTPL_ENABLE_MKL=ON -DTPL_MKL_INCLUDE_DIRS="${MKLROOT}
 ```
 Building `Belos` has not yet been tested on `Cirrus`, hence the full command was not included from the start.
 
-5. Install using multiple cores
+1. Install using multiple cores
 ```bash
 make -j8 install
 ```
 **Warning:** Installation with `make install` will work, but with 1 core the installation process takes about 3 hours on the `Cirrus` logon nodes.
 
-6. Export the installation path of the installed `Trilinos` to enable `CMake` to find it when building `Blaze`:
+1. Export the installation path of the installed `Trilinos` to enable `CMake` to find it when building `Blaze`:
 ```bash
 export Trilinos_DIR="/work/mdisspt/mdisspt/z#######/Trilinos/trilinos-install"
 ```
@@ -92,11 +94,11 @@ module load intel-20.4/compilers
 module load intel-20.4/mpi
 module load cmake
 ```
-2. Clone `Googletest` to chosen directory:
+1. Clone `Googletest` to chosen directory:
 ```bash
 git clone https://github.com/google/googletest.git
 ```
-3. Build and install with `CMake`:
+1. Build and install with `CMake`:
 ```bash
 cmake .. -DBUILD_GMOCK=ON -DCMAKE_INSTALL_PREFIX=/work/mdisspt/mdisspt/z#######/diss/googletest
 make
@@ -104,7 +106,7 @@ make install
 ```
 Where `/work/mdisspt/mdisspt/z#######/diss/googletest` is replaced with the desired installation directory.
 
-4. Update the primary `CMakeLists.txt` for `Blaze` to update the installation directory of `Google Test` in the command `list(APPEND CMAKE_PREFIX_PATH "/work/mdisspt/mdisspt/z#######/diss/googletest")` just before `find_package(GTest REQUIRED)`.
+1. Update the primary `CMakeLists.txt` for `Blaze` to update the installation directory of `Google Test` in the command `list(APPEND CMAKE_PREFIX_PATH "/work/mdisspt/mdisspt/z#######/diss/googletest")` just before `find_package(GTest REQUIRED)`.
 
 ## Instructions for building dependencies on a workstation running Intel hardware and Ubuntu (`WSL2`)
 ### Updating `cmake`
@@ -179,6 +181,35 @@ export Trilinos_DIR=/home/anwar/work/Trilinos/trilinos-install
 export GTEST_ROOT=/home/anwar/work/googletest
 ```
 Alternatively
+## Instructions for building dependencies on a Mac with M-architecture
+### Trilinos
+The majority of the procedure follows from [Instructions for building dependencies on a workstation running Intel hardware and Ubuntu (`WSL2`)](#instructions-for-building-dependencies-on-a-workstation-running-intel-hardware-and-ubuntu-wsl2), with a small caveat. `Mac OS` comes with its own `MKL`-like library called `Accelerate`. This means that the build-flags for `Trilinos` should include:
+```bash
+-DTPL_BLAS_LIBRARIES="$(xcrun --show-sdk-path)/System/Library/Frameworks/Accelerate.framework"
+-DTPL_LAPACK_LIBRARIES="$(xcrun --show-sdk-path)/System/Library/Frameworks/Accelerate.framework"
+```
+Where the command `xcrun --show-sdk-path` returns the path: `/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk`. As such, the full build-command for `Trilinos` is:
+```bash
+cmake -S .. -B . \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=../trilinos-install \
+  -DCMAKE_C_COMPILER="$(brew --prefix open-mpi)/bin/mpicc" \
+  -DCMAKE_CXX_COMPILER="$(brew --prefix open-mpi)/bin/mpicxx" \
+  -DTPL_ENABLE_MPI=ON \
+  -DTPL_ENABLE_MKL=OFF \
+  -DTPL_ENABLE_BLAS=ON \
+  -DTPL_ENABLE_LAPACK=ON \
+  -DTPL_BLAS_LIBRARIES="/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework" \
+  -DTPL_LAPACK_LIBRARIES="/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework" \
+  -DTrilinos_ENABLE_Tpetra=ON \
+  -DTrilinos_ENABLE_Amesos2=ON \
+  -DTrilinos_ENABLE_Belos=ON \
+  -DTrilinos_ENABLE_TESTS=OFF \
+  -DTrilinos_ENABLE_EXAMPLES=OFF
+```
+Noting that `MKL` is switched off, but `BLAS` and `LAPACK` are on.
+
+
 ## Building `Blaze`
 ### `CMake` flags
 | Flag Name             | Description                                                                                   | Values      | Default |
