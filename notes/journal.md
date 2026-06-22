@@ -2,16 +2,29 @@
 This journal contains the day-to-day project management and notes taken. It was also used as an indirect form of communication with the MSc supervisor so they are always up to date with my progress.
 
 <figure  style="text-align:center; background-color:#434973; padding:20px; display:inline-block;">
-  <img src="images/Blaze logo_white.png" alt="Blaze Logo" style="width:50%">
+  <img src="../Blaze logo_blue.png" alt="Blaze Logo" style="width:50%">
 </figure>
 
 ## Work plan
-### WP1: Debugging of geometric nonlinearity - 2 weeks - due 15/06/2024 - COMPLETED
-### WP2: Implementation of 1D nonlinear material - 8 weeks - due 23/09/2024 - COMPLETED
-### WP3: Shared-memory parallelisation on Cirrus using Kokkos - 6 weeks - due 15/01/2024 - COMPLETED AHEAD OF SCHEDULE; SIMPLIFIED GREATLY
-### WP4: Internode parallelisation with MPI - 7.5 weeks - due 18/06/2025
-### WP5: Profiling, data collection, and analysis - 4 weeks - due 14/07/2025
-### WP6: Thesis writing - 05 weeks - due 18/08/2025
+### Pre-conditioning
+  - [ ] Implement `Ifpack2` preconditioning step
+  - [ ] Evaluate solution accuracy
+  - [ ] Evaulate performance scalability
+### Heat transfer
+  - [ ] Heat transfer element (3D)
+  - [ ] Heat transfer material
+  - [ ] Heat trasfer solution procedure
+  - [ ] Interface library for `FDS`
+### Thermomechanical analysis
+  - [ ] Incorporate thermal elongation in material model
+  - [ ] Develop procedure for calculating impact of thermal elongtion on strain
+  - [ ] Develop thermal loading class
+  - [ ] Solution procedure for thermally-loaded structures
+  - [ ] Incorporate material degradation into material model
+### Element library
+  - [ ] 3D beam-column element
+  - [ ] Shell element
+  - [ ] Solid element
 
 ## Known Bugs
 - [ ] Unable to factorise matrix - this happens for the Plastic Cantilever test where it takes multiple runs to correctly proceed. **Update:** This problem persists and is amplified by the parallel tests where `nan` values are returned rather than a failure to factorise. It also resolves after a couple of runs.
@@ -36,6 +49,11 @@ This journal contains the day-to-day project management and notes taken. It was 
 - [ ] Rewrite `exchange_interface_nodes_updated_ids` and `exchange_interface_nodes_nz_i` to reduce code redundancy.
 
 ## Journal
+### 23 Jun 2026
+Preconditioning with `Ifpack2` is shown in an example [here](https://trilinos.github.io/docs/belos/tpetra_2example_2_t_f_q_m_r_2_t_f_q_m_r_tpetra_ex_file_8cpp-example.html) and [here](https://trilinos.github.io/docs/belos/tpetra_2example_2_t_f_q_m_r_2_pseudo_block_t_f_q_m_r_tpetra_ex_file_8cpp-example.html). These are the only two examples with `Tpetra`, `Belos`, and `Ifpack2` on the `Belos` [documentation](https://trilinos.github.io/docs/belos/index.html). 
+
+`Ifpack1` also has [documentation](https://trilinos.github.io/ifpack2.html), the [pdf](https://trilinos.github.io/pdfs/ifpack2guide.pdf) of which shows an example using "factories" on page 14. I am not sure that's the style I want to use for `Blaze`, but it appears to be the style used in both the `Ifpack2` documentation and the `Belos` documentation.
+
 ### 24 Jan 2026
 For some reason, I am getting an `MPI` error with `Blaze` when using `Belos` and the number of iterations exceeds about 8000. It seems to be something about running out of `MPI` tags. This was happening on my laptop as well as my office workstation. This did not occur again today on my laptop, to my surprise. What is going on? I changed almost nothing or completely nothing other than some of the number of iterations parameters? 
 
